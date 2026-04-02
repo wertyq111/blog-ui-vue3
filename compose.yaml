@@ -1,0 +1,13 @@
+services:
+  web:
+    build:
+      context: app
+      target: development
+    ports:
+      - "8083:5173"
+    environment:
+      VITE_API_BASE_URL: ${VITE_API_BASE_URL:-}
+      VITE_APP_TITLE: ${VITE_APP_TITLE:-个人博客管理台 Vue3}
+    volumes:
+      - ./app:/project
+      - /project/node_modules
