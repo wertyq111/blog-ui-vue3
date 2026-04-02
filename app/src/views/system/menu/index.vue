@@ -1,20 +1,10 @@
 <template>
   <section class="system-menu-page">
-    <header class="system-menu-page__hero">
-      <div>
-        <div class="system-menu-page__eyebrow">
-          System Management
-        </div>
-        <h1>菜单管理</h1>
-        <p>维护菜单层级、路由入口与权限节点，当前按后端 `menu/*` 实际契约迁移。</p>
-      </div>
-    </header>
-
-    <el-card shadow="never">
+    <AdminPageCard>
       <el-form
         :inline="true"
         :model="listQuery"
-        class="system-menu-page__filters"
+        class="admin-page__search system-menu-page__filters"
         @submit.prevent
       >
         <el-form-item label="菜单名称">
@@ -39,13 +29,11 @@
         </el-form-item>
       </el-form>
 
-      <div class="system-menu-page__toolbar">
-        <div>
-          <h2>菜单列表</h2>
-          <p>支持树形层级查看，包含菜单节点与权限节点。</p>
-        </div>
-
-        <div class="system-menu-page__toolbar-actions">
+      <AdminPageToolbar
+        title="菜单列表"
+        description="支持树形层级查看，包含菜单节点与权限节点。"
+      >
+        <template #actions>
           <el-button
             v-if="permission.can('sys:menu:add')"
             type="primary"
@@ -65,8 +53,8 @@
           >
             折叠全部
           </el-button>
-        </div>
-      </div>
+        </template>
+      </AdminPageToolbar>
 
       <el-table
         ref="tableRef"
@@ -178,7 +166,7 @@
           </template>
         </el-table-column>
       </el-table>
-    </el-card>
+    </AdminPageCard>
 
     <MenuEditDialog
       :visible="dialogVisible"
@@ -199,6 +187,8 @@ import type { TableInstance } from 'element-plus'
 
 import type { SystemMenuRow } from '@/types/system-menu'
 import { usePermissionAccess } from '@/composables/use-permission-access'
+import AdminPageCard from '@/components/admin-page/AdminPageCard.vue'
+import AdminPageToolbar from '@/components/admin-page/AdminPageToolbar.vue'
 
 import MenuEditDialog from './components/MenuEditDialog.vue'
 import { useMenuPage } from './use-menu-page'
@@ -262,26 +252,14 @@ function collectRows(nodes: SystemMenuRow[]): SystemMenuRow[] {
 }
 
 function expandAll(): void {
-  const table = tableRef.value
-
-  if (!table) {
-    return
-  }
-
   for (const row of collectRows(listItems.value)) {
-    table.toggleRowExpansion(row, true)
+    tableRef.value?.toggleRowExpansion(row, true)
   }
 }
 
 function collapseAll(): void {
-  const table = tableRef.value
-
-  if (!table) {
-    return
-  }
-
   for (const row of collectRows(listItems.value)) {
-    table.toggleRowExpansion(row, false)
+    tableRef.value?.toggleRowExpansion(row, false)
   }
 }
 
@@ -295,79 +273,3 @@ onMounted(() => {
   list.reload()
 })
 </script>
-
-<style scoped>
-.system-menu-page {
-  display: grid;
-  gap: 20px;
-}
-
-.system-menu-page__hero {
-  padding: 28px;
-  border-radius: 24px;
-  background:
-    radial-gradient(circle at top right, rgba(56, 189, 248, 0.18), transparent 28%),
-    linear-gradient(180deg, rgba(255, 255, 255, 0.96) 0%, rgba(239, 246, 255, 0.96) 100%);
-  border: 1px solid rgba(148, 163, 184, 0.18);
-}
-
-.system-menu-page__hero h1 {
-  margin: 8px 0 12px;
-  font-size: clamp(24px, 4vw, 34px);
-  color: #0f172a;
-}
-
-.system-menu-page__hero p {
-  margin: 0;
-  color: #475569;
-  line-height: 1.7;
-}
-
-.system-menu-page__eyebrow {
-  font-size: 12px;
-  font-weight: 700;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: #0284c7;
-}
-
-.system-menu-page__filters {
-  margin-bottom: 20px;
-}
-
-.system-menu-page__toolbar {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 16px;
-  margin-bottom: 16px;
-}
-
-.system-menu-page__toolbar h2 {
-  margin: 0 0 8px;
-  font-size: 18px;
-  color: #0f172a;
-}
-
-.system-menu-page__toolbar p {
-  margin: 0;
-  color: #64748b;
-}
-
-.system-menu-page__toolbar-actions {
-  display: flex;
-  gap: 8px;
-}
-
-.system-menu-page__title {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-}
-
-@media (max-width: 992px) {
-  .system-menu-page__toolbar {
-    flex-direction: column;
-  }
-}
-</style>

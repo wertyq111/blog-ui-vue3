@@ -1,84 +1,77 @@
 <template>
-  <section class="system-user-page">
-    <header class="system-user-page__hero">
-      <div>
-        <div class="system-user-page__eyebrow">
-          System Management
-        </div>
-        <h1>用户管理</h1>
-        <p>维护后台账号、角色分配与启用状态。未确认的批量删除和隐藏详情页链路仍暂缓迁入。</p>
-      </div>
-    </header>
-
-    <el-card shadow="never">
-      <el-form
-        :inline="true"
-        :model="listQuery"
-        class="system-user-page__filters"
-        @submit.prevent
-      >
-        <el-form-item label="用户账号">
-          <el-input
-            v-model="listQuery.username"
-            clearable
-            placeholder="请输入用户账号"
-            @keyup.enter="list.search()"
-          />
-        </el-form-item>
-
-        <el-form-item label="手机号">
-          <el-input
-            v-model="listQuery.phone"
-            clearable
-            placeholder="请输入手机号"
-            @keyup.enter="list.search()"
-          />
-        </el-form-item>
-
-        <el-form-item label="状态">
-          <el-select
-            v-model="listQuery.status"
-            clearable
-            placeholder="请选择状态"
-            style="width: 140px"
-          >
-            <el-option
-              label="在用"
-              :value="1"
-            />
-            <el-option
-              label="禁用"
-              :value="2"
-            />
-          </el-select>
-        </el-form-item>
-
-        <el-form-item>
-          <el-button
-            type="primary"
-            @click="list.search()"
-          >
-            查询
-          </el-button>
-          <el-button @click="list.reset()">
-            重置
-          </el-button>
-        </el-form-item>
-      </el-form>
-
-      <div class="system-user-page__toolbar">
-        <div>
-          <h2>用户列表</h2>
-          <p>当前按后端已确认接口迁移，性别筛选与批量删除暂不固化为正式契约。</p>
-        </div>
-
-        <el-button
-          v-if="permission.can('sys:user:add')"
-          type="primary"
-          @click="page.openCreate()"
+  <section class="admin-page system-user-page">
+    <AdminPageCard>
+      <div class="admin-page__search">
+        <el-form
+          :inline="true"
+          :model="listQuery"
+          @submit.prevent
         >
-          添加用户
-        </el-button>
+          <el-form-item label="用户账号">
+            <el-input
+              v-model="listQuery.username"
+              clearable
+              placeholder="请输入用户账号"
+              @keyup.enter="list.search()"
+            />
+          </el-form-item>
+
+          <el-form-item label="手机号">
+            <el-input
+              v-model="listQuery.phone"
+              clearable
+              placeholder="请输入手机号"
+              @keyup.enter="list.search()"
+            />
+          </el-form-item>
+
+          <el-form-item label="状态">
+            <el-select
+              v-model="listQuery.status"
+              clearable
+              placeholder="请选择状态"
+              style="width: 140px"
+            >
+              <el-option
+                label="在用"
+                :value="1"
+              />
+              <el-option
+                label="禁用"
+                :value="2"
+              />
+            </el-select>
+          </el-form-item>
+
+          <el-form-item>
+            <el-button
+              type="primary"
+              @click="list.search()"
+            >
+              查询
+            </el-button>
+            <el-button @click="list.reset()">
+              重置
+            </el-button>
+          </el-form-item>
+        </el-form>
+      </div>
+
+      <div class="admin-page__toolbar">
+        <AdminPageToolbar
+          title="用户列表"
+          description="按账号、手机号和状态筛选后台用户，保留当前已验证的编辑、状态和删除链路。"
+        >
+          <template #actions>
+            <el-button
+              v-if="permission.can('sys:user:add')"
+              type="primary"
+              @click="page.openCreate()"
+            >
+              添加用户
+            </el-button>
+          </template>
+        </AdminPageToolbar>
       </div>
 
       <el-table
@@ -176,7 +169,7 @@
         </el-table-column>
       </el-table>
 
-      <div class="system-user-page__pagination">
+      <div class="admin-page__pagination">
         <el-pagination
           background
           layout="total, prev, pager, next"
@@ -186,7 +179,7 @@
           @current-change="list.changePage"
         />
       </div>
-    </el-card>
+    </AdminPageCard>
 
     <UserEditDialog
       :visible="dialogVisible"
@@ -206,6 +199,8 @@ import { onMounted } from 'vue'
 
 import type { SystemUserRow } from '@/types/system-user'
 import { usePermissionAccess } from '@/composables/use-permission-access'
+import AdminPageCard from '@/components/admin-page/AdminPageCard.vue'
+import AdminPageToolbar from '@/components/admin-page/AdminPageToolbar.vue'
 
 import UserEditDialog from './components/UserEditDialog.vue'
 import { useUserPage } from './use-user-page'
@@ -237,73 +232,9 @@ onMounted(() => {
 </script>
 
 <style scoped>
-.system-user-page {
-  display: grid;
-  gap: 20px;
-}
-
-.system-user-page__hero {
-  padding: 28px;
-  border-radius: 24px;
-  background:
-    radial-gradient(circle at top right, rgba(56, 189, 248, 0.18), transparent 28%),
-    linear-gradient(180deg, rgba(255, 255, 255, 0.96) 0%, rgba(239, 246, 255, 0.96) 100%);
-  border: 1px solid rgba(148, 163, 184, 0.18);
-}
-
-.system-user-page__hero h1 {
-  margin: 8px 0 12px;
-  font-size: clamp(24px, 4vw, 34px);
-  color: #0f172a;
-}
-
-.system-user-page__hero p {
-  margin: 0;
-  color: #475569;
-  line-height: 1.7;
-}
-
-.system-user-page__eyebrow {
-  font-size: 12px;
-  font-weight: 700;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: #0284c7;
-}
-
-.system-user-page__filters {
-  margin-bottom: 20px;
-}
-
-.system-user-page__toolbar {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 16px;
-  margin-bottom: 16px;
-}
-
-.system-user-page__toolbar h2 {
-  margin: 0 0 8px;
-  font-size: 18px;
-  color: #0f172a;
-}
-
-.system-user-page__toolbar p {
-  margin: 0;
-  font-size: 13px;
-  color: #64748b;
-}
-
 .system-user-page__roles {
   display: flex;
   flex-wrap: wrap;
   gap: 6px;
-}
-
-.system-user-page__pagination {
-  display: flex;
-  justify-content: flex-end;
-  margin-top: 18px;
 }
 </style>

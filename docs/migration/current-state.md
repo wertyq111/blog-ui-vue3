@@ -52,6 +52,9 @@ Current `app/` scaffold includes:
 - `src/api/wallpaper-classify.ts`
 - `src/api/wallpaper.ts`
 - `src/components/AppDialog.vue`
+- `src/components/admin-page/AdminPageCard.vue`
+- `src/components/admin-page/AdminPageToolbar.vue`
+- `src/components/admin-page/AdminSplitWorkspace.vue`
 - `src/composables/use-crud-list.ts`
 - `src/composables/use-dialog-form.ts`
 - `src/composables/use-permission-access.ts`
@@ -64,6 +67,7 @@ Current `app/` scaffold includes:
 - `src/router/static.ts`
 - `src/stores/auth-storage.ts`
 - `src/stores/auth.ts`
+- `src/styles/admin-page.css`
 - `src/env.d.ts`
 - `src/test/setup.ts`
 - `src/types/api.ts`
@@ -141,12 +145,63 @@ Current `app/` scaffold includes:
 - `src/views/system/menu/components/MenuEditDialog.vue`
 - `src/views/system/menu/__tests__/use-menu-page.test.ts`
 - `src/api/system-menu.ts`
+- `src/api/init-model.ts`
+- `src/api/server-path.ts`
+- `src/api/work-platform.ts`
+- `src/api/work-daily.ts`
 - `src/api/__tests__/system-menu.test.ts`
+- `src/api/__tests__/init-model.test.ts`
+- `src/api/__tests__/server-path.test.ts`
+- `src/api/__tests__/work-platform.test.ts`
+- `src/api/__tests__/work-daily.test.ts`
+- `src/api/__tests__/work-doc.test.ts`
+- `src/types/init-model.ts`
 - `src/types/system-menu.ts`
+- `src/types/server-path.ts`
+- `src/types/work-platform.ts`
+- `src/types/work-daily.ts`
+- `src/types/work-doc.ts`
 - `src/views/system/user/info/index.vue`
 - `src/views/system/user/info/use-user-info-page.ts`
 - `src/views/system/user/info/__tests__/use-user-info-page.test.ts`
 - `src/views/dashboard/workplace/index.vue`
+- `src/views/develop/convert-path/index.vue`
+- `src/views/develop/convert-path/use-convert-path-page.ts`
+- `src/views/develop/convert-path/components/ConvertPathEditDialog.vue`
+- `src/views/develop/convert-path/components/ConvertPathConvertDialog.vue`
+- `src/views/develop/convert-path/__tests__/use-convert-path-page.test.ts`
+- `src/views/develop/init-model/index.vue`
+- `src/views/develop/init-model/use-init-model-page.ts`
+- `src/views/develop/init-model/components/InitModelEditDialog.vue`
+- `src/views/develop/init-model/components/InitModelConvertDialog.vue`
+- `src/views/develop/init-model/__tests__/use-init-model-page.test.ts`
+- `src/views/develop/work-platform/index.vue`
+- `src/views/develop/work-platform/use-work-platform-page.ts`
+- `src/views/develop/work-platform/components/WorkPlatformEditDialog.vue`
+- `src/views/develop/work-platform/__tests__/use-work-platform-page.test.ts`
+- `src/views/develop/work-daily/index.vue`
+- `src/views/develop/work-daily/use-work-daily-page.ts`
+- `src/views/develop/work-daily/components/WorkDailyEditDialog.vue`
+- `src/views/develop/work-daily/__tests__/use-work-daily-page.test.ts`
+- `src/views/develop/work-doc/index.vue`
+- `src/views/develop/work-doc/use-work-doc-page.ts`
+- `src/views/develop/work-doc/components/WorkDocEditDialog.vue`
+- `src/views/develop/work-doc/components/WorkDocCategoryEditDialog.vue`
+- `src/views/develop/work-doc/__tests__/use-work-doc-page.test.ts`
+- `src/api/member-level.ts`
+- `src/api/member.ts`
+- `src/api/__tests__/member-level.test.ts`
+- `src/api/__tests__/member.test.ts`
+- `src/types/member-level.ts`
+- `src/types/member.ts`
+- `src/views/member/memberlevel/index.vue`
+- `src/views/member/memberlevel/use-member-level-page.ts`
+- `src/views/member/memberlevel/components/MemberLevelEditDialog.vue`
+- `src/views/member/memberlevel/__tests__/use-member-level-page.test.ts`
+- `src/views/member/member/index.vue`
+- `src/views/member/member/use-member-page.ts`
+- `src/views/member/member/components/MemberEditDialog.vue`
+- `src/views/member/member/__tests__/use-member-page.test.ts`
 
 ## Remote File Tree Summary
 
@@ -178,6 +233,98 @@ Remote closure follow-up on `2026-04-02` additionally confirmed:
   - `system/role`
   - `system/menu`
 - later business waves are now treated as deferred backlog rather than active execution scope
+- a shared Vue2-structure restoration layer now exists for high-frequency admin pages:
+  - `src/components/admin-page/AdminPageCard.vue`
+  - `src/components/admin-page/AdminPageToolbar.vue`
+  - `src/components/admin-page/AdminSplitWorkspace.vue`
+  - `src/styles/admin-page.css`
+
+Develop-wave recovery on `2026-04-02` additionally confirmed:
+
+- the synced remote worktree now includes the `develop/convert-path` implementation
+- remote frontend route `/develop/convert-path` returns `200 OK`
+- remote container verification passed for `docker compose exec -T web npm run typecheck`
+- remote container verification passed for `docker compose exec -T web npm run build`
+- remote runtime API smoke passed for `server-path`:
+  - add
+  - list
+  - info
+  - edit
+  - convert
+  - delete
+- the synced remote worktree now includes the `develop/init-model` implementation
+- remote frontend route `/develop/init-model` returns `200 OK`
+- remote runtime API smoke passed for `init-model`:
+  - add
+  - list
+  - info
+  - edit
+  - convert
+  - delete
+- the synced remote worktree now includes the `develop/work-platform` implementation
+- remote frontend route `/develop/work-platform` returns `200 OK`
+- remote runtime API smoke passed for `work-platform`:
+  - add
+  - list
+  - info
+  - edit
+  - reorder
+  - delete
+- the synced remote worktree now includes the `develop/work-daily` implementation
+- remote frontend route `/develop/work-daily` returns `200 OK`
+- remote runtime API smoke passed for `work-daily`:
+  - add
+  - list
+  - info
+  - edit
+  - report models
+  - month report export
+  - delete
+- the synced remote worktree now includes the `develop/work-doc` implementation
+- remote frontend route `/develop/work-doc` returns `200 OK`
+- remote runtime API smoke passed for `work-doc-category`:
+  - add
+  - list
+  - info
+  - edit
+  - reorder
+  - delete
+- remote runtime API smoke passed for `work-doc`:
+  - add
+  - list
+  - info
+  - edit
+  - delete
+- the synced remote worktree now includes the `member/memberlevel` implementation
+- remote frontend route `/member/memberlevel` returns `200 OK`
+- remote container verification passed for backend `docker compose exec -T blog php artisan test tests/Unit/MemberLevelMigrationTest.php`
+- remote backend migration verification passed for `docker compose exec -T blog php artisan migrate --force`
+- remote runtime API smoke passed for `member-level`:
+  - add
+  - list
+  - edit
+  - batchDelete
+- the synced remote worktree now includes the `member/member` implementation
+- remote frontend route `/member/member` returns `200 OK`
+- remote runtime API smoke passed for `member`:
+  - list
+  - edit
+  - status
+  - delete
+- the local worktree now also includes a first-pass Vue2-structure restoration for the current high-frequency pages:
+  - `system/user`
+  - `system/role`
+  - `system/menu`
+  - `member/member`
+  - `develop/convert-path`
+  - `develop/init-model`
+  - `develop/work-daily`
+  - `develop/work-doc`
+- local restoration verification passed for:
+  - `test:run`
+  - `lint`
+  - `typecheck`
+  - `build`
 
 ## Scaffold Assessment
 
@@ -241,9 +388,11 @@ Strong candidates to create or rebuild in Task 2:
 - Remote runtime verification on `2026-04-01` confirmed `/api/users/list` now filters correctly for both matching and non-matching `filter[username]` queries against the current backend data set.
 - Task 6B `mini-program/photo-category` is now implemented locally on top of the Task 5 substrate, has passed local `test:run`, `lint`, `typecheck`, and `build`, and has been synced plus statically verified inside the running remote frontend container.
 - Remote runtime verification on `2026-04-01` confirmed the Vue3 `photo-category` API layer serializes the current backend contract as flat `name` query params, for example `/photo-categories/index?name=codex-photo-check&page=1`.
-- Remote runtime verification on `2026-04-01` confirmed authenticated `GET /api/photo-categories/index?page=1` currently returns `200 OK` with an empty collection for the seeded account.
-- Task 6B runtime verification still has a known backend blocker: authenticated `POST /api/photo-categories/add` returns `500` from `App\Http\Controllers\Api\MiniProgram\PhotoCategoryController::add` because `array_merge()` receives `null` from `authorizeForMember()` at line `109`.
-- This blocker is now explicitly deferred by migration decision so the frontend wave sequence can continue; add/delete runtime closure for `photo-category` will be patched in a later stabilization pass.
+- Remote runtime verification follow-up on `2026-04-02` closed the historical backend blocker for `photo-category`:
+  - `PhotoCategoryController::add` no longer merges `null` from `authorizeForMember()`
+  - the backend now writes `member_id` from the current authenticated member during category creation
+  - authenticated `POST /api/photo-categories/add` -> `GET /api/photo-categories/index?name=...` -> `DELETE /api/photo-categories/{id}` now completes successfully on the remote environment
+- Remote backend stabilization on `2026-04-02` also repaired a runtime file-permission regression in `/data/personal/projects/blog` so the existing container could continue serving `3925` without a fresh `docker compose up`.
 - Task 6C `system/user/info` has completed local implementation and local quality gates with Chinese function comments, and has now passed remote static verification in the running frontend container.
 - Remote runtime verification on `2026-04-01` confirmed authenticated `GET /api/users/getUserInfo?include=member` and `POST /api/index/updateUserInfo` both return `200` on the current remote backend.
 - Task 6D `mini-program/notebook-category` has completed local implementation with Chinese function comments on top of the shared CRUD substrate, and has passed local `test:run`, `lint`, `typecheck`, and `build`.
@@ -273,6 +422,26 @@ Strong candidates to create or rebuild in Task 2:
 - Remote static verification on `2026-04-01` confirmed `system/menu` passes `docker compose exec -T web npm run typecheck` and `docker compose exec -T web npm run build` inside the running frontend container.
 - Remote runtime verification on `2026-04-01` confirmed `system/menu` completes authenticated `POST /api/menu/add` -> `GET /api/menu/index?title=...` -> `GET /api/menu/info/{id}` -> `POST /api/menu/{id}` -> `DELETE /api/menu/{id}` end-to-end.
 - `system/menu` runtime debugging reconfirmed the current backend write contract uses `pid` and `target` (`_self`/`_blank`) directly; Vue3 API serialization now fixes this mapping explicitly.
+- `member/memberlevel` has now completed local implementation on top of the shared CRUD substrate, and passed local `test:run`, `lint`, `typecheck`, and `build`.
+- Remote runtime verification on `2026-04-02` confirmed Task `member/memberlevel` completes authenticated `POST /api/member-level/add` -> `GET /api/member-level/index` -> `POST /api/member-level/{id}` -> `DELETE /api/member-level/batchDelete` end-to-end.
+- `member/memberlevel` runtime debugging also closed a backend schema blocker:
+  - historical migration created `member_level.deleted_at` as `unsignedTinyInteger`
+  - the shared soft-delete implementation writes Unix timestamps into `deleted_at`
+  - remote migration `2026_04_02_113000_fix_member_level_deleted_at_column` now upgrades that column to `unsignedInteger`
+  - batch delete no longer overflows `deleted_at` on the remote MySQL environment
+- `member/member` has now completed local implementation on top of the shared CRUD substrate, and passed local focused tests, `lint`, `typecheck`, and `build`.
+- Remote runtime verification on `2026-04-02` confirmed Task `member/member` completes authenticated `GET /api/members/index` -> `POST /api/members/{id}` -> `POST /api/members/status/{id}` -> `DELETE /api/members/{id}` end-to-end.
+- `member/member` runtime debugging also closed the list-query contract mismatch:
+  - current remote backend expects flat query params `username` / `nickname` / `gender`
+  - it does not use the nested `filter[username]` shape on this endpoint
+  - Vue3 `member` API serialization is now aligned to that flat query contract
+- Backend middleware `FilterProcess` is now hardened for Symfony 6:
+  - array-shaped `filter` query values are read via `InputBag::all('filter')`
+  - flat request filters can still be merged into the normalized `filter` bag
+- This wave intentionally keeps create out of scope for now:
+  - backend `members/add` requires stable `user_id`
+  - the legacy Vue2 page depends on a separate account-selection flow
+  - current Vue3 closure therefore focuses on query, edit, status, delete, and member-level option loading
 - System-scope closure run on `2026-04-01` confirmed `system/menu` + `system/role` + `system/user` all pass one combined remote-first cycle:
   - local gates: focused tests + `lint` + `typecheck` + `build`
   - remote sync with pre/post `._*` cleanup
@@ -298,9 +467,15 @@ Strong candidates to create or rebuild in Task 2:
 
 ## Immediate Next Step
 
-Do not continue into new business waves from this thread. The current execution baseline is now frozen to the closed system scope, while later waves stay in deferred backlog until the user explicitly resumes migration:
+Migration has now resumed beyond the earlier system-only freeze. The current active baseline is the already-closed system scope, the completed develop wave, and the first recovered member wave:
 
-1. Maintain `system/user`, `system/role`, and `system/menu` as the only active in-scope system modules for this phase
-2. Keep `mini-program/photo-category` unchanged unless a frontend-specific bug is reproduced, and carry the backend `POST /api/photo-categories/add` `500` issue as a deferred runtime blocker
-3. Treat later `mini-program`, other `system`, and `develop/*` waves as deferred backlog instead of active execution scope
-4. If migration resumes later, first reconcile the deferred `photo-category` runtime blocker, then decide whether to reopen later route-backed waves under the same remote-first verification loop
+1. Keep `system/user`, `system/role`, `system/menu`, `develop/convert-path`, `develop/init-model`, `develop/work-platform`, `develop/work-daily`, `develop/work-doc`, `member/memberlevel`, and `member/member` as the current verified Vue3 baseline
+2. Treat the current `develop/*` route-backed wave as closed for now, because every existing Vue2 `develop` page now has a verified Vue3 counterpart
+3. Treat the current `member/*` wave as closed for now, because every existing Vue2 `member` page now has a verified Vue3 counterpart
+4. Treat the shared `admin-page` layer and the restored high-frequency pages as the current Vue2-structure recovery baseline
+5. Keep using the same remote-first loop for every resumed module:
+   - local gates
+   - `._*` cleanup
+   - remote sync
+   - remote container static verification
+   - remote runtime smoke
