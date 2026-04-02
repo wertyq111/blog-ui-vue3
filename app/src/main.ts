@@ -8,6 +8,7 @@ import AppDialog from '@/components/AppDialog.vue'
 import { createPermissionPlugin } from '@/directives/permission'
 import { createAppRouter, installAppGuards } from '@/router'
 import { useAuthStore } from '@/stores/auth'
+import '@/styles/admin-page.css'
 
 const appEnv = resolveAppEnv(import.meta.env)
 const pinia = createPinia()
