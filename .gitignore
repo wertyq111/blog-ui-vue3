@@ -1,6 +1,7 @@
 .DS_Store
 ._*
 .idea/
+.worktrees/
 
 app/node_modules/
 app/dist/
