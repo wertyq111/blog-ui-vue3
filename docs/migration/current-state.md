@@ -298,9 +298,9 @@ Strong candidates to create or rebuild in Task 2:
 
 ## Immediate Next Step
 
-Proceed with the remote-first continuation into the next unmigrated business wave, while keeping the Task 6B runtime blocker on the deferred patch list:
+Do not continue into new business waves from this thread. The current execution baseline is now frozen to the closed system scope, while later waves stay in deferred backlog until the user explicitly resumes migration:
 
-1. Keep the existing Vue3 `mini-program/photo-category` implementation unchanged unless a frontend-specific bug is reproduced
-2. Carry the backend `POST /api/photo-categories/add` 500 issue as a deferred runtime blocker item
-3. Start the next unmigrated route-backed `system` / `mini-program` business module with the same local gates + remote sync + remote static verification + runtime loop
-4. In the stabilization phase, rerun authenticated add/list/delete verification for `photo-category` and close the deferred blocker
+1. Maintain `system/user`, `system/role`, and `system/menu` as the only active in-scope system modules for this phase
+2. Keep `mini-program/photo-category` unchanged unless a frontend-specific bug is reproduced, and carry the backend `POST /api/photo-categories/add` `500` issue as a deferred runtime blocker
+3. Treat later `mini-program`, other `system`, and `develop/*` waves as deferred backlog instead of active execution scope
+4. If migration resumes later, first reconcile the deferred `photo-category` runtime blocker, then decide whether to reopen later route-backed waves under the same remote-first verification loop

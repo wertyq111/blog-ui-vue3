@@ -121,26 +121,18 @@
 
 ## Immediate Execution Order
 
-当前线程固定按以下顺序推进：
+当前线程不再继续按历史 wave 顺序推进，而是固定执行以下收口顺序：
 
-1. 写完 Task 3 的 5 份迁移文档
-2. 为 Task 4 写失败测试
-3. 实现 auth/menu/layout/login/dashboard 最小闭环
-4. 跑本地质量闸门
-5. 执行 remote sync 与 remote static verification
-6. 进入 Task 5 / Shared CRUD Substrate
-7. 进入 Task 6A / `system/user`
-8. 进入 Task 6B / `mini-program/photo-category`
-9. 进入 Task 6C / `system/user/info`
-10. 进入 Task 6D / `mini-program/notebook-category`
-11. 进入 Task 6E / `mini-program/notebook-label`
-12. 进入 Task 6F / `system/role`
-13. 进入 Task 6G / `mini-program/photo`
-14. 进入 Task 6H / `mini-program/notebook`
-15. 进入 Task 6I / `mini-program/wallpaper-classify`
-16. 进入 Task 6J / `mini-program/wallpaper`
-17. 进入 Task 6K / `system/menu`
-18. 后续每个业务 wave 都重复 remote-first 校验，并附着到现有远端运行态做页面调试
+1. 维持 `system/user`、`system/role`、`system/menu` 作为当前冻结基线
+2. 仅处理这三个模块的维护、回归与运行态问题，不扩展到新的 `system` 页面
+3. 将 `mini-program/photo-category` 以及其余业务 wave 维持在 deferred backlog
+4. 若后续恢复迁移，先按 `Resume Order` 回到 `mini-program/photo-category` 的遗留运行态阻塞，再决定是否继续新的业务 wave
+5. 恢复执行时，每次都重复既有 remote-first 顺序：
+   - 本地闸门
+   - `._*` 清理
+   - remote sync
+   - 远端容器内静态校验
+   - 远端运行态联调
 
 ## Risk Ledger To Carry Forward
 
