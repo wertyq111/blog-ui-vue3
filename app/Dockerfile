@@ -1,23 +1,21 @@
-# syntax=docker/dockerfile:1.7
 FROM node:22-alpine AS base
-
+RUN corepack enable && corepack prepare pnpm@latest --activate
 WORKDIR /project
-ENV HOST=0.0.0.0
-
-COPY package.json package-lock.json* ./
-RUN npm config set registry https://registry.npmjs.org/ \
-  && npm install --no-fund --no-audit
-
-COPY . .
 
 FROM base AS development
-EXPOSE 5173
-CMD ["npm", "run", "dev", "--", "--host", "0.0.0.0", "--port", "5173"]
+COPY package.json ./
+RUN pnpm install
+COPY . .
+EXPOSE 3000
+CMD ["pnpm", "run", "dev", "--host", "0.0.0.0"]
 
 FROM base AS build
-RUN npm run build
+COPY package.json ./
+RUN pnpm install --frozen-lockfile
+COPY . .
+RUN pnpm run build-only
 
-FROM nginx:1.27-alpine AS production
+FROM nginx:stable-alpine AS production
 COPY --from=build /project/dist /usr/share/nginx/html
 EXPOSE 80
 CMD ["nginx", "-g", "daemon off;"]

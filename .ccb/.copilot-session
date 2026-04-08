@@ -1,0 +1,17 @@
+{
+  "session_id": "ai-1775528704-24606",
+  "ccb_session_id": "ai-1775528704-24606",
+  "ccb_project_id": "c65dfc454c179c9faad6f7c6d8caf63e01051d8420584c6af84e30ac08b0784b",
+  "runtime_dir": "/var/folders/92/wqtdtrv916j8w0x42nbh69h00000gn/T/claude-ai-zhouxufeng/ai-1775528704-24606/copilot",
+  "terminal": "tmux",
+  "tmux_session": null,
+  "pane_id": "%2",
+  "pane_title_marker": "CCB-Copilot-c65dfc45",
+  "work_dir": "/Volumes/T7/Program/Personal/blog/blog-ui-vue3",
+  "work_dir_norm": "/Volumes/T7/Program/Personal/blog/blog-ui-vue3",
+  "start_dir": "/Volumes/T7/Program/Personal/blog/blog-ui-vue3",
+  "active": true,
+  "started_at": "2026-04-07 10:25:07",
+  "start_cmd": "export CCB_MANAGED=1; export CCB_PARENT_PID=24606; export CCB_RUN_DIR=/Users/zhouxufeng/.cache/ccb/projects/c65dfc454c179c9f; export CCB_CALLER=copilot; export PATH=/Users/zhouxufeng/.local/share/codex-dual/bin:/Users/zhouxufeng/.local/bin:/opt/homebrew/bin:/usr/local/bin:/System/Cryptexes/App/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/local/bin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin:/opt/pkg/env/active/bin:/opt/pmk/env/global/bin:/opt/homebrew/bin:/opt/homebrew/sbin:/Users/zhouxufeng/.local/bin:/Applications/iTerm.app/Contents/Resources/utilities:/Users/zhouxufeng/go_dev/go/bin:/Users/zhouxufeng/go_dev/go/bin; copilot",
+  "pane_log_path": "/Users/zhouxufeng/.cache/ccb/projects/c65dfc454c179c9f/pane-logs/tmux/pane-2.log"
+}

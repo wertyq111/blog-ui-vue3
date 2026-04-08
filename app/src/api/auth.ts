@@ -1,67 +1,66 @@
-import type { BackendMenuNode } from '@/types/menu'
-import type { AuthTokens, CurrentUser } from '@/types/auth'
+import request from "@/utils/request";
+import type { LoginRequest, LoginResponse, CaptchaInfo } from "@/types/api/auth";
 
-import { extractPayload } from '@/utils/http'
+const AUTH_BASE_URL = "/api/v1/auth";
 
-import { apiClient } from './client'
+const AuthAPI = {
+  /** 登录接口*/
+  login(data: LoginRequest) {
+    const payload: Record<string, any> = {
+      username: data.username,
+      password: data.password,
+      captchaId: data.captchaId,
+      captchaCode: data.captchaCode,
+    };
 
-export interface LoginPayload {
-  username: string
-  password: string
-  captcha: string
-  captchaKey: string
-  remember: boolean
-}
+    // tenantId is optional — include only when provided (multi-tenant feature)
+    if (typeof data.tenantId !== "undefined") {
+      payload.tenantId = data.tenantId;
+    }
 
-export interface CaptchaPayload {
-  captchaImageContent: string
-  captchaKey: string
-}
+    return request<any, LoginResponse>({
+      url: `${AUTH_BASE_URL}/login`,
+      method: "post",
+      data: payload,
+    });
+  },
 
-function normalizeAccessToken(token: string): string {
-  return token.startsWith('Bearer ') ? token : `Bearer ${token}`
-}
+  /** 切换租户(平台用户) - 返回新的 token */
+  switchTenant(tenantId: number) {
+    return request<any, LoginResponse>({
+      url: `${AUTH_BASE_URL}/switch-tenant`,
+      method: "post",
+      params: { tenantId },
+    });
+  },
 
-export async function loginByPassword(payload: LoginPayload): Promise<AuthTokens> {
-  const response = await apiClient.post('/user/login', {
-    username: payload.username,
-    password: payload.password,
-    captcha: payload.captcha,
-    captcha_key: payload.captchaKey,
-    remember: payload.remember,
-  })
+  /** 刷新 token 接口*/
+  refreshToken(refreshToken: string) {
+    return request<any, LoginResponse>({
+      url: `${AUTH_BASE_URL}/refresh-token`,
+      method: "post",
+      params: { refreshToken },
+      headers: {
+        Authorization: "no-auth",
+      },
+    });
+  },
 
-  const data = extractPayload<{ access_token: string; token_type?: string; expires_in?: number }>(response)
+  /** 退出登录接口 */
+  logout() {
+    return request({
+      url: `${AUTH_BASE_URL}/logout`,
+      method: "delete",
+    });
+  },
 
-  return {
-    accessToken: normalizeAccessToken(data.access_token),
-    tokenType: data.token_type,
-    expiresIn: data.expires_in,
-  }
-}
+  /** 获取验证码接口*/
+  getCaptcha() {
+    return request<any, CaptchaInfo>({
+      url: `${AUTH_BASE_URL}/captcha`,
+      method: "get",
+    });
+  },
+};
 
-export async function fetchCaptcha(): Promise<CaptchaPayload> {
-  const response = await apiClient.get('/captcha')
-  const data = extractPayload<{ captcha_image_content: string; captcha_key: string }>(response)
-
-  return {
-    captchaImageContent: data.captcha_image_content,
-    captchaKey: data.captcha_key,
-  }
-}
-
-export async function fetchCurrentUser(): Promise<CurrentUser> {
-  const response = await apiClient.get('/users/getUserInfo', {
-    params: {
-      include: ['member'],
-    },
-  })
-
-  return extractPayload<CurrentUser>(response)
-}
-
-export async function fetchMenuTree(): Promise<BackendMenuNode[]> {
-  const response = await apiClient.get('/index/getMenuList')
-
-  return extractPayload<BackendMenuNode[]>(response)
-}
+export default AuthAPI;
