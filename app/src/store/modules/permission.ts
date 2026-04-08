@@ -32,15 +32,16 @@ export const usePermissionStore = defineStore("permission", () => {
   /** 生成动态路由 */
   async function generateRoutes(): Promise<RouteRecordRaw[]> {
     try {
-      const data = await MenuAPI.getRoutes(); // 获取当前登录人的菜单路由
-      const dynamicRoutes = transformRoutes(data);
+      const data = await MenuAPI.getRoutes();
+      // 后端返回的菜单可能缺少 meta 包装，需要转换
+      const normalizedData = normalizeBackendMenus(data);
+      const dynamicRoutes = transformRoutes(normalizedData);
 
       routes.value = [...constantRoutes, ...dynamicRoutes];
       isRouteGenerated.value = true;
 
       return dynamicRoutes;
     } catch (error) {
-      // 路由生成失败，重置状态
       isRouteGenerated.value = false;
       throw error;
     }
@@ -54,7 +55,6 @@ export const usePermissionStore = defineStore("permission", () => {
 
   /** 重置路由状态 */
   const resetRouter = () => {
-    // 移除动态添加的路由
     const constantRouteNames = new Set(constantRoutes.map((route) => route.name).filter(Boolean));
     routes.value.forEach((route: RouteRecordRaw) => {
       if (route.name && !constantRouteNames.has(route.name)) {
@@ -62,7 +62,6 @@ export const usePermissionStore = defineStore("permission", () => {
       }
     });
 
-    // 重置所有状态
     routes.value = [...constantRoutes];
     mixLayoutSideMenus.value = [];
     isRouteGenerated.value = false;
@@ -70,15 +69,6 @@ export const usePermissionStore = defineStore("permission", () => {
 
   let reloadPromise: Promise<RouteRecordRaw[]> | null = null;
 
-  /**
-   * 重新加载动态路由（单飞）。
-   *
-   * 典型场景：后端权限变更导致接口返回权限不足（A0301），前端需要刷新路由和菜单以同步最新权限。
-   *
-   * - 会先清理已注册的动态路由（resetRouter）
-   * - 重新从后端拉取路由（generateRoutes）
-   * - 将动态路由注册到 vue-router（router.addRoute）
-   */
   async function reloadDynamicRoutesOnce(): Promise<RouteRecordRaw[]> {
     if (reloadPromise) return reloadPromise;
 
@@ -100,12 +90,6 @@ export const usePermissionStore = defineStore("permission", () => {
 
   let snapshotPromise: Promise<void> | null = null;
 
-  /**
-   * 刷新权限快照（单飞）。
-   *
-   * - 刷新用户信息（包含 perms/roles 等）
-   * - 重新加载动态路由
-   */
   async function reloadPermissionSnapshotOnce(): Promise<void> {
     if (snapshotPromise) return snapshotPromise;
 
@@ -135,28 +119,69 @@ export const usePermissionStore = defineStore("permission", () => {
 });
 
 /**
+ * 标准化后端菜单数据
+ *
+ * 后端返回: {id, name, title, type, path, component, icon, sort, children}
+ * 前端期望: {name, path, component, meta: {title, icon, hidden, keepAlive, alwaysShow}, children}
+ *
+ * 如果菜单项已有 meta 字段则保持原样；否则从顶层 title/icon 包装为 meta
+ */
+function normalizeBackendMenus(menus: any[]): RouteItem[] {
+  if (!Array.isArray(menus)) return [];
+
+  return menus
+    .filter((item) => {
+      // 过滤按钮类型（type=3），按钮不作为路由
+      return item.type !== 3;
+    })
+    .map((item) => {
+      const route: any = {
+        path: item.path,
+        name: item.name,
+        component: item.component,
+        redirect: item.redirect,
+      };
+
+      // 如果已有 meta，直接使用；否则从扁平字段包装
+      if (item.meta) {
+        route.meta = item.meta;
+      } else {
+        route.meta = {
+          title: item.title,
+          icon: item.icon,
+          hidden: item.hidden ?? false,
+          keepAlive: item.keepAlive ?? true,
+          alwaysShow: item.alwaysShow,
+        };
+      }
+
+      // 递归处理子菜单
+      if (item.children && item.children.length > 0) {
+        route.children = normalizeBackendMenus(item.children);
+      }
+
+      return route as RouteItem;
+    });
+}
+
+/**
  * 转换后端路由数据为Vue Router配置
- * 处理组件路径映射和Layout层级嵌套
  */
 const transformRoutes = (routes: RouteItem[], isTopLevel: boolean = true): RouteRecordRaw[] => {
   return routes.map((route) => {
     const { component, children, ...args } = route;
 
-    // 处理组件：顶层或非Layout保留组件，中间层Layout设为undefined
     const processedComponent = isTopLevel || component !== "Layout" ? component : undefined;
 
     const normalizedRoute = { ...args } as RouteRecordRaw;
 
     if (!processedComponent) {
-      // 多级菜单的父级菜单，不需要组件
       normalizedRoute.component = undefined;
     } else {
-      // 动态导入组件，Layout特殊处理，找不到组件时返回404
       normalizedRoute.component =
         processedComponent === "Layout" ? Layout : resolveViewComponent(processedComponent);
     }
 
-    // 递归处理子路由
     if (children && children.length > 0) {
       normalizedRoute.children = transformRoutes(children, false);
     }

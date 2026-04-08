@@ -11,9 +11,6 @@ import type {
   MobileUpdateForm,
   EmailUpdateForm,
   OptionItem,
-  UserEventQueryParams,
-  UserEventItem,
-  LoginDeviceItem,
 } from "@/types/api";
 
 const USER_BASE_URL = "/api/v1/users";
@@ -26,8 +23,9 @@ const UserAPI = {
    */
   getInfo() {
     return request<any, UserInfo>({
-      url: `${USER_BASE_URL}/me`,
+      url: `/users/getUserInfo`,
       method: "get",
+      params: { include: "member" },
     });
   },
 

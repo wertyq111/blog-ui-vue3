@@ -15,8 +15,9 @@ export const APP_PREFIX = "vea";
  *
  * @description
  * 拥有系统最高权限，可以访问所有资源
+ * 后端 Laravel RBAC 使用 "super" 标识
  */
-export const ROLE_ROOT = "ROOT";
+export const ROLE_ROOT = "super";
 
 /**
  * 平台租户ID
@@ -36,7 +37,6 @@ export const PLATFORM_TENANT_ID = 0;
 export const STORAGE_KEYS = {
   // ===== 认证相关 =====
   ACCESS_TOKEN: `${APP_PREFIX}:auth:access_token`,
-  REFRESH_TOKEN: `${APP_PREFIX}:auth:refresh_token`,
   REMEMBER_ME: `${APP_PREFIX}:auth:remember_me`,
 
   // ===== 租户相关 =====

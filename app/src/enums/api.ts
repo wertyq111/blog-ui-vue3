@@ -3,6 +3,7 @@
  *
  * @description
  * 包含 API 响应码、请求状态等枚举定义
+ * 适配 Laravel 后端：code 为整型，0 = 成功，401 = 未授权
  */
 
 /**
@@ -12,25 +13,10 @@ export const enum ApiCodeEnum {
   /**
    * 成功
    */
-  SUCCESS = "00000",
+  SUCCESS = 0,
 
   /**
-   * 访问令牌无效或过期
+   * 未授权（Token 无效或过期）
    */
-  ACCESS_TOKEN_INVALID = "A0230",
-
-  /**
-   * 刷新令牌无效或过期
-   */
-  REFRESH_TOKEN_INVALID = "A0231",
-
-  /**
-   * 权限不足
-   */
-  PERMISSION_DENIED = "A0301",
-
-  /**
-   * 需要选择租户
-   */
-  CHOOSE_TENANT = "A0250",
+  UNAUTHORIZED = 401,
 }

@@ -169,15 +169,8 @@ export const useTenantStore = defineStore("tenant", () => {
     }
   }
 
-  async function refreshTokenIfSupported(tenantId: number): Promise<void> {
-    try {
-      const token = await AuthAPI.switchTenant(tenantId);
-      if (token?.accessToken && token?.refreshToken) {
-        AuthStorage.setTokens(token.accessToken, token.refreshToken, AuthStorage.getRememberMe());
-      }
-    } catch {
-      // 忽略：非平台用户或后端未启用该接口时，回退到旧接口
-    }
+  async function refreshTokenIfSupported(_tenantId: number): Promise<void> {
+    // 多租户已禁用，此方法保留为空操作
   }
 
   /**

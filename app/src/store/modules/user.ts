@@ -20,38 +20,39 @@ export const useUserStore = defineStore("user", () => {
    * 登录
    */
   async function login(loginRequest: LoginRequest): Promise<void> {
-    const { accessToken, refreshToken } = await AuthAPI.login(loginRequest);
-    rememberMe.value = loginRequest.rememberMe ?? false;
-    AuthStorage.setTokens(accessToken, refreshToken, rememberMe.value);
-  }
-
-  let refreshPromise: Promise<void> | null = null;
-
-  /**
-   * 刷新 token（单飞模式）
-   *
-   * 多个并发请求遇到 token 过期时，共享同一次 refresh 请求。
-   */
-  function refreshTokenOnce(): Promise<void> {
-    if (refreshPromise) return refreshPromise;
-
-    refreshPromise = doRefreshToken().finally(() => {
-      refreshPromise = null;
-    });
-
-    return refreshPromise;
+    const { access_token } = await AuthAPI.login(loginRequest);
+    rememberMe.value = loginRequest.remember ?? false;
+    AuthStorage.setToken(access_token, rememberMe.value);
   }
 
   /**
    * 获取用户信息
+   *
+   * 后端返回格式：{id, username, nickname, avatar, roles: [{code, name}], authorities: [{permission}]}
+   * 需映射为：{userId, username, nickname, avatar, roles: string[], perms: string[]}
    */
   async function getUserInfo(): Promise<UserInfo> {
-    const data = await UserAPI.getInfo();
-    if (!data) {
+    const raw: any = await UserAPI.getInfo();
+    if (!raw) {
       throw new Error("Verification failed, please Login again.");
     }
-    Object.assign(userInfo.value, data);
-    return data;
+
+    // 映射后端数据格式到前端 UserInfo
+    const mapped: UserInfo = {
+      userId: String(raw.id ?? raw.userId ?? ""),
+      username: raw.username,
+      nickname: raw.nickname,
+      avatar: raw.avatar,
+      roles: Array.isArray(raw.roles)
+        ? raw.roles.map((r: any) => (typeof r === "string" ? r : r.code || r.name))
+        : [],
+      perms: Array.isArray(raw.authorities)
+        ? raw.authorities.map((a: any) => (typeof a === "string" ? a : a.permission))
+        : raw.perms ?? [],
+    };
+
+    Object.assign(userInfo.value, mapped);
+    return mapped;
   }
 
   /**
@@ -64,45 +65,21 @@ export const useUserStore = defineStore("user", () => {
 
   /**
    * 重置所有系统状态
-   *
-   * 统一处理所有清理工作，包括用户凭证、路由、缓存等
    */
   function resetAllState(): void {
-    // 1. 重置用户状态
     resetUserState();
-
-    // 2. 重置其他模块状态
     usePermissionStoreHook().resetRouter();
     useDictStoreHook().clearDictCache();
     useTagsViewStore().delAllViews();
-
-    // 3. 清理 SSE 连接
     cleanupSseServices();
   }
 
   /**
    * 重置用户状态
-   *
-   * 仅处理用户模块内的状态
    */
   function resetUserState(): void {
     AuthStorage.clearAuth();
     userInfo.value = {} as UserInfo;
-  }
-
-  /**
-   * 刷新 token
-   */
-  async function doRefreshToken(): Promise<void> {
-    const currentRefreshToken = AuthStorage.getRefreshToken();
-
-    if (!currentRefreshToken) {
-      throw new Error("没有有效的刷新令牌");
-    }
-
-    const { accessToken, refreshToken: newRefreshToken } =
-      await AuthAPI.refreshToken(currentRefreshToken);
-    AuthStorage.setTokens(accessToken, newRefreshToken, AuthStorage.getRememberMe());
   }
 
   return {
@@ -114,15 +91,11 @@ export const useUserStore = defineStore("user", () => {
     getUserInfo,
     resetAllState,
     resetUserState,
-    refreshToken: doRefreshToken,
-    refreshTokenOnce,
   };
 });
 
 /**
  * 在组件外部使用 UserStore 的钩子函数
- *
- * @see https://pinia.vuejs.org/core-concepts/outside-component-usage.html
  */
 export function useUserStoreHook() {
   return useUserStore(store);

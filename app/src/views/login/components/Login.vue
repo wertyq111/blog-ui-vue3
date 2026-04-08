@@ -36,10 +36,10 @@
       </el-tooltip>
 
       <!-- 验证码 -->
-      <el-form-item prop="captchaCode">
+      <el-form-item prop="captcha">
         <div flex items-center gap-10px>
           <el-input
-            v-model.trim="loginFormData.captchaCode"
+            v-model.trim="loginFormData.captcha"
             :placeholder="t('login.captchaCode')"
             clearable
             class="flex-1"
@@ -70,7 +70,7 @@
       </el-form-item>
 
       <div class="flex-x-between w-full">
-        <el-checkbox v-model="loginFormData.rememberMe">{{ t("login.rememberMe") }}</el-checkbox>
+        <el-checkbox v-model="loginFormData.remember">{{ t("login.rememberMe") }}</el-checkbox>
         <el-link type="primary" underline="never" @click="toOtherForm('resetPwd')">
           {{ t("login.forgetPassword") }}
         </el-link>
@@ -140,9 +140,9 @@ const rememberMe = AuthStorage.getRememberMe();
 const loginFormData = ref<LoginRequest>({
   username: "admin",
   password: "123456",
-  captchaId: "",
-  captchaCode: "",
-  rememberMe,
+  captcha_key: "",
+  captcha: "",
+  remember: rememberMe,
 });
 
 const loginRules = computed(() => {
@@ -166,7 +166,7 @@ const loginRules = computed(() => {
         trigger: "blur",
       },
     ],
-    captchaCode: [
+    captcha: [
       {
         required: true,
         trigger: "blur",
@@ -182,8 +182,8 @@ function getCaptcha() {
   codeLoading.value = true;
   AuthAPI.getCaptcha()
     .then((data) => {
-      loginFormData.value.captchaId = data.captchaId;
-      captchaBase64.value = data.captchaBase64;
+      loginFormData.value.captcha_key = data.captcha_key;
+      captchaBase64.value = data.captcha_image_content;
     })
     .finally(() => (codeLoading.value = false));
 }

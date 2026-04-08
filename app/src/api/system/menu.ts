@@ -6,7 +6,7 @@ const MENU_BASE_URL = "/api/v1/menus";
 const MenuAPI = {
   /** 获取当前用户的路由列表 */
   getRoutes() {
-    return request<any, RouteItem[]>({ url: `${MENU_BASE_URL}/routes`, method: "get" });
+    return request<any, RouteItem[]>({ url: `/index/getMenuList`, method: "get" });
   },
   /** 获取菜单树形列表 */
   getList(queryParams: MenuQueryParams) {

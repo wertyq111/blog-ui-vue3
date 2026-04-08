@@ -1,5 +1,6 @@
 /**
  * 认证相关类型定义
+ * 适配 Laravel 后端 JWT 认证
  */
 
 /**
@@ -11,13 +12,11 @@ export interface LoginRequest {
   /** 密码 */
   password: string;
   /** 验证码缓存key */
-  captchaId?: string;
+  captcha_key?: string;
   /** 验证码 */
-  captchaCode?: string;
+  captcha?: string;
   /** 记住我 */
-  rememberMe?: boolean;
-  /** 租户ID */
-  tenantId?: number;
+  remember?: boolean;
 }
 
 /**
@@ -25,21 +24,19 @@ export interface LoginRequest {
  */
 export interface LoginResponse {
   /** 访问令牌 */
-  accessToken: string;
-  /** 刷新令牌 */
-  refreshToken: string;
+  access_token: string;
   /** 令牌类型 */
-  tokenType: string;
+  token_type?: string;
   /** 过期时间(单位:秒) */
-  expiresIn: number;
+  expires_in?: number;
 }
 
 /**
  * 验证码响应
  */
 export interface CaptchaInfo {
-  /** 验证码缓存key */
-  captchaId: string;
   /** 验证码图片Base64 */
-  captchaBase64: string;
+  captcha_image_content: string;
+  /** 验证码缓存key */
+  captcha_key: string;
 }
