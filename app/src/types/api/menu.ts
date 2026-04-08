@@ -4,82 +4,72 @@
 
 /** 菜单查询参数 */
 export interface MenuQueryParams {
-  /** 搜索关键字 */
-  keywords?: string;
+  /** 模糊匹配标题 */
+  "filter[title]"?: string;
 }
 
-/** 菜单视图对象 */
+/** 菜单视图对象（后端 GET /menu/index 返回） */
 export interface MenuItem {
-  /** 子菜单 */
-  children?: MenuItem[];
-  /** 组件路径 */
-  component?: string;
+  /** 菜单ID */
+  id?: number;
+  /** 父菜单ID */
+  pid?: number;
+  /** 菜单标题 */
+  title?: string;
   /** ICON */
   icon?: string;
-  /** 菜单ID */
-  id?: string;
-  /** 菜单名称 */
-  name?: string;
-  /** 父菜单ID */
-  parentId?: string;
   /** 路由路径 */
   path?: string;
+  /** 组件路径 */
+  component?: string;
+  /** 链接目标 */
+  target?: string;
   /** 按钮权限标识 */
-  perm?: string;
-  /** 跳转路径 */
-  redirect?: string;
-  /** 菜单排序(数字越小排名越靠前) */
+  permission?: string;
+  /** 菜单类型（0:菜单/目录 1:权限/按钮） */
+  type?: number;
+  /** 状态(1:启用;0:禁用) */
+  status?: number;
+  /** 是否隐藏(0:显示;1:隐藏) */
+  hide?: number;
+  /** 备注 */
+  note?: string;
+  /** 排序 */
   sort?: number;
-  /** 菜单类型（C-目录 M-菜单 B-按钮） */
-  type?: string;
-  /** 菜单是否可见(1:显示;0:隐藏) */
-  visible?: number;
-  /** 菜单范围(1=平台 2=业务) */
-  scope?: number;
+  /** 子菜单 */
+  children?: MenuItem[];
 }
 
 /** 菜单表单对象 */
 export interface MenuForm {
   /** 菜单ID */
-  id?: string;
+  id?: number;
   /** 父菜单ID */
-  parentId?: string;
-  /** 菜单名称 */
-  name?: string;
-  /** 菜单类型（C-目录 M-菜单 B-按钮） */
-  type?: string;
+  pid?: number;
+  /** 菜单标题 */
+  title?: string;
+  /** 菜单类型（0:菜单/目录 1:权限/按钮） */
+  type?: number;
   /** 路由路径 */
   path?: string;
-  /** 路由名称（用于前端路由名） */
-  routeName?: string;
-  /** 路由路径（可用于自定义路由字段） */
-  routePath?: string;
-  /** 跳转路径 */
-  redirect?: string;
   /** 组件路径 */
   component?: string;
+  /** 链接目标 */
+  target?: string;
   /** ICON */
   icon?: string;
   /** 排序 */
   sort?: number;
-  /** 菜单是否可见 */
-  visible?: number;
-  /** 菜单范围(1=平台 2=业务) */
-  scope?: number;
+  /** 是否隐藏(0:显示;1:隐藏) */
+  hide?: number;
+  /** 状态(1:启用;0:禁用) */
+  status?: number;
   /** 按钮权限标识 */
-  perm?: string;
-  /** 路由参数（用于表单编辑 params） */
-  params?: { key?: string; value?: string }[];
-  /** 是否始终显示（仅对目录生效） */
-  alwaysShow?: number | boolean;
-  /** 是否缓存（用于 keepAlive） */
-  keepAlive?: number | boolean;
-}
-
-/** 菜单选项 */
-export interface MenuOption {
-  key: string;
-  value: string;
+  permission?: string;
+  /** 备注 */
+  note?: string;
+  /** 权限子项排序列表（用于自动创建权限子菜单） */
+  checkedList?: number[];
 }
 
 /** 路由对象 */

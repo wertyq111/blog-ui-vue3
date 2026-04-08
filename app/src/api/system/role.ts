@@ -1,48 +1,89 @@
 import request from "@/utils/request";
-import type { RoleQueryParams, RoleItem, RoleForm, OptionItem } from "@/types/api";
+import { adaptPagination } from "@/utils/pagination";
+import type {
+  RoleQueryParams,
+  RoleItem,
+  RoleForm,
+  BackendPermissionItem,
+  OptionItem,
+  PageResult,
+} from "@/types/api";
 
-const ROLE_BASE_URL = "/api/v1/roles";
+const ROLE_BASE_URL = "/role";
 
 const RoleAPI = {
   /** 获取角色分页数据 */
-  getPage(queryParams?: RoleQueryParams) {
-    return request<any, PageResult<RoleItem>>({
-      url: `${ROLE_BASE_URL}`,
+  async getPage(queryParams?: RoleQueryParams) {
+    const { pageNum, pageSize, ...others } = queryParams ?? {};
+    const res = await request<any, any>({
+      url: `${ROLE_BASE_URL}/index`,
       method: "get",
-      params: queryParams,
+      params: { page: pageNum, per_page: pageSize, ...others },
     });
+    return adaptPagination<RoleItem>(res);
   },
+
   /** 获取角色下拉数据源 */
   getOptions() {
-    return request<any, OptionItem[]>({ url: `${ROLE_BASE_URL}/options`, method: "get" });
+    return request<any, OptionItem[]>({
+      url: `${ROLE_BASE_URL}/getRoleList`,
+      method: "get",
+    });
   },
-  /** 获取角色的菜单ID集合 */
-  getRoleMenuIds(roleId: string) {
-    return request<any, string[]>({ url: `${ROLE_BASE_URL}/${roleId}/menu-ids`, method: "get" });
+
+  /**
+   * 获取角色的权限列表（含 checked 标记）
+   * 后端返回所有菜单平铺列表，已勾选的 checked=true
+   */
+  getPermissionList(roleId: string) {
+    return request<any, BackendPermissionItem[]>({
+      url: `${ROLE_BASE_URL}/permission/${roleId}`,
+      method: "get",
+    });
   },
-  /** 分配菜单权限 */
-  updateRoleMenus(roleId: string, data: number[]) {
-    return request({ url: `${ROLE_BASE_URL}/${roleId}/menus`, method: "put", data });
+
+  /** 保存角色的菜单权限 */
+  savePermissions(roleId: string, menuIds: number[]) {
+    return request({
+      url: `${ROLE_BASE_URL}/permission/${roleId}`,
+      method: "post",
+      data: { menu_id: menuIds },
+    });
   },
-  /** 获取角色表单数据 */
-  getFormData(id: string) {
-    return request<any, RoleForm>({ url: `${ROLE_BASE_URL}/${id}/form`, method: "get" });
-  },
-  /** 获取角色的部门ID集合(自定义数据权限) */
-  getRoleDeptIds(roleId: string) {
-    return request<any, string[]>({ url: `${ROLE_BASE_URL}/${roleId}/dept-ids`, method: "get" });
-  },
+
   /** 新增角色 */
   create(data: RoleForm) {
-    return request({ url: `${ROLE_BASE_URL}`, method: "post", data });
+    return request({
+      url: `${ROLE_BASE_URL}/add`,
+      method: "post",
+      data,
+    });
   },
+
   /** 更新角色 */
   update(id: string, data: RoleForm) {
-    return request({ url: `${ROLE_BASE_URL}/${id}`, method: "put", data });
+    return request({
+      url: `${ROLE_BASE_URL}/${id}`,
+      method: "post",
+      data,
+    });
   },
-  /** 批量删除角色，多个以英文逗号(,)分割 */
-  deleteByIds(ids: string) {
-    return request({ url: `${ROLE_BASE_URL}/${ids}`, method: "delete" });
+
+  /** 删除单个角色 */
+  deleteById(id: string) {
+    return request({
+      url: `${ROLE_BASE_URL}/${id}`,
+      method: "delete",
+    });
+  },
+
+  /** 批量删除角色 */
+  batchDelete(ids: number[]) {
+    return request({
+      url: `${ROLE_BASE_URL}/batchDelete`,
+      method: "post",
+      data: { id: ids },
+    });
   },
 };
 
