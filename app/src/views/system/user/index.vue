@@ -1,165 +1,143 @@
 <!-- 用户管理 -->
 <template>
   <div class="app-container">
-    <el-row :gutter="20">
-      <!-- 部门树 -->
-      <el-col :lg="4" :xs="24" class="mb-[12px]">
-        <UserDeptTree v-model="queryParams.deptId" @node-click="handleQuery" />
-      </el-col>
-
-      <!-- 用户列表 -->
-      <el-col :lg="20" :xs="24">
-        <!-- 搜索区域 -->
-        <div class="filter-section">
-          <el-form ref="queryFormRef" :model="queryParams" :inline="true" label-width="auto">
-            <el-form-item label="关键字" prop="keywords">
-              <el-input
-                v-model="queryParams.keywords"
-                placeholder="用户名/昵称/手机号"
-                clearable
-                @keyup.enter="handleQuery"
-              />
-            </el-form-item>
-
-            <el-form-item label="状态" prop="status">
-              <el-select
-                v-model="queryParams.status"
-                placeholder="全部"
-                clearable
-                style="width: 100px"
-              >
-                <el-option label="正常" :value="1" />
-                <el-option label="禁用" :value="0" />
-              </el-select>
-            </el-form-item>
-
-            <el-form-item label="创建时间">
-              <el-date-picker
-                v-model="queryParams.createTime"
-                :editable="false"
-                type="daterange"
-                range-separator="~"
-                start-placeholder="开始时间"
-                end-placeholder="截止时间"
-                value-format="YYYY-MM-DD"
-              />
-            </el-form-item>
-
-            <el-form-item class="search-buttons">
-              <el-button type="primary" icon="search" @click="handleQuery">搜索</el-button>
-              <el-button icon="refresh" @click="handleResetQuery">重置</el-button>
-            </el-form-item>
-          </el-form>
-        </div>
-
-        <el-card shadow="hover" class="table-section">
-          <div class="table-section__toolbar">
-            <div class="table-section__toolbar--actions">
-              <el-button
-                v-hasPerm="['sys:user:create']"
-                type="success"
-                icon="plus"
-                @click="handleCreateClick"
-              >
-                新增
-              </el-button>
-              <el-button
-                v-hasPerm="'sys:user:delete'"
-                type="danger"
-                icon="delete"
-                :disabled="!hasSelection"
-                @click="handleDelete()"
-              >
-                删除
-              </el-button>
-            </div>
-            <div class="table-section__toolbar--tools">
-              <el-button v-hasPerm="'sys:user:import'" icon="upload" @click="openImportDialog">
-                导入
-              </el-button>
-
-              <el-button v-hasPerm="'sys:user:export'" icon="download" @click="exportUsers">
-                导出
-              </el-button>
-            </div>
-          </div>
-
-          <el-table
-            v-loading="loading"
-            :data="userList"
-            border
-            stripe
-            highlight-current-row
-            class="table-section__content"
-            row-key="id"
-            @selection-change="handleSelectionChange"
-          >
-            <el-table-column type="selection" width="50" align="center" />
-            <el-table-column label="用户名" prop="username" />
-            <el-table-column label="昵称" width="200" align="center" prop="nickname" />
-            <el-table-column label="性别" width="100" align="center">
-              <template #default="scope">
-                <DictTag v-model="scope.row.gender" code="gender" />
-              </template>
-            </el-table-column>
-            <el-table-column label="部门" width="120" align="center" prop="deptName" />
-            <el-table-column label="角色" align="center" prop="roleNames" min-width="160" />
-            <el-table-column label="手机号码" align="center" prop="mobile" width="120" />
-            <el-table-column label="邮箱" align="center" prop="email" width="160" />
-            <el-table-column label="状态" align="center" prop="status" width="80">
-              <template #default="scope">
-                <el-tag :type="scope.row.status === CommonStatus.ENABLED ? 'success' : 'info'">
-                  {{ scope.row.status === CommonStatus.ENABLED ? "正常" : "禁用" }}
-                </el-tag>
-              </template>
-            </el-table-column>
-            <el-table-column label="创建时间" align="center" prop="createTime" width="180" />
-            <el-table-column label="操作" fixed="right" width="220">
-              <template #default="scope">
-                <el-button
-                  v-hasPerm="'sys:user:reset-password'"
-                  type="primary"
-                  icon="RefreshLeft"
-                  size="small"
-                  link
-                  @click="handleResetPassword(scope.row)"
-                >
-                  重置密码
-                </el-button>
-                <el-button
-                  v-hasPerm="'sys:user:update'"
-                  type="primary"
-                  icon="edit"
-                  link
-                  size="small"
-                  @click="handleEditClick(scope.row.id)"
-                >
-                  编辑
-                </el-button>
-                <el-button
-                  v-hasPerm="'sys:user:delete'"
-                  type="danger"
-                  icon="delete"
-                  link
-                  size="small"
-                  @click="handleDelete(scope.row.id)"
-                >
-                  删除
-                </el-button>
-              </template>
-            </el-table-column>
-          </el-table>
-
-          <pagination
-            v-if="total > 0"
-            v-model:total="total"
-            v-model:page="queryParams.pageNum"
-            v-model:limit="queryParams.pageSize"
-            @pagination="fetchList"
+    <!-- 用户列表 -->
+    <!-- 搜索区域 -->
+    <div class="filter-section">
+      <el-form ref="queryFormRef" :model="queryParams" :inline="true" label-width="auto">
+        <el-form-item label="用户名" prop="filter[username]">
+          <el-input
+            v-model="queryParams['filter[username]']"
+            placeholder="用户名"
+            clearable
+            @keyup.enter="handleQuery"
           />
-        </el-card>
-      </el-col>
-    </el-row>
+        </el-form-item>
+
+        <el-form-item label="手机号" prop="filter[phone]">
+          <el-input
+            v-model="queryParams['filter[phone]']"
+            placeholder="手机号"
+            clearable
+            @keyup.enter="handleQuery"
+          />
+        </el-form-item>
+
+        <el-form-item label="状态" prop="filter[status]">
+          <el-select
+            v-model="queryParams['filter[status]']"
+            placeholder="全部"
+            clearable
+            style="width: 100px"
+          >
+            <el-option label="正常" :value="1" />
+            <el-option label="禁用" :value="0" />
+          </el-select>
+        </el-form-item>
+
+        <el-form-item class="search-buttons">
+          <el-button type="primary" icon="search" @click="handleQuery">搜索</el-button>
+          <el-button icon="refresh" @click="handleResetQuery">重置</el-button>
+        </el-form-item>
+      </el-form>
+    </div>
+
+    <el-card shadow="hover" class="table-section">
+      <div class="table-section__toolbar">
+        <div class="table-section__toolbar--actions">
+          <el-button
+            v-hasPerm="['sys:user:create']"
+            type="success"
+            icon="plus"
+            @click="handleCreateClick"
+          >
+            新增
+          </el-button>
+          <el-button
+            v-hasPerm="'sys:user:delete'"
+            type="danger"
+            icon="delete"
+            :disabled="!hasSelection"
+            @click="handleDelete()"
+          >
+            删除
+          </el-button>
+        </div>
+      </div>
+
+      <el-table
+        v-loading="loading"
+        :data="userList"
+        border
+        stripe
+        highlight-current-row
+        class="table-section__content"
+        row-key="id"
+        @selection-change="handleSelectionChange"
+      >
+        <el-table-column type="selection" width="50" align="center" />
+        <el-table-column label="用户名" prop="username" />
+        <el-table-column label="昵称" width="200" align="center" prop="member.nickname" />
+        <el-table-column label="性别" width="100" align="center">
+          <template #default="scope">
+            <DictTag v-if="scope.row.member" v-model="scope.row.member.gender" code="gender" />
+          </template>
+        </el-table-column>
+        <el-table-column label="角色" align="center" prop="roleNames" min-width="160" />
+        <el-table-column label="手机号码" align="center" prop="phone" width="120" />
+        <el-table-column label="邮箱" align="center" prop="email" width="160" />
+        <el-table-column label="状态" align="center" prop="status" width="80">
+          <template #default="scope">
+            <el-tag :type="scope.row.status === CommonStatus.ENABLED ? 'success' : 'info'">
+              {{ scope.row.status === CommonStatus.ENABLED ? "正常" : "禁用" }}
+            </el-tag>
+          </template>
+        </el-table-column>
+        <el-table-column label="创建时间" align="center" prop="createdAt" width="180" />
+        <el-table-column label="操作" fixed="right" width="220">
+          <template #default="scope">
+            <el-button
+              v-hasPerm="'sys:user:reset-password'"
+              type="primary"
+              icon="RefreshLeft"
+              size="small"
+              link
+              @click="handleResetPassword(scope.row)"
+            >
+              重置密码
+            </el-button>
+            <el-button
+              v-hasPerm="'sys:user:update'"
+              type="primary"
+              icon="edit"
+              link
+              size="small"
+              @click="handleEditClick(scope.row.id)"
+            >
+              编辑
+            </el-button>
+            <el-button
+              v-hasPerm="'sys:user:delete'"
+              type="danger"
+              icon="delete"
+              link
+              size="small"
+              @click="handleDelete(scope.row.id)"
+            >
+              删除
+            </el-button>
+          </template>
+        </el-table-column>
+      </el-table>
+
+      <pagination
+        v-if="total > 0"
+        v-model:total="total"
+        v-model:page="queryParams.pageNum"
+        v-model:limit="queryParams.pageSize"
+        @pagination="fetchList"
+      />
+    </el-card>
 
     <!-- 用户表单 -->
     <el-drawer
@@ -178,23 +156,13 @@
           />
         </el-form-item>
 
-        <el-form-item label="用户昵称" prop="nickname">
-          <el-input v-model="formData.nickname" placeholder="请输入用户昵称" />
-        </el-form-item>
-
-        <el-form-item label="所属部门" prop="deptId">
-          <el-tree-select
-            v-model="formData.deptId"
-            placeholder="请选择所属部门"
-            :data="deptOptions"
-            filterable
-            check-strictly
-            :render-after-expand="false"
+        <el-form-item v-if="!formData.id" label="密码" prop="password">
+          <el-input
+            v-model="formData.password"
+            type="password"
+            placeholder="请输入密码"
+            show-password
           />
-        </el-form-item>
-
-        <el-form-item label="性别" prop="gender">
-          <DictSelect v-model="formData.gender" code="gender" />
         </el-form-item>
 
         <el-form-item label="角色" prop="roleIds">
@@ -208,8 +176,8 @@
           </el-select>
         </el-form-item>
 
-        <el-form-item label="手机号码" prop="mobile">
-          <el-input v-model="formData.mobile" placeholder="请输入手机号码" maxlength="11" />
+        <el-form-item label="手机号码" prop="phone">
+          <el-input v-model="formData.phone" placeholder="请输入手机号码" maxlength="11" />
         </el-form-item>
 
         <el-form-item label="邮箱" prop="email">
@@ -235,9 +203,6 @@
         </div>
       </template>
     </el-drawer>
-
-    <!-- 用户导入 -->
-    <UserImportDialog v-model="importDialogVisible" @import-success="handleQuery()" />
   </div>
 </template>
 
@@ -246,15 +211,11 @@ import { computed, onMounted, reactive, ref } from "vue";
 import { useDebounceFn } from "@vueuse/core";
 import { ElMessage, ElMessageBox, type FormInstance, type FormRules } from "element-plus";
 import type { UserForm, UserQueryParams, UserItem } from "@/types/api";
-import { downloadFile } from "@/utils";
 import UserAPI from "@/api/system/user";
-import DeptAPI from "@/api/system/dept";
 import RoleAPI from "@/api/system/role";
 import { useUserStore, useAppStore } from "@/store";
 import { DeviceEnum, DialogMode, CommonStatus } from "@/enums";
 import { useTableSelection } from "@/composables";
-import UserDeptTree from "./components/UserDeptTree.vue";
-import UserImportDialog from "./components/UserImportDialog.vue";
 
 defineOptions({
   name: "User",
@@ -272,6 +233,9 @@ const userFormRef = ref<FormInstance>();
 const queryParams = reactive<UserQueryParams>({
   pageNum: 1,
   pageSize: 10,
+  "filter[username]": "",
+  "filter[phone]": "",
+  "filter[status]": undefined,
 });
 
 // 列表数据
@@ -286,30 +250,26 @@ const dialogState = reactive({
   mode: DialogMode.CREATE,
 });
 
-// 导入弹窗状态
-const importDialogVisible = ref(false);
-
 // 表单初始数据
 const initialFormData: UserForm = {
   status: CommonStatus.ENABLED,
+  roleIds: [],
 };
 
 // 表单数据
 const formData = reactive<UserForm>({ ...initialFormData });
 
 // 下拉选项
-const deptOptions = ref<OptionItem[]>();
-const roleOptions = ref<OptionItem[]>();
+const roleOptions = ref<any[]>();
 
 const drawerSize = computed(() => (appStore.device === DeviceEnum.DESKTOP ? "600px" : "90%"));
 
 const rules: FormRules = {
   username: [{ required: true, message: "请输入用户名", trigger: "blur" }],
-  nickname: [{ required: true, message: "请输入用户昵称", trigger: "blur" }],
-  deptId: [{ required: true, message: "请选择所属部门", trigger: "change" }],
+  password: [{ required: true, message: "请输入密码", trigger: "blur", min: 6 }],
   roleIds: [{ required: true, message: "请选择用户角色", trigger: "change" }],
   email: [{ type: "email", message: "请输入正确的邮箱地址", trigger: "blur" }],
-  mobile: [{ pattern: /^1[3-9]\d{9}$/, message: "请输入正确的手机号码", trigger: "blur" }],
+  phone: [{ pattern: /^1[3-9]\d{9}$/, message: "请输入正确的手机号码", trigger: "blur" }],
 };
 
 /**
@@ -319,7 +279,10 @@ async function fetchList(): Promise<void> {
   loading.value = true;
   try {
     const data = await UserAPI.getPage(queryParams);
-    userList.value = data.list;
+    userList.value = data.list.map((user) => ({
+      ...user,
+      roleNames: user.roles?.map((r) => r.name).join(","),
+    }));
     total.value = data.total ?? 0;
   } finally {
     loading.value = false;
@@ -330,10 +293,11 @@ async function fetchList(): Promise<void> {
  * 加载表单下拉选项数据
  */
 async function loadFormOptions(): Promise<void> {
-  [roleOptions.value, deptOptions.value] = await Promise.all([
-    RoleAPI.getOptions(),
-    DeptAPI.getOptions(),
-  ]);
+  const options = await UserAPI.getOptions();
+  roleOptions.value = options.map((item: any) => ({
+    label: item.name,
+    value: item.id,
+  }));
 }
 
 const { selectedIds, hasSelection, handleSelectionChange } = useTableSelection<UserItem>();
@@ -351,8 +315,9 @@ function handleQuery(): void {
  */
 function resetQuery(): void {
   queryFormRef.value?.resetFields();
-  queryParams.deptId = undefined;
-  queryParams.createTime = undefined;
+  queryParams["filter[username]"] = "";
+  queryParams["filter[phone]"] = "";
+  queryParams["filter[status]"] = undefined;
 }
 
 /**
@@ -366,11 +331,10 @@ function handleResetQuery(): void {
 /**
  * 重置用户密码
  * @param userId 用户ID
- * @param password 新密码
  */
-async function resetPassword(userId: string, password: string): Promise<void> {
-  await UserAPI.resetPassword(userId, password);
-  ElMessage.success("密码重置成功");
+async function resetPassword(userId: string): Promise<void> {
+  await UserAPI.resetPassword(userId);
+  ElMessage.success("密码重置成功，新密码为 123456");
 }
 
 /**
@@ -378,7 +342,10 @@ async function resetPassword(userId: string, password: string): Promise<void> {
  * @param userIds 用户ID列表，多个ID用逗号分隔
  */
 async function deleteUsers(userIds: string): Promise<void> {
-  await UserAPI.deleteByIds(userIds);
+  const ids = userIds.split(",");
+  for (const id of ids) {
+    await UserAPI.deleteById(id);
+  }
   ElMessage.success("删除成功");
   handleQuery();
 }
@@ -412,13 +379,12 @@ function resetForm(): void {
  * @param row 用户数据
  */
 function handleResetPassword(row: UserItem): void {
-  ElMessageBox.prompt(`请输入用户【${row.username}】的新密码`, "重置密码", {
+  ElMessageBox.confirm(`确认重置用户【${row.username}】的密码吗？`, "警告", {
     confirmButtonText: "确定",
     cancelButtonText: "取消",
-    inputPattern: /.{6,}/,
-    inputErrorMessage: "密码至少需要6位字符",
+    type: "warning",
   }).then(
-    (result: any) => resetPassword(row.id, result.value),
+    () => resetPassword(row.id),
     () => {
       /* 用户取消 */
     }
@@ -444,7 +410,10 @@ async function handleEditClick(id: string): Promise<void> {
   dialogState.mode = DialogMode.EDIT;
   await loadFormOptions();
   const data = await UserAPI.getFormData(id);
-  Object.assign(formData, data);
+  Object.assign(formData, {
+    ...data,
+    roleIds: data.roleIds ?? [],
+  });
   openDialog();
 }
 
@@ -507,22 +476,6 @@ function handleDelete(id?: string): void {
       /* 用户取消 */
     }
   );
-}
-
-/**
- * 导出用户列表
- */
-async function exportUsers(): Promise<void> {
-  const response = await UserAPI.export(queryParams);
-  downloadFile(response);
-  ElMessage.success("导出成功");
-}
-
-/**
- * 打开导入弹窗
- */
-function openImportDialog(): void {
-  importDialogVisible.value = true;
 }
 
 onMounted(() => {
