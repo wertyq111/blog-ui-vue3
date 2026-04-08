@@ -80,7 +80,11 @@
         <el-table-column label="昵称" width="200" align="center" prop="member.nickname" />
         <el-table-column label="性别" width="100" align="center">
           <template #default="scope">
-            <DictTag v-if="scope.row.member" v-model="scope.row.member.gender" code="gender" />
+            <template v-if="scope.row.member">
+              <span v-if="scope.row.member.gender === 1">男</span>
+              <span v-else-if="scope.row.member.gender === 2">女</span>
+              <span v-else>未知</span>
+            </template>
           </template>
         </el-table-column>
         <el-table-column label="角色" align="center" prop="roleNames" min-width="160" />

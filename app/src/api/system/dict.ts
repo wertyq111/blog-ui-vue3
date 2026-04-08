@@ -102,17 +102,9 @@ const DictAPI = {
       })),
     }));
   },
-  /** 获取字典项列表 */
-  getDictItems(dictCode: string) {
-    return request<any, DictItemOption[]>({
-      url: `${DICT_BASE_URL}/${dictCode}/items/options`,
-      method: "get",
-    }).then((items) =>
-      (items ?? []).map((item) => ({
-        ...item,
-        tagType: decodeDictTagType((item as any).tagType),
-      }))
-    );
+  /** 获取字典项列表（后端无字典 API，返回空） */
+  getDictItems(_dictCode: string) {
+    return Promise.resolve([] as DictItemOption[]);
   },
   /** 新增字典项 */
   createDictItem(dictCode: string, data: DictItemForm) {

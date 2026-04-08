@@ -1,56 +1,38 @@
-import request from "@/utils/request";
-import type { NoticeQueryParams, NoticeForm, NoticeItem, NoticeDetail } from "@/types/api";
-
-const NOTICE_BASE_URL = "/api/v1/notices";
+/**
+ * 通知公告 API（已禁用：后端无通知功能）
+ * 所有方法返回空数据，避免组件引用报错
+ */
 
 const NoticeAPI = {
-  /** 获取通知公告分页数据 */
-  getPage(queryParams?: NoticeQueryParams) {
-    return request<any, PageResult<NoticeItem>>({
-      url: `${NOTICE_BASE_URL}`,
-      method: "get",
-      params: queryParams,
-    });
+  getPage() {
+    return Promise.resolve({ list: [], total: 0 });
   },
-  /** 获取通知公告表单数据 */
-  getFormData(id: string) {
-    return request<any, NoticeForm>({ url: `${NOTICE_BASE_URL}/${id}/form`, method: "get" });
+  getFormData(_id: string) {
+    return Promise.resolve({});
   },
-  /** 添加通知公告 */
-  create(data: NoticeForm) {
-    return request({ url: `${NOTICE_BASE_URL}`, method: "post", data });
+  create(_data: any) {
+    return Promise.resolve();
   },
-  /** 更新通知公告 */
-  update(id: string, data: NoticeForm) {
-    return request({ url: `${NOTICE_BASE_URL}/${id}`, method: "put", data });
+  update(_id: string, _data: any) {
+    return Promise.resolve();
   },
-  /** 批量删除通知公告，多个以英文逗号(,)分割 */
-  deleteByIds(ids: string) {
-    return request({ url: `${NOTICE_BASE_URL}/${ids}`, method: "delete" });
+  deleteByIds(_ids: string) {
+    return Promise.resolve();
   },
-  /** 发布通知 */
-  publish(id: string) {
-    return request({ url: `${NOTICE_BASE_URL}/${id}/publish`, method: "put" });
+  publish(_id: string) {
+    return Promise.resolve();
   },
-  /** 撤回通知 */
-  revoke(id: string) {
-    return request({ url: `${NOTICE_BASE_URL}/${id}/revoke`, method: "put" });
+  revoke(_id: string) {
+    return Promise.resolve();
   },
-  /** 查看通知 */
-  getDetail(id: string) {
-    return request<any, NoticeDetail>({ url: `${NOTICE_BASE_URL}/${id}/detail`, method: "get" });
+  getDetail(_id: string) {
+    return Promise.resolve({});
   },
-  /** 全部已读 */
   readAll() {
-    return request({ url: `${NOTICE_BASE_URL}/read-all`, method: "put" });
+    return Promise.resolve();
   },
-  /** 获取我的通知分页列表 */
-  getMyNoticePage(queryParams?: NoticeQueryParams) {
-    return request<any, PageResult<NoticeItem>>({
-      url: `${NOTICE_BASE_URL}/my`,
-      method: "get",
-      params: queryParams,
-    });
+  getMyNoticePage() {
+    return Promise.resolve({ list: [], total: 0 });
   },
 };
 
