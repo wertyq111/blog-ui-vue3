@@ -27,15 +27,23 @@ defineProps({
 .logo {
   width: 100%;
   height: $navbar-height;
-  background-color: $sidebar-logo-background;
+  background-color: color-mix(in srgb, var(--menu-background) 72%, transparent);
+  backdrop-filter: blur(10px) saturate(118%);
+  border-bottom: 1px solid var(--app-border);
 
   .title {
     flex-shrink: 0;
     margin-left: 10px;
-    font-size: 14px;
-    font-weight: bold;
-    color: $sidebar-logo-text-color;
+    font-size: 16px;
+    font-weight: 800;
+    color: var(--sidebar-logo-text-color);
+    letter-spacing: -0.5px;
   }
+}
+
+:global(html.dark) .logo {
+  background: rgba(10, 18, 30, 0.74);
+  border-bottom-color: rgba(103, 175, 242, 0.16);
 }
 </style>
 

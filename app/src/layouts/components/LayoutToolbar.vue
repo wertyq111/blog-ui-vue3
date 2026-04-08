@@ -37,14 +37,15 @@
     <div class="navbar-actions__item">
       <el-dropdown trigger="click">
         <div class="user-profile">
-          <div style="width: 28px; height: 28px; overflow: hidden; border-radius: 50%">
-            <img
-              :src="userStore.userInfo.avatar"
-              class="user-profile__avatar"
-              style="width: 100%; height: 100%; object-fit: cover; object-position: center"
-            />
-          </div>
-          <span class="user-profile__name">{{ userStore.userInfo.username }}</span>
+          <el-avatar :size="30" :src="avatarSrc" class="user-profile__avatar">
+            {{ avatarFallback }}
+          </el-avatar>
+          <span class="user-profile__name">
+            {{ displayName }}
+          </span>
+          <el-icon class="user-profile__arrow">
+            <ArrowDown />
+          </el-icon>
         </div>
         <template #dropdown>
           <el-dropdown-menu>
@@ -81,6 +82,7 @@ import LangSelect from "@/components/LangSelect/index.vue";
 import NoticeDropdown from "@/components/NoticeDropdown/index.vue";
 import TenantSwitcher from "@/components/TenantSwitcher/index.vue";
 import { useTenantStoreHook } from "@/store/modules/tenant";
+import { ArrowDown } from "@element-plus/icons-vue";
 
 const { t } = useI18n();
 const appStore = useAppStore();
@@ -102,6 +104,16 @@ const showTenantSwitcher = computed(() => {
     return false;
   }
   return tenantStore.tenantList.length > 1;
+});
+
+const displayName = computed(() => userStore.userInfo.nickname || userStore.userInfo.username || "");
+const avatarSrc = computed(() => userStore.userInfo.avatar || "");
+const avatarFallback = computed(() => {
+  const name = displayName.value.trim();
+  if (!name) {
+    return "U";
+  }
+  return name.charAt(0).toUpperCase();
 });
 
 function handleTenantChange(tenantId: number) {
@@ -240,18 +252,29 @@ function handleSettingsClick() {
     justify-content: center;
     height: 44px;
     padding: 0 8px;
+    border-radius: 10px;
+    transition: background-color 0.3s ease;
+
+    &:hover {
+      background: color-mix(in srgb, var(--el-color-primary) 8%, transparent);
+    }
 
     &__avatar {
       flex-shrink: 0;
-      width: 28px;
-      height: 28px;
-      border-radius: 50%;
+      border: 1px solid color-mix(in srgb, var(--el-color-primary) 20%, transparent);
     }
 
     &__name {
       margin-left: 8px;
-      color: var(--el-text-color-regular);
+      color: var(--app-text-soft, var(--el-text-color-regular));
       white-space: nowrap;
+      transition: color 0.3s;
+    }
+
+    &__arrow {
+      margin-left: 6px;
+      font-size: 14px;
+      color: var(--app-text-mute, var(--el-text-color-secondary));
       transition: color 0.3s;
     }
   }
@@ -275,6 +298,10 @@ function handleSettingsClick() {
 
   .user-profile__name {
     color: color-mix(in srgb, var(--el-color-white) 85%, transparent);
+  }
+
+  .user-profile__arrow {
+    color: color-mix(in srgb, var(--el-color-white) 70%, transparent);
   }
 
   // 租户选择器在白色文字模式下的样式
@@ -311,6 +338,10 @@ function handleSettingsClick() {
 
   .user-profile__name {
     color: var(--el-text-color-regular) !important;
+  }
+
+  .user-profile__arrow {
+    color: var(--app-text-mute, var(--el-text-color-secondary)) !important;
   }
 
   // 租户选择器在深色文字模式下的样式

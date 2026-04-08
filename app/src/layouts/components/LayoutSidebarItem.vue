@@ -60,6 +60,7 @@ import { RouteRecordRaw } from "vue-router";
 import { isExternal } from "@/utils";
 import { translateRouteTitle } from "@/lang/utils";
 import { ElIcon } from "element-plus";
+import * as ElementPlusIcons from "@element-plus/icons-vue";
 
 defineOptions({
   name: "LayoutSidebarItem",
@@ -70,8 +71,41 @@ defineOptions({
 const MenuIcon = defineComponent({
   props: { icon: String },
   setup(props) {
-    const isElIcon = computed(() => props.icon?.startsWith("el-icon"));
-    const iconName = computed(() => props.icon?.replace("el-icon-", ""));
+    const ICON_MAP: Record<string, string> = {
+      "s-management": "Setting",
+      "_user-group": "UserFilled",
+      "s-operation": "Operation",
+      "_surveying": "MapLocation",
+      "s-grid": "Grid",
+      "s-order": "Document",
+      "user-solid": "UserFilled",
+      "notebook-2": "Notebook",
+      "mobile-phone": "Cellphone",
+      "picture-outline-round": "PictureRounded",
+    };
+
+    const toPascalCase = (name: string) =>
+      name
+        .replace(/^[\W_]+/, "")
+        .split(/[^a-zA-Z0-9]+/)
+        .filter(Boolean)
+        .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+        .join("");
+
+    const isElIcon = computed(() => props.icon?.startsWith("el-icon-"));
+
+    const resolvedElIconName = computed(() => {
+      const rawName = props.icon?.replace("el-icon-", "");
+      if (!rawName) {
+        return "";
+      }
+
+      if (ICON_MAP[rawName]) {
+        return ICON_MAP[rawName];
+      }
+
+      return toPascalCase(rawName);
+    });
 
     return () => {
       if (!props.icon) {
@@ -80,7 +114,11 @@ const MenuIcon = defineComponent({
 
       // Element Plus 图标
       if (isElIcon.value) {
-        return h(ElIcon, null, () => h(resolveComponent(iconName.value!)));
+        const iconComponent = ElementPlusIcons[resolvedElIconName.value as keyof typeof ElementPlusIcons];
+        if (iconComponent) {
+          return h(ElIcon, null, () => h(iconComponent));
+        }
+        return h("div", { class: "i-svg:menu" });
       }
 
       // SVG 图标

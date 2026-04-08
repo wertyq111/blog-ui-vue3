@@ -21,15 +21,41 @@ $tags-view-height: 34px;
 // ============================================
 
 :root {
-  // 菜单
-  --menu-background: #fff;
-  --menu-text: #606266;
-  --menu-active-text: var(--el-menu-active-color);
-  --menu-hover: #e6f4ff;
+  // 菜单 (Light Mode - Vue2 Cyber Green)
+  --menu-background: rgba(255, 255, 255, 0.7);
+  --menu-text: #5d665b;
+  --menu-active-text: var(--el-color-primary);
+  --menu-hover: rgba(161, 247, 87, 0.12);
 
   // 侧边栏 Logo
-  --sidebar-logo-background: #f5f5f5;
-  --sidebar-logo-text-color: #303133;
+  --sidebar-logo-background: transparent;
+  --sidebar-logo-text-color: #263227;
+
+  // APP 设计 Token (Light Mode)
+  --app-bg-start: #f4f7f1;
+  --app-bg-end: #eef6ee;
+  --app-bg-deep: #e8f3ee;
+  --app-panel: rgba(255, 255, 255, 0.7);
+  --app-panel-strong: rgba(255, 255, 255, 0.86);
+  --app-border: rgba(153, 180, 142, 0.14);
+  --app-border-strong: rgba(149, 201, 113, 0.24);
+  --app-text-primary: #253126;
+  --app-text-soft: rgba(49, 61, 50, 0.86);
+  --app-text-mute: rgba(94, 109, 95, 0.68);
+  --app-glow-a: rgba(161, 247, 87, 0.22);
+  --app-glow-b: rgba(255, 232, 171, 0.45);
+  --app-shadow: 0 4px 12px rgba(115, 148, 104, 0.1);
+  --app-panel-shadow: 0 8px 32px rgba(115, 148, 104, 0.08);
+
+  // Element Plus 基础变量（浅色）
+  --el-bg-color: rgba(255, 255, 255, 0.7);
+  --el-bg-color-overlay: rgba(255, 255, 255, 0.86);
+  --el-bg-color-page: #eef6ee;
+  --el-border-color: rgba(153, 180, 142, 0.3);
+  --el-border-color-light: rgba(153, 180, 142, 0.2);
+  --el-text-color-primary: #253126;
+  --el-text-color-regular: rgba(49, 61, 50, 0.86);
+  --el-fill-color-light: rgba(161, 247, 87, 0.12);
 }
 
 // SCSS 变量映射（供组件使用）
@@ -44,24 +70,51 @@ $sidebar-logo-text-color: var(--sidebar-logo-text-color);
 // 3. 主题模式
 // ============================================
 
-// 浅色主题 - 深蓝色侧边栏
+// 浅色主题 - 深蓝色侧边栏 (保持兼容)
 html.sidebar-color-blue {
   --menu-background: #304156;
   --menu-text: #bfcbd9;
-  --menu-active-text: var(--el-menu-active-color);
+  --menu-active-text: var(--el-color-primary);
   --menu-hover: #263445;
   --sidebar-logo-background: #2d3748;
   --sidebar-logo-text-color: #fff;
 }
 
-// 暗黑主题
+// 暗黑主题 (Dark Mode - Stitch Purple Fantasy)
 html.dark {
-  --menu-background: var(--el-bg-color-overlay);
-  --menu-text: #fff;
-  --menu-active-text: var(--el-menu-active-color);
-  --menu-hover: rgb(0 0 0 / 20%);
-  --sidebar-logo-background: rgb(0 0 0 / 20%);
+  --menu-background: rgba(15, 26, 40, 0.78);
+  --menu-text: #eef6ff;
+  --menu-active-text: var(--el-color-primary);
+  --menu-hover: rgba(109, 71, 244, 0.22);
+  --sidebar-logo-background: transparent;
   --sidebar-logo-text-color: #fff;
+
+  // APP 设计 Token (Dark Mode)
+  --app-bg-start: #07111d;
+  --app-bg-end: #111c2a;
+  --app-bg-deep: #09111e;
+  --app-panel: rgba(15, 26, 40, 0.78);
+  --app-panel-strong: rgba(11, 20, 32, 0.92);
+  --app-border: rgba(103, 175, 242, 0.2);
+  --app-border-strong: rgba(103, 196, 255, 0.32);
+  --app-text-primary: #eef6ff;
+  --app-text-soft: rgba(202, 224, 248, 0.78);
+  --app-text-mute: rgba(159, 188, 221, 0.58);
+  --app-glow-a: rgba(72, 97, 255, 0.3);
+  --app-glow-b: rgba(145, 82, 255, 0.22);
+  --app-glow: 0 0 28px rgba(109, 71, 244, 0.2);
+  --app-shadow: 0 24px 48px rgba(2, 8, 19, 0.35);
+  --app-panel-shadow: 0 10px 36px rgba(2, 8, 19, 0.42), 0 0 0 1px rgba(123, 176, 255, 0.08), var(--app-glow);
+
+  // Element Plus 基础变量（暗色）
+  --el-bg-color: #0b1220;
+  --el-bg-color-overlay: rgba(15, 26, 40, 0.92);
+  --el-bg-color-page: #07111d;
+  --el-border-color: rgba(103, 175, 242, 0.15);
+  --el-border-color-light: rgba(103, 175, 242, 0.1);
+  --el-text-color-primary: #eef6ff;
+  --el-text-color-regular: rgba(202, 224, 248, 0.78);
+  --el-fill-color-light: rgba(109, 71, 244, 0.1);
 
   // Element Plus 表格选中行背景色
   .el-table {

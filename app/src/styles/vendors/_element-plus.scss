@@ -10,23 +10,23 @@
   $colors: (
     "primary": (
       // 默认主题色 - 修改此值时需同步修改 src/settings.ts 中的 themeColor
-      "base": #4080ff,
+      "base": #6d47f4,
     ),
     "success": (
-      "base": #23c343,
+      "base": #10b981,
     ),
     "warning": (
-      "base": #ff9a2e,
+      "base": #f59e0b,
     ),
     "danger": (
-      "base": #f76560,
+      "base": #ef4444,
     ),
     "info": (
       "base": #a9aeb8,
     ),
   ),
   $bg-color: (
-    "page": #f5f8fd,
+    "page": #f4f7f1,
   )
 );
 

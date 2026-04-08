@@ -4,9 +4,7 @@
     ref="menuRef"
     :default-active="activeMenuPath"
     :collapse="!appStore.sidebar.opened"
-    :background-color="menuThemeProps.backgroundColor"
-    :text-color="menuThemeProps.textColor"
-    :active-text-color="menuThemeProps.activeTextColor"
+    class="sidebar-menu-glass"
     :popper-effect="theme"
     :unique-opened="false"
     :collapse-transition="false"
@@ -29,11 +27,9 @@ import { useRoute } from "vue-router";
 import path from "path-browserify";
 import type { MenuInstance } from "element-plus";
 import type { RouteRecordRaw } from "vue-router";
-import { SidebarColor } from "@/enums/settings";
 import { useSettingsStore, useAppStore } from "@/store";
 import { isExternal } from "@/utils/index";
 import LayoutSidebarItem from "./LayoutSidebarItem.vue";
-import variables from "@/styles/variables.module.scss";
 
 const props = defineProps({
   data: {
@@ -62,21 +58,6 @@ const expandedMenuIndexes = ref<string[]>([]);
 
 // 获取主题
 const theme = computed(() => settingsStore.theme);
-
-// 获取浅色主题下的侧边栏配色方案
-const sidebarColorScheme = computed(() => settingsStore.sidebarColorScheme);
-
-// 菜单主题属性
-const menuThemeProps = computed(() => {
-  const isDarkOrClassicBlue =
-    theme.value === "dark" || sidebarColorScheme.value === SidebarColor.CLASSIC_BLUE;
-
-  return {
-    backgroundColor: isDarkOrClassicBlue ? variables["menu-background"] : undefined,
-    textColor: isDarkOrClassicBlue ? variables["menu-text"] : undefined,
-    activeTextColor: isDarkOrClassicBlue ? variables["menu-active-text"] : undefined,
-  };
-});
 
 // 计算当前激活的菜单项
 const activeMenuPath = computed((): string => {
@@ -243,3 +224,56 @@ onMounted(() => {
   updateParentMenuStyles();
 });
 </script>
+
+<style lang="scss" scoped>
+.sidebar-menu-glass {
+  background-color: transparent !important;
+  border: none;
+
+  :deep(.el-menu-item),
+  :deep(.el-sub-menu__title) {
+    position: relative;
+    margin: 3px 8px;
+    border-radius: 10px;
+    color: var(--menu-text);
+    transition: color 0.26s ease, background-color 0.26s ease, box-shadow 0.26s ease;
+
+    i {
+      color: inherit;
+    }
+
+    &:hover {
+      background-color: var(--menu-hover) !important;
+      box-shadow: 0 0 0 1px color-mix(in srgb, var(--el-color-primary) 26%, transparent);
+    }
+  }
+
+  :deep(.el-menu-item.is-active) {
+    color: var(--menu-active-text) !important;
+    background: linear-gradient(90deg, color-mix(in srgb, var(--el-color-primary) 24%, transparent), color-mix(in srgb, #8e6bff 20%, transparent)) !important;
+    box-shadow: 0 8px 18px color-mix(in srgb, var(--el-color-primary) 24%, transparent), inset 0 0 0 1px color-mix(in srgb, var(--el-color-primary) 48%, transparent);
+  }
+
+  :deep(.el-sub-menu.has-active-child > .el-sub-menu__title) {
+    color: var(--menu-active-text);
+    background: color-mix(in srgb, var(--el-color-primary) 14%, transparent);
+  }
+}
+
+:global(html.dark) .sidebar-menu-glass {
+  :deep(.el-menu-item),
+  :deep(.el-sub-menu__title) {
+    color: rgba(229, 240, 255, 0.92);
+
+    &:hover {
+      background: rgba(109, 71, 244, 0.18) !important;
+      box-shadow: 0 0 18px rgba(109, 71, 244, 0.2);
+    }
+  }
+
+  :deep(.el-menu-item.is-active) {
+    background: linear-gradient(90deg, rgba(109, 71, 244, 0.3), rgba(82, 130, 255, 0.22)) !important;
+    box-shadow: 0 10px 24px rgba(63, 101, 255, 0.18), inset 0 0 0 1px rgba(156, 197, 255, 0.3);
+  }
+}
+</style>

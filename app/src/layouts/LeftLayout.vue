@@ -46,8 +46,23 @@ const { showTagsView, showLogo, isSidebarOpen, routes } = useLayout();
     left: 0;
     z-index: 999;
     width: $sidebar-width;
-    background-color: $menu-background;
-    transition: width 0.28s;
+    background: var(--menu-background);
+    backdrop-filter: blur(20px) saturate(115%);
+    border-right: 1px solid var(--app-border);
+    box-shadow: var(--app-panel-shadow);
+    transition: width 0.28s, background-color 0.3s, box-shadow 0.3s;
+
+    &::before {
+      position: absolute;
+      top: -20%;
+      left: -20%;
+      z-index: -1;
+      width: 140%;
+      height: 140%;
+      content: "";
+      background: radial-gradient(circle at 22% 18%, var(--app-glow-a), transparent 52%);
+      opacity: 0.5;
+    }
 
     &--collapsed {
       width: $sidebar-width-collapsed;
@@ -56,7 +71,7 @@ const { showTagsView, showLogo, isSidebarOpen, routes } = useLayout();
     .layout-sidebar {
       position: relative;
       height: 100%;
-      background-color: var(--menu-background);
+      background-color: transparent;
       transition: width 0.28s;
 
       &.has-logo {
@@ -76,6 +91,7 @@ const { showTagsView, showLogo, isSidebarOpen, routes } = useLayout();
     height: 100%;
     margin-left: $sidebar-width;
     overflow-y: auto;
+    background-color: transparent;
     transition: margin-left 0.28s;
 
     &--collapsed {
@@ -86,8 +102,26 @@ const { showTagsView, showLogo, isSidebarOpen, routes } = useLayout();
       position: sticky;
       top: 0;
       z-index: 9;
+      background-color: var(--app-panel);
+      backdrop-filter: blur(14px) saturate(120%);
+      border-bottom: 1px solid var(--app-border);
+      box-shadow: 0 6px 16px rgba(11, 20, 32, 0.08);
       transition: width 0.28s;
     }
+  }
+}
+
+:global(html.dark) {
+  .layout__sidebar {
+    background: linear-gradient(180deg, rgba(8, 16, 28, 0.95) 0%, rgba(10, 18, 31, 0.9) 100%);
+    border-right: 1px solid rgba(103, 175, 242, 0.2);
+    box-shadow: inset -1px 0 0 rgba(106, 176, 252, 0.12), 10px 0 28px rgba(3, 10, 22, 0.45);
+  }
+
+  .layout__main .fixed-header {
+    background: rgba(11, 20, 32, 0.72);
+    border-bottom-color: rgba(103, 175, 242, 0.16);
+    box-shadow: 0 10px 24px rgba(2, 8, 20, 0.36);
   }
 }
 

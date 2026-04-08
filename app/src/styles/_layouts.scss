@@ -6,8 +6,75 @@
 // 通用容器
 // ============================================
 
+#app {
+  position: relative;
+  color: var(--app-text-primary);
+  background: linear-gradient(to bottom, var(--app-bg-start), var(--app-bg-end));
+  transition: background 0.3s ease, color 0.3s ease;
+
+  // 全局装饰光晕
+  &::before,
+  &::after {
+    position: fixed;
+    z-index: -1;
+    pointer-events: none;
+    content: "";
+    filter: blur(92px);
+  }
+
+  &::before {
+    top: -12%;
+    right: -12%;
+    width: 46%;
+    height: 44%;
+    background: var(--app-glow-a);
+    opacity: 0.8;
+  }
+
+  &::after {
+    bottom: -12%;
+    left: -10%;
+    width: 38%;
+    height: 36%;
+    background: var(--app-glow-b);
+    opacity: 0.72;
+  }
+}
+
+html.dark #app {
+  background:
+    radial-gradient(circle at 82% 12%, rgba(107, 84, 255, 0.16) 0%, transparent 34%),
+    radial-gradient(circle at 20% 86%, rgba(53, 138, 255, 0.12) 0%, transparent 32%),
+    linear-gradient(160deg, #07101b 0%, #0a1523 42%, #0d1828 100%);
+}
+
+html.dark #app::before {
+  top: -16%;
+  right: -6%;
+  width: 52%;
+  height: 52%;
+  background: radial-gradient(circle, rgba(111, 78, 255, 0.34) 0%, rgba(84, 109, 255, 0.14) 42%, transparent 70%);
+  opacity: 0.9;
+}
+
+html.dark #app::after {
+  bottom: -20%;
+  left: -12%;
+  width: 44%;
+  height: 42%;
+  background: radial-gradient(circle, rgba(38, 146, 255, 0.24) 0%, rgba(114, 83, 255, 0.08) 48%, transparent 76%);
+  opacity: 0.85;
+}
+
+.layout-container {
+  position: relative;
+  z-index: 1;
+  background: transparent !important;
+}
+
 .app-container {
   padding: 15px;
+  background: transparent;
 }
 
 // ============================================
@@ -23,12 +90,14 @@
 // ============================================
 
 .el-menu--popup {
-  --el-menu-bg-color: var(--menu-background);
+  --el-menu-bg-color: var(--app-panel-strong);
   --el-menu-text-color: var(--menu-text);
   --el-menu-active-color: var(--menu-active-text);
   --el-menu-hover-bg-color: var(--menu-hover);
 
-  background-color: var(--menu-background);
+  background-color: var(--app-panel-strong);
+  backdrop-filter: blur(10px);
+  box-shadow: var(--app-panel-shadow);
 
   .el-menu-item,
   .el-sub-menu__title {
@@ -54,13 +123,13 @@
 .layout-mix .layout__sidebar--left .el-menu {
   .el-menu-item {
     &:hover {
-      background-color: var(--el-fill-color-light) !important;
+      background-color: var(--menu-hover) !important;
     }
   }
 
   .el-sub-menu__title {
     &:hover {
-      background-color: var(--el-fill-color-light) !important;
+      background-color: var(--menu-hover) !important;
     }
   }
 }
@@ -88,6 +157,7 @@ html.sidebar-color-blue .layout-mix .layout__sidebar--left .el-menu {
   width: 100% !important;
   min-width: 0 !important;
   overflow: hidden;
+  background-color: transparent !important;
 }
 
 // 窄屏隐藏菜单文字，仅保留图标
@@ -119,11 +189,13 @@ html.sidebar-color-blue .layout-mix .layout__sidebar--left .el-menu {
 // ============================================
 
 .filter-section {
-  padding: 8px 12px 0;
-  margin-bottom: 8px;
-  background-color: var(--el-bg-color-overlay);
-  border: 1px solid var(--el-border-color-light);
-  border-radius: 4px;
+  padding: 16px;
+  margin-bottom: 12px;
+  background-color: var(--app-panel);
+  backdrop-filter: blur(12px);
+  border: 1px solid var(--app-border);
+  border-radius: var(--el-border-radius-base);
+  box-shadow: var(--app-panel-shadow);
 
   .search-buttons {
     margin-right: 0;
@@ -139,7 +211,13 @@ html.sidebar-color-blue .layout-mix .layout__sidebar--left .el-menu {
 // ============================================
 
 .table-section {
+  padding: 16px;
   margin-bottom: 12px;
+  background-color: var(--app-panel);
+  backdrop-filter: blur(12px);
+  border: 1px solid var(--app-border);
+  border-radius: var(--el-border-radius-base);
+  box-shadow: var(--app-panel-shadow);
 
   &__toolbar {
     display: flex;
@@ -160,5 +238,34 @@ html.sidebar-color-blue .layout-mix .layout__sidebar--left .el-menu {
   .el-pagination {
     justify-content: flex-end;
     margin-top: 12px;
+  }
+}
+
+html.dark {
+  .filter-section,
+  .table-section,
+  .el-card,
+  .el-dialog,
+  .el-drawer,
+  .el-popover {
+    background: rgba(15, 26, 40, 0.78);
+    border: 1px solid rgba(112, 176, 255, 0.16);
+    box-shadow: 0 14px 32px rgba(1, 8, 22, 0.42), 0 0 16px rgba(109, 71, 244, 0.12);
+    backdrop-filter: blur(14px);
+  }
+
+  .el-table {
+    --el-table-bg-color: rgba(15, 24, 38, 0.72);
+    --el-table-tr-bg-color: rgba(12, 21, 34, 0.62);
+    --el-table-header-bg-color: rgba(9, 18, 31, 0.88);
+    --el-table-border-color: rgba(103, 175, 242, 0.12);
+    --el-table-row-hover-bg-color: rgba(109, 71, 244, 0.12);
+    --el-table-text-color: rgba(226, 239, 255, 0.88);
+    --el-table-header-text-color: rgba(195, 218, 246, 0.82);
+  }
+
+  .el-table th.el-table__cell,
+  .el-table td.el-table__cell {
+    border-bottom-color: rgba(103, 175, 242, 0.1);
   }
 }

@@ -374,10 +374,31 @@ useContextMenuManager();
   width: 100%;
   height: $tags-view-height;
   padding: 0 15px;
-  border-top: 1px solid var(--el-border-color-light);
+  background-color: color-mix(in srgb, var(--app-panel) 86%, transparent);
+  backdrop-filter: blur(12px) saturate(118%);
+  border-bottom: 1px solid var(--app-border);
 
   .scroll-container {
     white-space: nowrap;
+  }
+
+  :deep(.el-tag) {
+    background-color: color-mix(in srgb, var(--app-panel) 86%, transparent);
+    border-color: var(--app-border);
+    color: var(--app-text-soft);
+    transition: all 0.3s;
+
+    &:hover {
+      border-color: var(--el-color-primary);
+      color: var(--el-color-primary);
+    }
+
+    &.el-tag--primary {
+      background: linear-gradient(90deg, var(--el-color-primary), #8a66ff);
+      border-color: color-mix(in srgb, var(--el-color-primary) 66%, white);
+      color: #fff;
+      box-shadow: 0 6px 14px color-mix(in srgb, var(--el-color-primary) 28%, transparent);
+    }
   }
 }
 .contextmenu {
@@ -387,9 +408,11 @@ useContextMenuManager();
   margin: 0;
   font-size: 12px;
   font-weight: 400;
-  color: var(--el-text-color-primary);
+  color: var(--app-text-primary);
   list-style-type: none;
-  background: var(--el-bg-color);
+  background: var(--app-panel-strong);
+  backdrop-filter: blur(10px);
+  border: 1px solid var(--app-border);
   border-radius: 4px;
   box-shadow: var(--el-box-shadow-light);
 
@@ -403,8 +426,14 @@ useContextMenuManager();
     transition: background-color 0.2s;
 
     &:hover {
-      background: var(--el-fill-color-light);
+      background: var(--menu-hover);
+      color: var(--el-color-primary);
     }
   }
+}
+
+:global(html.dark) .tags-container {
+  background: rgba(10, 18, 32, 0.6);
+  border-bottom-color: rgba(103, 175, 242, 0.14);
 }
 </style>
