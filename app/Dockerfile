@@ -3,14 +3,14 @@ RUN corepack enable && corepack prepare pnpm@latest --activate
 WORKDIR /project
 
 FROM base AS development
-COPY package.json ./
+COPY package.json pnpm-lock.yaml ./
 RUN pnpm install
 COPY . .
 EXPOSE 3000
 CMD ["pnpm", "run", "dev", "--host", "0.0.0.0"]
 
 FROM base AS build
-COPY package.json ./
+COPY package.json pnpm-lock.yaml ./
 RUN pnpm install --frozen-lockfile
 COPY . .
 RUN pnpm run build-only

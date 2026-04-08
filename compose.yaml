@@ -5,8 +5,10 @@ services:
       target: development
     ports:
       - "8083:3000"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     environment:
-      VITE_APP_API_URL: ${VITE_APP_API_URL:-http://host.docker.internal:8000/api}
+      VITE_APP_API_URL: ${VITE_APP_API_URL:-http://host.docker.internal:3925/api}
       VITE_APP_TITLE: ${VITE_APP_TITLE:-Blog Admin}
     volumes:
       - ./app:/project
