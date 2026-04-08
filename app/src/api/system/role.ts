@@ -19,7 +19,8 @@ const RoleAPI = {
       url: `${ROLE_BASE_URL}/index`,
       method: "get",
       params: { page: pageNum, per_page: pageSize, ...others },
-    });
+      __returnEnvelope: true,
+    } as any);
     return adaptPagination<RoleItem>(res);
   },
 

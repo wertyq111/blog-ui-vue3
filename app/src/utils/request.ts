@@ -47,6 +47,10 @@ http.interceptors.response.use(
     const { code, data, msg } = response.data;
 
     if (code === ApiCodeEnum.SUCCESS) {
+      // 分页请求需要完整信封（含 count 字段）
+      if ((response.config as any).__returnEnvelope) {
+        return response.data;
+      }
       return data;
     }
 

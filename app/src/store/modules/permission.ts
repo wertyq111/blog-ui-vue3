@@ -121,43 +121,52 @@ export const usePermissionStore = defineStore("permission", () => {
 /**
  * 标准化后端菜单数据
  *
- * 后端返回: {id, name, title, type, path, component, icon, sort, children}
- * 前端期望: {name, path, component, meta: {title, icon, hidden, keepAlive, alwaysShow}, children}
+ * 后端返回: {id, pid, title, type, path, component, icon, sort, hide, menuChildren}
+ * 前端期望: {name, path, component, meta: {title, icon, hidden}, children}
  *
- * 如果菜单项已有 meta 字段则保持原样；否则从顶层 title/icon 包装为 meta
+ * 关键映射:
+ * - menuChildren → children（后端 children 字段始终为空，实际子菜单在 menuChildren）
+ * - hide: 0/1 → meta.hidden: false/true
+ * - component: "" → "Layout"（顶层目录）
+ * - type: 1（按钮/权限）→ 过滤掉，不生成路由
  */
 function normalizeBackendMenus(menus: any[]): RouteItem[] {
   if (!Array.isArray(menus)) return [];
 
   return menus
     .filter((item) => {
-      // 过滤按钮类型（type=3），按钮不作为路由
-      return item.type !== 3;
+      // 过滤按钮/权限类型（type=1），按钮不作为路由
+      return item.type !== 1;
     })
     .map((item) => {
+      // 使用 menuChildren（后端实际的子菜单字段）
+      const children = item.menuChildren || item.children || [];
+
+      // 顶层目录（pid=0 且无 component 或 component 为空）应使用 Layout
+      const component =
+        !item.component || item.component === ""
+          ? item.pid === 0
+            ? "Layout"
+            : undefined
+          : item.component;
+
       const route: any = {
         path: item.path,
-        name: item.name,
-        component: item.component,
+        name: item.name || item.path?.replace(/\//g, "-").replace(/^-/, ""),
+        component,
         redirect: item.redirect,
       };
 
-      // 如果已有 meta，直接使用；否则从扁平字段包装
-      if (item.meta) {
-        route.meta = item.meta;
-      } else {
-        route.meta = {
-          title: item.title,
-          icon: item.icon,
-          hidden: item.hidden ?? false,
-          keepAlive: item.keepAlive ?? true,
-          alwaysShow: item.alwaysShow,
-        };
-      }
+      route.meta = {
+        title: item.title,
+        icon: item.icon,
+        hidden: item.hide === 1,
+        keepAlive: true,
+      };
 
       // 递归处理子菜单
-      if (item.children && item.children.length > 0) {
-        route.children = normalizeBackendMenus(item.children);
+      if (children.length > 0) {
+        route.children = normalizeBackendMenus(children);
       }
 
       return route as RouteItem;

@@ -1,29 +1,31 @@
 /**
  * 分页数据适配器
  *
- * 将 Laravel 分页格式转换为 vue3-element-admin 期望的格式
+ * 将后端分页响应信封转换为 vue3-element-admin 期望的格式
+ *
+ * 后端返回: { code: 0, data: T[], count: number, msg: "..." }
+ * 使用 request 的 __returnEnvelope 标记获取完整信封
  */
 
 import type { PageResult } from "@/types/api/common";
 
-/** Laravel 分页响应格式 */
-interface LaravelPagination<T = any> {
+/** 后端分页响应信封（含 count） */
+interface BackendEnvelope<T = any> {
+  code: number;
   data: T[];
-  current_page: number;
-  last_page: number;
-  per_page: number;
-  total: number;
+  count: number;
+  msg: string;
 }
 
 /**
- * 将 Laravel 分页响应转换为前端 PageResult 格式
+ * 将后端分页响应信封转换为前端 PageResult 格式
  *
- * Laravel: { data: T[], current_page, last_page, per_page, total }
- * 前端:    { list: T[], total }
+ * 后端:   { code: 0, data: T[], count: N, msg: "..." }
+ * 前端:   { list: T[], total: N }
  */
-export function adaptPagination<T>(response: LaravelPagination<T>): PageResult<T> {
+export function adaptPagination<T>(envelope: BackendEnvelope<T>): PageResult<T> {
   return {
-    list: response.data ?? [],
-    total: response.total ?? 0,
+    list: envelope.data ?? [],
+    total: envelope.count ?? 0,
   };
 }
