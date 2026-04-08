@@ -1,7 +1,6 @@
 import UserAPI from "@/api/system/user";
-import type { ISelectConfig } from "@/components/TableSelect/index.vue";
 
-const selectConfig: ISelectConfig = {
+const selectConfig: any = {
   pk: "id",
   width: "70%",
   placeholder: "请选择用户",
@@ -81,7 +80,7 @@ const selectConfig: ISelectConfig = {
       },
     },
   ],
-  indexAction(params) {
+  indexAction(params: any) {
     if ("createAt" in params) {
       const createAt = params.createAt as string[];
       if (createAt?.length > 1) {

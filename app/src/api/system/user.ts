@@ -7,7 +7,6 @@ import type {
   UserItem,
   UserProfileForm,
   OptionItem,
-  PageResult,
 } from "@/types/api";
 
 const USER_BASE_URL = "/users";
@@ -110,6 +109,17 @@ const UserAPI = {
     });
   },
 
+  /**
+   * 批量删除用户 (兼容旧版及CURD组件)
+   * @param ids 用户ID字符串，多个以英文逗号(,)分割
+   */
+  async deleteByIds(ids: string) {
+    const idList = ids.split(",");
+    for (const id of idList) {
+      await this.deleteById(id);
+    }
+  },
+
   /** 获取个人中心用户信息 */
   getProfile() {
     return this.getInfo();
@@ -132,6 +142,17 @@ const UserAPI = {
       url: `/role/getRoleList`,
       method: "get",
     });
+  },
+
+  /** 以下方法为后端暂不支持，保留为空实现以避免 Demo 报错 */
+  downloadTemplate() {
+    return Promise.resolve();
+  },
+  export(_queryParams: UserQueryParams) {
+    return Promise.resolve();
+  },
+  import(_file: File) {
+    return Promise.resolve({ code: "0", invalidCount: 0, validCount: 0, messageList: [] });
   },
 };
 
