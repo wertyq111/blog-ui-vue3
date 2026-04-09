@@ -102,3 +102,146 @@
     </el-dialog>
   </div>
 </template>
+
+<script setup lang="ts">
+import type { FormInstance, FormRules } from "element-plus";
+import PhotoCategoryAPI from "@/api/mini-program/photo-category";
+import type {
+  PhotoCategoryQueryParams,
+  PhotoCategoryItem,
+  PhotoCategoryForm,
+} from "@/types/api/photo-category";
+import { useTableSelection } from "@/composables";
+
+defineOptions({ name: "PhotoCategory" });
+
+const queryFormRef = ref<FormInstance>();
+const formRef = ref<FormInstance>();
+
+const queryParams = reactive<PhotoCategoryQueryParams>({
+  pageNum: 1,
+  pageSize: 10,
+  name: "",
+});
+
+const loading = ref(false);
+const total = ref(0);
+const dataList = ref<PhotoCategoryItem[]>([]);
+
+const { selectedIds, hasSelection, handleSelectionChange } = useTableSelection<PhotoCategoryItem>();
+
+const dialogState = reactive({
+  visible: false,
+  title: "",
+});
+
+const initialFormData: PhotoCategoryForm = {
+  name: "",
+  sort: 0,
+};
+
+const formData = reactive<PhotoCategoryForm>({ ...initialFormData });
+
+const rules: FormRules = {
+  name: [
+    { required: true, message: "请输入分类名称", trigger: "blur" },
+    { max: 20, message: "分类名称不能超过20个字符", trigger: "blur" },
+  ],
+};
+
+async function fetchList() {
+  loading.value = true;
+  try {
+    const data = await PhotoCategoryAPI.getPage(queryParams);
+    dataList.value = data.list;
+    total.value = data.total;
+  } finally {
+    loading.value = false;
+  }
+}
+
+function handleQuery() {
+  queryParams.pageNum = 1;
+  fetchList();
+}
+
+function handleResetQuery() {
+  queryFormRef.value?.resetFields();
+  handleQuery();
+}
+
+function handleCreateClick() {
+  dialogState.title = "新增相册分类";
+  Object.assign(formData, initialFormData);
+  dialogState.visible = true;
+}
+
+function handleEditClick(row: PhotoCategoryItem) {
+  dialogState.title = "编辑相册分类";
+  Object.assign(formData, {
+    id: row.id,
+    name: row.name,
+    sort: row.sort || 0,
+  });
+  dialogState.visible = true;
+}
+
+function closeDialog() {
+  dialogState.visible = false;
+  formRef.value?.resetFields();
+}
+
+async function handleSubmit() {
+  await formRef.value?.validate();
+  loading.value = true;
+  try {
+    if (formData.id) {
+      await PhotoCategoryAPI.update(formData.id, formData);
+      ElMessage.success("修改成功");
+    } else {
+      await PhotoCategoryAPI.create(formData);
+      ElMessage.success("新增成功");
+    }
+    closeDialog();
+    fetchList();
+  } finally {
+    loading.value = false;
+  }
+}
+
+function normalizeIds(id?: number) {
+  if (id) return [id];
+  return selectedIds.value.map((item) => Number(item)).filter((item) => Number.isFinite(item));
+}
+
+async function handleDelete(id?: number) {
+  const ids = normalizeIds(id);
+  if (!ids.length) {
+    ElMessage.warning("请勾选删除项");
+    return;
+  }
+  try {
+    await ElMessageBox.confirm("确认删除选中的项吗？", "警告", {
+      confirmButtonText: "确定",
+      cancelButtonText: "取消",
+      type: "warning",
+    });
+  } catch {
+    return;
+  }
+
+  loading.value = true;
+  try {
+    await Promise.all(ids.map((item) => PhotoCategoryAPI.deleteById(item)));
+    ElMessage.success("删除成功");
+    fetchList();
+  } finally {
+    loading.value = false;
+  }
+}
+
+onMounted(() => {
+  fetchList();
+});
+</script>
+

@@ -106,3 +106,147 @@
     </el-dialog>
   </div>
 </template>
+
+<script setup lang="ts">
+import type { FormInstance, FormRules } from "element-plus";
+import CategoryAPI from "@/api/mini-program/category";
+import type { CategoryQueryParams, CategoryItem, CategoryForm } from "@/types/api/category";
+import { useTableSelection } from "@/composables";
+
+defineOptions({ name: "NotebookCategory" });
+
+const queryFormRef = ref<FormInstance>();
+const formRef = ref<FormInstance>();
+
+const queryParams = reactive<CategoryQueryParams>({
+  pageNum: 1,
+  pageSize: 10,
+  name: "",
+});
+
+const loading = ref(false);
+const total = ref(0);
+const dataList = ref<CategoryItem[]>([]);
+
+const { selectedIds, hasSelection, handleSelectionChange } = useTableSelection<CategoryItem>();
+
+const dialogState = reactive({
+  visible: false,
+  title: "",
+});
+
+const initialFormData: CategoryForm = {
+  name: "",
+  description: "",
+  priority: 0,
+  type: 1,
+};
+
+const formData = reactive<CategoryForm>({ ...initialFormData });
+
+const rules: FormRules = {
+  name: [
+    { required: true, message: "请输入分类名称", trigger: "blur" },
+    { max: 20, message: "分类名称不能超过20个字符", trigger: "blur" },
+  ],
+  priority: [{ required: true, message: "请输入优先级", trigger: "change" }],
+};
+
+async function fetchList() {
+  loading.value = true;
+  try {
+    const data = await CategoryAPI.getPage(queryParams);
+    dataList.value = data.list;
+    total.value = data.total;
+  } finally {
+    loading.value = false;
+  }
+}
+
+function handleQuery() {
+  queryParams.pageNum = 1;
+  fetchList();
+}
+
+function handleResetQuery() {
+  queryFormRef.value?.resetFields();
+  handleQuery();
+}
+
+function handleCreateClick() {
+  dialogState.title = "新增笔记分类";
+  Object.assign(formData, initialFormData);
+  dialogState.visible = true;
+}
+
+function handleEditClick(row: CategoryItem) {
+  dialogState.title = "编辑笔记分类";
+  Object.assign(formData, {
+    id: row.id,
+    name: row.name,
+    description: row.description || "",
+    priority: row.priority || 0,
+    type: row.type,
+  });
+  dialogState.visible = true;
+}
+
+function closeDialog() {
+  dialogState.visible = false;
+  formRef.value?.resetFields();
+}
+
+async function handleSubmit() {
+  await formRef.value?.validate();
+  loading.value = true;
+  try {
+    if (formData.id) {
+      await CategoryAPI.update(formData.id, formData);
+      ElMessage.success("修改成功");
+    } else {
+      await CategoryAPI.create(formData);
+      ElMessage.success("新增成功");
+    }
+    closeDialog();
+    fetchList();
+  } finally {
+    loading.value = false;
+  }
+}
+
+function normalizeIds(id?: number) {
+  if (id) return [id];
+  return selectedIds.value.map((item) => Number(item)).filter((item) => Number.isFinite(item));
+}
+
+async function handleDelete(id?: number) {
+  const ids = normalizeIds(id);
+  if (!ids.length) {
+    ElMessage.warning("请勾选删除项");
+    return;
+  }
+  try {
+    await ElMessageBox.confirm("确认删除选中的项吗？", "警告", {
+      confirmButtonText: "确定",
+      cancelButtonText: "取消",
+      type: "warning",
+    });
+  } catch {
+    return;
+  }
+
+  loading.value = true;
+  try {
+    await Promise.all(ids.map((item) => CategoryAPI.deleteById(item)));
+    ElMessage.success("删除成功");
+    fetchList();
+  } finally {
+    loading.value = false;
+  }
+}
+
+onMounted(() => {
+  fetchList();
+});
+</script>
+

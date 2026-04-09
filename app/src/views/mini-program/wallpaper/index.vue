@@ -166,3 +166,180 @@
     </el-dialog>
   </div>
 </template>
+
+<script setup lang="ts">
+import type { FormInstance, FormRules } from "element-plus";
+import WallpaperAPI from "@/api/mini-program/wallpaper";
+import type { WallpaperClassifyItem } from "@/types/api/wallpaper-classify";
+import type { WallpaperQueryParams, WallpaperItem, WallpaperForm } from "@/types/api/wallpaper";
+import { useTableSelection } from "@/composables";
+
+defineOptions({ name: "Wallpaper" });
+
+const queryFormRef = ref<FormInstance>();
+const formRef = ref<FormInstance>();
+
+const queryParams = reactive<WallpaperQueryParams>({
+  pageNum: 1,
+  pageSize: 10,
+  classId: undefined,
+  nickname: "",
+});
+
+const loading = ref(false);
+const total = ref(0);
+const dataList = ref<WallpaperItem[]>([]);
+const classifyList = ref<WallpaperClassifyItem[]>([]);
+
+const { selectedIds, hasSelection, handleSelectionChange } = useTableSelection<WallpaperItem>();
+
+const dialogState = reactive({
+  visible: false,
+  title: "",
+});
+
+const initialFormData: WallpaperForm = {
+  classId: undefined as unknown as number,
+  url: "",
+  smallPicUrl: "",
+  nickname: "",
+  description: "",
+  score: 0,
+  tags: [],
+};
+
+const formData = reactive<WallpaperForm>({ ...initialFormData });
+const newTag = ref("");
+
+const rules: FormRules = {
+  classId: [{ required: true, message: "请选择分类", trigger: "change" }],
+  url: [{ required: true, message: "请输入图片URL", trigger: "blur" }],
+  nickname: [
+    { required: true, message: "请输入发布者", trigger: "blur" },
+    { max: 20, message: "发布者不能超过20个字符", trigger: "blur" },
+  ],
+};
+
+async function fetchClassifyList() {
+  classifyList.value = await WallpaperAPI.getClassifyList();
+}
+
+async function fetchList() {
+  loading.value = true;
+  try {
+    const data = await WallpaperAPI.getPage(queryParams);
+    dataList.value = data.list;
+    total.value = data.total;
+  } finally {
+    loading.value = false;
+  }
+}
+
+function handleQuery() {
+  queryParams.pageNum = 1;
+  fetchList();
+}
+
+function handleResetQuery() {
+  queryFormRef.value?.resetFields();
+  handleQuery();
+}
+
+function handleCreateClick() {
+  dialogState.title = "新增壁纸";
+  Object.assign(formData, initialFormData, { tags: [] });
+  newTag.value = "";
+  dialogState.visible = true;
+}
+
+function handleEditClick(row: WallpaperItem) {
+  dialogState.title = "编辑壁纸";
+  Object.assign(formData, {
+    id: row.id,
+    classId: row.classId,
+    url: row.url,
+    smallPicUrl: row.smallPicUrl || "",
+    nickname: row.nickname,
+    description: row.description || "",
+    score: row.score || 0,
+    tags: [...(row.tags || [])],
+  });
+  newTag.value = "";
+  dialogState.visible = true;
+}
+
+function closeDialog() {
+  dialogState.visible = false;
+  formRef.value?.resetFields();
+  newTag.value = "";
+}
+
+function handleAddTag() {
+  const value = newTag.value.trim();
+  if (!value) return;
+  if (!formData.tags) formData.tags = [];
+  if (!formData.tags.includes(value)) {
+    formData.tags.push(value);
+  }
+  newTag.value = "";
+}
+
+function handleRemoveTag(tag: string) {
+  formData.tags = (formData.tags || []).filter((item) => item !== tag);
+}
+
+async function handleSubmit() {
+  await formRef.value?.validate();
+  loading.value = true;
+  try {
+    if (formData.id) {
+      await WallpaperAPI.update(formData.id, formData);
+      ElMessage.success("修改成功");
+    } else {
+      await WallpaperAPI.create(formData);
+      ElMessage.success("新增成功");
+    }
+    closeDialog();
+    fetchList();
+  } finally {
+    loading.value = false;
+  }
+}
+
+function normalizeIds(id?: number) {
+  if (id) return [id];
+  return selectedIds.value.map((item) => Number(item)).filter((item) => Number.isFinite(item));
+}
+
+async function handleDelete(id?: number) {
+  const ids = normalizeIds(id);
+  if (!ids.length) {
+    ElMessage.warning("请勾选删除项");
+    return;
+  }
+  try {
+    await ElMessageBox.confirm("确认删除选中的项吗？", "警告", {
+      confirmButtonText: "确定",
+      cancelButtonText: "取消",
+      type: "warning",
+    });
+  } catch {
+    return;
+  }
+
+  loading.value = true;
+  try {
+    await Promise.all(ids.map((item) => WallpaperAPI.deleteById(item)));
+    ElMessage.success("删除成功");
+    fetchList();
+  } finally {
+    loading.value = false;
+  }
+}
+
+onMounted(async () => {
+  await fetchClassifyList();
+  fetchList();
+});
+</script>
+

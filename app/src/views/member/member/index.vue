@@ -229,3 +229,163 @@
     </el-dialog>
   </div>
 </template>
+
+<script setup lang="ts">
+import { onMounted, reactive, ref } from "vue";
+import { ElMessage, ElMessageBox, type FormInstance, type FormRules } from "element-plus";
+import MemberAPI from "@/api/member/member";
+import MemberLevelAPI from "@/api/member/member-level";
+import type { MemberItem, MemberQueryParams, MemberForm } from "@/types/api";
+import { useTableSelection } from "@/composables";
+
+defineOptions({
+  name: "Member",
+});
+
+const queryFormRef = ref<FormInstance>();
+const formRef = ref<FormInstance>();
+
+const queryParams = reactive<MemberQueryParams>({
+  pageNum: 1,
+  pageSize: 10,
+  nickname: "",
+  phone: "",
+  status: undefined,
+  memberLevel: undefined,
+});
+
+const loading = ref(false);
+const total = ref(0);
+const dataList = ref<MemberItem[]>([]);
+const levelOptions = ref<any[]>([]);
+
+const { selectedIds, hasSelection, handleSelectionChange } = useTableSelection<MemberItem>();
+
+const dialogState = reactive({
+  visible: false,
+  title: "",
+});
+
+const initialFormData: MemberForm = {
+  nickname: "",
+  realname: "",
+  gender: 0,
+  avatar: "",
+  birthday: undefined,
+  memberLevel: 0,
+  phone: "",
+  status: 1,
+};
+
+const formData = reactive<MemberForm>({ ...initialFormData });
+
+const rules: FormRules = {
+  nickname: [{ required: true, message: "请输入昵称", trigger: "blur" }],
+  memberLevel: [{ required: true, message: "请选择会员等级", trigger: "change" }],
+  phone: [{ pattern: /^1[3-9]\d{9}$/, message: "请输入正确的手机号码", trigger: "blur" }],
+};
+
+async function fetchList() {
+  loading.value = true;
+  try {
+    const data = await MemberAPI.getPage(queryParams);
+    dataList.value = data.list;
+    total.value = data.total;
+  } finally {
+    loading.value = false;
+  }
+}
+
+async function fetchLevelOptions() {
+  const options = await MemberLevelAPI.getOptions();
+  levelOptions.value = options;
+}
+
+function getLevelName(levelId: number) {
+  const level = levelOptions.value.find((item) => item.value === levelId);
+  return level ? level.label : "未知等级";
+}
+
+function handleQuery() {
+  queryParams.pageNum = 1;
+  fetchList();
+}
+
+function handleResetQuery() {
+  queryFormRef.value?.resetFields();
+  handleQuery();
+}
+
+function handleCreateClick() {
+  dialogState.title = "新增会员";
+  Object.assign(formData, initialFormData);
+  dialogState.visible = true;
+}
+
+function handleEditClick(row: MemberItem) {
+  dialogState.title = "编辑会员";
+  Object.assign(formData, {
+    id: row.id,
+    nickname: row.nickname,
+    realname: row.realname,
+    gender: row.gender,
+    avatar: row.avatar,
+    birthday: row.birthday,
+    memberLevel: row.memberLevel,
+    phone: row.phone,
+    status: row.status,
+  });
+  dialogState.visible = true;
+}
+
+function closeDialog() {
+  dialogState.visible = false;
+  formRef.value?.resetFields();
+}
+
+async function handleSubmit() {
+  await formRef.value?.validate();
+  loading.value = true;
+  try {
+    if (formData.id) {
+      await MemberAPI.update(formData.id, formData);
+      ElMessage.success("修改成功");
+    } else {
+      await MemberAPI.create(formData);
+      ElMessage.success("新增成功");
+    }
+    closeDialog();
+    fetchList();
+  } finally {
+    loading.value = false;
+  }
+}
+
+function handleDelete(id?: number) {
+  const ids = id ? [id] : (selectedIds.value as number[]);
+  if (!ids.length) {
+    ElMessage.warning("请勾选删除项");
+    return;
+  }
+
+  ElMessageBox.confirm("确认删除选中的会员吗？", "警告", {
+    confirmButtonText: "确定",
+    cancelButtonText: "取消",
+    type: "warning",
+  }).then(async () => {
+    loading.value = true;
+    try {
+      await MemberAPI.deleteByIds(ids);
+      ElMessage.success("删除成功");
+      fetchList();
+    } finally {
+      loading.value = false;
+    }
+  });
+}
+
+onMounted(() => {
+  fetchLevelOptions();
+  fetchList();
+});
+</script>

@@ -126,3 +126,151 @@
     </el-dialog>
   </div>
 </template>
+
+<script setup lang="ts">
+import type { FormInstance, FormRules } from "element-plus";
+import WallpaperClassifyAPI from "@/api/mini-program/wallpaper-classify";
+import type {
+  WallpaperClassifyItem,
+  WallpaperClassifyQueryParams,
+  WallpaperClassifyForm,
+} from "@/types/api/wallpaper-classify";
+import { useTableSelection } from "@/composables";
+
+defineOptions({ name: "WallpaperClassify" });
+
+const queryFormRef = ref<FormInstance>();
+const formRef = ref<FormInstance>();
+
+const queryParams = reactive<WallpaperClassifyQueryParams>({
+  pageNum: 1,
+  pageSize: 10,
+  name: "",
+});
+
+const loading = ref(false);
+const total = ref(0);
+const dataList = ref<WallpaperClassifyItem[]>([]);
+
+const { selectedIds, hasSelection, handleSelectionChange } = useTableSelection<WallpaperClassifyItem>();
+
+const dialogState = reactive({
+  visible: false,
+  title: "",
+});
+
+const initialFormData: WallpaperClassifyForm = {
+  name: "",
+  sort: 0,
+  picUrl: "",
+  select: false,
+};
+
+const formData = reactive<WallpaperClassifyForm>({ ...initialFormData });
+
+const rules: FormRules = {
+  name: [
+    { required: true, message: "请输入分类名称", trigger: "blur" },
+    { max: 20, message: "分类名称不能超过20个字符", trigger: "blur" },
+  ],
+  sort: [{ required: true, message: "请输入排序", trigger: "change" }],
+};
+
+async function fetchList() {
+  loading.value = true;
+  try {
+    const data = await WallpaperClassifyAPI.getPage(queryParams);
+    dataList.value = data.list;
+    total.value = data.total;
+  } finally {
+    loading.value = false;
+  }
+}
+
+function handleQuery() {
+  queryParams.pageNum = 1;
+  fetchList();
+}
+
+function handleResetQuery() {
+  queryFormRef.value?.resetFields();
+  handleQuery();
+}
+
+function handleCreateClick() {
+  dialogState.title = "新增壁纸分类";
+  Object.assign(formData, initialFormData);
+  dialogState.visible = true;
+}
+
+function handleEditClick(row: WallpaperClassifyItem) {
+  dialogState.title = "编辑壁纸分类";
+  Object.assign(formData, {
+    id: row.id,
+    name: row.name,
+    sort: row.sort,
+    picUrl: row.picUrl || "",
+    select: row.select,
+  });
+  dialogState.visible = true;
+}
+
+function closeDialog() {
+  dialogState.visible = false;
+  formRef.value?.resetFields();
+}
+
+async function handleSubmit() {
+  await formRef.value?.validate();
+  loading.value = true;
+  try {
+    if (formData.id) {
+      await WallpaperClassifyAPI.update(formData.id, formData);
+      ElMessage.success("修改成功");
+    } else {
+      await WallpaperClassifyAPI.create(formData);
+      ElMessage.success("新增成功");
+    }
+    closeDialog();
+    fetchList();
+  } finally {
+    loading.value = false;
+  }
+}
+
+function normalizeIds(id?: number) {
+  if (id) return [id];
+  return selectedIds.value.map((item) => Number(item)).filter((item) => Number.isFinite(item));
+}
+
+async function handleDelete(id?: number) {
+  const ids = normalizeIds(id);
+  if (!ids.length) {
+    ElMessage.warning("请勾选删除项");
+    return;
+  }
+  try {
+    await ElMessageBox.confirm("确认删除选中的项吗？", "警告", {
+      confirmButtonText: "确定",
+      cancelButtonText: "取消",
+      type: "warning",
+    });
+  } catch {
+    return;
+  }
+
+  loading.value = true;
+  try {
+    await Promise.all(ids.map((item) => WallpaperClassifyAPI.deleteById(item)));
+    ElMessage.success("删除成功");
+    fetchList();
+  } finally {
+    loading.value = false;
+  }
+}
+
+onMounted(() => {
+  fetchList();
+});
+</script>
+

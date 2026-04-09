@@ -110,3 +110,133 @@
     </el-dialog>
   </div>
 </template>
+
+<script setup lang="ts">
+import { onMounted, reactive, ref } from "vue";
+import { ElMessage, ElMessageBox, type FormInstance, type FormRules } from "element-plus";
+import MemberLevelAPI from "@/api/member/member-level";
+import type { MemberLevelItem, MemberLevelQueryParams, MemberLevelForm } from "@/types/api";
+import { useTableSelection } from "@/composables";
+
+defineOptions({
+  name: "MemberLevel",
+});
+
+const queryFormRef = ref<FormInstance>();
+const formRef = ref<FormInstance>();
+
+const queryParams = reactive<MemberLevelQueryParams>({
+  pageNum: 1,
+  pageSize: 10,
+  name: "",
+});
+
+const loading = ref(false);
+const total = ref(0);
+const dataList = ref<MemberLevelItem[]>([]);
+
+const { selectedIds, hasSelection, handleSelectionChange } = useTableSelection<MemberLevelItem>();
+
+const dialogState = reactive({
+  visible: false,
+  title: "",
+});
+
+const initialFormData: MemberLevelForm = {
+  name: "",
+  sort: 0,
+};
+
+const formData = reactive<MemberLevelForm>({ ...initialFormData });
+
+const rules: FormRules = {
+  name: [{ required: true, message: "请输入等级名称", trigger: "blur" }],
+};
+
+async function fetchList() {
+  loading.value = true;
+  try {
+    const data = await MemberLevelAPI.getPage(queryParams);
+    dataList.value = data.list;
+    total.value = data.total;
+  } finally {
+    loading.value = false;
+  }
+}
+
+function handleQuery() {
+  queryParams.pageNum = 1;
+  fetchList();
+}
+
+function handleResetQuery() {
+  queryFormRef.value?.resetFields();
+  handleQuery();
+}
+
+function handleCreateClick() {
+  dialogState.title = "新增会员等级";
+  Object.assign(formData, initialFormData);
+  dialogState.visible = true;
+}
+
+function handleEditClick(row: MemberLevelItem) {
+  dialogState.title = "编辑会员等级";
+  Object.assign(formData, {
+    id: row.id,
+    name: row.name,
+    sort: row.sort,
+  });
+  dialogState.visible = true;
+}
+
+function closeDialog() {
+  dialogState.visible = false;
+  formRef.value?.resetFields();
+}
+
+async function handleSubmit() {
+  await formRef.value?.validate();
+  loading.value = true;
+  try {
+    if (formData.id) {
+      await MemberLevelAPI.update(formData.id, formData);
+      ElMessage.success("修改成功");
+    } else {
+      await MemberLevelAPI.create(formData);
+      ElMessage.success("新增成功");
+    }
+    closeDialog();
+    fetchList();
+  } finally {
+    loading.value = false;
+  }
+}
+
+function handleDelete(id?: number) {
+  const ids = id ? [id] : (selectedIds.value as number[]);
+  if (!ids.length) {
+    ElMessage.warning("请勾选删除项");
+    return;
+  }
+
+  ElMessageBox.confirm("确认删除选中的项吗？", "警告", {
+    confirmButtonText: "确定",
+    cancelButtonText: "取消",
+    type: "warning",
+  }).then(async () => {
+    loading.value = true;
+    try {
+      await MemberLevelAPI.deleteByIds(ids);
+      ElMessage.success("删除成功");
+      fetchList();
+    } finally {
+      loading.value = false;
+    }
+  });
+}
+
+onMounted(() => {
+  fetchList();
+});
+</script>

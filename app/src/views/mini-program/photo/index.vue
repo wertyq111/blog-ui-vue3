@@ -129,3 +129,152 @@
     </el-dialog>
   </div>
 </template>
+
+<script setup lang="ts">
+import type { FormInstance, FormRules } from "element-plus";
+import PhotoAPI from "@/api/mini-program/photo";
+import type { PhotoCategoryItem } from "@/types/api/photo-category";
+import type { PhotoQueryParams, PhotoItem, PhotoForm } from "@/types/api/photo";
+import { useTableSelection } from "@/composables";
+
+defineOptions({ name: "Photo" });
+
+const queryFormRef = ref<FormInstance>();
+const formRef = ref<FormInstance>();
+
+const queryParams = reactive<PhotoQueryParams>({
+  pageNum: 1,
+  pageSize: 10,
+  categoryId: undefined,
+  remark: "",
+});
+
+const loading = ref(false);
+const total = ref(0);
+const dataList = ref<PhotoItem[]>([]);
+const categoryList = ref<PhotoCategoryItem[]>([]);
+
+const { selectedIds, hasSelection, handleSelectionChange } = useTableSelection<PhotoItem>();
+
+const dialogState = reactive({
+  visible: false,
+  title: "",
+});
+
+const initialFormData: PhotoForm = {
+  categoryId: undefined as unknown as number,
+  url: "",
+  smallPicUrl: "",
+  remark: "",
+};
+
+const formData = reactive<PhotoForm>({ ...initialFormData });
+
+const rules: FormRules = {
+  categoryId: [{ required: true, message: "请选择相册", trigger: "change" }],
+  url: [{ required: true, message: "请输入图片URL", trigger: "blur" }],
+};
+
+async function fetchCategoryList() {
+  categoryList.value = await PhotoAPI.getCategoryList();
+}
+
+async function fetchList() {
+  loading.value = true;
+  try {
+    const data = await PhotoAPI.getPage(queryParams);
+    dataList.value = data.list;
+    total.value = data.total;
+  } finally {
+    loading.value = false;
+  }
+}
+
+function handleQuery() {
+  queryParams.pageNum = 1;
+  fetchList();
+}
+
+function handleResetQuery() {
+  queryFormRef.value?.resetFields();
+  handleQuery();
+}
+
+function handleCreateClick() {
+  dialogState.title = "新增相册图片";
+  Object.assign(formData, initialFormData);
+  dialogState.visible = true;
+}
+
+function handleEditClick(row: PhotoItem) {
+  dialogState.title = "编辑相册图片";
+  Object.assign(formData, {
+    id: row.id,
+    categoryId: row.categoryId,
+    url: row.url,
+    smallPicUrl: row.smallPicUrl || "",
+    remark: row.remark || "",
+  });
+  dialogState.visible = true;
+}
+
+function closeDialog() {
+  dialogState.visible = false;
+  formRef.value?.resetFields();
+}
+
+async function handleSubmit() {
+  await formRef.value?.validate();
+  loading.value = true;
+  try {
+    if (formData.id) {
+      await PhotoAPI.update(formData.id, formData);
+      ElMessage.success("修改成功");
+    } else {
+      await PhotoAPI.create(formData);
+      ElMessage.success("新增成功");
+    }
+    closeDialog();
+    fetchList();
+  } finally {
+    loading.value = false;
+  }
+}
+
+function normalizeIds(id?: number) {
+  if (id) return [id];
+  return selectedIds.value.map((item) => Number(item)).filter((item) => Number.isFinite(item));
+}
+
+async function handleDelete(id?: number) {
+  const ids = normalizeIds(id);
+  if (!ids.length) {
+    ElMessage.warning("请勾选删除项");
+    return;
+  }
+  try {
+    await ElMessageBox.confirm("确认删除选中的项吗？", "警告", {
+      confirmButtonText: "确定",
+      cancelButtonText: "取消",
+      type: "warning",
+    });
+  } catch {
+    return;
+  }
+
+  loading.value = true;
+  try {
+    await PhotoAPI.batchDelete(ids);
+    ElMessage.success("删除成功");
+    fetchList();
+  } finally {
+    loading.value = false;
+  }
+}
+
+onMounted(async () => {
+  await fetchCategoryList();
+  fetchList();
+});
+</script>
+

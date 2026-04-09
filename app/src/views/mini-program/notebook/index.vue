@@ -134,3 +134,175 @@
     </el-dialog>
   </div>
 </template>
+
+<script setup lang="ts">
+import type { FormInstance, FormRules } from "element-plus";
+import ArticleAPI from "@/api/mini-program/article";
+import type { CategoryItem } from "@/types/api/category";
+import type { LabelItem } from "@/types/api/label";
+import type { ArticleQueryParams, ArticleItem, ArticleForm } from "@/types/api/article";
+import { useTableSelection } from "@/composables";
+
+defineOptions({ name: "NotebookArticle" });
+
+const queryFormRef = ref<FormInstance>();
+const formRef = ref<FormInstance>();
+
+const queryParams = reactive<ArticleQueryParams>({
+  pageNum: 1,
+  pageSize: 10,
+  title: "",
+  categoryId: undefined,
+});
+
+const loading = ref(false);
+const total = ref(0);
+const dataList = ref<ArticleItem[]>([]);
+const categories = ref<CategoryItem[]>([]);
+
+const { selectedIds, hasSelection, handleSelectionChange } = useTableSelection<ArticleItem>();
+
+const dialogState = reactive({
+  visible: false,
+  title: "",
+});
+
+const initialFormData: ArticleForm = {
+  categoryId: undefined as unknown as number,
+  labelId: undefined,
+  title: "",
+  content: "",
+  cover: "",
+  viewStatus: 1,
+  commentStatus: 1,
+  recommendStatus: 0,
+};
+
+const formData = reactive<ArticleForm>({ ...initialFormData });
+
+const currentLabels = computed<LabelItem[]>(() => {
+  return categories.value.find((item) => item.id === formData.categoryId)?.labels || [];
+});
+
+watch(
+  () => formData.categoryId,
+  () => {
+    if (!currentLabels.value.some((item) => item.id === formData.labelId)) {
+      formData.labelId = undefined;
+    }
+  }
+);
+
+const rules: FormRules = {
+  title: [{ required: true, message: "请输入标题", trigger: "blur" }],
+  categoryId: [{ required: true, message: "请选择分类", trigger: "change" }],
+  content: [{ required: true, message: "请输入内容", trigger: "blur" }],
+};
+
+async function fetchCategoryWithLabels() {
+  categories.value = await ArticleAPI.getCategoryWithLabels();
+}
+
+async function fetchList() {
+  loading.value = true;
+  try {
+    const data = await ArticleAPI.getPage(queryParams);
+    dataList.value = data.list;
+    total.value = data.total;
+  } finally {
+    loading.value = false;
+  }
+}
+
+function handleQuery() {
+  queryParams.pageNum = 1;
+  fetchList();
+}
+
+function handleResetQuery() {
+  queryFormRef.value?.resetFields();
+  handleQuery();
+}
+
+function handleCreateClick() {
+  dialogState.title = "新增笔记";
+  Object.assign(formData, initialFormData);
+  dialogState.visible = true;
+}
+
+function handleEditClick(row: ArticleItem) {
+  dialogState.title = "编辑笔记";
+  Object.assign(formData, {
+    id: row.id,
+    categoryId: row.categoryId,
+    labelId: row.labelId,
+    title: row.title,
+    content: row.content,
+    cover: row.cover || "",
+    viewStatus: row.viewStatus ?? 1,
+    commentStatus: row.commentStatus ?? 1,
+    recommendStatus: row.recommendStatus ?? 0,
+  });
+  dialogState.visible = true;
+}
+
+function closeDialog() {
+  dialogState.visible = false;
+  formRef.value?.resetFields();
+}
+
+async function handleSubmit() {
+  await formRef.value?.validate();
+  loading.value = true;
+  try {
+    if (formData.id) {
+      await ArticleAPI.update(formData.id, formData);
+      ElMessage.success("修改成功");
+    } else {
+      await ArticleAPI.create(formData);
+      ElMessage.success("新增成功");
+    }
+    closeDialog();
+    fetchList();
+  } finally {
+    loading.value = false;
+  }
+}
+
+function normalizeIds(id?: number) {
+  if (id) return [id];
+  return selectedIds.value.map((item) => Number(item)).filter((item) => Number.isFinite(item));
+}
+
+async function handleDelete(id?: number) {
+  const ids = normalizeIds(id);
+  if (!ids.length) {
+    ElMessage.warning("请勾选删除项");
+    return;
+  }
+  try {
+    await ElMessageBox.confirm("确认删除选中的项吗？", "警告", {
+      confirmButtonText: "确定",
+      cancelButtonText: "取消",
+      type: "warning",
+    });
+  } catch {
+    return;
+  }
+
+  loading.value = true;
+  try {
+    await Promise.all(ids.map((item) => ArticleAPI.deleteById(item)));
+    ElMessage.success("删除成功");
+    fetchList();
+  } finally {
+    loading.value = false;
+  }
+}
+
+onMounted(async () => {
+  await fetchCategoryWithLabels();
+  fetchList();
+});
+</script>
+
