@@ -225,3 +225,339 @@
     </el-drawer>
   </div>
 </template>
+
+<script setup lang="ts">
+import { useAppStore } from "@/store/modules/app";
+import { DeviceEnum } from "@/enums/settings";
+
+import RoleAPI from "@/api/system/role";
+import type { RoleItem, RoleForm, RoleQueryParams, BackendPermissionItem } from "@/types/api";
+
+defineOptions({
+  name: "Role",
+  inheritAttrs: false,
+});
+
+const appStore = useAppStore();
+
+const queryFormRef = ref();
+const roleFormRef = ref();
+const permTreeRef = ref();
+
+const loading = ref(false);
+const ids = ref<number[]>([]);
+const total = ref(0);
+
+const queryParams = reactive<RoleQueryParams>({
+  pageNum: 1,
+  pageSize: 10,
+});
+
+// 角色表格数据
+const roleList = ref<RoleItem[]>();
+// 菜单权限树
+const menuPermOptions = ref<OptionItem[]>([]);
+
+// 弹窗
+const dialogState = reactive({
+  title: "",
+  visible: false,
+});
+
+const drawerSize = computed(() => (appStore.device === DeviceEnum.DESKTOP ? "600px" : "90%"));
+
+// 角色表单
+const formData = reactive<RoleForm>({
+  sort: 1,
+  status: 1,
+});
+
+const rules = reactive({
+  name: [{ required: true, message: "请输入角色名称", trigger: "blur" }],
+  code: [{ required: true, message: "请输入角色编码", trigger: "blur" }],
+  status: [{ required: true, message: "请选择状态", trigger: "blur" }],
+});
+
+// 选中的角色
+interface CheckedRole {
+  id?: string;
+  name?: string;
+}
+const checkedRole = ref<CheckedRole>({});
+const assignPermDialogVisible = ref(false);
+
+const permKeywords = ref("");
+const isExpanded = ref(true);
+
+const parentChildLinked = ref(true);
+
+/**
+ * 将后端平铺权限列表构建为 el-tree 所需的树结构
+ */
+function buildPermTree(flatList: BackendPermissionItem[]): OptionItem[] {
+  const map = new Map<number, OptionItem & { _pid: number }>();
+  for (const item of flatList) {
+    map.set(item.id, {
+      value: item.id,
+      label: item.title,
+      children: [],
+      _pid: item.pid,
+    } as any);
+  }
+  const roots: OptionItem[] = [];
+  for (const node of map.values()) {
+    const pid = (node as any)._pid;
+    if (pid === 0 || !map.has(pid)) {
+      roots.push(node);
+    } else {
+      const parent = map.get(pid)!;
+      if (!parent.children) parent.children = [];
+      parent.children.push(node);
+    }
+  }
+  return roots;
+}
+
+/**
+ * 加载角色列表数据
+ */
+async function fetchList(): Promise<void> {
+  loading.value = true;
+  try {
+    const data = await RoleAPI.getPage(queryParams);
+    roleList.value = data.list;
+    total.value = data.total ?? 0;
+  } finally {
+    loading.value = false;
+  }
+}
+
+// 查询（重置页码后获取数据）
+function handleQuery(): void {
+  queryParams.pageNum = 1;
+  fetchList();
+}
+
+/**
+ * 重置查询条件
+ */
+function resetQuery(): void {
+  queryFormRef.value?.resetFields();
+  queryParams["filter[name]"] = undefined;
+}
+
+/**
+ * 重置查询条件并重新查询
+ */
+function handleResetQuery(): void {
+  resetQuery();
+  handleQuery();
+}
+
+// 行复选框选中
+function handleSelectionChange(selection: any): void {
+  ids.value = selection.map((item: any) => item.id);
+}
+
+/**
+ * 打开表单弹窗
+ */
+function openDialog(): void {
+  dialogState.visible = true;
+}
+
+/**
+ * 关闭表单弹窗
+ */
+function closeDialog(): void {
+  dialogState.visible = false;
+  resetForm();
+}
+
+/**
+ * 重置表单数据和验证状态
+ */
+function resetForm(): void {
+  roleFormRef.value?.resetFields();
+  roleFormRef.value?.clearValidate();
+
+  formData.id = undefined;
+  formData.sort = 1;
+  formData.status = 1;
+  formData.note = undefined;
+}
+
+/**
+ * 新增按钮点击事件
+ */
+function handleCreateClick(): void {
+  dialogState.title = "新增角色";
+  openDialog();
+}
+
+/**
+ * 编辑按钮点击事件（直接使用列表行数据）
+ */
+function handleEditClick(row: RoleItem): void {
+  dialogState.title = "修改角色";
+  Object.assign(formData, {
+    id: row.id,
+    name: row.name,
+    code: row.code,
+    sort: row.sort,
+    status: row.status,
+    note: row.note,
+  });
+  openDialog();
+}
+
+// 提交角色表单
+async function handleSubmit(): Promise<void> {
+  const valid = await roleFormRef.value?.validate().then(
+    () => true,
+    () => false
+  );
+  if (!valid) return;
+
+  loading.value = true;
+  try {
+    const roleId = formData.id;
+    if (roleId) {
+      await RoleAPI.update(roleId, formData);
+      ElMessage.success("修改成功");
+    } else {
+      await RoleAPI.create(formData);
+      ElMessage.success("新增成功");
+    }
+    closeDialog();
+    handleResetQuery();
+  } finally {
+    loading.value = false;
+  }
+}
+
+// 删除角色
+function handleDelete(roleId?: number): void {
+  const roleIds = roleId ? [roleId] : ids.value;
+  if (!roleIds.length) {
+    ElMessage.warning("请勾选删除项");
+    return;
+  }
+
+  ElMessageBox.confirm("确认删除已选中的数据项?", "警告", {
+    confirmButtonText: "确定",
+    cancelButtonText: "取消",
+    type: "warning",
+  }).then(
+    () => {
+      loading.value = true;
+      const promise =
+        roleIds.length === 1
+          ? RoleAPI.deleteById(String(roleIds[0]))
+          : RoleAPI.batchDelete(roleIds);
+      promise
+        .then(() => {
+          ElMessage.success("删除成功");
+          handleResetQuery();
+        })
+        .finally(() => (loading.value = false));
+    },
+    () => {
+      ElMessage.info("已取消删除");
+    }
+  );
+}
+
+/**
+ * 批量删除按钮点击事件
+ */
+function handleBatchDelete(): void {
+  handleDelete();
+}
+
+// 打开分配菜单权限弹窗
+async function handleAssignPermClick(row: RoleItem): Promise<void> {
+  const roleId = row.id;
+  if (roleId) {
+    assignPermDialogVisible.value = true;
+    loading.value = true;
+
+    checkedRole.value.id = roleId;
+    checkedRole.value.name = row.name;
+
+    try {
+      // 后端返回所有菜单的平铺列表，已勾选的 checked=true
+      const permList = await RoleAPI.getPermissionList(roleId);
+
+      // 构建树结构
+      menuPermOptions.value = buildPermTree(permList);
+
+      // 勾选已有权限
+      await nextTick();
+      const checkedIds = permList.filter((p) => p.checked).map((p) => p.id);
+      checkedIds.forEach((menuId) => permTreeRef.value?.setChecked(menuId, true, false));
+    } finally {
+      loading.value = false;
+    }
+  }
+}
+
+// 分配菜单权限提交
+function handleAssignPermSubmit() {
+  const roleId = checkedRole.value.id;
+  if (roleId) {
+    const checkedMenuIds: number[] = permTreeRef
+      .value!.getCheckedNodes(false, true)
+      .map((node: any) => node.value);
+
+    loading.value = true;
+    RoleAPI.savePermissions(roleId, checkedMenuIds)
+      .then(() => {
+        ElMessage.success("分配权限成功");
+        assignPermDialogVisible.value = false;
+        handleResetQuery();
+      })
+      .finally(() => {
+        loading.value = false;
+      });
+  }
+}
+
+// 展开/收缩 菜单权限树
+function togglePermTree(): void {
+  isExpanded.value = !isExpanded.value;
+  if (permTreeRef.value) {
+    Object.values(permTreeRef.value.store.nodesMap).forEach((node: any) => {
+      if (isExpanded.value) {
+        node.expand();
+      } else {
+        node.collapse();
+      }
+    });
+  }
+}
+
+// 权限筛选
+watch(permKeywords, (val) => {
+  permTreeRef.value!.filter(val);
+});
+
+function handlePermFilter(
+  value: string,
+  data: {
+    [key: string]: any;
+  }
+) {
+  if (!value) return true;
+  return data.label.includes(value);
+}
+
+// 父子菜单节点是否联动
+function handleParentChildLinkedChange(val: any): void {
+  parentChildLinked.value = val;
+}
+
+onMounted(() => {
+  handleQuery();
+});
+</script>

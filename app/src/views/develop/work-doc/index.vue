@@ -127,7 +127,7 @@
             </div>
 
             <el-table v-loading="loading" :data="dataList" border stripe>
-          <el-table-column label="标题" min-width="260" show-overflow-tooltip>
+          <el-table-column label="标题" min-width="260">
             <template #default="{ row }">
               <el-tag v-if="row.isPin === 1" size="small" type="danger" class="mr-1">置顶</el-tag>
               <el-link type="primary" class="font-medium" @click="handlePreview(row)">{{ row.title }}</el-link>

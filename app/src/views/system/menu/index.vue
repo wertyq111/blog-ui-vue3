@@ -208,3 +208,192 @@
     </el-drawer>
   </div>
 </template>
+
+<script setup lang="ts">
+import { useAppStore } from "@/store/modules/app";
+import { DeviceEnum } from "@/enums/settings";
+import MenuAPI from "@/api/system/menu";
+import type { MenuQueryParams, MenuForm, MenuItem } from "@/types/api";
+import type { FormInstance, FormRules } from "element-plus";
+
+defineOptions({
+  name: "SysMenu",
+  inheritAttrs: false,
+});
+
+const appStore = useAppStore();
+
+const queryFormRef = ref<FormInstance>();
+const menuFormRef = ref<FormInstance>();
+
+const queryParams = reactive<MenuQueryParams>({});
+
+const menuTableData = ref<MenuItem[]>([]);
+const menuOptions = ref<OptionItem[]>([]);
+const loading = ref(false);
+
+const dialogState = reactive({
+  title: "新增菜单",
+  visible: false,
+});
+
+const initialMenuFormData: MenuForm = {
+  id: undefined,
+  pid: 0,
+  hide: 0,
+  sort: 1,
+  type: 0,
+};
+const formData = ref<MenuForm>({ ...initialMenuFormData });
+const selectedMenuId = ref<number | undefined>();
+
+const drawerSize = computed(() => (appStore.device === DeviceEnum.DESKTOP ? "600px" : "90%"));
+
+const isExternalLink = computed(
+  () =>
+    formData.value.type === 0 &&
+    !!formData.value.path &&
+    /^https?:\/\//.test(formData.value.path)
+);
+
+const rules: FormRules = {
+  pid: [{ required: true, message: "请选择父级菜单", trigger: "blur" }],
+  title: [{ required: true, message: "请输入菜单名称", trigger: "blur" }],
+  type: [{ required: true, message: "请选择菜单类型", trigger: "blur" }],
+  hide: [{ required: true, message: "请选择显示状态", trigger: "change" }],
+};
+
+function fetchData(): void {
+  loading.value = true;
+  MenuAPI.getList(queryParams)
+    .then((data) => {
+      menuTableData.value = data;
+    })
+    .finally(() => {
+      loading.value = false;
+    });
+}
+
+function handleQuery(): void {
+  fetchData();
+}
+
+function handleResetQuery(): void {
+  queryFormRef.value?.resetFields();
+  queryParams["filter[title]"] = undefined;
+  fetchData();
+}
+
+function handleRowClick(row: MenuItem): void {
+  selectedMenuId.value = row.id;
+}
+
+function openDialog(parentId?: number, menuId?: number): void {
+  MenuAPI.getOptions(true)
+    .then((data) => {
+      menuOptions.value = [{ value: 0, label: "顶级菜单", children: data }];
+    })
+    .then(() => {
+      dialogState.visible = true;
+      if (menuId) {
+        dialogState.title = "编辑菜单";
+        MenuAPI.getFormData(menuId).then((data) => {
+          formData.value = data;
+        });
+      } else {
+        dialogState.title = "新增菜单";
+        formData.value = { ...initialMenuFormData };
+        if (parentId !== undefined) {
+          formData.value.pid = parentId;
+        }
+      }
+    });
+}
+
+function handleSubmit(): void {
+  menuFormRef.value?.validate((isValid) => {
+    if (isValid) {
+      const menuId = formData.value.id;
+      if (menuId) {
+        if (formData.value.pid === menuId) {
+          ElMessage.error("父级菜单不能为当前菜单");
+          return;
+        }
+        MenuAPI.update(menuId, formData.value).then(() => {
+          ElMessage.success("修改成功");
+          closeDialog();
+          fetchData();
+        });
+      } else {
+        MenuAPI.create(formData.value).then(() => {
+          ElMessage.success("新增成功");
+          closeDialog();
+          fetchData();
+        });
+      }
+    }
+  });
+}
+
+function handleDelete(menuId: number): void {
+  if (!menuId) {
+    ElMessage.warning("请勾选删除项");
+    return;
+  }
+
+  ElMessageBox.confirm("确认删除已选中的数据项?", "警告", {
+    confirmButtonText: "确定",
+    cancelButtonText: "取消",
+    type: "warning",
+  }).then(
+    () => {
+      loading.value = true;
+      MenuAPI.deleteById(menuId)
+        .then(() => {
+          ElMessage.success("删除成功");
+          fetchData();
+        })
+        .finally(() => {
+          loading.value = false;
+        });
+    },
+    () => {
+      ElMessage.info("已取消删除");
+    }
+  );
+}
+
+function closeDialog(): void {
+  dialogState.visible = false;
+  menuFormRef.value?.resetFields();
+  menuFormRef.value?.clearValidate();
+  formData.value = { ...initialMenuFormData };
+}
+
+onMounted(() => {
+  fetchData();
+});
+</script>
+
+<style scoped>
+.menu-name-cell {
+  display: inline-flex;
+  align-items: center;
+  max-width: 100%;
+}
+
+.menu-name-cell__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  min-width: 18px;
+  margin-right: 6px;
+}
+
+.menu-name-cell__text {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+</style>
