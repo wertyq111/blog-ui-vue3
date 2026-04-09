@@ -283,7 +283,15 @@ async function fetchPlatforms() {
 }
 
 async function fetchModels() {
-  reportModels.value = await WorkDailyAPI.getReportModels();
+  try {
+    const res = await WorkDailyAPI.getReportModels();
+    reportModels.value = res.models || [];
+    if (res.currentModel) {
+      reportConfig.model = res.currentModel;
+    }
+  } catch {
+    reportModels.value = [];
+  }
 }
 
 async function fetchList() {

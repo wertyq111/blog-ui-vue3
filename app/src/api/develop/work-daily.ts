@@ -107,7 +107,7 @@ const WorkDailyAPI = {
 
   /** 获取报告模板 */
   getReportModels() {
-    return request<any, string[]>({
+    return request<any, { models: string[]; currentModel: string }>({
       url: `${BASE_URL}/report/models`,
       method: "get",
     });
