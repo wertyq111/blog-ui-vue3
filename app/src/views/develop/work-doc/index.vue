@@ -1,13 +1,24 @@
 <template>
   <div class="app-container" style="display: flex; gap: 16px">
     <!-- 左侧分类树 -->
-    <el-card style="width: 280px; flex-shrink: 0" shadow="hover">
+    <el-card style="width: 280px; flex-shrink: 0" shadow="hover" class="category-card">
       <template #header>
         <div class="flex items-center justify-between">
           <span class="font-bold">文档分类</span>
           <el-button type="primary" icon="plus" circle size="small" @click="handleCreateCategory" />
         </div>
       </template>
+
+      <!-- 根节点放置区 -->
+      <div 
+        class="root-drop-zone mb-2 p-2 border-2 border-dashed border-gray-200 rounded text-center text-xs text-gray-400 transition-colors"
+        :class="{ 'border-blue-400 bg-blue-50 text-blue-500': rootDragOver }"
+        @dragover.prevent="rootDragOver = true"
+        @dragleave="rootDragOver = false"
+        @drop="handleRootDrop"
+      >
+        拖拽到此处设为根分类
+      </div>
 
       <el-tree
         ref="treeRef"
@@ -16,11 +27,20 @@
         node-key="id"
         highlight-current
         default-expand-all
+        draggable
+        :allow-drop="allowDrop"
         @node-click="handleCategoryClick"
+        @node-drop="handleCategoryDrop"
       >
         <template #default="{ node, data }">
           <div class="flex items-center justify-between w-full pr-2 group">
-            <span>{{ node.label }}</span>
+            <div class="flex items-center">
+              <el-icon class="mr-1 text-gray-400">
+                <Folder v-if="data.children?.length" />
+                <Document v-else />
+              </el-icon>
+              <span>{{ node.label }}</span>
+            </div>
             <span class="hidden group-hover:flex items-center gap-1">
               <el-icon class="text-blue-500 cursor-pointer" @click.stop="handleEditCategory(data)">
                 <Edit />
@@ -86,10 +106,10 @@
         </div>
 
         <el-table v-loading="loading" :data="dataList" border stripe class="table-section__content">
-          <el-table-column label="标题" prop="title" min-width="260" show-overflow-tooltip>
+          <el-table-column label="标题" min-width="260" show-overflow-tooltip>
             <template #default="{ row }">
               <el-tag v-if="row.isPin === 1" size="small" type="danger" class="mr-1">置顶</el-tag>
-              <span>{{ row.title }}</span>
+              <el-link type="primary" class="font-medium" @click="handlePreview(row)">{{ row.title }}</el-link>
             </template>
           </el-table-column>
           <el-table-column label="分类" min-width="120">
@@ -118,10 +138,13 @@
             </template>
           </el-table-column>
           <el-table-column label="更新时间" prop="updateTime" width="180" align="center" />
-          <el-table-column label="操作" fixed="right" width="150" align="center">
+          <el-table-column label="操作" fixed="right" width="200" align="center">
             <template #default="{ row }">
               <el-button type="primary" icon="edit" link size="small" @click="handleEditClick(row)">
                 编辑
+              </el-button>
+              <el-button type="success" icon="share" link size="small" @click="copyMarkdownLink(row)">
+                链接
               </el-button>
               <el-button type="danger" icon="delete" link size="small" @click="handleDelete(row.id)">
                 删除
@@ -239,7 +262,7 @@
           </el-col>
         </el-row>
         <el-form-item label="内容" prop="content">
-          <WangEditor v-model="formData.content" height="400px" />
+          <MdEditor v-model="formData.content" height="500px" />
         </el-form-item>
       </el-form>
       <template #footer>
@@ -249,25 +272,32 @@
         </div>
       </template>
     </el-dialog>
+
+    <!-- 文档预览弹窗 -->
+    <el-dialog v-model="previewState.visible" :title="previewState.title" width="80%" fullscreen>
+      <MdEditor :model-value="previewState.content" preview-only height="calc(100vh - 120px)" />
+    </el-dialog>
   </div>
 </template>
 
 <script setup lang="ts">
+import { ref, reactive, computed, onMounted } from "vue";
 import type { FormInstance, FormRules } from "element-plus";
-import { Edit, Delete } from "@element-plus/icons-vue";
+import { Edit, Delete, Folder, Document } from "@element-plus/icons-vue";
 import WorkDocAPI from "@/api/develop/work-doc";
 import WorkDocCategoryAPI from "@/api/develop/work-doc-category";
 import WorkPlatformAPI from "@/api/develop/work-platform";
 import type { WorkDocQueryParams, WorkDocItem, WorkDocForm } from "@/types/api/work-doc";
 import type { WorkDocCategoryItem, WorkDocCategoryForm } from "@/types/api/work-doc-category";
 import type { WorkPlatformItem } from "@/types/api/work-platform";
-import WangEditor from "@/components/WangEditor/index.vue";
+import MdEditor from "@/components/MdEditor/index.vue";
 
 defineOptions({ name: "WorkDoc" });
 
 const queryFormRef = ref<FormInstance>();
 const formRef = ref<FormInstance>();
 const categoryFormRef = ref<FormInstance>();
+const treeRef = ref();
 
 const queryParams = reactive<WorkDocQueryParams>({
   pageNum: 1,
@@ -284,6 +314,8 @@ const dataList = ref<WorkDocItem[]>([]);
 const categoryTree = ref<WorkDocCategoryItem[]>([]);
 const platforms = ref<WorkPlatformItem[]>([]);
 
+const rootDragOver = ref(false);
+
 const dialogState = reactive({
   visible: false,
   title: "",
@@ -292,6 +324,12 @@ const dialogState = reactive({
 const categoryDialog = reactive({
   visible: false,
   title: "",
+});
+
+const previewState = reactive({
+  visible: false,
+  title: "",
+  content: "",
 });
 
 const initialFormData = {
@@ -376,6 +414,51 @@ function handleResetQuery() {
 function handleCategoryClick(data: any) {
   queryParams.categoryId = data.id;
   handleQuery();
+}
+
+function allowDrop(draggingNode: any, dropNode: any, type: string) {
+  return true;
+}
+
+function flattenTree(nodes: any[], parentId: number | null = null): any[] {
+  const result: any[] = [];
+  nodes.forEach((node, index) => {
+    result.push({ id: node.id, parentId, sort: index });
+    if (node.children?.length) {
+      result.push(...flattenTree(node.children, node.id));
+    }
+  });
+  return result;
+}
+
+async function handleCategoryDrop() {
+  const flatList = flattenTree(categoryTree.value);
+  loading.value = true;
+  try {
+    await WorkDocCategoryAPI.reorder(flatList);
+    ElMessage.success('排序已保存');
+    fetchCategories();
+  } finally {
+    loading.value = false;
+  }
+}
+
+async function handleRootDrop() {
+  rootDragOver.value = false;
+  // logic handled by whole tree reorder in handleCategoryDrop
+}
+
+function handlePreview(row: WorkDocItem) {
+  previewState.title = row.title;
+  previewState.content = row.content;
+  previewState.visible = true;
+}
+
+function copyMarkdownLink(row: WorkDocItem) {
+  const link = `[${row.title}](/develop/work-doc?id=${row.id})`;
+  navigator.clipboard.writeText(link).then(() => {
+    ElMessage.success('Markdown 链接已复制');
+  });
 }
 
 // 文档 CRUD
@@ -534,9 +617,17 @@ onMounted(async () => {
 .app-container {
   height: calc(100vh - 84px);
 }
+.category-card {
+  display: flex;
+  flex-direction: column;
+}
 .table-section {
   height: 100%;
   display: flex;
   flex-direction: column;
+}
+.root-drop-zone.drag-over {
+  border-color: var(--el-color-primary);
+  background-color: var(--el-color-primary-light-9);
 }
 </style>

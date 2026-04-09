@@ -30,7 +30,20 @@
         </div>
       </div>
 
-      <el-table v-loading="loading" :data="dataList" border stripe class="table-section__content">
+      <el-table
+        ref="tableRef"
+        v-loading="loading"
+        :data="dataList"
+        border
+        stripe
+        row-key="id"
+        class="table-section__content"
+      >
+        <el-table-column width="50" align="center">
+          <template #default>
+            <el-icon class="drag-handle" style="cursor: move"><Rank /></el-icon>
+          </template>
+        </el-table-column>
         <el-table-column label="平台名称" prop="name" min-width="200" />
         <el-table-column label="排序" prop="sort" width="100" align="center" />
         <el-table-column label="状态" width="100" align="center">
@@ -87,14 +100,18 @@
 </template>
 
 <script setup lang="ts">
+import { ref, reactive, onMounted, nextTick } from "vue";
 import type { FormInstance, FormRules } from "element-plus";
 import WorkPlatformAPI from "@/api/develop/work-platform";
 import type { WorkPlatformQueryParams, WorkPlatformItem, WorkPlatformForm } from "@/types/api/work-platform";
+import { Rank } from "@element-plus/icons-vue";
+import { useDraggable } from "vue-draggable-plus";
 
 defineOptions({ name: "WorkPlatform" });
 
 const queryFormRef = ref<FormInstance>();
 const formRef = ref<FormInstance>();
+const tableRef = ref();
 
 const queryParams = reactive<WorkPlatformQueryParams>({
   pageNum: 1,
@@ -130,9 +147,41 @@ async function fetchList() {
     const data = await WorkPlatformAPI.getPage(queryParams);
     dataList.value = data.list;
     total.value = data.total;
+    nextTick(() => {
+      initDraggable();
+    });
   } finally {
     loading.value = false;
   }
+}
+
+function initDraggable() {
+  const el = tableRef.value?.$el.querySelector(".el-table__body-wrapper tbody");
+  if (!el) return;
+  useDraggable(el, dataList, {
+    handle: ".drag-handle",
+    onEnd: async (evt) => {
+      const { oldIndex, newIndex } = evt;
+      if (oldIndex === newIndex) return;
+      
+      const list = dataList.value.map((item, index) => ({
+        id: item.id,
+        sort: index,
+      }));
+      
+      loading.value = true;
+      try {
+        await WorkPlatformAPI.reorder(list);
+        ElMessage.success("排序已保存");
+        fetchList();
+      } catch (error) {
+        console.error("Reorder failed", error);
+        fetchList();
+      } finally {
+        loading.value = false;
+      }
+    },
+  });
 }
 
 function handleQuery() {
