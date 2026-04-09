@@ -1,6 +1,6 @@
 <template>
   <div class="navbar">
-    <div class="flex-y-center">
+    <div class="navbar__leading">
       <!-- 菜单折叠按钮 -->
       <Hamburger :is-active="isSidebarOpened" @toggle-click="toggleSideBar" />
       <!-- 面包屑导行栏-->
@@ -33,17 +33,28 @@ function toggleSideBar() {
   align-items: center;
   justify-content: space-between;
   height: var(--navbar-height);
-  padding: 0 20px 0 12px;
-  border-radius: var(--cyber-shell-radius);
+  min-width: 0;
+  padding: 0 18px 0 14px;
+  border-radius: 30px;
   background: var(--cyber-panel-shell);
   border: 1px solid var(--cyber-border-strong);
   box-shadow: var(--cyber-shadow);
   backdrop-filter: blur(18px);
 
+  &__leading {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    min-width: 0;
+    flex: 1;
+  }
+
   &__actions {
     display: flex;
     align-items: center;
     height: 100%;
+    gap: 4px;
+    padding-left: 12px;
     color: var(--el-text-color-regular);
 
     :deep(.toolbar-item) {
@@ -62,6 +73,28 @@ function toggleSideBar() {
         color: var(--cyber-header-tool-hover-text);
       }
     }
+  }
+
+  :deep(.el-breadcrumb) {
+    min-width: 0;
+    overflow: hidden;
+    white-space: nowrap;
+  }
+
+  :deep(.el-breadcrumb__item) {
+    display: inline-flex;
+    align-items: center;
+  }
+
+  :deep(.el-breadcrumb__inner),
+  :deep(.el-breadcrumb__inner a) {
+    color: var(--cyber-text-soft);
+    font-size: 13px;
+    font-weight: 500 !important;
+  }
+
+  :deep(.el-breadcrumb__separator) {
+    color: color-mix(in srgb, var(--cyber-text-soft) 52%, transparent);
   }
 }
 </style>

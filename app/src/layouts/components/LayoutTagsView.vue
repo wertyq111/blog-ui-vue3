@@ -375,25 +375,29 @@ useContextMenuManager();
   width: auto;
   height: var(--tags-view-height);
   margin: 0;
-  padding: 0 12px 0 16px;
+  padding: 0 10px 0 12px;
   box-sizing: border-box;
-  background: var(--cyber-panel-shell);
+  background: color-mix(in srgb, var(--cyber-panel) 58%, transparent);
   backdrop-filter: blur(18px);
-  border: 1px solid var(--cyber-border-strong);
-  border-radius: var(--cyber-shell-radius);
-  box-shadow: var(--cyber-shadow);
+  border: 1px solid color-mix(in srgb, var(--cyber-border-strong) 82%, transparent);
+  border-radius: 22px;
+  box-shadow: 0 14px 28px color-mix(in srgb, var(--cyber-primary) 5%, transparent);
 
   .scroll-container {
+    display: flex;
+    align-items: center;
+    height: 100%;
     white-space: nowrap;
   }
 
   .cyber-tag {
     border-radius: 999px;
-    height: 34px;
-    padding: 0 16px;
+    height: 28px;
+    padding: 0 13px;
     border: 1px solid color-mix(in srgb, var(--cyber-border) 85%, transparent);
     background: color-mix(in srgb, var(--cyber-panel-strong) 82%, transparent);
     color: var(--cyber-text-soft);
+    font-size: 13px;
     font-weight: 600;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 
@@ -407,7 +411,7 @@ useContextMenuManager();
       background: linear-gradient(135deg, rgba(220, 247, 185, 0.98) 0%, rgba(196, 239, 148, 0.94) 100%);
       border-color: rgba(204, 227, 168, 0.42);
       color: #5f8f18;
-      box-shadow: 0 8px 16px rgba(171, 192, 157, 0.08);
+      box-shadow: 0 8px 14px rgba(171, 192, 157, 0.08);
     }
 
     :deep(.el-tag__close) {
@@ -453,9 +457,9 @@ useContextMenuManager();
 
 :global(body.cyber-theme-dark) .tags-container,
 :global(html.sidebar-color-blue) .tags-container {
-  background: var(--cyber-panel-shell);
-  border-color: var(--cyber-border-strong);
-  box-shadow: var(--cyber-shadow);
+  background: color-mix(in srgb, var(--cyber-panel-shell) 84%, transparent);
+  border-color: color-mix(in srgb, var(--cyber-border-strong) 90%, transparent);
+  box-shadow: 0 16px 28px rgba(2, 8, 19, 0.18);
 
   .cyber-tag {
     background: rgba(255, 255, 255, 0.05);

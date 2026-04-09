@@ -45,8 +45,17 @@ function toggleClick() {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 0 15px;
+  height: 40px;
+  padding: 0 10px;
   cursor: pointer;
+  border-radius: 999px;
+  transition:
+    background-color 0.2s ease,
+    color 0.2s ease;
+
+  &:hover {
+    background: var(--cyber-header-tool-hover-bg);
+  }
 
   .hamburger {
     vertical-align: middle;

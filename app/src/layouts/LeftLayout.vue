@@ -53,15 +53,16 @@ const { showTagsView, showLogo, isSidebarOpen, routes } = useLayout();
     bottom: 0;
     left: 0;
     z-index: 1001;
-    width: $sidebar-width;
+    width: calc(#{$sidebar-width} + #{$layout-shell-gap});
     background: transparent;
     transition: width 0.28s;
 
     &--collapsed {
-      width: $sidebar-width-collapsed;
+      width: calc(#{$sidebar-width-collapsed} + #{$layout-shell-gap});
 
       .layout-sidebar {
-        padding-left: 10px;
+        padding-left: 12px;
+        padding-right: $layout-shell-gap;
 
         &__shell {
           padding-left: 8px;
@@ -75,16 +76,16 @@ const { showTagsView, showLogo, isSidebarOpen, routes } = useLayout();
       height: 100%;
       background-color: transparent;
       transition: width 0.28s;
-      padding: 18px 0 18px 18px;
+      padding: 20px $layout-shell-gap 20px 20px;
 
       &__shell {
         display: flex;
         flex-direction: column;
         height: 100%;
-        padding: 16px 12px 14px;
+        padding: 18px 14px 16px;
         background: var(--cyber-sidebar-shell);
         border: 1px solid var(--cyber-sidebar-border);
-        border-radius: var(--cyber-shell-radius);
+        border-radius: 30px;
         box-shadow:
           inset -1px 0 0 rgba(255, 255, 255, 0.04),
           20px 0 42px rgba(2, 7, 17, 0.24);
@@ -93,12 +94,12 @@ const { showTagsView, showLogo, isSidebarOpen, routes } = useLayout();
 
       &__brand {
         flex-shrink: 0;
-        padding: 0 4px 14px;
+        padding: 0 2px 16px;
 
         :deep(.logo) {
-          height: 56px;
+          height: 52px;
           border-bottom: none;
-          border-radius: 22px;
+          border-radius: 20px;
           background: color-mix(in srgb, var(--cyber-panel-strong) 80%, transparent);
           border: 1px solid color-mix(in srgb, var(--cyber-border) 75%, transparent);
           box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12);
@@ -145,13 +146,13 @@ const { showTagsView, showLogo, isSidebarOpen, routes } = useLayout();
   &__main {
     position: relative;
     height: 100%;
-    margin-left: $sidebar-width;
+    margin-left: calc(#{$sidebar-width} + #{$layout-shell-gap});
     overflow-y: auto;
     background-color: transparent;
     transition: margin-left 0.28s;
 
     &--collapsed {
-      margin-left: $sidebar-width-collapsed;
+      margin-left: calc(#{$sidebar-width-collapsed} + #{$layout-shell-gap});
     }
 
     .fixed-header {
@@ -170,7 +171,7 @@ const { showTagsView, showLogo, isSidebarOpen, routes } = useLayout();
 /* 移动端样式*/
 .mobile {
   .layout__sidebar {
-    width: $sidebar-width !important;
+    width: calc(#{$sidebar-width} + #{$layout-shell-gap}) !important;
     transition:
       transform 0.28s,
       width 0s;
@@ -178,7 +179,7 @@ const { showTagsView, showLogo, isSidebarOpen, routes } = useLayout();
 
   &.hideSidebar {
     .layout__sidebar {
-      transform: translateX(-$sidebar-width);
+      transform: translateX(calc(-1 * (#{$sidebar-width} + #{$layout-shell-gap})));
     }
   }
 
