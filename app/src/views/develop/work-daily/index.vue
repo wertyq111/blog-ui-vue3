@@ -1,154 +1,178 @@
 <template>
-  <div class="app-container">
-    <div class="filter-section">
-      <el-form ref="queryFormRef" :model="queryParams" :inline="true">
-        <el-form-item label="平台" prop="platformId">
-          <el-select v-model="queryParams.platformId" placeholder="全部" clearable style="width: 150px">
-            <el-option v-for="item in platforms" :key="item.id" :label="item.name" :value="item.id" />
-          </el-select>
-        </el-form-item>
-        <el-form-item label="日期范围">
-          <el-date-picker
-            v-model="dateRange"
-            type="daterange"
-            range-separator="至"
-            start-placeholder="开始日期"
-            end-placeholder="结束日期"
-            value-format="YYYY-MM-DD"
-            style="width: 240px"
-          />
-        </el-form-item>
-        <el-form-item label="内容" prop="content">
-          <el-input
-            v-model="queryParams.content"
-            placeholder="请输入内容"
-            clearable
-            @keyup.enter="handleQuery"
-          />
-        </el-form-item>
-        <el-form-item class="search-buttons">
-          <el-button type="primary" icon="search" @click="handleQuery">搜索</el-button>
-          <el-button icon="refresh" @click="handleResetQuery">重置</el-button>
-        </el-form-item>
-      </el-form>
-    </div>
-
-    <!-- 报表导出区域 -->
-    <el-card shadow="never" class="mb-4">
-      <el-row :gutter="16" align="middle">
-        <el-col :span="4">
-          <el-select v-model="reportConfig.type" placeholder="报表类型">
-            <el-option label="月报" value="month" />
-            <el-option label="周报" value="week" />
-            <el-option label="年报" value="year" />
-          </el-select>
-        </el-col>
-        <el-col :span="6">
-          <el-date-picker
-            v-if="reportConfig.type === 'month'"
-            v-model="reportConfig.month"
-            type="month"
-            placeholder="选择月份"
-            value-format="YYYY-MM"
-            style="width: 100%"
-          />
-          <el-date-picker
-            v-else-if="reportConfig.type === 'week'"
-            v-model="reportConfig.weekRange"
-            type="daterange"
-            range-separator="至"
-            start-placeholder="开始"
-            end-placeholder="结束"
-            value-format="YYYY-MM-DD"
-            style="width: 100%"
-          />
-          <el-date-picker
-            v-else
-            v-model="reportConfig.year"
-            type="year"
-            placeholder="选择年份"
-            value-format="YYYY"
-            style="width: 100%"
-          />
-        </el-col>
-        <el-col :span="4">
-          <el-select v-model="reportConfig.model" placeholder="AI模型(可选)" clearable style="width: 100%">
-            <el-option v-for="m in reportModels" :key="m" :label="m" :value="m" />
-          </el-select>
-        </el-col>
-        <el-col :span="10">
-          <el-button type="primary" :loading="exporting" @click="handleExport">导出报表</el-button>
-          <el-upload
-            action="#"
-            :auto-upload="false"
-            :show-file-list="false"
-            accept=".md"
-            class="inline-block ml-3"
-            @change="handleImport"
-          >
-            <el-button type="success">导入MD</el-button>
-          </el-upload>
-        </el-col>
-      </el-row>
-    </el-card>
-
-    <el-card shadow="hover" class="table-section">
-      <div class="table-section__toolbar">
-        <div class="table-section__toolbar--actions">
-          <el-button type="success" icon="plus" @click="handleCreateClick">新增</el-button>
+  <div class="develop-page">
+    <el-card shadow="never" class="develop-shell">
+      <section class="develop-hero">
+        <div class="develop-hero__copy">
+          <div class="develop-hero__eyebrow">Develop Workspace</div>
+          <div class="develop-hero__title">工作日常</div>
+          <div class="develop-hero__desc">按日期记录每个平台的工作内容，支持报表导出和 Markdown 导入。</div>
         </div>
-      </div>
+      </section>
 
-      <el-table v-loading="loading" :data="dataList" border stripe class="table-section__content">
-        <el-table-column label="ID" prop="id" width="80" align="center" />
-        <el-table-column label="日期" prop="logDate" width="120" align="center" />
-        <el-table-column label="内容" min-width="400">
-          <template #default="{ row }">
-            <el-popover trigger="hover" :width="600" placement="right">
-              <template #reference>
-                <div class="cursor-pointer">
-                  <div v-if="typeof row.content === 'object' && row.content.platforms" class="daily-summary">
-                    <div v-for="p in row.content.platforms" :key="p.platform_id" class="mb-1 truncate">
-                      <el-tag size="small" type="info" class="mr-1">【{{ p.platform_name }}】</el-tag>
-                      <span class="text-gray-500">{{ stripHtml(p.content).substring(0, 100) }}...</span>
+      <section class="develop-panel develop-panel--filter">
+        <el-form ref="queryFormRef" :model="queryParams" :inline="true" class="develop-form">
+          <el-form-item label="平台" prop="platformId">
+            <el-select v-model="queryParams.platformId" placeholder="全部" clearable style="width: 150px">
+              <el-option v-for="item in platforms" :key="item.id" :label="item.name" :value="item.id" />
+            </el-select>
+          </el-form-item>
+          <el-form-item label="日期范围">
+            <el-date-picker
+              v-model="dateRange"
+              type="daterange"
+              range-separator="至"
+              start-placeholder="开始日期"
+              end-placeholder="结束日期"
+              value-format="YYYY-MM-DD"
+              style="width: 240px"
+            />
+          </el-form-item>
+          <el-form-item label="内容" prop="content">
+            <el-input
+              v-model="queryParams.content"
+              placeholder="请输入内容"
+              clearable
+              @keyup.enter="handleQuery"
+            />
+          </el-form-item>
+          <el-form-item class="search-buttons">
+            <el-button type="primary" icon="search" @click="handleQuery">搜索</el-button>
+            <el-button icon="refresh" @click="handleResetQuery">重置</el-button>
+          </el-form-item>
+        </el-form>
+      </section>
+
+      <!-- 报表导出区域 -->
+      <section class="daily-panel daily-panel--accent mb-5">
+        <div class="daily-panel__head">
+          <div class="daily-panel__title">数据报表与导入</div>
+          <div class="daily-panel__desc">快速生成阶段性工作汇报或从外部 Markdown 文件导入记录。</div>
+        </div>
+        <el-row :gutter="16" align="middle" class="daily-form--report">
+          <el-col :span="4">
+            <el-select v-model="reportConfig.type" placeholder="报表类型">
+              <el-option label="月报" value="month" />
+              <el-option label="周报" value="week" />
+              <el-option label="年报" value="year" />
+            </el-select>
+          </el-col>
+          <el-col :span="6">
+            <el-date-picker
+              v-if="reportConfig.type === 'month'"
+              v-model="reportConfig.month"
+              type="month"
+              placeholder="选择月份"
+              value-format="YYYY-MM"
+              style="width: 100%"
+            />
+            <el-date-picker
+              v-else-if="reportConfig.type === 'week'"
+              v-model="reportConfig.weekRange"
+              type="daterange"
+              range-separator="至"
+              start-placeholder="开始"
+              end-placeholder="结束"
+              value-format="YYYY-MM-DD"
+              style="width: 100%"
+            />
+            <el-date-picker
+              v-else
+              v-model="reportConfig.year"
+              type="year"
+              placeholder="选择年份"
+              value-format="YYYY"
+              style="width: 100%"
+            />
+          </el-col>
+          <el-col :span="4">
+            <el-select v-model="reportConfig.model" placeholder="AI模型(可选)" clearable style="width: 100%">
+              <el-option v-for="m in reportModels" :key="m" :label="m" :value="m" />
+            </el-select>
+          </el-col>
+          <el-col :span="10">
+            <el-button type="primary" :loading="exporting" @click="handleExport">导出报表</el-button>
+            <el-upload
+              action="#"
+              :auto-upload="false"
+              :show-file-list="false"
+              accept=".md"
+              class="inline-block ml-3"
+              @change="handleImport"
+            >
+              <el-button type="success">导入MD</el-button>
+            </el-upload>
+          </el-col>
+        </el-row>
+      </section>
+
+      <section class="develop-table-shell">
+        <div class="develop-table-shell__header">
+          <div>
+            <div class="develop-table-shell__title">日常记录列表</div>
+            <div class="develop-table-shell__desc">记录每日开发进度，鼠标悬停内容可快速预览详细 Markdown。</div>
+          </div>
+          <div class="develop-table-shell__actions">
+            <el-button type="success" icon="plus" @click="handleCreateClick">新增记录</el-button>
+          </div>
+        </div>
+
+        <el-table v-loading="loading" :data="dataList" border stripe class="develop-table">
+          <el-table-column label="ID" prop="id" width="80" align="center" />
+          <el-table-column label="日期" prop="logDate" width="120" align="center" />
+          <el-table-column label="内容" min-width="400">
+            <template #default="{ row }">
+              <div v-if="typeof row.content === 'object' && row.content.platforms" class="daily-summary">
+                <div v-for="p in row.content.platforms" :key="p.platform_id" class="mb-1">
+                  <el-popover trigger="hover" :width="520" placement="top" popper-class="work-daily-preview-popper">
+                    <template #reference>
+                      <div class="cursor-pointer truncate daily-content-brief">
+                        <span class="daily-content-item__platform">【{{ p.platform_name }}】</span>
+                        <span class="text-gray-500">{{ stripHtml(p.content).substring(0, 100) }}...</span>
+                      </div>
+                    </template>
+                    <div class="max-h-[400px] overflow-y-auto daily-markdown-preview">
+                      <MdEditor :model-value="p.content || ''" preview-only height="auto" />
                     </div>
-                  </div>
-                  <div v-else class="text-gray-500 truncate">
-                    {{ stripHtml(String(row.content)).substring(0, 200) }}...
-                  </div>
+                  </el-popover>
                 </div>
-              </template>
-              <div class="max-h-[500px] overflow-y-auto">
-                <MdEditor :model-value="getFullContent(row)" preview-only height="auto" />
               </div>
-            </el-popover>
-          </template>
-        </el-table-column>
-        <el-table-column label="创建时间" prop="createTime" width="180" align="center" />
-        <el-table-column label="操作" fixed="right" width="150" align="center">
-          <template #default="{ row }">
-            <el-button type="primary" icon="edit" link size="small" @click="handleEditClick(row)">
-              编辑
-            </el-button>
-            <el-button type="danger" icon="delete" link size="small" @click="handleDelete(row.id)">
-              删除
-            </el-button>
-          </template>
-        </el-table-column>
-      </el-table>
+              <div v-else class="text-gray-500 truncate daily-content-brief">
+                {{ stripHtml(String(row.content)).substring(0, 200) }}...
+              </div>
+            </template>
+          </el-table-column>
+          <el-table-column label="创建时间" prop="createTime" width="180" align="center" />
+          <el-table-column label="操作" fixed="right" width="150" align="center">
+            <template #default="{ row }">
+              <el-button type="primary" icon="edit" link size="small" @click="handleEditClick(row)">
+                编辑
+              </el-button>
+              <el-button type="danger" icon="delete" link size="small" @click="handleDelete(row.id)">
+                删除
+              </el-button>
+            </template>
+          </el-table-column>
+        </el-table>
 
-      <pagination
-        v-if="total > 0"
-        v-model:total="total"
-        v-model:page="queryParams.pageNum"
-        v-model:limit="queryParams.pageSize"
-        @pagination="fetchList"
-      />
+        <pagination
+          v-if="total > 0"
+          v-model:total="total"
+          v-model:page="queryParams.pageNum"
+          v-model:limit="queryParams.pageSize"
+          @pagination="fetchList"
+        />
+      </section>
     </el-card>
 
     <!-- 新增/编辑弹窗 -->
-    <el-dialog v-model="dialogState.visible" :title="dialogState.title" width="1000px" @close="closeDialog">
-      <el-form ref="formRef" :model="formData" :rules="rules" label-width="100px">
+    <el-dialog
+      v-model="dialogState.visible"
+      :title="dialogState.title"
+      width="1000px"
+      class="develop-dialog"
+      @close="closeDialog"
+    >
+      <el-form ref="formRef" :model="formData" :rules="rules" label-width="100px" class="develop-dialog-form">
         <el-row :gutter="20">
           <el-col :span="12">
             <el-form-item label="日期" prop="logDate">
@@ -189,7 +213,7 @@
         </div>
       </el-form>
       <template #footer>
-        <div class="dialog-footer">
+        <div class="develop-dialog-footer">
           <el-button type="primary" @click="handleSubmit">确 定</el-button>
           <el-button @click="closeDialog">取 消</el-button>
         </div>
@@ -459,10 +483,76 @@ onMounted(async () => {
 });
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
+.daily-panel {
+  position: relative;
+  overflow: hidden;
+  border-radius: 24px;
+  padding: 22px 22px 14px;
+  background:
+    radial-gradient(circle at top right, rgba(172, 236, 109, 0.12), transparent 26%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.84) 0%, rgba(246, 251, 241, 0.74) 100%);
+  border: 1px solid rgba(255, 255, 255, 0.56);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.88),
+    0 24px 46px rgba(160, 186, 145, 0.12);
+}
+
+.daily-panel--accent {
+  background:
+    radial-gradient(circle at top right, rgba(172, 236, 109, 0.18), transparent 28%),
+    radial-gradient(circle at bottom left, rgba(170, 216, 255, 0.14), transparent 30%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.9) 0%, rgba(244, 250, 238, 0.8) 100%);
+}
+
+.daily-panel__head {
+  margin-bottom: 16px;
+}
+
+.daily-panel__title {
+  color: #2a3529;
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.daily-panel__desc {
+  color: rgba(88, 102, 86, 0.82);
+  font-size: 12px;
+  margin-top: 4px;
+}
+
+.daily-content-item__platform {
+  color: var(--el-color-primary);
+  font-weight: 700;
+}
+
+.daily-content-brief {
+  color: var(--el-text-color-secondary);
+  font-size: 13px;
+  line-height: 1.6;
+}
+
 .platform-editor {
   border: 1px solid var(--el-border-color-lighter);
-  padding: 12px;
-  border-radius: 4px;
+  padding: 16px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.4);
+}
+
+// 暗黑模式
+html.dark {
+  .daily-panel {
+    background: var(--el-bg-color-overlay);
+    border: 1px solid var(--el-border-color-lighter);
+  }
+  .daily-panel__title {
+    color: var(--el-text-color-primary);
+  }
+  .daily-panel__desc {
+    color: var(--el-text-color-secondary);
+  }
+  .platform-editor {
+    background: var(--el-fill-color-light);
+  }
 }
 </style>

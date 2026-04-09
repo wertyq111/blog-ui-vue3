@@ -1,0 +1,178 @@
+/**
+ * 共享开发管理样式
+ */
+
+.develop-page {
+  padding: 20px;
+  background-color: var(--el-bg-color-page);
+  min-height: calc(100vh - 84px);
+
+  .develop-shell {
+    border-radius: 28px;
+    overflow: hidden;
+    border: none;
+    background: transparent;
+
+    & > .el-card__body {
+      padding: 24px;
+    }
+  }
+}
+
+.develop-hero {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 18px;
+  margin-bottom: 24px;
+  padding: 2px 4px 0;
+}
+
+.develop-hero__copy {
+  max-width: 720px;
+}
+
+.develop-hero__eyebrow {
+  margin-bottom: 8px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #7aa126;
+}
+
+.develop-hero__title {
+  font-size: 28px;
+  font-weight: 700;
+  line-height: 1.2;
+  color: #2a3529;
+}
+
+.develop-hero__desc {
+  margin-top: 10px;
+  font-size: 14px;
+  line-height: 1.7;
+  color: rgba(88, 102, 86, 0.82);
+}
+
+.develop-panel,
+.develop-table-shell {
+  border-radius: 24px;
+  border: 1px solid rgba(255, 255, 255, 0.56);
+  background:
+    radial-gradient(circle at top right, rgba(172, 236, 109, 0.12), transparent 26%),
+    radial-gradient(circle at bottom left, rgba(170, 216, 255, 0.12), transparent 34%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.84) 0%, rgba(246, 251, 241, 0.74) 100%);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.88),
+    0 24px 46px rgba(160, 186, 145, 0.12);
+}
+
+.develop-panel {
+  margin-bottom: 18px;
+  padding: 18px 20px;
+}
+
+.develop-table-shell {
+  padding: 20px;
+  margin-top: 20px;
+
+  .el-table {
+    background-color: transparent;
+    --el-table-bg-color: transparent;
+    --el-table-tr-bg-color: transparent;
+    --el-table-header-bg-color: rgba(255, 255, 255, 0.5);
+
+    &::before {
+      display: none;
+    }
+  }
+}
+
+.develop-table-shell__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 18px;
+}
+
+.develop-table-shell__title {
+  font-size: 18px;
+  font-weight: 700;
+  line-height: 1.3;
+  color: #2a3529;
+}
+
+.develop-table-shell__desc {
+  margin-top: 6px;
+  font-size: 13px;
+  line-height: 1.6;
+  color: rgba(88, 102, 86, 0.82);
+}
+
+// 暗黑模式适配
+html.dark {
+  .develop-page {
+    background-color: var(--el-bg-color-page);
+  }
+
+  .develop-hero__eyebrow {
+    color: var(--el-color-primary-light-3);
+  }
+
+  .develop-hero__title {
+    color: var(--el-text-color-primary);
+  }
+
+  .develop-hero__desc,
+  .develop-table-shell__desc {
+    color: var(--el-text-color-secondary);
+  }
+
+  .develop-panel,
+  .develop-table-shell {
+    background: var(--el-bg-color-overlay);
+    border: 1px solid var(--el-border-color-lighter);
+    box-shadow: var(--el-box-shadow-light);
+  }
+
+  .develop-table-shell {
+    .el-table {
+      --el-table-header-bg-color: var(--el-fill-color-light);
+    }
+    .develop-table-shell__title {
+      color: var(--el-text-color-primary);
+    }
+  }
+
+  .develop-dialog.el-dialog {
+    background: var(--el-bg-color-overlay);
+    border: 1px solid var(--el-border-color-lighter);
+  }
+}
+
+// 对话框全局适配
+.develop-dialog.el-dialog {
+  border-radius: 24px;
+  overflow: hidden;
+  
+  .el-dialog__header {
+    margin-right: 0;
+    padding: 20px 24px 14px;
+    border-bottom: 1px solid var(--el-border-color-lighter);
+  }
+
+  .el-dialog__title {
+    font-weight: 700;
+  }
+
+  .el-dialog__body {
+    padding: 22px 24px 18px;
+  }
+
+  .el-dialog__footer {
+    padding: 14px 24px 22px;
+    border-top: 1px solid var(--el-border-color-lighter);
+  }
+}

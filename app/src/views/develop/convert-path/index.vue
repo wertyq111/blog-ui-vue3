@@ -1,79 +1,99 @@
 <template>
-  <div class="app-container">
-    <div class="filter-section">
-      <el-form ref="queryFormRef" :model="queryParams" :inline="true">
-        <el-form-item label="项目名称" prop="name">
-          <el-input
-            v-model="queryParams.name"
-            placeholder="请输入项目名称"
-            clearable
-            @keyup.enter="handleQuery"
-          />
-        </el-form-item>
-        <el-form-item class="search-buttons">
-          <el-button type="primary" icon="search" @click="handleQuery">搜索</el-button>
-          <el-button icon="refresh" @click="handleResetQuery">重置</el-button>
-        </el-form-item>
-      </el-form>
-    </div>
-
-    <el-card shadow="hover" class="table-section">
-      <div class="table-section__toolbar">
-        <div class="table-section__toolbar--actions">
-          <el-button type="success" icon="plus" @click="handleCreateClick">新增</el-button>
-          <el-button type="danger" icon="delete" :disabled="!hasSelection" @click="handleBatchDelete">
-            批量删除
-          </el-button>
+  <div class="develop-page">
+    <el-card shadow="never" class="develop-shell">
+      <section class="develop-hero">
+        <div class="develop-hero__copy">
+          <div class="develop-hero__eyebrow">Develop Workspace</div>
+          <div class="develop-hero__title">路径转换</div>
+          <div class="develop-hero__desc">管理项目的本地与远程路径映射关系，快捷转换部署路径。</div>
         </div>
-      </div>
+      </section>
 
-      <el-table
-        v-loading="loading"
-        :data="dataList"
-        border
-        stripe
-        class="table-section__content"
-        @selection-change="handleSelectionChange"
-      >
-        <el-table-column type="selection" width="50" align="center" />
-        <el-table-column type="index" label="#" width="50" align="center" />
-        <el-table-column label="项目编码" prop="code" width="150" />
-        <el-table-column label="项目名称" prop="name" width="150" />
-        <el-table-column label="网址" min-width="200">
-          <template #default="{ row }">
-            <el-link v-if="row.url" :href="row.url" target="_blank" type="primary">{{ row.url }}</el-link>
-            <span v-else>-</span>
-          </template>
-        </el-table-column>
-        <el-table-column label="服务器地址" prop="target" min-width="200" />
-        <el-table-column label="排序" prop="sort" width="80" align="center" />
-        <el-table-column label="操作" fixed="right" width="200" align="center">
-          <template #default="{ row }">
-            <el-button type="success" icon="refresh" link size="small" @click="handleConvertClick(row)">
-              转换
-            </el-button>
-            <el-button type="primary" icon="edit" link size="small" @click="handleEditClick(row)">
-              编辑
-            </el-button>
-            <el-button type="danger" icon="delete" link size="small" @click="handleDelete(row.id)">
-              删除
-            </el-button>
-          </template>
-        </el-table-column>
-      </el-table>
+      <section class="develop-panel develop-panel--filter">
+        <el-form ref="queryFormRef" :model="queryParams" :inline="true" class="develop-form">
+          <el-form-item label="项目名称" prop="name">
+            <el-input
+              v-model="queryParams.name"
+              placeholder="请输入项目名称"
+              clearable
+              @keyup.enter="handleQuery"
+            />
+          </el-form-item>
+          <el-form-item class="search-buttons">
+            <el-button type="primary" icon="search" @click="handleQuery">搜索</el-button>
+            <el-button icon="refresh" @click="handleResetQuery">重置</el-button>
+          </el-form-item>
+        </el-form>
+      </section>
 
-      <pagination
-        v-if="total > 0"
-        v-model:total="total"
-        v-model:page="queryParams.pageNum"
-        v-model:limit="queryParams.pageSize"
-        @pagination="fetchList"
-      />
+      <section class="develop-table-shell">
+        <div class="develop-table-shell__header">
+          <div>
+            <div class="develop-table-shell__title">路径映射列表</div>
+            <div class="develop-table-shell__desc">配置本地开发路径与服务器部署路径的对应关系。</div>
+          </div>
+          <div class="develop-table-shell__actions">
+            <el-button type="success" icon="plus" @click="handleCreateClick">新增映射</el-button>
+            <el-button type="danger" icon="delete" :disabled="!hasSelection" @click="handleBatchDelete">
+              批量删除
+            </el-button>
+          </div>
+        </div>
+
+        <el-table
+          v-loading="loading"
+          :data="dataList"
+          border
+          stripe
+          class="develop-table"
+          @selection-change="handleSelectionChange"
+        >
+          <el-table-column type="selection" width="50" align="center" />
+          <el-table-column type="index" label="#" width="50" align="center" />
+          <el-table-column label="项目编码" prop="code" width="150" />
+          <el-table-column label="项目名称" prop="name" width="150" />
+          <el-table-column label="网址" min-width="200">
+            <template #default="{ row }">
+              <el-link v-if="row.url" :href="row.url" target="_blank" type="primary">{{ row.url }}</el-link>
+              <span v-else>-</span>
+            </template>
+          </el-table-column>
+          <el-table-column label="服务器地址" prop="target" min-width="200" />
+          <el-table-column label="排序" prop="sort" width="80" align="center" />
+          <el-table-column label="操作" fixed="right" width="200" align="center">
+            <template #default="{ row }">
+              <el-button type="success" icon="refresh" link size="small" @click="handleConvertClick(row)">
+                转换
+              </el-button>
+              <el-button type="primary" icon="edit" link size="small" @click="handleEditClick(row)">
+                编辑
+              </el-button>
+              <el-button type="danger" icon="delete" link size="small" @click="handleDelete(row.id)">
+                删除
+              </el-button>
+            </template>
+          </el-table-column>
+        </el-table>
+
+        <pagination
+          v-if="total > 0"
+          v-model:total="total"
+          v-model:page="queryParams.pageNum"
+          v-model:limit="queryParams.pageSize"
+          @pagination="fetchList"
+        />
+      </section>
     </el-card>
 
     <!-- 新增/编辑弹窗 -->
-    <el-dialog v-model="dialogState.visible" :title="dialogState.title" width="600px" @close="closeDialog">
-      <el-form ref="formRef" :model="formData" :rules="rules" label-width="110px">
+    <el-dialog
+      v-model="dialogState.visible"
+      :title="dialogState.title"
+      width="600px"
+      class="develop-dialog"
+      @close="closeDialog"
+    >
+      <el-form ref="formRef" :model="formData" :rules="rules" label-width="110px" class="develop-dialog-form">
         <el-form-item label="项目编码" prop="code">
           <el-input v-model="formData.code" placeholder="请输入项目编码" maxlength="20" />
         </el-form-item>
@@ -107,7 +127,7 @@
         </el-form-item>
       </el-form>
       <template #footer>
-        <div class="dialog-footer">
+        <div class="develop-dialog-footer">
           <el-button type="primary" @click="handleSubmit">确 定</el-button>
           <el-button @click="closeDialog">取 消</el-button>
         </div>
@@ -115,8 +135,13 @@
     </el-dialog>
 
     <!-- 转换弹窗 -->
-    <el-dialog v-model="convertState.visible" title="路径转换" width="700px">
-      <el-form label-position="top">
+    <el-dialog
+      v-model="convertState.visible"
+      title="路径转换"
+      width="700px"
+      class="develop-dialog"
+    >
+      <el-form label-position="top" class="develop-dialog-form">
         <el-form-item label="待转换路径 (每行一个)">
           <el-input
             v-model="convertState.pathsText"
@@ -130,7 +155,7 @@
         </el-form-item>
       </el-form>
       <template #footer>
-        <div class="dialog-footer">
+        <div class="develop-dialog-footer">
           <el-button type="primary" :loading="convertState.loading" @click="handleDoConvert">
             转 换
           </el-button>
