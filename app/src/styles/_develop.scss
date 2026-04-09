@@ -114,37 +114,49 @@
 // 暗黑模式适配
 html.dark {
   .develop-hero__eyebrow {
-    color: var(--el-color-primary-light-3);
+    color: #18a8ff;
   }
 
   .develop-hero__title {
-    color: var(--el-text-color-primary);
+    color: #eef6ff;
+    text-shadow: 0 0 20px rgba(24, 168, 255, 0.12);
   }
 
   .develop-hero__desc,
   .develop-table-shell__desc {
-    color: var(--el-text-color-secondary);
+    color: rgba(202, 224, 248, 0.78);
   }
 
   .develop-panel,
   .develop-table-shell {
-    background: var(--el-bg-color-overlay);
-    border: 1px solid var(--el-border-color-lighter);
-    box-shadow: var(--el-box-shadow-light);
+    background:
+      radial-gradient(circle at top right, rgba(24, 168, 255, 0.08), transparent 28%),
+      radial-gradient(circle at bottom left, rgba(39, 228, 214, 0.06), transparent 34%),
+      linear-gradient(180deg, rgba(15, 26, 40, 0.82) 0%, rgba(11, 20, 32, 0.92) 100%);
+    border: 1px solid rgba(103, 175, 242, 0.18);
+    box-shadow: 0 24px 48px rgba(2, 8, 19, 0.28);
   }
 
   .develop-table-shell {
     .el-table {
-      --el-table-header-bg-color: var(--el-fill-color-light);
+      --el-table-header-bg-color: rgba(10, 18, 30, 0.6);
     }
     .develop-table-shell__title {
-      color: var(--el-text-color-primary);
+      color: #eef6ff;
     }
   }
 
   .develop-dialog.el-dialog {
-    background: var(--el-bg-color-overlay);
-    border: 1px solid var(--el-border-color-lighter);
+    background: rgba(10, 18, 30, 0.96);
+    border: 1px solid rgba(103, 175, 242, 0.24);
+    box-shadow: 0 30px 60px rgba(2, 8, 20, 0.48);
+    
+    .el-dialog__title {
+      color: #eef6ff;
+    }
+    .el-dialog__header, .el-dialog__footer {
+      border-color: rgba(103, 175, 242, 0.14);
+    }
   }
 }
 

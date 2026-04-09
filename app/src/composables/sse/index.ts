@@ -25,13 +25,9 @@ import { cleanupSse } from "./useSse";
  * ```
  */
 export function setupSse() {
-  // 初始化字典同步服务
-  const dictSync = useDictSync();
-  dictSync.initialize();
-
-  // 初始化在线用户统计服务
-  const onlineCount = useOnlineCount();
-  onlineCount.initialize();
+  // SSE 服务已禁用：当前 Laravel 后端不提供 SSE 端点
+  // 原 vue3-element-admin 的字典同步和在线人数统计依赖 SSE，
+  // 本项目不需要这些功能。
 }
 
 /**

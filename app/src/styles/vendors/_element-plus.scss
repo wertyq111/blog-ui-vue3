@@ -1,5 +1,5 @@
 /**
- * Element Plus 全局样式覆盖 (Cyber Light Mode)
+ * Element Plus 全局样式覆盖 (Cyber Theme)
  */
 
 // 1. 卡片
@@ -86,7 +86,7 @@
   }
 }
 
-// 5. 弹出层 (下拉、气泡、Select)
+// 5. 弹出层
 .el-dropdown-menu, .el-select-dropdown, .el-popover.el-popper {
   background: rgba(255, 255, 255, 0.92) !important;
   backdrop-filter: blur(12px);
@@ -95,39 +95,81 @@
   box-shadow: 0 20px 40px rgba(150, 176, 145, 0.16) !important;
 }
 
-// 6. 对话框 (已经在 _develop.scss 中处理，这里做全局补充)
-.el-overlay-dialog {
-  background-color: rgba(42, 53, 41, 0.12);
-  backdrop-filter: blur(4px);
-}
-
-// 暗黑模式禁用以上覆盖或采用暗黑变量
+// 暗黑模式覆盖
 html.dark {
   .el-card {
-    background: var(--el-bg-color-overlay);
-    border: 1px solid var(--el-border-color-lighter);
-    box-shadow: var(--el-box-shadow-light);
+    background: rgba(15, 26, 40, 0.78);
+    border: 1px solid rgba(103, 175, 242, 0.2);
+    box-shadow: 0 24px 48px rgba(2, 8, 19, 0.28);
     
     &__header {
-      border-bottom: 1px solid var(--el-border-color-lighter);
-      color: var(--el-text-color-primary);
+      border-bottom: 1px solid rgba(103, 175, 242, 0.14);
+      color: #eef6ff;
     }
   }
-  
-  .el-input__inner, .el-input__wrapper, .el-textarea__inner {
-    background: var(--el-fill-color-blank) !important;
-    border: 1px solid var(--el-border-color) !important;
-    box-shadow: none !important;
+
+  .el-button {
+    background: rgba(10, 18, 29, 0.78);
+    border: 1px solid rgba(97, 160, 224, 0.18);
+    color: rgba(202, 224, 248, 0.78);
+
+    &:hover {
+      background: rgba(34, 80, 126, 0.36);
+      border-color: rgba(103, 175, 242, 0.4);
+      color: #fff;
+      box-shadow: 0 0 20px rgba(24, 168, 255, 0.12);
+    }
+
+    &--primary {
+      background: linear-gradient(135deg, rgba(15, 167, 255, 0.96), rgba(20, 104, 255, 0.94));
+      border: none;
+      color: #fff;
+      box-shadow: 0 10px 20px rgba(13, 126, 255, 0.18);
+
+      &:hover {
+        background: linear-gradient(135deg, #30b4ff, #2a7aff);
+        box-shadow: 0 12px 24px rgba(13, 126, 255, 0.24);
+      }
+    }
   }
 
-  .el-button--primary {
-    background: var(--el-color-primary);
-    box-shadow: none;
+  .el-input__inner, .el-input__wrapper, .el-textarea__inner {
+    background: rgba(8, 15, 26, 0.78) !important;
+    border: 1px solid rgba(103, 175, 242, 0.2) !important;
+    color: #eef6ff !important;
+    box-shadow: none !important;
+
+    &:focus, &.is-focus {
+      border-color: #18a8ff !important;
+      box-shadow: 0 0 0 3px rgba(24, 168, 255, 0.12) !important;
+    }
   }
 
   .el-table {
+    color: rgba(202, 224, 248, 0.85);
     th.el-table__cell {
-      background-color: var(--el-fill-color-light) !important;
+      background-color: rgba(15, 26, 40, 0.88) !important;
+      color: #eef6ff;
+    }
+    &__row:hover > td.el-table__cell {
+      background-color: rgba(25, 47, 70, 0.52) !important;
+    }
+  }
+
+  .el-dropdown-menu, .el-select-dropdown, .el-popover.el-popper {
+    background: rgba(10, 18, 30, 0.94) !important;
+    border: 1px solid rgba(103, 175, 242, 0.24) !important;
+    box-shadow: 0 24px 48px rgba(2, 8, 19, 0.42) !important;
+  }
+
+  .el-pagination {
+    button, .el-pager li {
+      background-color: transparent !important;
+      color: rgba(202, 224, 248, 0.78);
+    }
+    .el-pager li.is-active {
+      background: linear-gradient(135deg, #18a8ff, #1668ff) !important;
+      color: #fff !important;
     }
   }
 }
