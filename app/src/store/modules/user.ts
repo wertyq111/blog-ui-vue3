@@ -59,7 +59,11 @@ export const useUserStore = defineStore("user", () => {
    * 登出
    */
   async function logout(): Promise<void> {
-    await AuthAPI.logout();
+    try {
+      await AuthAPI.logout();
+    } catch {
+      // 即使后端登出失败，也清理本地状态
+    }
     resetAllState();
   }
 
