@@ -15,5 +15,18 @@ export * from "./log";
 export * from "./statistics";
 export * from "./notice";
 
+// Member 模块
+export * from "./member-level";
+export * from "./member";
+
+// Mini-Program 模块
+export * from "./wallpaper-classify";
+export * from "./wallpaper";
+export * from "./category";
+export * from "./label";
+export * from "./article";
+export * from "./photo-category";
+export * from "./photo";
+
 // 其他模块
 export * from "./file";
