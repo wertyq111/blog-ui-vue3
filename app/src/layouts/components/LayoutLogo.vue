@@ -2,7 +2,7 @@
   <div class="logo">
     <transition enter-active-class="animate__animated animate__fadeInLeft">
       <router-link :key="+collapse" class="wh-full flex-center" to="/">
-        <img :src="logo" class="w20px h20px" />
+        <img :src="logo" class="logo-img" />
         <span v-if="!collapse" class="title">
           {{ appConfig.title }}
         </span>
@@ -26,24 +26,36 @@ defineProps({
 <style lang="scss" scoped>
 .logo {
   width: 100%;
-  height: $navbar-height;
-  background-color: color-mix(in srgb, var(--menu-background) 72%, transparent);
-  backdrop-filter: blur(10px) saturate(118%);
-  border-bottom: 1px solid var(--app-border);
+  height: var(--navbar-height);
+  background-color: transparent;
+  border-bottom: 1px solid rgba(122, 161, 38, 0.12);
+
+  .logo-img {
+    width: 24px;
+    height: 24px;
+    filter: drop-shadow(0 4px 10px rgba(130, 201, 30, 0.24));
+  }
 
   .title {
     flex-shrink: 0;
     margin-left: 10px;
-    font-size: 16px;
+    font-size: 18px;
     font-weight: 800;
-    color: var(--sidebar-logo-text-color);
+    color: #2a3529;
     letter-spacing: -0.5px;
   }
 }
 
 :global(html.dark) .logo {
-  background: rgba(10, 18, 30, 0.74);
   border-bottom-color: rgba(103, 175, 242, 0.16);
+  
+  .logo-img {
+    filter: drop-shadow(0 4px 14px rgba(17, 180, 255, 0.28));
+  }
+
+  .title {
+    color: #eef6ff;
+  }
 }
 </style>
 
@@ -55,7 +67,7 @@ defineProps({
     background-color: transparent !important;
 
     .title {
-      color: var(--menu-text);
+      color: var(--el-text-color-primary);
     }
   }
 }
@@ -64,7 +76,7 @@ defineProps({
 .openSidebar {
   &.layout-top .layout__header-left .logo,
   &.layout-mix .layout__header-logo .logo {
-    width: $sidebar-width; // 210px，显示logo+文字
+    width: var(--sidebar-width);
   }
 }
 
@@ -72,7 +84,7 @@ defineProps({
 .hideSidebar {
   &.layout-top .layout__header-left .logo,
   &.layout-mix .layout__header-logo .logo {
-    width: $sidebar-width-collapsed; // 54px，只显示logo
+    width: var(--sidebar-width-collapsed);
   }
 
   // 隐藏文字，只显示图标

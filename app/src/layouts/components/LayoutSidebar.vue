@@ -1,25 +1,27 @@
 <!-- 菜单组件 -->
 <template>
-  <el-menu
-    ref="menuRef"
-    :default-active="activeMenuPath"
-    :collapse="!appStore.sidebar.opened"
-    class="sidebar-menu-glass"
-    :popper-effect="theme"
-    :unique-opened="false"
-    :collapse-transition="false"
-    :mode="menuMode"
-    @open="onMenuOpen"
-    @close="onMenuClose"
-  >
-    <!-- 菜单项 -->
-    <LayoutSidebarItem
-      v-for="route in data"
-      :key="route.path"
-      :item="route"
-      :base-path="resolveFullPath(route.path)"
-    />
-  </el-menu>
+  <div class="sidebar-wrapper">
+    <el-menu
+      ref="menuRef"
+      :default-active="activeMenuPath"
+      :collapse="!appStore.sidebar.opened"
+      class="sidebar-menu-cyber"
+      :popper-effect="theme"
+      :unique-opened="false"
+      :collapse-transition="false"
+      :mode="menuMode"
+      @open="onMenuOpen"
+      @close="onMenuClose"
+    >
+      <!-- 菜单项 -->
+      <LayoutSidebarItem
+        v-for="route in data"
+        :key="route.path"
+        :item="route"
+        :base-path="resolveFullPath(route.path)"
+      />
+    </el-menu>
+  </div>
 </template>
 
 <script lang="ts" setup>
@@ -226,54 +228,83 @@ onMounted(() => {
 </script>
 
 <style lang="scss" scoped>
-.sidebar-menu-glass {
+.sidebar-wrapper {
+  background:
+    radial-gradient(circle at top right, rgba(170, 236, 109, 0.14), transparent 24%),
+    radial-gradient(circle at bottom left, rgba(168, 216, 255, 0.14), transparent 32%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.82), rgba(246, 251, 241, 0.72));
+  backdrop-filter: blur(20px);
+  border-radius: 28px;
+  margin: 18px 0 18px 18px;
+  height: calc(100% - 36px);
+  overflow: hidden;
+  box-shadow:
+    inset -1px 0 0 rgba(255, 255, 255, 0.04),
+    20px 0 42px rgba(150, 176, 145, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.56);
+}
+
+.sidebar-menu-cyber {
   background-color: transparent !important;
   border: none;
 
   :deep(.el-menu-item),
   :deep(.el-sub-menu__title) {
     position: relative;
-    margin: 3px 8px;
-    border-radius: 10px;
-    color: var(--menu-text);
-    transition: color 0.26s ease, background-color 0.26s ease, box-shadow 0.26s ease;
+    margin: 6px 12px;
+    border-radius: 14px;
+    color: var(--menu-text-color);
+    transition: all 0.26s ease;
 
-    i {
+    i, .el-icon {
       color: inherit;
     }
 
     &:hover {
-      background-color: var(--menu-hover) !important;
-      box-shadow: 0 0 0 1px color-mix(in srgb, var(--el-color-primary) 26%, transparent);
+      background-color: rgba(255, 255, 255, 0.58) !important;
+      color: #3f4f3a !important;
+      box-shadow: 0 12px 24px rgba(177, 197, 158, 0.08);
     }
   }
 
   :deep(.el-menu-item.is-active) {
-    color: var(--menu-active-text) !important;
-    background: linear-gradient(90deg, color-mix(in srgb, var(--el-color-primary) 24%, transparent), color-mix(in srgb, #8e6bff 20%, transparent)) !important;
-    box-shadow: 0 8px 18px color-mix(in srgb, var(--el-color-primary) 24%, transparent), inset 0 0 0 1px color-mix(in srgb, var(--el-color-primary) 48%, transparent);
+    color: #ffffff !important;
+    background: linear-gradient(135deg, #b6e866 0%, #82c91e 60%, #69c014 100%) !important;
+    box-shadow: 0 12px 24px rgba(130, 201, 30, 0.24), 0 0 22px rgba(130, 201, 30, 0.26);
+    
+    i, .el-icon {
+      color: #ffffff !important;
+    }
   }
 
   :deep(.el-sub-menu.has-active-child > .el-sub-menu__title) {
-    color: var(--menu-active-text);
-    background: color-mix(in srgb, var(--el-color-primary) 14%, transparent);
+    color: #586255;
+    font-weight: 700;
   }
 }
 
-:global(html.dark) .sidebar-menu-glass {
+:global(html.dark) .sidebar-wrapper {
+  background: rgba(10, 18, 30, 0.72);
+  border: 1px solid rgba(109, 183, 255, 0.14);
+  box-shadow:
+    inset -1px 0 0 rgba(255, 255, 255, 0.04),
+    20px 0 42px rgba(2, 7, 17, 0.24);
+}
+
+:global(html.dark) .sidebar-menu-cyber {
   :deep(.el-menu-item),
   :deep(.el-sub-menu__title) {
-    color: rgba(229, 240, 255, 0.92);
+    color: rgba(202, 224, 248, 0.78);
 
     &:hover {
-      background: rgba(109, 71, 244, 0.18) !important;
-      box-shadow: 0 0 18px rgba(109, 71, 244, 0.2);
+      background: rgba(34, 80, 126, 0.36) !important;
+      color: #eef6ff !important;
     }
   }
 
   :deep(.el-menu-item.is-active) {
-    background: linear-gradient(90deg, rgba(109, 71, 244, 0.3), rgba(82, 130, 255, 0.22)) !important;
-    box-shadow: 0 10px 24px rgba(63, 101, 255, 0.18), inset 0 0 0 1px rgba(156, 197, 255, 0.3);
+    background: linear-gradient(135deg, rgba(15, 167, 255, 0.96), rgba(20, 104, 255, 0.94)) !important;
+    box-shadow: 0 12px 24px rgba(13, 126, 255, 0.24), 0 0 22px rgba(16, 165, 255, 0.26);
   }
 }
 </style>

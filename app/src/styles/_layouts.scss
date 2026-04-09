@@ -1,271 +1,130 @@
+@use "./variables" as *;
+
 /**
- * 布局相关样式
+ * 核心框架布局
  */
 
-// ============================================
-// 通用容器
-// ============================================
-
-#app {
-  position: relative;
-  color: var(--app-text-primary);
-  background: linear-gradient(to bottom, var(--app-bg-start), var(--app-bg-end));
-  transition: background 0.3s ease, color 0.3s ease;
-
-  // 全局装饰光晕
-  &::before,
-  &::after {
-    position: fixed;
-    z-index: -1;
-    pointer-events: none;
-    content: "";
-    filter: blur(92px);
-  }
-
-  &::before {
-    top: -12%;
-    right: -12%;
-    width: 46%;
-    height: 44%;
-    background: var(--app-glow-a);
-    opacity: 0.8;
-  }
-
-  &::after {
-    bottom: -12%;
-    left: -10%;
-    width: 38%;
-    height: 36%;
-    background: var(--app-glow-b);
-    opacity: 0.72;
-  }
-}
-
-html.dark #app {
-  background:
-    radial-gradient(circle at 82% 12%, rgba(107, 84, 255, 0.16) 0%, transparent 34%),
-    radial-gradient(circle at 20% 86%, rgba(53, 138, 255, 0.12) 0%, transparent 32%),
-    linear-gradient(160deg, #07101b 0%, #0a1523 42%, #0d1828 100%);
-}
-
-html.dark #app::before {
-  top: -16%;
-  right: -6%;
-  width: 52%;
-  height: 52%;
-  background: radial-gradient(circle, rgba(111, 78, 255, 0.34) 0%, rgba(84, 109, 255, 0.14) 42%, transparent 70%);
-  opacity: 0.9;
-}
-
-html.dark #app::after {
-  bottom: -20%;
-  left: -12%;
-  width: 44%;
-  height: 42%;
-  background: radial-gradient(circle, rgba(38, 146, 255, 0.24) 0%, rgba(114, 83, 255, 0.08) 48%, transparent 76%);
-  opacity: 0.85;
-}
-
-.layout-container {
-  position: relative;
-  z-index: 1;
-  background: transparent !important;
-}
-
-.app-container {
-  padding: 15px;
-  background: transparent;
-}
-
-// ============================================
-// 进度条
-// ============================================
-
-#nprogress .bar {
-  background-color: var(--el-color-primary);
-}
-
-// ============================================
-// 弹出菜单
-// ============================================
-
-.el-menu--popup {
-  --el-menu-bg-color: var(--app-panel-strong);
-  --el-menu-text-color: var(--menu-text);
-  --el-menu-active-color: var(--menu-active-text);
-  --el-menu-hover-bg-color: var(--menu-hover);
-
-  background-color: var(--app-panel-strong);
-  backdrop-filter: blur(10px);
-  box-shadow: var(--app-panel-shadow);
-
-  .el-menu-item,
-  .el-sub-menu__title {
-    color: var(--menu-text) !important;
-  }
-
-  .el-menu-item:hover,
-  .el-sub-menu__title:hover {
-    color: var(--menu-active-text) !important;
-    background-color: var(--menu-hover) !important;
-  }
-
-  .el-menu-item.is-active {
-    color: var(--menu-active-text) !important;
-    background-color: var(--menu-hover) !important;
-  }
-}
-
-// ============================================
-// 混合布局左侧菜单 hover 样式
-// ============================================
-
-.layout-mix .layout__sidebar--left .el-menu {
-  .el-menu-item {
-    &:hover {
-      background-color: var(--menu-hover) !important;
-    }
-  }
-
-  .el-sub-menu__title {
-    &:hover {
-      background-color: var(--menu-hover) !important;
-    }
-  }
-}
-
-// 深色或深蓝侧边栏的 hover 样式
-html.dark .layout-mix .layout__sidebar--left .el-menu,
-html.sidebar-color-blue .layout-mix .layout__sidebar--left .el-menu {
-  .el-menu-item,
-  .el-sub-menu__title {
-    &:hover {
-      background-color: var(--menu-hover) !important;
-    }
-  }
-}
-
-// ============================================
-// 顶部布局菜单
-// ============================================
-
-.layout-top .layout__header-left .el-menu--horizontal,
-.layout-mix .layout__header-menu .el-menu--horizontal {
-  display: flex;
-  flex: 1 1 0% !important;
-  align-items: center;
-  width: 100% !important;
-  min-width: 0 !important;
+// 侧边栏
+.sidebar-container {
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 1001;
+  width: var(--sidebar-width);
+  height: 100%;
   overflow: hidden;
+  transition: width 0.3s;
   background-color: transparent !important;
 }
 
-// 窄屏隐藏菜单文字，仅保留图标
+// 主内容区
+.main-container {
+  position: relative;
+  min-height: 100%;
+  margin-left: var(--sidebar-width);
+  transition: margin-left 0.3s;
+  background: transparent !important;
+}
+
+// 导航栏
+.navbar-container {
+  height: var(--navbar-height);
+  overflow: hidden;
+  position: relative;
+  background: rgba(255, 255, 255, 0.56);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--el-border-color-lighter);
+}
+
+// 标签栏
+.tags-view-container {
+  height: var(--tags-view-height);
+  width: 100%;
+}
+
+// 页面主体
+.app-main {
+  position: relative;
+  width: 100%;
+  min-height: calc(100vh - var(--navbar-height));
+  overflow: hidden;
+  background: transparent !important;
+}
+
+// 全局背景 (Cyber Style)
+body {
+  background:
+    radial-gradient(circle at 85% 10%, var(--cyber-body-glow-a), transparent 20%),
+    radial-gradient(circle at 15% 78%, var(--cyber-body-glow-b), transparent 22%),
+    linear-gradient(135deg, var(--el-bg-color-page) 0%, var(--el-bg-color) 46%, var(--el-bg-color-page) 100%);
+  background-attachment: fixed;
+  color: var(--el-text-color-primary);
+}
+
+#app {
+  position: relative;
+  &::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    background:
+      radial-gradient(circle at 78% 12%, var(--cyber-layout-glow-a), transparent 24%),
+      radial-gradient(circle at 18% 84%, var(--cyber-layout-glow-b), transparent 24%);
+    filter: blur(8px);
+    z-index: 0;
+  }
+  & > * {
+    position: relative;
+    z-index: 1;
+  }
+}
+
+// 固定头部
+.fixed-header {
+  position: fixed;
+  top: 0;
+  right: 0;
+  z-index: 9;
+  width: calc(100% - var(--sidebar-width));
+  transition: width 0.3s;
+}
+
 .hideSidebar {
-  &.layout-top .layout__header .el-menu--horizontal,
-  &.layout-mix .layout__header .el-menu--horizontal {
-    .el-menu-item,
-    .el-sub-menu__title {
-      .menu-title,
-      span:not([class*="i-svg"]):not(.el-icon) {
-        display: none !important;
-      }
-    }
+  .sidebar-container {
+    width: var(--sidebar-width-collapsed) !important;
   }
-
-  &.layout-mix .layout__sidebar--left .el-menu {
-    .el-menu-item,
-    .el-sub-menu__title {
-      .menu-title,
-      span:not([class*="i-svg"]):not(.el-icon) {
-        display: none !important;
-      }
-    }
+  .main-container {
+    margin-left: var(--sidebar-width-collapsed);
+  }
+  .fixed-header {
+    width: calc(100% - var(--sidebar-width-collapsed));
   }
 }
 
-// ============================================
-// 全局筛选区域
-// ============================================
-
-.filter-section {
-  padding: 16px;
-  margin-bottom: 12px;
-  background-color: var(--app-panel);
-  backdrop-filter: blur(12px);
-  border: 1px solid var(--app-border);
-  border-radius: var(--el-border-radius-base);
-  box-shadow: var(--app-panel-shadow);
-
-  .search-buttons {
-    margin-right: 0;
+// 响应式处理
+.mobile {
+  .main-container {
+    margin-left: 0;
   }
-
-  .el-form-item {
-    margin-bottom: 8px;
+  .sidebar-container {
+    width: var(--sidebar-width) !important;
+    transition: transform 0.3s;
   }
-}
-
-// ============================================
-// 表格区域
-// ============================================
-
-.table-section {
-  padding: 16px;
-  margin-bottom: 12px;
-  background-color: var(--app-panel);
-  backdrop-filter: blur(12px);
-  border: 1px solid var(--app-border);
-  border-radius: var(--el-border-radius-base);
-  box-shadow: var(--app-panel-shadow);
-
-  &__toolbar {
-    display: flex;
-    justify-content: space-between;
-    margin-bottom: 4px;
-
-    &--actions,
-    &--tools {
-      display: flex;
-      gap: 4px;
+  &.hideSidebar {
+    .sidebar-container {
+      pointer-events: none;
+      transform: translateX(-100%);
     }
   }
-
-  &__content {
-    margin: 8px 0;
-  }
-
-  .el-pagination {
-    justify-content: flex-end;
-    margin-top: 12px;
+  .fixed-header {
+    width: 100%;
   }
 }
 
 html.dark {
-  .filter-section,
-  .table-section,
-  .el-card,
-  .el-dialog,
-  .el-drawer,
-  .el-popover {
-    background: rgba(15, 26, 40, 0.78);
-    border: 1px solid rgba(112, 176, 255, 0.16);
-    box-shadow: 0 14px 32px rgba(1, 8, 22, 0.42), 0 0 16px rgba(109, 71, 244, 0.12);
-    backdrop-filter: blur(14px);
-  }
-
-  .el-table {
-    --el-table-bg-color: rgba(15, 24, 38, 0.72);
-    --el-table-tr-bg-color: rgba(12, 21, 34, 0.62);
-    --el-table-header-bg-color: rgba(9, 18, 31, 0.88);
-    --el-table-border-color: rgba(103, 175, 242, 0.12);
-    --el-table-row-hover-bg-color: rgba(109, 71, 244, 0.12);
-    --el-table-text-color: rgba(226, 239, 255, 0.88);
-    --el-table-header-text-color: rgba(195, 218, 246, 0.82);
-  }
-
-  .el-table th.el-table__cell,
-  .el-table td.el-table__cell {
-    border-bottom-color: rgba(103, 175, 242, 0.1);
+  .navbar-container {
+    background: rgba(15, 26, 40, 0.72);
   }
 }

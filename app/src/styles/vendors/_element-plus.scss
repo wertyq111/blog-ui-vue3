@@ -1,81 +1,133 @@
 /**
- * Element Plus 变量覆盖和样式适配
+ * Element Plus 全局样式覆盖 (Cyber Light Mode)
  */
 
-// ============================================
-// 1. 变量覆盖（必须在最前面）
-// ============================================
+// 1. 卡片
+.el-card {
+  border-radius: 24px;
+  border: 1px solid rgba(255, 255, 255, 0.48);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.78) 0%, rgba(255, 255, 255, 0.64) 100%);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.78),
+    0 24px 48px rgba(158, 184, 151, 0.12);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 
-@forward "element-plus/theme-chalk/src/common/var.scss" with (
-  $colors: (
-    "primary": (
-      // 默认主题色 - 修改此值时需同步修改 src/settings.ts 中的 themeColor
-      "base": #6d47f4,
-    ),
-    "success": (
-      "base": #10b981,
-    ),
-    "warning": (
-      "base": #f59e0b,
-    ),
-    "danger": (
-      "base": #ef4444,
-    ),
-    "info": (
-      "base": #a9aeb8,
-    ),
-  ),
-  $bg-color: (
-    "page": #f4f7f1,
-  )
-);
-
-// ============================================
-// 2. 样式覆盖
-// ============================================
-
-$border: 1px solid var(--el-border-color-light);
-
-/* el-dialog */
-.el-dialog {
-  .el-dialog__header {
-    padding: 15px 20px;
-    margin: 0;
-    border-bottom: $border;
+  &.is-hover-shadow:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 32px 64px rgba(150, 180, 140, 0.18);
   }
 
-  .el-dialog__body {
-    padding: 20px;
-  }
-
-  .el-dialog__footer {
-    padding: 15px;
-    border-top: $border;
+  &__header {
+    border-bottom: 1px solid rgba(122, 161, 38, 0.08);
+    padding: 18px 24px;
+    font-weight: 700;
+    color: #2a3529;
   }
 }
 
-/* el-drawer */
-.el-drawer {
-  .el-drawer__header {
-    padding: 15px 20px;
-    margin: 0;
-    color: inherit;
-    border-bottom: $border;
+// 2. 按钮
+.el-button {
+  border-radius: 12px;
+  font-weight: 600;
+  transition: all 0.2s ease;
+
+  &:not(.is-text):not(.is-link):hover {
+    transform: translateY(-1px);
+    box-shadow: 0 8px 16px rgba(130, 201, 30, 0.14);
   }
 
-  .el-drawer__body {
-    padding: 20px;
-  }
+  &--primary {
+    background: linear-gradient(135deg, #8fe521 0%, #69c014 100%);
+    border: none;
+    box-shadow: 0 10px 20px rgba(110, 190, 40, 0.18);
+    color: #fff;
 
-  .el-drawer__footer {
-    padding: 15px;
-    border-top: $border;
+    &:hover, &:focus {
+      background: linear-gradient(135deg, #9ef032 0%, #7ad125 100%);
+      box-shadow: 0 12px 24px rgba(110, 190, 40, 0.24);
+    }
   }
 }
 
-/* 抽屉和对话框底部按钮区域 */
-.dialog-footer {
-  display: flex;
-  gap: 8px;
-  justify-content: flex-end;
+// 3. 输入框
+.el-input, .el-textarea {
+  &__inner, &__wrapper {
+    border-radius: 12px !important;
+    background: rgba(255, 255, 255, 0.6) !important;
+    border: 1px solid rgba(122, 161, 38, 0.12) !important;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8) !important;
+    transition: all 0.2s ease;
+
+    &:focus, &.is-focus {
+      border-color: #82c91e !important;
+      box-shadow: 0 0 0 3px rgba(130, 201, 30, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.8) !important;
+    }
+  }
+}
+
+// 4. 表格
+.el-table {
+  background-color: transparent !important;
+  --el-table-bg-color: transparent !important;
+  --el-table-tr-bg-color: transparent !important;
+
+  th.el-table__cell {
+    background-color: rgba(244, 248, 235, 0.6) !important;
+    color: #2a3529;
+    font-weight: 700;
+  }
+
+  tr {
+    background-color: transparent !important;
+  }
+
+  &__row:hover > td.el-table__cell {
+    background-color: rgba(244, 248, 235, 0.92) !important;
+  }
+}
+
+// 5. 弹出层 (下拉、气泡、Select)
+.el-dropdown-menu, .el-select-dropdown, .el-popover.el-popper {
+  background: rgba(255, 255, 255, 0.92) !important;
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.56) !important;
+  border-radius: 16px !important;
+  box-shadow: 0 20px 40px rgba(150, 176, 145, 0.16) !important;
+}
+
+// 6. 对话框 (已经在 _develop.scss 中处理，这里做全局补充)
+.el-overlay-dialog {
+  background-color: rgba(42, 53, 41, 0.12);
+  backdrop-filter: blur(4px);
+}
+
+// 暗黑模式禁用以上覆盖或采用暗黑变量
+html.dark {
+  .el-card {
+    background: var(--el-bg-color-overlay);
+    border: 1px solid var(--el-border-color-lighter);
+    box-shadow: var(--el-box-shadow-light);
+    
+    &__header {
+      border-bottom: 1px solid var(--el-border-color-lighter);
+      color: var(--el-text-color-primary);
+    }
+  }
+  
+  .el-input__inner, .el-input__wrapper, .el-textarea__inner {
+    background: var(--el-fill-color-blank) !important;
+    border: 1px solid var(--el-border-color) !important;
+    box-shadow: none !important;
+  }
+
+  .el-button--primary {
+    background: var(--el-color-primary);
+    box-shadow: none;
+  }
+
+  .el-table {
+    th.el-table__cell {
+      background-color: var(--el-fill-color-light) !important;
+    }
+  }
 }

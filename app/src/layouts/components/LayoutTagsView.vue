@@ -11,8 +11,9 @@
         <el-tag
           v-for="tag in visitedViews"
           :key="tag.fullPath"
-          h-26px
+          h-28px
           cursor-pointer
+          class="cyber-tag"
           :closable="!tag.affix"
           :effect="tagsViewStore.isActive(tag) ? 'dark' : 'light'"
           :type="tagsViewStore.isActive(tag) ? 'primary' : 'info'"
@@ -371,69 +372,114 @@ useContextMenuManager();
 
 <style lang="scss" scoped>
 .tags-container {
-  width: 100%;
-  height: $tags-view-height;
-  padding: 0 15px;
-  background-color: color-mix(in srgb, var(--app-panel) 86%, transparent);
-  backdrop-filter: blur(12px) saturate(118%);
-  border-bottom: 1px solid var(--app-border);
+  width: 97.7%;
+  height: var(--tags-view-height);
+  margin: 18px 13px -5px;
+  padding: 0 10px 0 14px;
+  box-sizing: border-box;
+  background:
+    radial-gradient(circle at top right, rgba(170, 236, 109, 0.14), transparent 24%),
+    radial-gradient(circle at bottom left, rgba(168, 216, 255, 0.14), transparent 32%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.82), rgba(246, 251, 241, 0.72));
+  backdrop-filter: blur(10px);
+  border: 1px solid var(--el-border-color-lighter);
+  border-radius: 28px;
+  box-shadow: 0 8px 16px rgba(150, 176, 145, 0.08);
 
   .scroll-container {
     white-space: nowrap;
   }
 
-  :deep(.el-tag) {
-    background-color: color-mix(in srgb, var(--app-panel) 86%, transparent);
-    border-color: var(--app-border);
-    color: var(--app-text-soft);
-    transition: all 0.3s;
+  .cyber-tag {
+    border-radius: 999px;
+    height: 30px;
+    padding: 0 16px;
+    border: 1px solid rgba(122, 161, 38, 0.12);
+    background: rgba(255, 255, 255, 0.46);
+    color: #5d665b;
+    font-weight: 600;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 
     &:hover {
+      background: rgba(255, 255, 255, 0.88);
       border-color: var(--el-color-primary);
       color: var(--el-color-primary);
     }
 
     &.el-tag--primary {
-      background: linear-gradient(90deg, var(--el-color-primary), #8a66ff);
-      border-color: color-mix(in srgb, var(--el-color-primary) 66%, white);
-      color: #fff;
-      box-shadow: 0 6px 14px color-mix(in srgb, var(--el-color-primary) 28%, transparent);
+      background: #ffffff;
+      border-color: var(--el-color-primary);
+      color: var(--el-color-primary);
+      box-shadow: 0 6px 12px rgba(130, 201, 30, 0.12);
+    }
+    
+    :deep(.el-tag__close) {
+      color: #98a293;
+      &:hover {
+        background-color: var(--el-color-primary);
+        color: #fff;
+      }
     }
   }
 }
+
 .contextmenu {
   position: absolute;
   z-index: 3000;
-  padding: 5px 0;
+  padding: 8px 0;
   margin: 0;
-  font-size: 12px;
-  font-weight: 400;
-  color: var(--app-text-primary);
+  font-size: 13px;
+  font-weight: 500;
+  color: #2a3529;
   list-style-type: none;
-  background: var(--app-panel-strong);
-  backdrop-filter: blur(10px);
-  border: 1px solid var(--app-border);
-  border-radius: 4px;
-  box-shadow: var(--el-box-shadow-light);
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.56);
+  border-radius: 16px;
+  box-shadow: 0 20px 40px rgba(150, 176, 145, 0.16);
 
   li {
     display: flex;
-    gap: 8px;
+    gap: 10px;
     align-items: center;
-    padding: 7px 16px;
+    padding: 8px 20px;
     margin: 0;
     cursor: pointer;
-    transition: background-color 0.2s;
+    transition: all 0.2s;
 
     &:hover {
-      background: var(--menu-hover);
-      color: var(--el-color-primary);
+      background: rgba(244, 248, 235, 0.92);
+      color: #597921;
     }
   }
 }
 
 :global(html.dark) .tags-container {
-  background: rgba(10, 18, 32, 0.6);
+  background: rgba(10, 18, 32, 0.78);
   border-bottom-color: rgba(103, 175, 242, 0.14);
+  box-shadow: var(--el-box-shadow-dark);
+  
+  .cyber-tag {
+    background: rgba(255, 255, 255, 0.05);
+    border-color: rgba(255, 255, 255, 0.1);
+    color: rgba(202, 224, 248, 0.78);
+    
+    &.el-tag--primary {
+      background: var(--el-color-primary);
+      color: #fff;
+      border-color: transparent;
+    }
+  }
+}
+
+:global(html.dark) .contextmenu {
+  background: #111c2a;
+  border-color: rgba(103, 175, 242, 0.2);
+  color: #eef6ff;
+  
+  li:hover {
+    background: rgba(34, 80, 126, 0.36);
+    color: #fff;
+  }
 }
 </style>
