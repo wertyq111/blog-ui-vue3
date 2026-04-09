@@ -1,153 +1,155 @@
 <template>
-  <div class="app-container dashboard-container p-6">
-    <!-- 顶部欢迎区 -->
-    <el-card shadow="never" class="welcome-card mb-5">
-      <div class="flex items-center justify-between">
-        <div class="flex items-center">
-          <el-avatar :size="80" :src="userStore.userInfo.avatar" class="mr-5 shadow-sm" />
-          <div>
-            <h1 class="text-xl font-bold text-[--el-text-color-primary] mb-1">
-              {{ greetings }}{{ userStore.userInfo.nickname }}
-            </h1>
-            <p class="text-sm text-[--el-text-color-secondary]">今天也是充满活力的一天，开始处理你的开发任务吧！</p>
+  <div class="develop-page">
+    <el-card shadow="never" class="develop-shell">
+      <!-- Hero: 欢迎区 -->
+      <section class="develop-hero">
+        <div class="develop-hero__copy">
+          <div class="develop-hero__eyebrow">DASHBOARD</div>
+          <h1 class="develop-hero__title">欢迎回来，{{ userStore.userInfo.nickname }}</h1>
+          <p class="develop-hero__desc">
+            {{ greetings.replace('，', '') }}。这是你的个人工作台，快速访问常用功能和查看近期数据。
+          </p>
+        </div>
+        <div class="develop-hero__actions">
+          <el-avatar :size="64" :src="userStore.userInfo.avatar" class="shadow-sm" />
+        </div>
+      </section>
+
+      <!-- 快捷操作区 -->
+      <section class="develop-panel mb-5">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-4">
+            <span class="text-sm font-bold text-[#2a3529]">常用功能:</span>
+            <el-button type="primary" icon="plus" @click="router.push('/develop/work-daily')">写日志</el-button>
+            <el-button type="success" icon="document" @click="router.push('/develop/work-doc')">新文档</el-button>
+            <el-button type="warning" icon="refresh" @click="router.push('/develop/convert-path')">路径转换</el-button>
           </div>
         </div>
-        <div class="flex gap-3">
-          <el-button type="primary" icon="plus" @click="router.push('/develop/work-daily')">写日志</el-button>
-          <el-button type="success" icon="document" @click="router.push('/develop/work-doc')">新文档</el-button>
-          <el-button type="warning" icon="refresh" @click="router.push('/develop/convert-path')">路径转换</el-button>
-        </div>
-      </div>
+      </section>
+
+      <!-- 统计卡片区 -->
+      <section class="develop-panel dashboard-stats-panel mb-5">
+        <el-row :gutter="20">
+          <el-col :span="6" :xs="12" :sm="6" class="mb-4 sm:mb-0">
+            <div class="stat-card-mini">
+              <div class="stat-card-mini__icon text-blue-500"><Monitor /></div>
+              <div class="stat-card-mini__info">
+                <div class="stat-card-mini__label">工作平台</div>
+                <div class="stat-card-mini__value">{{ stats.platforms }}</div>
+              </div>
+            </div>
+          </el-col>
+          <el-col :span="6" :xs="12" :sm="6" class="mb-4 sm:mb-0">
+            <div class="stat-card-mini">
+              <div class="stat-card-mini__icon text-green-500"><EditPen /></div>
+              <div class="stat-card-mini__info">
+                <div class="stat-card-mini__label">工作日志</div>
+                <div class="stat-card-mini__value">{{ stats.logs }}</div>
+              </div>
+            </div>
+          </el-col>
+          <el-col :span="6" :xs="12" :sm="6">
+            <div class="stat-card-mini">
+              <div class="stat-card-mini__icon text-purple-500"><Document /></div>
+              <div class="stat-card-mini__info">
+                <div class="stat-card-mini__label">文档总数</div>
+                <div class="stat-card-mini__value">{{ stats.docs }}</div>
+              </div>
+            </div>
+          </el-col>
+          <el-col :span="6" :xs="12" :sm="6">
+            <div class="stat-card-mini">
+              <div class="stat-card-mini__icon text-orange-500"><Tools /></div>
+              <div class="stat-card-mini__info">
+                <div class="stat-card-mini__label">开发工具</div>
+                <div class="stat-card-mini__value">{{ stats.tools }}</div>
+              </div>
+            </div>
+          </el-col>
+        </el-row>
+      </section>
+
+      <!-- 主内容区 -->
+      <el-row :gutter="18">
+        <!-- 左侧: 近期列表 -->
+        <el-col :span="16" :xs="24">
+          <div class="develop-table-shell mt-0 mb-5">
+            <div class="develop-table-shell__header">
+              <div>
+                <div class="develop-table-shell__title">最近日志</div>
+                <div class="develop-table-shell__desc">你最近提交的工作内容记录。</div>
+              </div>
+              <el-button type="primary" link @click="router.push('/develop/work-daily')">查看更多</el-button>
+            </div>
+            <div v-loading="loading.logs" class="min-h-[240px]">
+              <el-empty v-if="!recentLogs.length" :image-size="60" description="暂无日志" />
+              <div v-else class="dashboard-recent-list">
+                <div v-for="log in recentLogs" :key="log.id" class="recent-item" @click="router.push('/develop/work-daily')">
+                  <div class="recent-item__head">
+                    <span class="recent-item__date">{{ log.logDate }}</span>
+                    <span class="recent-item__time">{{ log.createTime }}</span>
+                  </div>
+                  <div class="recent-item__body truncate">
+                    {{ formatLogContent(log.content) }}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="develop-table-shell mt-0">
+            <div class="develop-table-shell__header">
+              <div>
+                <div class="develop-table-shell__title">最近文档</div>
+                <div class="develop-table-shell__desc">你最近编辑或创建的工作文档。</div>
+              </div>
+              <el-button type="primary" link @click="router.push('/develop/work-doc')">查看更多</el-button>
+            </div>
+            <div v-loading="loading.docs" class="min-h-[240px]">
+              <el-empty v-if="!recentDocs.length" :image-size="60" description="暂无文档" />
+              <div v-else class="dashboard-recent-list">
+                <div v-for="doc in recentDocs" :key="doc.id" class="recent-item" @click="router.push('/develop/work-doc')">
+                  <div class="recent-item__head">
+                    <span class="recent-item__title">{{ doc.title }}</span>
+                    <span class="recent-item__time">{{ doc.updateTime }}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </el-col>
+
+        <!-- 右侧: 工具/入口 -->
+        <el-col :span="8" :xs="24">
+          <div class="develop-panel mt-0 mb-5">
+            <div class="develop-table-shell__title mb-4">活跃工作平台</div>
+            <div v-loading="loading.platforms">
+              <el-empty v-if="!activePlatforms.length" :image-size="40" description="未配置平台" />
+              <div v-else class="flex flex-wrap gap-2">
+                <el-tag v-for="p in activePlatforms" :key="p.id" size="large" type="success" effect="plain" class="rounded-pill">
+                  {{ p.name }}
+                </el-tag>
+              </div>
+            </div>
+          </div>
+
+          <div class="develop-panel mt-0">
+            <div class="develop-table-shell__title mb-4">开发入口</div>
+            <div class="tool-links flex flex-col gap-3">
+              <div v-for="tool in toolLinks" :key="tool.path" class="tool-item-link" @click="router.push(tool.path)">
+                <div class="flex items-center">
+                  <div class="tool-item-link__icon">
+                    <el-icon><component :is="tool.icon" /></el-icon>
+                  </div>
+                  <span class="tool-item-link__name">{{ tool.name }}</span>
+                </div>
+                <el-icon class="tool-item-link__arrow"><ArrowRight /></el-icon>
+              </div>
+            </div>
+          </div>
+        </el-col>
+      </el-row>
     </el-card>
-
-    <!-- 统计卡片行 -->
-    <el-row :gutter="20" class="mb-5">
-      <el-col :span="6" :xs="24" class="mb-4 sm:mb-0">
-        <el-card shadow="hover" class="stat-card">
-          <div class="flex items-center justify-between">
-            <div>
-              <div class="text-sm text-[--el-text-color-secondary] mb-1">工作平台</div>
-              <div class="text-2xl font-bold">{{ stats.platforms }}</div>
-            </div>
-            <el-icon class="text-3xl text-blue-500 opacity-80"><Monitor /></el-icon>
-          </div>
-        </el-card>
-      </el-col>
-      <el-col :span="6" :xs="24" class="mb-4 sm:mb-0">
-        <el-card shadow="hover" class="stat-card">
-          <div class="flex items-center justify-between">
-            <div>
-              <div class="text-sm text-[--el-text-color-secondary] mb-1">工作日志</div>
-              <div class="text-2xl font-bold">{{ stats.logs }}</div>
-            </div>
-            <el-icon class="text-3xl text-green-500 opacity-80"><EditPen /></el-icon>
-          </div>
-        </el-card>
-      </el-col>
-      <el-col :span="6" :xs="24" class="mb-4 sm:mb-0">
-        <el-card shadow="hover" class="stat-card">
-          <div class="flex items-center justify-between">
-            <div>
-              <div class="text-sm text-[--el-text-color-secondary] mb-1">文档总数</div>
-              <div class="text-2xl font-bold">{{ stats.docs }}</div>
-            </div>
-            <el-icon class="text-3xl text-purple-500 opacity-80"><Document /></el-icon>
-          </div>
-        </el-card>
-      </el-col>
-      <el-col :span="6" :xs="24">
-        <el-card shadow="hover" class="stat-card">
-          <div class="flex items-center justify-between">
-            <div>
-              <div class="text-sm text-[--el-text-color-secondary] mb-1">开发工具</div>
-              <div class="text-2xl font-bold">{{ stats.tools }}</div>
-            </div>
-            <el-icon class="text-3xl text-orange-500 opacity-80"><Tools /></el-icon>
-          </div>
-        </el-card>
-      </el-col>
-    </el-row>
-
-    <!-- 主内容区 -->
-    <el-row :gutter="20">
-      <!-- 左栏 -->
-      <el-col :span="16" :xs="24">
-        <el-card shadow="hover" class="mb-5">
-          <template #header>
-            <div class="flex items-center justify-between">
-              <span class="font-bold">最近日志</span>
-              <el-button type="primary" link @click="router.push('/develop/work-daily')">更多</el-button>
-            </div>
-          </template>
-          <div v-loading="loading.logs" class="min-h-[200px]">
-            <el-empty v-if="!recentLogs.length" :image-size="80" description="暂无日志" />
-            <div v-else class="recent-list">
-              <div v-for="log in recentLogs" :key="log.id" class="recent-item p-3 border-b border-[--el-border-color-lighter] last:border-0 hover:bg-[--el-fill-color-light] rounded transition-colors cursor-pointer" @click="router.push('/develop/work-daily')">
-                <div class="flex items-center justify-between mb-1">
-                  <span class="font-medium text-blue-600">{{ log.logDate }}</span>
-                  <span class="text-xs text-[--el-text-color-placeholder]">{{ log.createTime }}</span>
-                </div>
-                <div class="text-sm text-[--el-text-color-secondary] truncate">
-                  {{ formatLogContent(log.content) }}
-                </div>
-              </div>
-            </div>
-          </div>
-        </el-card>
-
-        <el-card shadow="hover">
-          <template #header>
-            <div class="flex items-center justify-between">
-              <span class="font-bold">最近文档</span>
-              <el-button type="primary" link @click="router.push('/develop/work-doc')">更多</el-button>
-            </div>
-          </template>
-          <div v-loading="loading.docs" class="min-h-[200px]">
-            <el-empty v-if="!recentDocs.length" :image-size="80" description="暂无文档" />
-            <div v-else class="recent-list">
-              <div v-for="doc in recentDocs" :key="doc.id" class="recent-item p-3 border-b border-[--el-border-color-lighter] last:border-0 hover:bg-[--el-fill-color-light] rounded transition-colors cursor-pointer" @click="router.push('/develop/work-doc')">
-                <div class="flex items-center justify-between">
-                  <span class="font-medium text-[--el-text-color-primary]">{{ doc.title }}</span>
-                  <span class="text-xs text-[--el-text-color-placeholder]">{{ doc.updateTime }}</span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </el-card>
-      </el-col>
-
-      <!-- 右栏 -->
-      <el-col :span="8" :xs="24">
-        <el-card shadow="hover" class="mb-5">
-          <template #header>
-            <span class="font-bold">工作平台</span>
-          </template>
-          <div v-loading="loading.platforms">
-            <el-empty v-if="!activePlatforms.length" :image-size="60" description="未配置平台" />
-            <div v-else class="flex flex-wrap gap-2">
-              <el-tag v-for="p in activePlatforms" :key="p.id" size="large" type="success" effect="plain">
-                {{ p.name }}
-              </el-tag>
-            </div>
-          </div>
-        </el-card>
-
-        <el-card shadow="hover">
-          <template #header>
-            <span class="font-bold">开发工具</span>
-          </template>
-          <div class="tool-links flex flex-col gap-2">
-            <div v-for="tool in toolLinks" :key="tool.path" class="tool-item p-3 rounded bg-[--el-fill-color-light] hover:bg-blue-50 transition-colors cursor-pointer group flex items-center justify-between" @click="router.push(tool.path)">
-              <div class="flex items-center">
-                <el-icon class="mr-2 text-blue-500 group-hover:scale-110 transition-transform"><component :is="tool.icon" /></el-icon>
-                <span class="text-sm font-medium">{{ tool.name }}</span>
-              </div>
-              <el-icon class="text-xs text-[--el-text-color-placeholder]"><ArrowRight /></el-icon>
-            </div>
-          </div>
-        </el-card>
-      </el-col>
-    </el-row>
   </div>
 </template>
 
@@ -252,28 +254,167 @@ onMounted(() => {
 </script>
 
 <style lang="scss" scoped>
-.dashboard-container {
-  background-color: var(--el-bg-color-page);
-  min-height: calc(100vh - 84px);
+.dashboard-stats-panel {
+  padding: 24px !important;
 }
 
-.welcome-card {
-  border: none;
-  background: linear-gradient(to right, #ffffff, #f0f7ff);
-}
-
-.stat-card {
-  border: none;
+.stat-card-mini {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 12px;
+  background: rgba(255, 255, 255, 0.4);
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.6);
   transition: all 0.3s ease;
+
   &:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+    background: rgba(255, 255, 255, 0.8);
+    transform: translateY(-2px);
+    box-shadow: 0 10px 20px rgba(150, 180, 140, 0.1);
+  }
+
+  &__icon {
+    font-size: 28px;
+    opacity: 0.85;
+  }
+
+  &__label {
+    font-size: 12px;
+    color: rgba(88, 102, 86, 0.82);
+    margin-bottom: 2px;
+  }
+
+  &__value {
+    font-size: 20px;
+    font-weight: 700;
+    color: #2a3529;
   }
 }
 
-.tool-item {
+.dashboard-recent-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.recent-item {
+  padding: 14px 16px;
+  background: rgba(255, 255, 255, 0.4);
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  cursor: pointer;
+  transition: all 0.26s ease;
+
   &:hover {
-    background-color: var(--el-color-primary-light-9);
+    background: rgba(255, 255, 255, 0.95);
+    border-color: var(--el-color-primary-light-5);
+    transform: translateX(4px);
+  }
+
+  &__head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 6px;
+  }
+
+  &__date, &__title {
+    font-weight: 600;
+    color: var(--el-color-primary);
+    font-size: 14px;
+  }
+
+  &__title {
+    color: #2a3529;
+  }
+
+  &__time {
+    font-size: 11px;
+    color: rgba(88, 102, 86, 0.6);
+  }
+
+  &__body {
+    font-size: 13px;
+    color: rgba(88, 102, 86, 0.82);
+    line-height: 1.5;
+  }
+}
+
+.tool-item-link {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  background: rgba(255, 255, 255, 0.5);
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  &:hover {
+    background: #fff;
+    border-color: var(--el-color-primary);
+    
+    .tool-item-link__icon {
+      background: var(--el-color-primary-light-9);
+      color: var(--el-color-primary);
+      transform: scale(1.1);
+    }
+    
+    .tool-item-link__arrow {
+      transform: translateX(3px);
+      color: var(--el-color-primary);
+    }
+  }
+
+  &__icon {
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255, 255, 255, 0.8);
+    border-radius: 8px;
+    margin-right: 12px;
+    color: rgba(88, 102, 86, 0.8);
+    transition: all 0.3s ease;
+  }
+
+  &__name {
+    font-size: 14px;
+    font-weight: 600;
+    color: #2a3529;
+  }
+
+  &__arrow {
+    font-size: 12px;
+    color: #99a;
+    transition: all 0.2s ease;
+  }
+}
+
+.rounded-pill {
+  border-radius: 999px !important;
+}
+
+// 暗黑模式适配
+html.dark {
+  .stat-card-mini, .recent-item, .tool-item-link {
+    background: var(--el-fill-color-light);
+    border-color: var(--el-border-color-lighter);
+  }
+  
+  .stat-card-mini__value, .recent-item__title, .tool-item-link__name {
+    color: var(--el-text-color-primary);
+  }
+  
+  .stat-card-mini__label, .recent-item__body {
+    color: var(--el-text-color-secondary);
+  }
+
+  .tool-item-link:hover {
+    background: var(--el-fill-color-darker);
   }
 }
 </style>

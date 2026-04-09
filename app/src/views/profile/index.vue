@@ -1,104 +1,123 @@
 <template>
-  <div class="app-container p-6">
-    <el-row :gutter="20">
-      <!-- 左侧个人信息卡片 -->
-      <el-col :xs="24" :sm="24" :md="8" :lg="8">
-        <el-card shadow="hover" class="user-card text-center mb-5">
-          <div class="avatar-container mb-4 relative inline-block">
-            <el-avatar :size="120" :src="userProfile.avatar" class="shadow-md" />
-            <el-button
-              type="primary"
-              size="small"
-              circle
-              icon="Camera"
-              class="absolute bottom-0 right-0 border-2 border-white"
-              @click="triggerFileUpload"
-            />
-            <input
-              ref="fileInput"
-              type="file"
-              style="display: none"
-              accept="image/*"
-              @change="handleFileChange"
-            />
-          </div>
-          <div class="user-names mb-4">
-            <h2 class="text-xl font-bold mb-1">{{ userProfile.member?.nickname || userProfile.nickname || "未设置昵称" }}</h2>
-            <div class="text-sm text-[--el-text-color-secondary]">
-              {{ userProfile.roles?.join(', ') || '普通用户' }}
-            </div>
-          </div>
-          <el-divider />
-          <el-descriptions :column="1" size="small" border>
-            <el-descriptions-item label="用户名">
-              <el-icon class="mr-1"><User /></el-icon>
-              {{ userProfile.username }}
-            </el-descriptions-item>
-            <el-descriptions-item label="手机号">
-              <el-icon class="mr-1"><Iphone /></el-icon>
-              {{ userProfile.phone || '-' }}
-            </el-descriptions-item>
-            <el-descriptions-item label="邮箱">
-              <el-icon class="mr-1"><Message /></el-icon>
-              {{ userProfile.email || '-' }}
-            </el-descriptions-item>
-            <el-descriptions-item label="创建时间">
-              <el-icon class="mr-1"><Timer /></el-icon>
-              {{ userProfile.createTime }}
-            </el-descriptions-item>
-          </el-descriptions>
-        </el-card>
-      </el-col>
+  <div class="develop-page">
+    <el-card shadow="never" class="develop-shell">
+      <!-- Hero: 个人中心 -->
+      <section class="develop-hero">
+        <div class="develop-hero__copy">
+          <div class="develop-hero__eyebrow">PROFILE</div>
+          <h1 class="develop-hero__title">个人中心</h1>
+          <p class="develop-hero__desc">管理你的个人基础信息、头像和账户安全设置。</p>
+        </div>
+      </section>
 
-      <!-- 右侧编辑区 -->
-      <el-col :xs="24" :sm="24" :md="16" :lg="16">
-        <el-card shadow="hover">
-          <template #header>
-            <span class="font-bold">基本信息</span>
-          </template>
-          <el-form
-            ref="formRef"
-            :model="formData"
-            :rules="rules"
-            label-width="100px"
-            v-loading="loading"
-          >
-            <el-form-item label="用户昵称" prop="nickname">
-              <el-input v-model="formData.nickname" placeholder="请输入昵称" maxlength="50" />
-            </el-form-item>
-            <el-form-item label="手机号" prop="phone">
-              <el-input v-model="formData.phone" placeholder="请输入手机号" />
-            </el-form-item>
-            <el-form-item label="电子邮箱" prop="email">
-              <el-input v-model="formData.email" placeholder="请输入电子邮箱" />
-            </el-form-item>
-            <el-form-item label="性别" prop="gender">
-              <el-radio-group v-model="formData.gender">
-                <el-radio :label="1">男</el-radio>
-                <el-radio :label="2">女</el-radio>
-                <el-radio :label="0">未知</el-radio>
-              </el-radio-group>
-            </el-form-item>
-            <el-form-item label="联系地址" prop="address">
-              <el-input v-model="formData.address" placeholder="请输入地址" />
-            </el-form-item>
-            <el-form-item label="个人简介" prop="intro">
-              <el-input
-                v-model="formData.intro"
-                type="textarea"
-                :rows="4"
-                placeholder="请输入个人简介"
-                maxlength="200"
-                show-word-limit
+      <el-row :gutter="18">
+        <!-- 左侧个人信息卡片 -->
+        <el-col :xs="24" :sm="24" :md="8" :lg="8">
+          <section class="develop-panel user-profile-panel text-center">
+            <div class="avatar-wrapper mb-4">
+              <el-avatar :size="120" :src="userProfile.avatar" class="profile-avatar" />
+              <el-button
+                type="primary"
+                size="small"
+                circle
+                icon="Camera"
+                class="avatar-upload-btn"
+                @click="triggerFileUpload"
               />
-            </el-form-item>
-            <el-form-item>
-              <el-button type="primary" @click="handleSubmit">保存修改</el-button>
-            </el-form-item>
-          </el-form>
-        </el-card>
-      </el-col>
-    </el-row>
+              <input
+                ref="fileInput"
+                type="file"
+                style="display: none"
+                accept="image/*"
+                @change="handleFileChange"
+              />
+            </div>
+            <div class="user-info-brief mb-5">
+              <h2 class="user-nickname">{{ userProfile.member?.nickname || userProfile.nickname || "未设置昵称" }}</h2>
+              <div class="user-roles">
+                <el-tag v-for="role in userProfile.roles" :key="role" size="small" effect="plain" class="mr-1 rounded-pill">
+                  {{ role }}
+                </el-tag>
+                <el-tag v-if="!userProfile.roles?.length" size="small" effect="plain" class="rounded-pill">普通用户</el-tag>
+              </div>
+            </div>
+            
+            <el-divider border-style="dashed" />
+            
+            <el-descriptions :column="1" size="small" class="profile-details">
+              <el-descriptions-item label="用户名">
+                <el-icon class="mr-1"><User /></el-icon>
+                {{ userProfile.username }}
+              </el-descriptions-item>
+              <el-descriptions-item label="手机号">
+                <el-icon class="mr-1"><Iphone /></el-icon>
+                {{ userProfile.phone || '-' }}
+              </el-descriptions-item>
+              <el-descriptions-item label="邮箱">
+                <el-icon class="mr-1"><Message /></el-icon>
+                {{ userProfile.email || '-' }}
+              </el-descriptions-item>
+              <el-descriptions-item label="加入时间">
+                <el-icon class="mr-1"><Timer /></el-icon>
+                {{ userProfile.createTime }}
+              </el-descriptions-item>
+            </el-descriptions>
+          </section>
+        </el-col>
+
+        <!-- 右侧编辑区 -->
+        <el-col :xs="24" :sm="24" :md="16" :lg="16">
+          <section class="develop-panel profile-edit-panel">
+            <div class="panel-header mb-5">
+              <div class="panel-title">基本信息</div>
+              <div class="panel-desc text-xs text-gray-400 mt-1">完善个人资料有助于提升账户识别度。</div>
+            </div>
+            
+            <el-form
+              ref="formRef"
+              :model="formData"
+              :rules="rules"
+              label-width="100px"
+              v-loading="loading"
+              class="develop-form"
+            >
+              <el-form-item label="用户昵称" prop="nickname">
+                <el-input v-model="formData.nickname" placeholder="请输入昵称" maxlength="50" />
+              </el-form-item>
+              <el-form-item label="手机号" prop="phone">
+                <el-input v-model="formData.phone" placeholder="请输入手机号" />
+              </el-form-item>
+              <el-form-item label="电子邮箱" prop="email">
+                <el-input v-model="formData.email" placeholder="请输入电子邮箱" />
+              </el-form-item>
+              <el-form-item label="性别" prop="gender">
+                <el-radio-group v-model="formData.gender">
+                  <el-radio :label="1">男</el-radio>
+                  <el-radio :label="2">女</el-radio>
+                  <el-radio :label="0">未知</el-radio>
+                </el-radio-group>
+              </el-form-item>
+              <el-form-item label="联系地址" prop="address">
+                <el-input v-model="formData.address" placeholder="请输入地址" />
+              </el-form-item>
+              <el-form-item label="个人简介" prop="intro">
+                <el-input
+                  v-model="formData.intro"
+                  type="textarea"
+                  :rows="4"
+                  placeholder="请输入个人简介"
+                  maxlength="200"
+                  show-word-limit
+                />
+              </el-form-item>
+              <el-form-item class="mt-8">
+                <el-button type="primary" @click="handleSubmit">保存资料修改</el-button>
+              </el-form-item>
+            </el-form>
+          </section>
+        </el-col>
+      </el-row>
+    </el-card>
   </div>
 </template>
 
@@ -196,11 +215,78 @@ onMounted(() => {
 </script>
 
 <style lang="scss" scoped>
-.user-card {
-  .avatar-container {
-    &:hover .el-button {
-      background-color: var(--el-color-primary);
+.user-profile-panel {
+  padding: 32px 24px !important;
+}
+
+.avatar-wrapper {
+  position: relative;
+  display: inline-block;
+  
+  .profile-avatar {
+    border: 4px solid #fff;
+    box-shadow: 0 10px 30px rgba(150, 180, 140, 0.15);
+  }
+  
+  .avatar-upload-btn {
+    position: absolute;
+    bottom: 4px;
+    right: 4px;
+    border: 2px solid #fff;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    
+    &:hover {
+      transform: scale(1.1);
     }
+  }
+}
+
+.user-nickname {
+  font-size: 22px;
+  font-weight: 700;
+  color: #2a3529;
+  margin-bottom: 8px;
+}
+
+.user-roles {
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+}
+
+.profile-details {
+  :deep(.el-descriptions__label) {
+    color: rgba(88, 102, 86, 0.6);
+    font-weight: 500;
+  }
+  :deep(.el-descriptions__content) {
+    color: #2a3529;
+    font-weight: 600;
+  }
+}
+
+.profile-edit-panel {
+  padding: 28px 32px !important;
+}
+
+.panel-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: #2a3529;
+}
+
+.rounded-pill {
+  border-radius: 999px !important;
+}
+
+// 暗黑模式
+html.dark {
+  .user-nickname, .panel-title, .profile-details :deep(.el-descriptions__content) {
+    color: var(--el-text-color-primary);
+  }
+  
+  .avatar-wrapper .profile-avatar {
+    border-color: var(--el-border-color-lighter);
   }
 }
 </style>
