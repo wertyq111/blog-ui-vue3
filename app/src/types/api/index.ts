@@ -28,5 +28,13 @@ export * from "./article";
 export * from "./photo-category";
 export * from "./photo";
 
+// Develop 模块
+export * from "./server-path";
+export * from "./init-model";
+export * from "./work-platform";
+export * from "./work-daily";
+export * from "./work-doc-category";
+export * from "./work-doc";
+
 // 其他模块
 export * from "./file";
