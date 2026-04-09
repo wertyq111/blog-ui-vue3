@@ -372,19 +372,16 @@ useContextMenuManager();
 
 <style lang="scss" scoped>
 .tags-container {
-  width: 97.7%;
+  width: auto;
   height: var(--tags-view-height);
-  margin: 18px 13px -5px;
-  padding: 0 10px 0 14px;
+  margin: 0;
+  padding: 0 12px 0 16px;
   box-sizing: border-box;
-  background:
-    radial-gradient(circle at top right, rgba(170, 236, 109, 0.14), transparent 24%),
-    radial-gradient(circle at bottom left, rgba(168, 216, 255, 0.14), transparent 32%),
-    linear-gradient(180deg, rgba(255, 255, 255, 0.82), rgba(246, 251, 241, 0.72));
-  backdrop-filter: blur(10px);
-  border: 1px solid var(--el-border-color-lighter);
-  border-radius: 28px;
-  box-shadow: 0 8px 16px rgba(150, 176, 145, 0.08);
+  background: var(--cyber-panel-shell);
+  backdrop-filter: blur(18px);
+  border: 1px solid var(--cyber-border-strong);
+  border-radius: var(--cyber-shell-radius);
+  box-shadow: var(--cyber-shadow);
 
   .scroll-container {
     white-space: nowrap;
@@ -392,32 +389,32 @@ useContextMenuManager();
 
   .cyber-tag {
     border-radius: 999px;
-    height: 30px;
+    height: 34px;
     padding: 0 16px;
-    border: 1px solid rgba(122, 161, 38, 0.12);
-    background: rgba(255, 255, 255, 0.46);
-    color: #5d665b;
+    border: 1px solid color-mix(in srgb, var(--cyber-border) 85%, transparent);
+    background: color-mix(in srgb, var(--cyber-panel-strong) 82%, transparent);
+    color: var(--cyber-text-soft);
     font-weight: 600;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 
     &:hover {
-      background: rgba(255, 255, 255, 0.88);
-      border-color: var(--el-color-primary);
-      color: var(--el-color-primary);
+      background: color-mix(in srgb, var(--cyber-primary) 10%, var(--cyber-panel-strong));
+      border-color: color-mix(in srgb, var(--cyber-primary) 22%, transparent);
+      color: var(--cyber-text);
     }
 
     &.el-tag--primary {
-      background: #ffffff;
-      border-color: var(--el-color-primary);
-      color: var(--el-color-primary);
-      box-shadow: 0 6px 12px rgba(130, 201, 30, 0.12);
+      background: linear-gradient(135deg, rgba(220, 247, 185, 0.98) 0%, rgba(196, 239, 148, 0.94) 100%);
+      border-color: rgba(204, 227, 168, 0.42);
+      color: #5f8f18;
+      box-shadow: 0 8px 16px rgba(171, 192, 157, 0.08);
     }
-    
+
     :deep(.el-tag__close) {
-      color: #98a293;
+      color: color-mix(in srgb, var(--cyber-text-soft) 76%, transparent);
       &:hover {
-        background-color: var(--el-color-primary);
-        color: #fff;
+        background-color: color-mix(in srgb, var(--cyber-primary) 18%, transparent);
+        color: var(--cyber-text);
       }
     }
   }
@@ -454,25 +451,28 @@ useContextMenuManager();
   }
 }
 
-:global(html.dark) .tags-container {
-  background: rgba(10, 18, 32, 0.78);
-  border-bottom-color: rgba(103, 175, 242, 0.14);
-  box-shadow: var(--el-box-shadow-dark);
-  
+:global(body.cyber-theme-dark) .tags-container,
+:global(html.sidebar-color-blue) .tags-container {
+  background: var(--cyber-panel-shell);
+  border-color: var(--cyber-border-strong);
+  box-shadow: var(--cyber-shadow);
+
   .cyber-tag {
     background: rgba(255, 255, 255, 0.05);
     border-color: rgba(255, 255, 255, 0.1);
     color: rgba(202, 224, 248, 0.78);
     
     &.el-tag--primary {
-      background: var(--el-color-primary);
+      background: var(--cyber-sidebar-active-bg);
       color: #fff;
       border-color: transparent;
+      box-shadow: var(--cyber-sidebar-active-shadow);
     }
   }
 }
 
-:global(html.dark) .contextmenu {
+:global(body.cyber-theme-dark) .contextmenu,
+:global(html.sidebar-color-blue) .contextmenu {
   background: #111c2a;
   border-color: rgba(103, 175, 242, 0.2);
   color: #eef6ff;

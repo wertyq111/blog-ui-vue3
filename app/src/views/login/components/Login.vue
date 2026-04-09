@@ -271,30 +271,30 @@ defineExpose({ loginFormData });
   margin-bottom: 20px;
   font-size: 18px;
   font-weight: 600;
-  color: #111827;
+  color: var(--cyber-text);
 
   .brand-logo {
     width: 28px;
     height: 28px;
     object-fit: cover;
     border-radius: 6px;
-    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.22);
+    box-shadow: 0 8px 18px color-mix(in srgb, var(--cyber-primary) 22%, transparent);
   }
 }
 
 .panel-title {
   margin: 0;
-  font-size: 56px;
+  font-size: 54px;
   font-weight: 700;
   line-height: 1.16;
-  color: #0f172a;
+  color: var(--cyber-text);
   text-align: center;
 }
 
 .panel-subtitle {
   margin: 14px 0 36px;
   font-size: 16px;
-  color: #64748b;
+  color: var(--cyber-text-muted);
   text-align: center;
 }
 
@@ -302,7 +302,7 @@ defineExpose({ loginFormData });
   margin: 0 0 10px;
   font-size: 16px;
   font-weight: 600;
-  color: #111827;
+  color: var(--cyber-text);
 }
 
 .login-form {
@@ -311,22 +311,30 @@ defineExpose({ loginFormData });
   }
 
   :deep(.el-input__wrapper) {
-    background: #fff;
+    background: color-mix(in srgb, var(--cyber-panel-strong) 94%, transparent);
     border-radius: 25px;
-    box-shadow: 0 0 0 1px #d7dce5 inset;
+    border: 1px solid color-mix(in srgb, var(--cyber-border) 82%, transparent) !important;
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.12),
+      0 12px 22px color-mix(in srgb, var(--cyber-primary) 8%, transparent) !important;
 
     &.is-focus {
-      box-shadow: 0 0 0 1px var(--el-color-primary) inset;
+      border-color: color-mix(in srgb, var(--cyber-primary) 46%, transparent) !important;
+      box-shadow:
+        0 0 0 2px color-mix(in srgb, var(--cyber-primary) 14%, transparent),
+        0 18px 30px color-mix(in srgb, var(--cyber-primary) 16%, transparent) !important;
     }
   }
 
   :deep(.el-input__inner) {
-    height: 50px;
+    height: 52px;
     font-size: 16px;
+    color: var(--cyber-text);
   }
 
   :deep(.el-input__prefix-inner) {
     font-size: 18px;
+    color: var(--cyber-text-muted);
   }
 }
 
@@ -338,7 +346,11 @@ defineExpose({ loginFormData });
 
   :deep(.el-checkbox__label) {
     font-size: 16px;
-    color: #111827;
+    color: var(--cyber-text);
+  }
+
+  :deep(.el-link) {
+    color: var(--cyber-primary-strong);
   }
 }
 
@@ -349,53 +361,32 @@ defineExpose({ loginFormData });
   font-size: 18px;
   font-weight: 600;
   border-radius: 26px;
+  color: #fff !important;
+  background: linear-gradient(135deg, var(--cyber-primary) 0%, var(--cyber-primary-strong) 100%) !important;
+  border: none !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.18),
+    0 16px 30px color-mix(in srgb, var(--cyber-primary) 26%, transparent) !important;
+
+  &:hover,
+  &:focus {
+    color: #fff !important;
+    background: linear-gradient(135deg, var(--cyber-primary) 0%, var(--cyber-primary-strong) 100%) !important;
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.24),
+      0 18px 34px color-mix(in srgb, var(--cyber-primary) 30%, transparent) !important;
+  }
 }
 
 .signup-tip {
   margin-top: 22px;
   font-size: 16px;
-  color: #64748b;
+  color: var(--cyber-text-muted);
   text-align: center;
 
   span {
     font-weight: 600;
-    color: #111827;
-  }
-}
-
-// Dark Mode Styles
-.dark {
-  .mobile-brand {
-    color: #f3f4f6;
-  }
-
-  .panel-title {
-    color: #f3f4f6;
-  }
-
-  .panel-subtitle {
-    color: #9ca3af;
-  }
-
-  .field-title {
-    color: #e5e7eb;
-  }
-
-  .login-form :deep(.el-input__wrapper) {
-    background: #1f2937;
-    box-shadow: 0 0 0 1px #374151 inset;
-  }
-
-  .remember-row :deep(.el-checkbox__label) {
-    color: #e5e7eb;
-  }
-
-  .signup-tip {
-    color: #9ca3af;
-
-    span {
-      color: #f3f4f6;
-    }
+    color: var(--cyber-text);
   }
 }
 

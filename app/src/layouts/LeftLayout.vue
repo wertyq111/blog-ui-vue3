@@ -2,11 +2,19 @@
   <BaseLayout>
     <!-- 左侧菜单 -->
     <div class="layout__sidebar" :class="{ 'layout__sidebar--collapsed': !isSidebarOpen }">
-      <div :class="{ 'has-logo': showLogo }" class="layout-sidebar">
-        <LayoutLogo v-if="showLogo" :collapse="!isSidebarOpen" />
-        <el-scrollbar>
-          <LayoutSidebar :data="routes" base-path="" />
-        </el-scrollbar>
+      <div class="layout-sidebar">
+        <div class="layout-sidebar__shell">
+          <div
+            v-if="showLogo"
+            class="layout-sidebar__brand"
+            :class="{ 'layout-sidebar__brand--collapsed': !isSidebarOpen }"
+          >
+            <LayoutLogo :collapse="!isSidebarOpen" />
+          </div>
+          <el-scrollbar class="layout-sidebar__scroll">
+            <LayoutSidebar :data="routes" base-path="" />
+          </el-scrollbar>
+        </div>
       </div>
     </div>
 
@@ -44,28 +52,22 @@ const { showTagsView, showLogo, isSidebarOpen, routes } = useLayout();
     top: 0;
     bottom: 0;
     left: 0;
-    z-index: 999;
+    z-index: 1001;
     width: $sidebar-width;
-    background: var(--menu-background);
-    backdrop-filter: blur(20px) saturate(115%);
-    border-right: 1px solid var(--app-border);
-    box-shadow: var(--app-panel-shadow);
-    transition: width 0.28s, background-color 0.3s, box-shadow 0.3s;
-
-    &::before {
-      position: absolute;
-      top: -20%;
-      left: -20%;
-      z-index: -1;
-      width: 140%;
-      height: 140%;
-      content: "";
-      background: radial-gradient(circle at 22% 18%, var(--app-glow-a), transparent 52%);
-      opacity: 0.5;
-    }
+    background: transparent;
+    transition: width 0.28s;
 
     &--collapsed {
       width: $sidebar-width-collapsed;
+
+      .layout-sidebar {
+        padding-left: 10px;
+
+        &__shell {
+          padding-left: 8px;
+          padding-right: 8px;
+        }
+      }
     }
 
     .layout-sidebar {
@@ -73,15 +75,69 @@ const { showTagsView, showLogo, isSidebarOpen, routes } = useLayout();
       height: 100%;
       background-color: transparent;
       transition: width 0.28s;
+      padding: 18px 0 18px 18px;
 
-      &.has-logo {
-        .el-scrollbar {
-          height: calc(100vh - $navbar-height);
+      &__shell {
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+        padding: 16px 12px 14px;
+        background: var(--cyber-sidebar-shell);
+        border: 1px solid var(--cyber-sidebar-border);
+        border-radius: var(--cyber-shell-radius);
+        box-shadow:
+          inset -1px 0 0 rgba(255, 255, 255, 0.04),
+          20px 0 42px rgba(2, 7, 17, 0.24);
+        overflow: hidden;
+      }
+
+      &__brand {
+        flex-shrink: 0;
+        padding: 0 4px 14px;
+
+        :deep(.logo) {
+          height: 56px;
+          border-bottom: none;
+          border-radius: 22px;
+          background: color-mix(in srgb, var(--cyber-panel-strong) 80%, transparent);
+          border: 1px solid color-mix(in srgb, var(--cyber-border) 75%, transparent);
+          box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12);
+        }
+
+        :deep(.logo a) {
+          justify-content: flex-start;
+          padding: 0 18px;
         }
       }
 
-      :deep(.el-menu) {
-        border: none;
+      &__brand--collapsed {
+        :deep(.logo a) {
+          justify-content: center;
+          padding: 0;
+        }
+      }
+
+      &__scroll {
+        flex: 1;
+        min-height: 0;
+
+        :deep(.el-scrollbar__view) {
+          height: 100%;
+        }
+
+        :deep(.sidebar-wrapper) {
+          height: 100%;
+          margin: 0;
+          background: transparent;
+          border: none;
+          box-shadow: none;
+          backdrop-filter: none;
+          border-radius: 0;
+        }
+
+        :deep(.el-menu) {
+          border: none;
+        }
       }
     }
   }
@@ -102,26 +158,12 @@ const { showTagsView, showLogo, isSidebarOpen, routes } = useLayout();
       position: sticky;
       top: 0;
       z-index: 9;
-      background-color: var(--app-panel);
-      backdrop-filter: blur(14px) saturate(120%);
-      border-bottom: 1px solid var(--app-border);
-      box-shadow: 0 6px 16px rgba(11, 20, 32, 0.08);
+      background: transparent;
+      backdrop-filter: none;
+      border-bottom: none;
+      box-shadow: none;
       transition: width 0.28s;
     }
-  }
-}
-
-:global(html.dark) {
-  .layout__sidebar {
-    background: linear-gradient(180deg, rgba(8, 16, 28, 0.95) 0%, rgba(10, 18, 31, 0.9) 100%);
-    border-right: 1px solid rgba(103, 175, 242, 0.2);
-    box-shadow: inset -1px 0 0 rgba(106, 176, 252, 0.12), 10px 0 28px rgba(3, 10, 22, 0.45);
-  }
-
-  .layout__main .fixed-header {
-    background: rgba(11, 20, 32, 0.72);
-    border-bottom-color: rgba(103, 175, 242, 0.16);
-    box-shadow: 0 10px 24px rgba(2, 8, 20, 0.36);
   }
 }
 

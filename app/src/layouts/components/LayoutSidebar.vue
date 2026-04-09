@@ -1,6 +1,6 @@
 <!-- 菜单组件 -->
 <template>
-  <div class="sidebar-wrapper">
+  <div :class="['sidebar-wrapper', `sidebar-wrapper--${menuMode}`]">
     <el-menu
       ref="menuRef"
       :default-active="activeMenuPath"
@@ -59,7 +59,7 @@ const currentRoute = useRoute();
 const expandedMenuIndexes = ref<string[]>([]);
 
 // 获取主题
-const theme = computed(() => settingsStore.theme);
+const theme = computed(() => settingsStore.resolvedTheme);
 
 // 计算当前激活的菜单项
 const activeMenuPath = computed((): string => {
@@ -229,19 +229,26 @@ onMounted(() => {
 
 <style lang="scss" scoped>
 .sidebar-wrapper {
-  background:
-    radial-gradient(circle at top right, rgba(170, 236, 109, 0.14), transparent 24%),
-    radial-gradient(circle at bottom left, rgba(168, 216, 255, 0.14), transparent 32%),
-    linear-gradient(180deg, rgba(255, 255, 255, 0.82), rgba(246, 251, 241, 0.72));
+  background: var(--cyber-sidebar-shell);
   backdrop-filter: blur(20px);
-  border-radius: 28px;
+  border-radius: var(--cyber-shell-radius);
   margin: 18px 0 18px 18px;
   height: calc(100% - 36px);
   overflow: hidden;
   box-shadow:
     inset -1px 0 0 rgba(255, 255, 255, 0.04),
-    20px 0 42px rgba(150, 176, 145, 0.12);
-  border: 1px solid rgba(255, 255, 255, 0.56);
+    20px 0 42px rgba(2, 7, 17, 0.24);
+  border: 1px solid var(--cyber-sidebar-border);
+}
+
+.sidebar-wrapper--horizontal {
+  margin: 0;
+  height: auto;
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  backdrop-filter: none;
+  border-radius: 0;
 }
 
 .sidebar-menu-cyber {
@@ -252,59 +259,37 @@ onMounted(() => {
   :deep(.el-sub-menu__title) {
     position: relative;
     margin: 6px 12px;
-    border-radius: 14px;
-    color: var(--menu-text-color);
+    min-height: 42px;
+    border-radius: 18px;
+    color: var(--cyber-sidebar-text);
     transition: all 0.26s ease;
 
-    i, .el-icon {
+    i,
+    .el-icon {
       color: inherit;
     }
 
     &:hover {
-      background-color: rgba(255, 255, 255, 0.58) !important;
-      color: #3f4f3a !important;
-      box-shadow: 0 12px 24px rgba(177, 197, 158, 0.08);
+      background: var(--cyber-sidebar-hover) !important;
+      color: var(--cyber-text) !important;
+      box-shadow: 0 12px 24px color-mix(in srgb, var(--cyber-primary) 14%, transparent);
     }
   }
 
   :deep(.el-menu-item.is-active) {
-    color: #ffffff !important;
-    background: linear-gradient(135deg, #b6e866 0%, #82c91e 60%, #69c014 100%) !important;
-    box-shadow: 0 12px 24px rgba(130, 201, 30, 0.24), 0 0 22px rgba(130, 201, 30, 0.26);
+    color: var(--cyber-sidebar-active-text) !important;
+    background: var(--cyber-sidebar-active-bg) !important;
+    box-shadow: var(--cyber-sidebar-active-shadow);
     
     i, .el-icon {
-      color: #ffffff !important;
+      color: currentcolor !important;
     }
   }
 
   :deep(.el-sub-menu.has-active-child > .el-sub-menu__title) {
-    color: #586255;
+    color: var(--cyber-sidebar-text);
     font-weight: 700;
-  }
-}
-
-:global(html.dark) .sidebar-wrapper {
-  background: rgba(10, 18, 30, 0.72);
-  border: 1px solid rgba(109, 183, 255, 0.14);
-  box-shadow:
-    inset -1px 0 0 rgba(255, 255, 255, 0.04),
-    20px 0 42px rgba(2, 7, 17, 0.24);
-}
-
-:global(html.dark) .sidebar-menu-cyber {
-  :deep(.el-menu-item),
-  :deep(.el-sub-menu__title) {
-    color: rgba(202, 224, 248, 0.78);
-
-    &:hover {
-      background: rgba(34, 80, 126, 0.36) !important;
-      color: #eef6ff !important;
-    }
-  }
-
-  :deep(.el-menu-item.is-active) {
-    background: linear-gradient(135deg, rgba(15, 167, 255, 0.96), rgba(20, 104, 255, 0.94)) !important;
-    box-shadow: 0 12px 24px rgba(13, 126, 255, 0.24), 0 0 22px rgba(16, 165, 255, 0.26);
+    background: color-mix(in srgb, var(--cyber-primary) 10%, transparent) !important;
   }
 }
 </style>

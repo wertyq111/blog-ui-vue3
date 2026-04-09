@@ -71,6 +71,13 @@ export function generateThemeColors(primary: string, theme: ThemeMode) {
   return colors;
 }
 
+export function resolveThemeMode(theme: ThemeMode, prefersDark: boolean): ThemeMode {
+  if (theme === ThemeMode.AUTO) {
+    return prefersDark ? ThemeMode.DARK : ThemeMode.LIGHT;
+  }
+  return theme;
+}
+
 export function applyTheme(colors: Record<string, string>) {
   const el = document.documentElement;
 
@@ -86,16 +93,20 @@ export function applyTheme(colors: Record<string, string>) {
 }
 
 /**
- * 切换暗黑模式
+ * 同步 DOM 主题类
  *
- * @param isDark 是否启用暗黑模式
+ * @param resolvedTheme 实际生效的主题
  */
-export function toggleDarkMode(isDark: boolean) {
-  if (isDark) {
-    document.documentElement.classList.add(ThemeMode.DARK);
-  } else {
-    document.documentElement.classList.remove(ThemeMode.DARK);
-  }
+export function syncThemeClass(resolvedTheme: ThemeMode) {
+  const isDark = resolvedTheme === ThemeMode.DARK;
+
+  document.documentElement.classList.toggle(ThemeMode.DARK, isDark);
+  document.documentElement.dataset.themeResolved = resolvedTheme;
+
+  document.body.classList.add("cyber-theme");
+  document.body.classList.toggle("cyber-theme-dark", isDark);
+  document.body.classList.toggle("cyber-theme-light", !isDark);
+  document.body.dataset.cyberTheme = resolvedTheme;
 }
 
 /**

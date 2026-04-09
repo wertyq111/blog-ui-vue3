@@ -4,127 +4,237 @@
  * 核心框架布局
  */
 
-// 侧边栏
-.sidebar-container {
-  position: fixed;
-  top: 0;
-  bottom: 0;
-  left: 0;
-  z-index: 1001;
-  width: var(--sidebar-width);
-  height: 100%;
-  overflow: hidden;
-  transition: width 0.3s;
-  background-color: transparent !important;
-}
-
-// 主内容区
-.main-container {
-  position: relative;
+html,
+body,
+#app {
   min-height: 100%;
-  margin-left: var(--sidebar-width);
-  transition: margin-left 0.3s;
-  background: transparent !important;
 }
 
-// 导航栏
-.navbar-container {
-  height: var(--navbar-height);
-  overflow: hidden;
-  position: relative;
-  background: rgba(255, 255, 255, 0.56);
-  backdrop-filter: blur(10px);
-  border-bottom: 1px solid var(--el-border-color-lighter);
-}
-
-// 标签栏
-.tags-view-container {
-  height: var(--tags-view-height);
-  width: 100%;
-}
-
-// 页面主体
-.app-main {
-  position: relative;
-  width: 100%;
-  min-height: calc(100vh - var(--navbar-height));
-  overflow: hidden;
-  background: transparent !important;
-}
-
-// 全局背景 (Cyber Style)
-body {
+body.cyber-theme {
   background:
     radial-gradient(circle at 85% 10%, var(--cyber-body-glow-a), transparent 20%),
     radial-gradient(circle at 15% 78%, var(--cyber-body-glow-b), transparent 22%),
-    linear-gradient(135deg, var(--el-bg-color-page) 0%, var(--el-bg-color) 46%, var(--el-bg-color-page) 100%);
+    linear-gradient(135deg, var(--cyber-bg-start) 0%, var(--cyber-bg-end) 46%, var(--cyber-bg-deep) 100%);
   background-attachment: fixed;
-  color: var(--el-text-color-primary);
+  color: var(--cyber-text);
 }
 
 #app {
   position: relative;
+
   &::before {
     content: "";
     position: fixed;
     inset: 0;
+    z-index: 0;
     pointer-events: none;
     background:
       radial-gradient(circle at 78% 12%, var(--cyber-layout-glow-a), transparent 24%),
       radial-gradient(circle at 18% 84%, var(--cyber-layout-glow-b), transparent 24%);
     filter: blur(8px);
-    z-index: 0;
   }
-  & > * {
+
+  > * {
     position: relative;
     z-index: 1;
   }
 }
 
-// 固定头部
-.fixed-header {
-  position: fixed;
-  top: 0;
-  right: 0;
-  z-index: 9;
-  width: calc(100% - var(--sidebar-width));
-  transition: width 0.3s;
+.layout,
+.layout-left,
+.layout-top,
+.layout-mix {
+  min-height: 100vh;
 }
 
-.hideSidebar {
-  .sidebar-container {
-    width: var(--sidebar-width-collapsed) !important;
-  }
-  .main-container {
-    margin-left: var(--sidebar-width-collapsed);
-  }
-  .fixed-header {
-    width: calc(100% - var(--sidebar-width-collapsed));
-  }
+.layout__overlay {
+  background: rgba(7, 13, 22, 0.42) !important;
+  backdrop-filter: blur(6px);
 }
 
-// 响应式处理
-.mobile {
-  .main-container {
-    margin-left: 0;
-  }
-  .sidebar-container {
-    width: var(--sidebar-width) !important;
-    transition: transform 0.3s;
-  }
-  &.hideSidebar {
-    .sidebar-container {
-      pointer-events: none;
-      transform: translateX(-100%);
-    }
-  }
-  .fixed-header {
-    width: 100%;
-  }
+.navbar,
+.tags-container,
+.layout-top .layout__header,
+.layout-mix .layout__header {
+  border: 1px solid var(--cyber-border-strong);
+  background: var(--cyber-panel-shell);
+  box-shadow: var(--cyber-shadow);
+  backdrop-filter: blur(18px);
 }
 
-html.dark {
-  .navbar-container {
-    background: rgba(15, 26, 40, 0.72);
-  }
+.layout-left .navbar,
+.layout-left .tags-container {
+  margin-right: $workspace-gap;
+}
+
+.layout-left .navbar {
+  margin-top: $workspace-gap;
+}
+
+.layout-left .tags-container {
+  margin-top: 10px;
+  background: color-mix(in srgb, var(--cyber-panel) 72%, transparent);
+  box-shadow: 0 14px 28px color-mix(in srgb, var(--cyber-primary) 6%, transparent);
+}
+
+.layout-top .layout__header,
+.layout-mix .layout__header {
+  position: sticky;
+  top: $workspace-gap;
+  z-index: 40;
+  height: $navbar-height;
+  margin: $workspace-gap $workspace-gap 0 $workspace-gap;
+  border-radius: var(--cyber-shell-radius);
+  overflow: visible;
+}
+
+.layout-top .tags-container,
+.layout-mix .tags-container {
+  margin: $workspace-gap $workspace-gap 0 $workspace-gap;
+}
+
+.layout-left .tags-container,
+.layout-top .tags-container,
+.layout-mix .tags-container {
+  width: auto !important;
+}
+
+.layout-left .app-main,
+.layout-top .app-main,
+.layout-mix .app-main {
+  background: transparent !important;
+}
+
+.layout-left .app-main {
+  min-height: calc(100vh - #{$navbar-height});
+}
+
+.layout-top .layout__main,
+.layout-mix .layout__main {
+  min-height: calc(100vh - #{$navbar-height + $workspace-gap * 2});
+}
+
+.layout-top .app-main,
+.layout-mix .app-main {
+  min-height: calc(100vh - #{$navbar-height + $workspace-gap * 2});
+}
+
+.layout-mix .layout__container {
+  display: flex;
+  gap: $workspace-gap;
+  padding: $workspace-gap $workspace-gap 24px;
+}
+
+.layout-mix .layout__sidebar--left {
+  background: var(--cyber-sidebar-shell);
+  border: 1px solid var(--cyber-sidebar-border);
+  border-radius: var(--cyber-shell-radius);
+  box-shadow:
+    inset -1px 0 0 rgba(255, 255, 255, 0.04),
+    20px 0 42px rgba(2, 7, 17, 0.24);
+}
+
+.layout-mix .layout__main {
+  min-width: 0;
+}
+
+.layout-top .layout__main,
+.layout-mix .layout__main,
+.layout-left .layout__main {
+  background: transparent !important;
+}
+
+.layout-top .layout__header-menu .el-menu,
+.layout-mix .layout__header-menu .el-menu,
+.layout-top .layout__header-menu .el-menu--horizontal,
+.layout-mix .layout__header-menu .el-menu--horizontal {
+  background: transparent !important;
+  border: none !important;
+}
+
+.layout-top .layout__header-menu .el-menu-item,
+.layout-top .layout__header-menu .el-sub-menu__title,
+.layout-mix .layout__header-menu .el-menu-item,
+.layout-mix .layout__header-menu .el-sub-menu__title {
+  height: 38px !important;
+  line-height: 38px !important;
+  margin: 0 4px;
+  border-radius: 999px;
+  color: var(--cyber-text-soft) !important;
+  border-bottom: none !important;
+  transition:
+    background 0.2s ease,
+    color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.layout-top .layout__header-menu .el-menu-item:hover,
+.layout-top .layout__header-menu .el-sub-menu__title:hover,
+.layout-mix .layout__header-menu .el-menu-item:hover,
+.layout-mix .layout__header-menu .el-sub-menu__title:hover {
+  background: color-mix(in srgb, var(--cyber-primary) 10%, var(--cyber-panel)) !important;
+  color: var(--cyber-text) !important;
+}
+
+.layout-top .layout__header-menu .el-menu-item.is-active,
+.layout-top .layout__header-menu .el-sub-menu.has-active-child > .el-sub-menu__title,
+.layout-mix .layout__header-menu .el-menu-item.is-active,
+.layout-mix .layout__header-menu .el-sub-menu.has-active-child > .el-sub-menu__title {
+  background: linear-gradient(
+    135deg,
+    color-mix(in srgb, var(--cyber-primary) 18%, #fff) 0%,
+    color-mix(in srgb, var(--cyber-primary-strong) 16%, #fff) 100%
+  ) !important;
+  color: var(--cyber-sidebar-active-text) !important;
+  box-shadow: 0 10px 22px color-mix(in srgb, var(--cyber-primary) 18%, transparent);
+}
+
+body.cyber-theme-dark .layout-top .layout__header-menu .el-menu-item.is-active,
+body.cyber-theme-dark .layout-top .layout__header-menu .el-sub-menu.has-active-child > .el-sub-menu__title,
+body.cyber-theme-dark .layout-mix .layout__header-menu .el-menu-item.is-active,
+body.cyber-theme-dark .layout-mix .layout__header-menu .el-sub-menu.has-active-child > .el-sub-menu__title,
+html.sidebar-color-blue .layout-top .layout__header-menu .el-menu-item.is-active,
+html.sidebar-color-blue .layout-top .layout__header-menu .el-sub-menu.has-active-child > .el-sub-menu__title,
+html.sidebar-color-blue .layout-mix .layout__header-menu .el-menu-item.is-active,
+html.sidebar-color-blue .layout-mix .layout__header-menu .el-sub-menu.has-active-child > .el-sub-menu__title {
+  background: var(--cyber-sidebar-active-bg) !important;
+  box-shadow: var(--cyber-sidebar-active-shadow);
+}
+
+.layout-top .layout__header-right,
+.layout-mix .layout__header-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.layout-top .layout__header-logo,
+.layout-mix .layout__header-logo {
+  margin-right: 18px;
+}
+
+.layout-top .layout__header-logo .logo,
+.layout-mix .layout__header-logo .logo {
+  width: auto;
+  border-bottom: none;
+}
+
+.mobile.layout-left .layout__main,
+.mobile.layout-top .layout__main,
+.mobile.layout-mix .layout__main {
+  margin-left: 0 !important;
+}
+
+.mobile.layout-top .layout__header,
+.mobile.layout-mix .layout__header,
+.mobile.layout-top .tags-container,
+.mobile.layout-mix .tags-container,
+.mobile.layout-left .navbar,
+.mobile.layout-left .tags-container {
+  margin-left: 12px;
+  margin-right: 12px;
+}
+
+.mobile.layout-mix .layout__container {
+  padding: 12px 12px 20px;
 }

@@ -33,10 +33,12 @@ function toggleSideBar() {
   align-items: center;
   justify-content: space-between;
   height: var(--navbar-height);
-  background: rgba(255, 255, 255, 0.56);
-  backdrop-filter: blur(10px);
-  border-bottom: 1px solid var(--el-border-color-lighter);
-  padding-right: 18px;
+  padding: 0 20px 0 12px;
+  border-radius: var(--cyber-shell-radius);
+  background: var(--cyber-panel-shell);
+  border: 1px solid var(--cyber-border-strong);
+  box-shadow: var(--cyber-shadow);
+  backdrop-filter: blur(18px);
 
   &__actions {
     display: flex;
@@ -56,24 +58,9 @@ function toggleSideBar() {
       transition: all 0.2s ease;
 
       &:hover {
-        background: rgba(122, 161, 38, 0.12);
-        color: var(--el-color-primary);
+        background: var(--cyber-header-tool-hover-bg);
+        color: var(--cyber-header-tool-hover-text);
       }
-    }
-  }
-}
-
-:global(html.dark) .navbar {
-  background: rgba(12, 20, 33, 0.72);
-  border-bottom-color: rgba(103, 175, 242, 0.16);
-  box-shadow: 0 10px 24px rgba(2, 8, 20, 0.34);
-  
-  &__actions {
-    color: rgba(202, 224, 248, 0.78);
-    
-    :deep(.toolbar-item:hover) {
-      background: rgba(255, 255, 255, 0.08);
-      color: #fff;
     }
   }
 }

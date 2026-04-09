@@ -6,7 +6,7 @@
 
 <script setup lang="ts">
 import { useSettingsStore } from "@/store";
-import { ThemeMode, SidebarColor, LayoutMode } from "@/enums/settings";
+import { SidebarColor, LayoutMode } from "@/enums/settings";
 
 defineProps({
   isActive: { type: Boolean, required: true },
@@ -19,7 +19,7 @@ const layout = computed(() => settingsStore.layout);
 
 const hamburgerClass = computed(() => {
   // 如果暗黑主题
-  if (settingsStore.theme === ThemeMode.DARK) {
+  if (settingsStore.effectiveDarkMode) {
     return "hamburger--white";
   }
 

@@ -1,6 +1,6 @@
 <template>
-  <div class="develop-page workplace-page">
-    <el-card shadow="never" class="develop-shell workplace-shell">
+  <div class="develop-page admin-workspace-page workplace-page">
+    <el-card shadow="never" class="develop-shell admin-workspace-shell workplace-shell">
       <!-- Hero 区域: 欢迎与快捷操作 -->
       <section class="develop-hero workplace-hero">
         <div class="develop-hero__copy workplace-hero__copy">
@@ -49,7 +49,7 @@
                   <div class="develop-table-shell__title">最近工作日志</div>
                   <div class="develop-table-shell__desc">追踪近期开发记录、所属平台与摘要。</div>
                 </div>
-                <el-link type="primary" :underline="false" @click="router.push('/develop/work-daily')">查看全部</el-link>
+                <el-link type="primary" underline="never" @click="router.push('/develop/work-daily')">查看全部</el-link>
               </div>
               <div v-loading="loading.logs" class="min-h-[200px]">
                 <el-empty v-if="!recentLogs.length" :image-size="60" description="暂无日志" />
@@ -79,7 +79,7 @@
                   <div class="develop-table-shell__title">最近工作文档</div>
                   <div class="develop-table-shell__desc">快速访问最近编辑或创建的文档。</div>
                 </div>
-                <el-link type="primary" :underline="false" @click="router.push('/develop/work-doc')">查看全部</el-link>
+                <el-link type="primary" underline="never" @click="router.push('/develop/work-doc')">查看全部</el-link>
               </div>
               <div v-loading="loading.docs" class="min-h-[200px]">
                 <el-empty v-if="!recentDocs.length" :image-size="60" description="暂无文档" />
@@ -267,14 +267,14 @@ onMounted(() => {
   &__value {
     font-size: 26px;
     font-weight: 800;
-    color: #2a3529;
+    color: var(--cyber-text);
     line-height: 1;
     margin-bottom: 6px;
   }
 
   &__hint {
     font-size: 11px;
-    color: rgba(88, 102, 86, 0.5);
+    color: var(--cyber-text-mute);
   }
 }
 
@@ -286,16 +286,16 @@ onMounted(() => {
 
 .workplace-log-item {
   padding: 16px;
-  background: rgba(255, 255, 255, 0.4);
+  background: color-mix(in srgb, var(--cyber-panel-strong) 86%, transparent);
   border-radius: 16px;
-  border: 1px solid rgba(255, 255, 255, 0.6);
+  border: 1px solid color-mix(in srgb, var(--cyber-border) 88%, transparent);
   cursor: pointer;
   transition: all 0.26s ease;
 
   &:hover {
-    background: rgba(255, 255, 255, 0.9);
+    background: color-mix(in srgb, var(--cyber-primary) 8%, var(--cyber-panel-strong));
     transform: translateX(4px);
-    border-color: var(--el-color-primary-light-5);
+    border-color: color-mix(in srgb, var(--cyber-primary) 24%, transparent);
   }
 
   &__head {
@@ -314,7 +314,7 @@ onMounted(() => {
   &__content {
     font-size: 13px;
     line-height: 1.6;
-    color: rgba(88, 102, 86, 0.82);
+    color: var(--cyber-text-soft);
   }
 }
 
@@ -322,8 +322,8 @@ onMounted(() => {
   display: inline-block;
   padding: 2px 8px;
   font-size: 11px;
-  background: rgba(130, 201, 30, 0.1);
-  color: #69c014;
+  background: color-mix(in srgb, var(--cyber-primary) 12%, transparent);
+  color: var(--cyber-primary-strong);
   border-radius: 6px;
   margin-left: 6px;
   font-weight: 600;
@@ -340,25 +340,25 @@ onMounted(() => {
   align-items: center;
   justify-content: space-between;
   padding: 14px 16px;
-  background: rgba(255, 255, 255, 0.4);
+  background: color-mix(in srgb, var(--cyber-panel-strong) 86%, transparent);
   border-radius: 14px;
-  border: 1px solid rgba(255, 255, 255, 0.5);
+  border: 1px solid color-mix(in srgb, var(--cyber-border) 88%, transparent);
   cursor: pointer;
   transition: all 0.2s;
 
   &:hover {
-    background: #fff;
+    background: color-mix(in srgb, var(--cyber-primary) 8%, var(--cyber-panel-strong));
     .workplace-doc-item__arrow { transform: translateX(3px); color: var(--el-color-primary); }
   }
 
   &__title {
     font-size: 14px;
     font-weight: 600;
-    color: #2a3529;
+    color: var(--cyber-text);
     margin-bottom: 4px;
   }
 
-  &__arrow { color: #ccc; transition: all 0.2s; }
+  &__arrow { color: var(--cyber-text-mute); transition: all 0.2s; }
 }
 
 .workplace-platform-grid {
@@ -372,18 +372,21 @@ onMounted(() => {
   align-items: center;
   gap: 8px;
   padding: 10px 12px;
-  background: rgba(255, 255, 255, 0.5);
+  background: color-mix(in srgb, var(--cyber-panel-strong) 88%, transparent);
   border-radius: 10px;
   font-size: 13px;
   font-weight: 600;
-  color: #5d665b;
+  color: var(--cyber-text-soft);
 
   .dot {
     width: 6px;
     height: 6px;
     border-radius: 50%;
-    background: #ccc;
-    &.is-active { background: #82c91e; box-shadow: 0 0 8px rgba(130, 201, 30, 0.6); }
+    background: var(--cyber-text-mute);
+    &.is-active {
+      background: var(--cyber-primary);
+      box-shadow: 0 0 8px color-mix(in srgb, var(--cyber-primary) 60%, transparent);
+    }
   }
 }
 
@@ -399,13 +402,13 @@ onMounted(() => {
   align-items: center;
   gap: 8px;
   padding: 12px 8px;
-  background: rgba(255, 255, 255, 0.4);
+  background: color-mix(in srgb, var(--cyber-panel-strong) 86%, transparent);
   border-radius: 12px;
   cursor: pointer;
   transition: all 0.2s;
 
   &:hover {
-    background: #fff;
+    background: color-mix(in srgb, var(--cyber-primary) 8%, var(--cyber-panel-strong));
     transform: translateY(-2px);
     .workplace-tool-item__icon { background: var(--el-color-primary); color: #fff; }
   }
@@ -416,14 +419,14 @@ onMounted(() => {
     display: flex;
     align-items: center;
     justify-content: center;
-    background: rgba(255, 255, 255, 0.8);
+    background: color-mix(in srgb, var(--cyber-panel-strong) 92%, transparent);
     border-radius: 10px;
     font-size: 20px;
     color: var(--el-color-primary);
     transition: all 0.3s;
   }
 
-  &__name { font-size: 12px; font-weight: 600; color: #5d665b; }
+  &__name { font-size: 12px; font-weight: 600; color: var(--cyber-text-soft); }
 }
 
 .truncate-2 {
@@ -436,10 +439,10 @@ onMounted(() => {
 .rounded-pill { border-radius: 999px !important; }
 
 // 暗黑模式
-html.dark {
+:global(body.cyber-theme-dark) {
   .workplace-overview__item { border-right-color: rgba(103, 175, 242, 0.1); }
-  .workplace-overview__value { color: #eef6ff; }
-  .workplace-overview__label, .workplace-overview__hint { color: rgba(202, 224, 248, 0.7); }
+  .workplace-overview__value { color: var(--cyber-text); }
+  .workplace-overview__label, .workplace-overview__hint { color: var(--cyber-text-soft); }
   
   .workplace-log-item, .workplace-doc-item, .workplace-platform-tag, .workplace-tool-item {
     background: rgba(15, 26, 40, 0.4);
@@ -451,10 +454,10 @@ html.dark {
   }
   
   .workplace-doc-item__title, .workplace-tool-item__name, .workplace-platform-tag {
-    color: #eef6ff;
+    color: var(--cyber-text);
   }
   
-  .workplace-log-item__content { color: rgba(202, 224, 248, 0.8); }
+  .workplace-log-item__content { color: var(--cyber-text-soft); }
   
   .workplace-tool-item__icon {
     background: rgba(34, 80, 126, 0.36);

@@ -199,7 +199,12 @@ const colorPresets = [...themeColorPresets];
 
 const settingsStore = useSettingsStore();
 
-const isDark = ref<boolean>(settingsStore.theme === ThemeMode.DARK);
+const isDark = computed({
+  get: () => settingsStore.effectiveDarkMode,
+  set: (value: boolean) => {
+    settingsStore.theme = value ? ThemeMode.DARK : ThemeMode.LIGHT;
+  },
+});
 const sidebarColor = ref(settingsStore.sidebarColorScheme);
 
 const selectedThemeColor = computed({
@@ -278,7 +283,6 @@ const handleResetSettings = async () => {
     settingsStore.resetSettings();
 
     // 同步更新本地状态"
-    isDark.value = settingsStore.theme === ThemeMode.DARK;
     sidebarColor.value = settingsStore.sidebarColorScheme;
 
     ElMessage.success(t("settings.resetSuccess"));
@@ -332,6 +336,13 @@ const generateSettingsCode = (): string => {
 const handleCloseDrawer = () => {
   settingsStore.settingsVisible = false;
 };
+
+watch(
+  () => settingsStore.sidebarColorScheme,
+  (value) => {
+    sidebarColor.value = value;
+  }
+);
 </script>
 
 <style lang="scss" scoped>

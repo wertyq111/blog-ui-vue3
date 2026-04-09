@@ -28,12 +28,17 @@ defineProps({
   width: 100%;
   height: var(--navbar-height);
   background-color: transparent;
-  border-bottom: 1px solid rgba(122, 161, 38, 0.12);
+  border-bottom: 1px solid color-mix(in srgb, var(--cyber-border) 72%, transparent);
+
+  a {
+    justify-content: flex-start;
+    padding: 0 20px;
+  }
 
   .logo-img {
     width: 24px;
     height: 24px;
-    filter: drop-shadow(0 4px 10px rgba(130, 201, 30, 0.24));
+    filter: drop-shadow(0 8px 18px color-mix(in srgb, var(--cyber-primary) 22%, transparent));
   }
 
   .title {
@@ -41,20 +46,8 @@ defineProps({
     margin-left: 10px;
     font-size: 18px;
     font-weight: 800;
-    color: #2a3529;
+    color: var(--cyber-text);
     letter-spacing: -0.5px;
-  }
-}
-
-:global(html.dark) .logo {
-  border-bottom-color: rgba(103, 175, 242, 0.16);
-  
-  .logo-img {
-    filter: drop-shadow(0 4px 14px rgba(17, 180, 255, 0.28));
-  }
-
-  .title {
-    color: #eef6ff;
   }
 }
 </style>
@@ -65,9 +58,10 @@ defineProps({
 .layout-mix {
   .logo {
     background-color: transparent !important;
+    border-bottom: none;
 
     .title {
-      color: var(--el-text-color-primary);
+      color: var(--cyber-text);
     }
   }
 }

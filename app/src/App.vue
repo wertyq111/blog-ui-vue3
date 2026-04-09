@@ -1,5 +1,5 @@
 <template>
-  <el-config-provider :locale="locale" :size="size">
+  <el-config-provider :key="themeRenderKey" :locale="locale" :size="size">
     <!-- 开启水印-->
     <el-watermark
       :font="{ color: fontColor }"
@@ -15,7 +15,7 @@
 <script setup lang="ts">
 import { useAppStore, useSettingsStore } from "@/store";
 import { appConfig } from "@/settings";
-import { ThemeMode, ComponentSize } from "@/enums";
+import { ComponentSize } from "@/enums";
 
 const appStore = useAppStore();
 const settingsStore = useSettingsStore();
@@ -24,9 +24,12 @@ const locale = computed(() => appStore.locale);
 const size = computed(() => appStore.size as ComponentSize);
 const showWatermark = computed(() => settingsStore.showWatermark);
 const watermarkContent = appConfig.name;
+const themeRenderKey = computed(
+  () => `${settingsStore.resolvedTheme}-${settingsStore.themeRefreshKey}`
+);
 
 // 明亮/暗黑主题水印字体颜色适配
 const fontColor = computed(() => {
-  return settingsStore.theme === ThemeMode.DARK ? "rgba(255, 255, 255, .15)" : "rgba(0, 0, 0, .15)";
+  return settingsStore.effectiveDarkMode ? "rgba(255, 255, 255, .15)" : "rgba(0, 0, 0, .15)";
 });
 </script>

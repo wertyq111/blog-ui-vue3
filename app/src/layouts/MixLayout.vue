@@ -127,7 +127,8 @@ const isLogoCollapsed = computed(() => width.value < 768);
 // 是否使用深色菜单配色（暗色主题或经典蓝侧边栏）
 const useMenuColors = computed(
   () =>
-    settingsStore.theme === "dark" || settingsStore.sidebarColorScheme === SidebarColor.CLASSIC_BLUE
+    settingsStore.effectiveDarkMode ||
+    settingsStore.sidebarColorScheme === SidebarColor.CLASSIC_BLUE
 );
 
 // 顶部菜单项（处理单子菜单显示优化）
@@ -227,12 +228,16 @@ watch(
 .layout {
   &__header {
     position: sticky;
-    top: 0;
+    top: 18px;
     z-index: 999;
     width: 100%;
     height: $navbar-height;
-    background-color: var(--menu-background);
-    border-bottom: 1px solid var(--el-border-color-lighter);
+    padding: 0 22px;
+    border-radius: var(--cyber-shell-radius);
+    background: var(--cyber-panel-shell);
+    border: 1px solid var(--cyber-border-strong);
+    box-shadow: var(--cyber-shadow);
+    backdrop-filter: blur(18px);
 
     &-content {
       display: flex;
@@ -269,13 +274,19 @@ watch(
         height: 100%;
 
         .el-menu-item {
-          height: 100%;
-          line-height: $navbar-height;
+          display: inline-flex;
+          align-items: center;
+          height: 38px;
+          line-height: 38px;
+          margin: 0 4px;
+          border-radius: 999px;
           border-bottom: none;
+          color: var(--cyber-text-soft);
 
           &.is-active {
-            background-color: rgba(255, 255, 255, 0.12);
-            border-bottom: 2px solid var(--el-color-primary);
+            color: var(--cyber-sidebar-active-text);
+            background: var(--cyber-sidebar-active-bg);
+            box-shadow: var(--cyber-sidebar-active-shadow);
           }
         }
       }
@@ -292,14 +303,21 @@ watch(
 
   &__container {
     display: flex;
-    height: calc(100vh - $navbar-height);
-    padding-top: 0;
+    min-height: calc(100vh - $navbar-height - 36px);
+    padding-top: 18px;
 
     .layout__sidebar--left {
       position: relative;
       width: $sidebar-width;
       height: 100%;
-      background-color: var(--menu-background);
+      margin: 0;
+      background: var(--cyber-sidebar-shell);
+      border: 1px solid var(--cyber-sidebar-border);
+      border-radius: var(--cyber-shell-radius);
+      box-shadow:
+        inset -1px 0 0 rgba(255, 255, 255, 0.04),
+        20px 0 42px rgba(2, 7, 17, 0.24);
+      overflow: hidden;
       transition: width 0.28s;
 
       &.layout__sidebar--collapsed {
@@ -324,15 +342,15 @@ watch(
         width: 100%;
         height: 50px;
         line-height: 50px;
-        background-color: var(--menu-background);
-        box-shadow: 0 0 6px -2px var(--el-color-primary);
+        background-color: color-mix(in srgb, var(--cyber-panel) 92%, transparent);
+        box-shadow: 0 -10px 24px color-mix(in srgb, var(--cyber-primary) 12%, transparent);
       }
     }
 
     .layout__main {
       flex: 1;
       min-width: 0;
-      height: 100%;
+      height: auto;
       margin-left: 0;
       overflow-y: auto;
     }

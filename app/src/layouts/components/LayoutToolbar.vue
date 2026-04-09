@@ -71,7 +71,7 @@
 import { useI18n } from "vue-i18n";
 import { useRoute, useRouter } from "vue-router";
 import { defaults } from "@/settings";
-import { DeviceEnum, SidebarColor, ThemeMode, LayoutMode } from "@/enums/settings";
+import { DeviceEnum } from "@/enums/settings";
 import { useAppStore, useSettingsStore, useUserStore } from "@/store";
 
 // 导入子组件
@@ -137,28 +137,9 @@ function handleProfileClick() {
 
 // 根据主题和侧边栏配色方案选择样式类
 const navbarActionsClass = computed(() => {
-  const { theme, sidebarColorScheme, layout } = settingStore;
+  const { effectiveDarkMode } = settingStore;
 
-  // 暗黑主题下，所有布局都使用白色文字
-  if (theme === ThemeMode.DARK) {
-    return "navbar-actions--white-text";
-  }
-
-  // 明亮主题下
-  if (theme === ThemeMode.LIGHT) {
-    // 顶部布局和混合布局的顶部区域：
-    // - 如果侧边栏是经典蓝色，使用白色文字
-    // - 如果侧边栏是极简白色，使用深色文字
-    if (layout === LayoutMode.TOP || layout === LayoutMode.MIX) {
-      if (sidebarColorScheme === SidebarColor.CLASSIC_BLUE) {
-        return "navbar-actions--white-text";
-      } else {
-        return "navbar-actions--dark-text";
-      }
-    }
-  }
-
-  return "navbar-actions--dark-text";
+  return effectiveDarkMode ? "navbar-actions--white-text" : "navbar-actions--dark-text";
 });
 
 /**
@@ -201,6 +182,7 @@ function handleSettingsClick() {
     padding: 0 8px;
     text-align: center;
     cursor: pointer;
+    border-radius: 12px;
     transition: all 0.3s;
 
     // 确保子元素居中
@@ -233,15 +215,15 @@ function handleSettingsClick() {
     :deep([class^="i-svg:"]) {
       font-size: 18px;
       line-height: 1;
-      color: var(--el-text-color-regular);
+      color: var(--cyber-header-tool-text);
       transition: color 0.3s;
     }
 
     &:hover {
-      background: var(--el-fill-color-light);
+      background: var(--cyber-header-tool-hover-bg);
 
       :deep([class^="i-svg:"]) {
-        color: var(--el-color-primary);
+        color: var(--cyber-header-tool-hover-text);
       }
     }
   }
@@ -252,16 +234,18 @@ function handleSettingsClick() {
     justify-content: center;
     height: 44px;
     padding: 0 8px;
-    border-radius: 10px;
-    transition: background-color 0.3s ease;
+    border-radius: 12px;
+    transition:
+      background-color 0.3s ease,
+      color 0.3s ease;
 
     &:hover {
-      background: color-mix(in srgb, var(--el-color-primary) 8%, transparent);
+      background: var(--cyber-header-tool-hover-bg);
     }
 
     &__avatar {
       flex-shrink: 0;
-      border: 1px solid color-mix(in srgb, var(--el-color-primary) 20%, transparent);
+      border: 1px solid color-mix(in srgb, var(--cyber-primary) 22%, transparent);
     }
 
     &__name {
@@ -284,39 +268,39 @@ function handleSettingsClick() {
 .navbar-actions--white-text {
   .navbar-actions__item {
     :deep([class^="i-svg:"]) {
-      color: color-mix(in srgb, var(--el-color-white) 85%, transparent);
+      color: var(--cyber-header-tool-text);
     }
 
     &:hover {
-      background: color-mix(in srgb, var(--el-color-white) 10%, transparent);
+      background: var(--cyber-header-tool-hover-bg);
 
       :deep([class^="i-svg:"]) {
-        color: var(--el-color-white);
+        color: var(--cyber-header-tool-hover-text);
       }
     }
   }
 
   .user-profile__name {
-    color: color-mix(in srgb, var(--el-color-white) 85%, transparent);
+    color: var(--cyber-header-tool-text);
   }
 
   .user-profile__arrow {
-    color: color-mix(in srgb, var(--el-color-white) 70%, transparent);
+    color: var(--cyber-text-mute);
   }
 
   // 租户选择器在白色文字模式下的样式
   ::v-deep(.tenant-switcher__trigger) {
-    color: color-mix(in srgb, var(--el-color-white) 85%, transparent);
+    color: var(--cyber-header-tool-text);
   }
   ::v-deep(.tenant-switcher__trigger .tenant-switcher__icon) {
-    color: color-mix(in srgb, var(--el-color-white) 85%, transparent);
+    color: var(--cyber-header-tool-text);
   }
   ::v-deep(.tenant-switcher__trigger:hover) {
-    color: var(--el-color-white);
-    background: color-mix(in srgb, var(--el-color-white) 10%, transparent);
+    color: var(--cyber-header-tool-hover-text);
+    background: var(--cyber-header-tool-hover-bg);
   }
   ::v-deep(.tenant-switcher__trigger:hover .tenant-switcher__icon) {
-    color: var(--el-color-white);
+    color: var(--cyber-header-tool-hover-text);
   }
 }
 
@@ -324,39 +308,39 @@ function handleSettingsClick() {
 .navbar-actions--dark-text {
   .navbar-actions__item {
     :deep([class^="i-svg:"]) {
-      color: var(--el-text-color-regular) !important;
+      color: var(--cyber-header-tool-text) !important;
     }
 
     &:hover {
-      background: rgba(0, 0, 0, 0.04);
+      background: var(--cyber-header-tool-hover-bg);
 
       :deep([class^="i-svg:"]) {
-        color: var(--el-color-primary) !important;
+        color: var(--cyber-header-tool-hover-text) !important;
       }
     }
   }
 
   .user-profile__name {
-    color: var(--el-text-color-regular) !important;
+    color: var(--cyber-header-tool-text) !important;
   }
 
   .user-profile__arrow {
-    color: var(--app-text-mute, var(--el-text-color-secondary)) !important;
+    color: var(--cyber-text-mute) !important;
   }
 
   // 租户选择器在深色文字模式下的样式
   ::v-deep(.tenant-switcher__trigger) {
-    color: var(--el-text-color-regular) !important;
+    color: var(--cyber-header-tool-text) !important;
   }
   ::v-deep(.tenant-switcher__trigger .tenant-switcher__icon) {
-    color: var(--el-text-color-regular) !important;
+    color: var(--cyber-header-tool-text) !important;
   }
   ::v-deep(.tenant-switcher__trigger:hover) {
-    color: var(--el-color-primary) !important;
-    background: var(--el-fill-color-light);
+    color: var(--cyber-header-tool-hover-text) !important;
+    background: var(--cyber-header-tool-hover-bg);
   }
   ::v-deep(.tenant-switcher__trigger:hover .tenant-switcher__icon) {
-    color: var(--el-color-primary) !important;
+    color: var(--cyber-header-tool-hover-text) !important;
   }
 }
 

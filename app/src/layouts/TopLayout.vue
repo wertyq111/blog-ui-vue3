@@ -50,14 +50,19 @@ const isLogoCollapsed = computed(() => width.value < 768);
 .layout {
   &__header {
     position: sticky;
-    top: 0;
+    top: 18px;
     z-index: 999;
     display: flex;
     align-items: center;
     justify-content: space-between;
     width: 100%;
     height: $navbar-height;
-    background-color: $menu-background;
+    padding: 0 22px;
+    border-radius: var(--cyber-shell-radius);
+    background: var(--cyber-panel-shell);
+    border: 1px solid var(--cyber-border-strong);
+    box-shadow: var(--cyber-shadow);
+    backdrop-filter: blur(18px);
 
     &-left {
       display: flex;
@@ -95,30 +100,44 @@ const isLogoCollapsed = computed(() => width.value < 768);
       :deep(.el-menu--horizontal) {
         flex: 1;
         min-width: 0;
-        height: $navbar-height;
+        height: 100%;
         overflow: hidden;
-        line-height: $navbar-height;
+        line-height: 38px;
         background-color: transparent;
         border: none;
 
         .el-menu-item {
-          height: $navbar-height;
-          line-height: $navbar-height;
+          display: inline-flex;
+          align-items: center;
+          height: 38px;
+          line-height: 38px;
+          color: var(--cyber-text-soft);
+          border-bottom: none;
+          border-radius: 999px;
+
+          &.is-active {
+            color: var(--cyber-sidebar-active-text);
+            background: var(--cyber-sidebar-active-bg);
+            box-shadow: var(--cyber-sidebar-active-shadow);
+          }
         }
 
         .el-sub-menu {
           .el-sub-menu__title {
-            height: $navbar-height;
-            line-height: $navbar-height;
+            height: 38px;
+            line-height: 38px;
+            color: var(--cyber-text-soft);
+            border-radius: 999px;
           }
 
           &.has-active-child {
             .el-sub-menu__title {
-              color: var(--el-color-primary) !important;
-              border-bottom: 2px solid var(--el-color-primary) !important;
+              color: var(--cyber-sidebar-active-text) !important;
+              background: var(--cyber-sidebar-active-bg) !important;
+              box-shadow: var(--cyber-sidebar-active-shadow);
 
               .menu-icon {
-                color: var(--el-color-primary) !important;
+                color: currentcolor !important;
               }
             }
           }
@@ -135,12 +154,12 @@ const isLogoCollapsed = computed(() => width.value < 768);
       flex-shrink: 0;
       align-items: center;
       height: 100%;
-      padding-left: 12px;
+      padding-left: 18px;
     }
   }
 
   &__main {
-    height: calc(100vh - $navbar-height);
+    height: auto;
     overflow-y: auto;
   }
 }

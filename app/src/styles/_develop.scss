@@ -4,16 +4,19 @@
 
 .develop-page,
 .admin-workspace-page {
-  padding: 18px 18px 24px 0;
   min-height: calc(100vh - 84px);
+  padding: 18px 18px 24px 0;
 
-  .develop-shell {
-    border-radius: 28px;
+  .develop-shell,
+  .admin-workspace-shell {
+    position: relative;
     overflow: hidden;
-    border: none;
-    background: transparent;
+    border-radius: var(--cyber-shell-radius);
+    border: 1px solid var(--cyber-border-strong);
+    background: var(--cyber-panel-shell);
+    box-shadow: var(--cyber-shadow);
 
-    & > .el-card__body {
+    > .el-card__body {
       padding: 24px;
     }
   }
@@ -24,7 +27,7 @@
   justify-content: space-between;
   align-items: flex-start;
   gap: 18px;
-  margin-bottom: 24px;
+  margin-bottom: 18px;
   padding: 2px 4px 0;
 }
 
@@ -38,34 +41,35 @@
   font-weight: 700;
   letter-spacing: 0.14em;
   text-transform: uppercase;
-  color: #7aa126;
+  color: color-mix(in srgb, var(--cyber-primary-strong) 82%, var(--cyber-text-soft));
 }
 
 .develop-hero__title {
   font-size: 28px;
   font-weight: 700;
   line-height: 1.2;
-  color: #2a3529;
+  color: var(--cyber-text);
 }
 
-.develop-hero__desc {
+.develop-hero__desc,
+.develop-table-shell__desc,
+.field-desc {
   margin-top: 10px;
   font-size: 14px;
   line-height: 1.7;
-  color: rgba(88, 102, 86, 0.82);
+  color: var(--cyber-text-muted);
 }
 
 .develop-panel,
-.develop-table-shell {
-  border-radius: 24px;
-  border: 1px solid rgba(255, 255, 255, 0.56);
-  background:
-    radial-gradient(circle at top right, rgba(170, 236, 109, 0.14), transparent 24%),
-    radial-gradient(circle at bottom left, rgba(168, 216, 255, 0.14), transparent 32%),
-    linear-gradient(180deg, rgba(255, 255, 255, 0.82), rgba(246, 251, 241, 0.72));
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.88),
-    0 24px 46px rgba(160, 186, 145, 0.12);
+.develop-table-shell,
+.admin-workspace-form-panel,
+.admin-workspace-org-users-panel,
+.admin-workspace-tree-shell .org-tree-group,
+.admin-workspace-tree-shell .doc-tree-group {
+  border-radius: var(--cyber-panel-radius);
+  border: 1px solid var(--cyber-border-strong);
+  background: var(--cyber-panel-shell);
+  box-shadow: var(--cyber-shadow);
 }
 
 .develop-panel {
@@ -73,112 +77,65 @@
   padding: 18px 20px;
 }
 
-.develop-table-shell {
-  padding: 20px;
-  margin-top: 20px;
-
-  .el-table {
-    background-color: transparent;
-    --el-table-bg-color: transparent;
-    --el-table-tr-bg-color: transparent;
-    --el-table-header-bg-color: rgba(255, 255, 255, 0.5);
-
-    &::before {
-      display: none;
-    }
-  }
+.develop-panel--workspace {
+  min-height: calc(100vh - 260px);
 }
 
-.develop-table-shell__header {
+.develop-form .el-form-item {
+  margin-bottom: 10px;
+}
+
+.develop-table-shell {
+  padding: 18px;
+}
+
+.develop-table-shell__header,
+.admin-workspace-form-panel__header,
+.admin-workspace-org-users-panel .develop-table-shell__header {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 16px;
-  margin-bottom: 18px;
+  margin-bottom: 14px;
 }
 
 .develop-table-shell__title {
   font-size: 18px;
   font-weight: 700;
   line-height: 1.3;
-  color: #2a3529;
+  color: var(--cyber-text);
 }
 
-.develop-table-shell__desc {
-  margin-top: 6px;
-  font-size: 13px;
-  line-height: 1.6;
-  color: rgba(88, 102, 86, 0.82);
+.develop-table-shell .el-table,
+.develop-table-shell .el-table__expanded-cell,
+.develop-table-shell .el-table tr,
+.develop-table-shell .el-table th,
+.develop-table-shell .el-table td {
+  background: transparent;
 }
 
-// 暗黑模式适配
-html.dark {
-  .develop-hero__eyebrow {
-    color: #18a8ff;
-  }
-
-  .develop-hero__title {
-    color: #eef6ff;
-    text-shadow: 0 0 20px rgba(24, 168, 255, 0.12);
-  }
-
-  .develop-hero__desc,
-  .develop-table-shell__desc {
-    color: rgba(202, 224, 248, 0.78);
-  }
-
-  .develop-panel,
-  .develop-table-shell {
-    background:
-      radial-gradient(circle at top right, rgba(24, 168, 255, 0.08), transparent 28%),
-      radial-gradient(circle at bottom left, rgba(39, 228, 214, 0.06), transparent 34%),
-      linear-gradient(180deg, rgba(15, 26, 40, 0.82) 0%, rgba(11, 20, 32, 0.92) 100%);
-    border: 1px solid rgba(103, 175, 242, 0.18);
-    box-shadow: 0 24px 48px rgba(2, 8, 19, 0.28);
-  }
-
-  .develop-table-shell {
-    .el-table {
-      --el-table-header-bg-color: rgba(10, 18, 30, 0.6);
-    }
-    .develop-table-shell__title {
-      color: #eef6ff;
-    }
-  }
-
-  .develop-dialog.el-dialog {
-    background: rgba(10, 18, 30, 0.96);
-    border: 1px solid rgba(103, 175, 242, 0.24);
-    box-shadow: 0 30px 60px rgba(2, 8, 20, 0.48);
-    
-    .el-dialog__title {
-      color: #eef6ff;
-    }
-    .el-dialog__header, .el-dialog__footer {
-      border-color: rgba(103, 175, 242, 0.14);
-    }
-  }
+.develop-table-shell .el-table th.is-leaf,
+.develop-table-shell .el-table td {
+  border-bottom-width: 1px;
 }
 
-// 对话框通用适配
 .develop-dialog.el-dialog {
-  border-radius: 24px;
   overflow: hidden;
-  border: 1px solid rgba(255, 255, 255, 0.58);
-  background:
-    radial-gradient(circle at top right, rgba(173, 236, 109, 0.16), transparent 24%),
-    linear-gradient(180deg, rgba(255, 255, 255, 0.95) 0%, rgba(249, 253, 244, 0.92) 100%);
-  box-shadow: 0 30px 60px rgba(162, 186, 147, 0.18);
-  
+  border-radius: var(--cyber-panel-radius);
+  border: 1px solid var(--cyber-border-strong);
+  background: var(--cyber-panel-shell-strong);
+  box-shadow: var(--cyber-shadow-strong);
+
   .el-dialog__header {
     margin-right: 0;
     padding: 20px 24px 14px;
-    border-bottom: 1px solid rgba(223, 232, 214, 0.9);
+    border-bottom: 1px solid color-mix(in srgb, var(--cyber-border) 72%, transparent);
   }
 
   .el-dialog__title {
+    color: var(--cyber-text);
+    font-size: 18px;
     font-weight: 700;
-    color: #334132;
   }
 
   .el-dialog__body {
@@ -187,6 +144,124 @@ html.dark {
 
   .el-dialog__footer {
     padding: 14px 24px 22px;
-    border-top: 1px solid rgba(223, 232, 214, 0.9);
+    border-top: 1px solid color-mix(in srgb, var(--cyber-border) 72%, transparent);
+  }
+}
+
+.develop-dialog-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.develop-dialog-form .el-form-item__label {
+  color: var(--cyber-text-soft);
+  font-weight: 600;
+}
+
+.develop-dialog-form .field-desc {
+  margin-top: 6px;
+}
+
+.admin-workspace-page .develop-panel--filter,
+.admin-workspace-page .develop-table-shell,
+.admin-workspace-form-panel,
+.admin-workspace-org-users-panel,
+.admin-workspace-tree-shell .org-tree-group,
+.admin-workspace-tree-shell .doc-tree-group {
+  transition:
+    background 0.2s ease,
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+body.cyber-theme-light {
+  .develop-page .develop-shell,
+  .admin-workspace-page .develop-shell,
+  .admin-workspace-page .admin-workspace-shell {
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.72) 0%, rgba(251, 255, 245, 0.62) 100%);
+  }
+
+  .develop-hero__eyebrow {
+    color: #7aa126;
+  }
+
+  .develop-hero__title,
+  .develop-table-shell__title {
+    color: #2a3529;
+  }
+
+  .develop-hero__desc,
+  .develop-table-shell__desc,
+  .develop-form .el-form-item__label,
+  .field-desc {
+    color: rgba(88, 102, 86, 0.82);
+  }
+
+  .develop-table-shell .el-table thead tr,
+  .develop-table-shell .el-table thead th {
+    background: rgba(255, 255, 255, 0.7);
+  }
+
+  .develop-table-shell .el-table th.is-leaf,
+  .develop-table-shell .el-table td {
+    border-bottom-color: rgba(224, 231, 215, 0.82);
+  }
+
+  .develop-table-shell .el-table th > .cell {
+    color: #4f5a4b;
+  }
+
+  .develop-table-shell .el-table .cell {
+    color: #445042;
+  }
+
+  .develop-table-shell .el-table tbody tr:hover > td {
+    background: rgba(245, 249, 238, 0.96) !important;
+  }
+}
+
+body.cyber-theme-dark {
+  .develop-shell,
+  .admin-workspace-shell,
+  .develop-panel,
+  .develop-table-shell,
+  .admin-workspace-form-panel,
+  .admin-workspace-org-users-panel,
+  .admin-workspace-tree-shell .org-tree-group,
+  .admin-workspace-tree-shell .doc-tree-group {
+    background: var(--cyber-panel-shell);
+    border-color: var(--cyber-border-strong);
+    box-shadow: var(--cyber-shadow);
+  }
+
+  .develop-hero__eyebrow {
+    color: var(--cyber-primary);
+  }
+
+  .develop-hero__title {
+    color: var(--cyber-text);
+    text-shadow: 0 0 20px color-mix(in srgb, var(--cyber-primary) 12%, transparent);
+  }
+
+  .develop-hero__desc,
+  .develop-table-shell__desc,
+  .develop-form .el-form-item__label,
+  .field-desc {
+    color: var(--cyber-text-soft);
+  }
+
+  .develop-table-shell .el-table thead tr,
+  .develop-table-shell .el-table thead th {
+    background: rgba(16, 30, 47, 0.9);
+  }
+
+  .develop-table-shell .el-table th.is-leaf,
+  .develop-table-shell .el-table td {
+    border-bottom-color: rgba(78, 128, 184, 0.16);
+  }
+
+  .develop-table-shell .el-table tbody tr:hover > td {
+    background: rgba(30, 54, 79, 0.56) !important;
   }
 }

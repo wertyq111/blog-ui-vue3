@@ -2,21 +2,20 @@
  * 全局 SCSS 变量
  */
 
-// --- Sass 布局变量 (供 SCSS 使用) ---
 $sidebar-width: 256px;
 $sidebar-width-collapsed: 64px;
 $navbar-height: 60px;
 $tags-view-height: 50px;
+$workspace-gap: 18px;
 
-// --- Sass 菜单变量 (供 SCSS 使用) ---
 $menu-background: transparent;
-$menu-text: #5d665b;
-$menu-active-text: #6fa317;
-$menu-hover: rgba(255, 255, 255, 0.58);
+$menu-text: rgba(221, 236, 255, 0.82);
+$menu-active-text: #ffffff;
+$menu-hover: rgba(34, 80, 126, 0.36);
 
-:root {
-  // --- 颜色变量 (浅色模式 - Cyber Light) ---
-  --el-color-primary: #82c91e;
+:root,
+body.cyber-theme-light {
+  --el-color-primary: #8fe521;
   --el-color-primary-light-3: #b6e866;
   --el-color-primary-light-5: #d3f2a3;
   --el-color-primary-light-7: #e9fac8;
@@ -26,46 +25,89 @@ $menu-hover: rgba(255, 255, 255, 0.58);
 
   --el-bg-color: #eef6ee;
   --el-bg-color-page: #f4f7f1;
-  --el-bg-color-overlay: rgba(255, 255, 255, 0.82);
+  --el-bg-color-overlay: rgba(255, 255, 255, 0.92);
 
   --el-text-color-primary: #2a3529;
   --el-text-color-regular: rgba(42, 53, 41, 0.88);
   --el-text-color-secondary: rgba(88, 102, 86, 0.82);
-  --el-text-color-placeholder: rgba(150, 164, 148, 0.6);
+  --el-text-color-placeholder: rgba(150, 164, 148, 0.62);
 
-  --el-border-color: rgba(122, 161, 38, 0.12);
-  --el-border-color-light: rgba(122, 161, 38, 0.08);
-  --el-border-color-lighter: rgba(122, 161, 38, 0.05);
+  --el-border-color: rgba(153, 180, 142, 0.14);
+  --el-border-color-light: rgba(153, 180, 142, 0.1);
+  --el-border-color-lighter: rgba(153, 180, 142, 0.06);
 
-  // --- Cyber 专属变量 ---
+  --cyber-workspace-gap: #{$workspace-gap};
+  --cyber-sidebar-width: #{$sidebar-width};
+  --cyber-sidebar-collapsed-width: #{$sidebar-width-collapsed};
+  --cyber-navbar-height: #{$navbar-height};
+  --cyber-tags-height: #{$tags-view-height};
+  --cyber-shell-radius: 28px;
+  --cyber-panel-radius: 24px;
+
   --cyber-bg-start: #f4f7f1;
   --cyber-bg-end: #eef6ee;
   --cyber-bg-deep: #e8f3ee;
-  --cyber-panel: rgba(255, 255, 255, 0.7);
+  --cyber-panel: rgba(255, 255, 255, 0.78);
+  --cyber-panel-strong: rgba(255, 255, 255, 0.92);
+  --cyber-panel-shell:
+    radial-gradient(circle at top right, rgba(172, 236, 109, 0.12), transparent 26%),
+    radial-gradient(circle at bottom left, rgba(170, 216, 255, 0.12), transparent 34%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.84) 0%, rgba(246, 251, 241, 0.74) 100%);
+  --cyber-panel-shell-strong:
+    radial-gradient(circle at top right, rgba(173, 236, 109, 0.16), transparent 24%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.95) 0%, rgba(249, 253, 244, 0.92) 100%);
   --cyber-border: rgba(153, 180, 142, 0.14);
+  --cyber-border-strong: rgba(255, 255, 255, 0.56);
   --cyber-text: #253126;
+  --cyber-text-soft: rgba(49, 61, 50, 0.86);
+  --cyber-text-mute: rgba(94, 109, 95, 0.68);
   --cyber-primary: #8fe521;
   --cyber-primary-strong: #69c014;
+  --cyber-danger: #e07b7b;
+  --cyber-danger-deep: rgba(229, 126, 126, 0.28);
+  --cyber-glow: 0 20px 42px rgba(126, 180, 59, 0.14);
+  --cyber-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.88),
+    0 24px 46px rgba(160, 186, 145, 0.12);
+  --cyber-shadow-strong: 0 30px 60px rgba(162, 186, 147, 0.18);
   --cyber-body-glow-a: rgba(161, 247, 87, 0.16);
   --cyber-body-glow-b: rgba(255, 232, 171, 0.34);
   --cyber-layout-glow-a: rgba(180, 255, 122, 0.18);
   --cyber-layout-glow-b: rgba(170, 219, 255, 0.2);
 
-  // --- 布局变量 ---
-  --sidebar-width: #{$sidebar-width};
-  --sidebar-width-collapsed: #{$sidebar-width-collapsed};
-  --navbar-height: #{$navbar-height};
-  --tags-view-height: #{$tags-view-height};
+  --cyber-sidebar-shell:
+    radial-gradient(circle at top right, rgba(170, 236, 109, 0.14), transparent 24%),
+    radial-gradient(circle at bottom left, rgba(168, 216, 255, 0.14), transparent 32%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.72) 0%, rgba(251, 255, 243, 0.62) 100%);
+  --cyber-sidebar-border: rgba(255, 255, 255, 0.56);
+  --cyber-sidebar-text: #5d665b;
+  --cyber-sidebar-text-muted: rgba(104, 114, 99, 0.82);
+  --cyber-sidebar-hover: rgba(255, 255, 255, 0.58);
+  --cyber-sidebar-active-bg: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.92),
+    rgba(252, 255, 240, 0.86)
+  );
+  --cyber-sidebar-active-text: #6fa317;
+  --cyber-sidebar-active-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.78),
+    0 14px 28px rgba(168, 193, 142, 0.14),
+    0 0 0 1px rgba(204, 227, 168, 0.18);
 
-  // --- 菜单变量 ---
+  --cyber-header-tool-bg: transparent;
+  --cyber-header-tool-hover-bg: rgba(255, 255, 255, 0.34);
+  --cyber-header-tool-text: #667163;
+  --cyber-header-tool-hover-text: #4c5a43;
+
+  --menu-background: #{$menu-background};
   --menu-bg-color: #{$menu-background};
   --menu-text-color: #5d665b;
   --menu-active-text-color: #6fa317;
-  --menu-hover-bg-color: #{$menu-hover};
+  --menu-hover-bg-color: rgba(255, 255, 255, 0.58);
 }
 
-html.dark {
-  // --- 颜色变量 (深色模式) ---
+html.dark,
+body.cyber-theme-dark {
   --el-color-primary: #18a8ff;
   --el-color-primary-light-3: #58bcff;
   --el-color-primary-light-5: #8cd0ff;
@@ -76,10 +118,10 @@ html.dark {
 
   --el-bg-color: #07111d;
   --el-bg-color-page: #09111e;
-  --el-bg-color-overlay: #111c2a;
+  --el-bg-color-overlay: rgba(10, 18, 30, 0.94);
 
   --el-text-color-primary: #eef6ff;
-  --el-text-color-regular: rgba(238, 246, 255, 0.85);
+  --el-text-color-regular: rgba(238, 246, 255, 0.86);
   --el-text-color-secondary: rgba(202, 224, 248, 0.78);
   --el-text-color-placeholder: rgba(159, 188, 221, 0.58);
 
@@ -87,15 +129,82 @@ html.dark {
   --el-border-color-light: rgba(103, 175, 242, 0.15);
   --el-border-color-lighter: rgba(103, 175, 242, 0.1);
 
-  // --- Cyber 专属变量 (Dark) ---
+  --cyber-bg-start: #07111d;
+  --cyber-bg-end: #111c2a;
+  --cyber-bg-deep: #09111e;
+  --cyber-panel: rgba(15, 26, 40, 0.78);
+  --cyber-panel-strong: rgba(11, 20, 32, 0.92);
+  --cyber-panel-shell:
+    radial-gradient(circle at top right, rgba(41, 123, 255, 0.1), transparent 28%),
+    radial-gradient(circle at bottom left, rgba(39, 228, 214, 0.06), transparent 34%),
+    linear-gradient(180deg, rgba(15, 26, 40, 0.82) 0%, rgba(11, 20, 32, 0.92) 100%);
+  --cyber-panel-shell-strong:
+    radial-gradient(circle at top right, rgba(36, 120, 255, 0.12), transparent 28%),
+    linear-gradient(180deg, rgba(14, 25, 39, 0.94) 0%, rgba(9, 18, 31, 0.98) 100%);
+  --cyber-border: rgba(103, 175, 242, 0.2);
+  --cyber-border-strong: rgba(103, 175, 242, 0.18);
+  --cyber-text: #eef6ff;
+  --cyber-text-soft: rgba(208, 227, 246, 0.84);
+  --cyber-text-mute: rgba(147, 177, 209, 0.72);
+  --cyber-primary: #18a8ff;
+  --cyber-primary-strong: #1668ff;
+  --cyber-danger: #ff7f9d;
+  --cyber-danger-deep: rgba(149, 34, 68, 0.56);
+  --cyber-glow: 0 0 28px rgba(24, 168, 255, 0.18);
+  --cyber-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.04),
+    0 24px 48px rgba(2, 8, 19, 0.28);
+  --cyber-shadow-strong: 0 30px 60px rgba(2, 8, 20, 0.48);
   --cyber-body-glow-a: rgba(33, 124, 255, 0.22);
   --cyber-body-glow-b: rgba(39, 228, 214, 0.12);
   --cyber-layout-glow-a: rgba(58, 150, 255, 0.14);
   --cyber-layout-glow-b: rgba(54, 233, 220, 0.08);
 
-  // --- 菜单变量 ---
-  --menu-bg-color: transparent;
+  --cyber-sidebar-shell: linear-gradient(
+    180deg,
+    rgba(8, 16, 28, 0.95) 0%,
+    rgba(10, 18, 30, 0.78) 100%
+  );
+  --cyber-sidebar-border: rgba(103, 175, 242, 0.2);
+  --cyber-sidebar-text: rgba(202, 224, 248, 0.78);
+  --cyber-sidebar-text-muted: rgba(147, 177, 209, 0.72);
+  --cyber-sidebar-hover: rgba(34, 80, 126, 0.36);
+  --cyber-sidebar-active-bg: linear-gradient(
+    135deg,
+    rgba(15, 167, 255, 0.96),
+    rgba(20, 104, 255, 0.94)
+  );
+  --cyber-sidebar-active-text: #ffffff;
+  --cyber-sidebar-active-shadow:
+    0 12px 24px rgba(13, 126, 255, 0.24),
+    0 0 22px rgba(16, 165, 255, 0.26);
+
+  --cyber-header-tool-bg: rgba(12, 21, 33, 0.6);
+  --cyber-header-tool-hover-bg: rgba(22, 40, 61, 0.72);
+  --cyber-header-tool-text: rgba(202, 224, 248, 0.78);
+  --cyber-header-tool-hover-text: #eef6ff;
+
+  --menu-background: #{$menu-background};
+  --menu-bg-color: #{$menu-background};
   --menu-text-color: rgba(202, 224, 248, 0.78);
   --menu-active-text-color: #ffffff;
   --menu-hover-bg-color: rgba(34, 80, 126, 0.36);
+}
+
+html.sidebar-color-blue {
+  --cyber-sidebar-shell: linear-gradient(
+    180deg,
+    rgba(10, 18, 30, 0.94) 0%,
+    rgba(12, 23, 37, 0.84) 100%
+  );
+  --cyber-sidebar-border: rgba(103, 175, 242, 0.18);
+  --cyber-sidebar-text: rgba(221, 236, 255, 0.82);
+  --cyber-sidebar-text-muted: rgba(179, 206, 235, 0.68);
+  --cyber-sidebar-hover: rgba(34, 80, 126, 0.36);
+  --cyber-sidebar-active-bg: linear-gradient(
+    135deg,
+    rgba(15, 167, 255, 0.96),
+    rgba(20, 104, 255, 0.94)
+  );
+  --cyber-sidebar-active-text: #ffffff;
 }

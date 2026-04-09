@@ -1,6 +1,6 @@
 <template>
-  <div class="develop-page">
-    <el-card shadow="never" class="develop-shell">
+  <div class="develop-page admin-workspace-page profile-page">
+    <el-card shadow="never" class="develop-shell admin-workspace-shell">
       <!-- Hero: 个人中心 -->
       <section class="develop-hero">
         <div class="develop-hero__copy">
@@ -224,16 +224,16 @@ onMounted(() => {
   display: inline-block;
   
   .profile-avatar {
-    border: 4px solid #fff;
-    box-shadow: 0 10px 30px rgba(150, 180, 140, 0.15);
+    border: 4px solid color-mix(in srgb, var(--cyber-panel-strong) 92%, transparent);
+    box-shadow: 0 10px 30px color-mix(in srgb, var(--cyber-primary) 18%, transparent);
   }
   
   .avatar-upload-btn {
     position: absolute;
     bottom: 4px;
     right: 4px;
-    border: 2px solid #fff;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    border: 2px solid color-mix(in srgb, var(--cyber-panel-strong) 92%, transparent);
+    box-shadow: 0 4px 10px color-mix(in srgb, var(--cyber-primary) 12%, transparent);
     
     &:hover {
       transform: scale(1.1);
@@ -244,7 +244,7 @@ onMounted(() => {
 .user-nickname {
   font-size: 22px;
   font-weight: 700;
-  color: #2a3529;
+  color: var(--cyber-text);
   margin-bottom: 8px;
 }
 
@@ -256,11 +256,11 @@ onMounted(() => {
 
 .profile-details {
   :deep(.el-descriptions__label) {
-    color: rgba(88, 102, 86, 0.6);
+    color: var(--cyber-text-muted);
     font-weight: 500;
   }
   :deep(.el-descriptions__content) {
-    color: #2a3529;
+    color: var(--cyber-text);
     font-weight: 600;
   }
 }
@@ -272,7 +272,7 @@ onMounted(() => {
 .panel-title {
   font-size: 18px;
   font-weight: 700;
-  color: #2a3529;
+  color: var(--cyber-text);
 }
 
 .rounded-pill {
@@ -280,13 +280,13 @@ onMounted(() => {
 }
 
 // 暗黑模式
-html.dark {
+:global(body.cyber-theme-dark) {
   .user-nickname, .panel-title, .profile-details :deep(.el-descriptions__content) {
-    color: var(--el-text-color-primary);
+    color: var(--cyber-text);
   }
   
   .avatar-wrapper .profile-avatar {
-    border-color: var(--el-border-color-lighter);
+    border-color: color-mix(in srgb, var(--cyber-border) 72%, transparent);
   }
 }
 </style>

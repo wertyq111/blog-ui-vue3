@@ -11,22 +11,22 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue';
-import { MdEditor } from 'md-editor-v3';
-import 'md-editor-v3/lib/style.css';
-import { useSettingsStore } from '@/store/modules/settings';
+import { computed } from "vue";
+import { MdEditor } from "md-editor-v3";
+import "md-editor-v3/lib/style.css";
+import { useSettingsStore } from "@/store/modules/settings";
 
 const settingsStore = useSettingsStore();
-const isDark = computed(() => settingsStore.isDark);
+const isDark = computed(() => settingsStore.effectiveDarkMode);
 
 const props = defineProps({
   modelValue: {
     type: String,
-    default: '',
+    default: "",
   },
   height: {
     type: String,
-    default: '400px',
+    default: "400px",
   },
   editable: {
     type: Boolean,
@@ -39,42 +39,42 @@ const props = defineProps({
   toolbars: {
     type: Array,
     default: () => [
-      'bold',
-      'underline',
-      'italic',
-      '-',
-      'title',
-      'strikeThrough',
-      'sub',
-      'sup',
-      'quote',
-      'unorderedList',
-      'orderedList',
-      'task',
-      '-',
-      'codeComposite',
-      'code',
-      'link',
-      'image',
-      'table',
-      'mermaid',
-      'katex',
-      '-',
-      'revoke',
-      'next',
-      'save',
-      '=',
-      'pageFullscreen',
-      'fullscreen',
-      'preview',
-      'htmlPreview',
-      'catalog',
-      'github'
+      "bold",
+      "underline",
+      "italic",
+      "-",
+      "title",
+      "strikeThrough",
+      "sub",
+      "sup",
+      "quote",
+      "unorderedList",
+      "orderedList",
+      "task",
+      "-",
+      "codeComposite",
+      "code",
+      "link",
+      "image",
+      "table",
+      "mermaid",
+      "katex",
+      "-",
+      "revoke",
+      "next",
+      "save",
+      "=",
+      "pageFullscreen",
+      "fullscreen",
+      "preview",
+      "htmlPreview",
+      "catalog",
+      "github",
     ],
   },
 });
 
-const emit = defineEmits(['update:modelValue']);
+const emit = defineEmits(["update:modelValue"]);
 
 const modelValue = computed({
   get: () => props.modelValue,

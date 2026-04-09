@@ -1,6 +1,6 @@
 <template>
-  <div class="develop-page">
-    <el-card shadow="never" class="develop-shell">
+  <div class="develop-page admin-workspace-page">
+    <el-card shadow="never" class="develop-shell admin-workspace-shell">
       <section class="develop-hero">
         <div class="develop-hero__copy">
           <div class="develop-hero__eyebrow">Develop Workspace</div>
@@ -548,7 +548,7 @@ onMounted(async () => {
 }
 
 // 暗黑模式
-html.dark {
+:global(body.cyber-theme-dark) {
   .daily-panel {
     background: var(--el-bg-color-overlay);
     border: 1px solid var(--el-border-color-lighter);

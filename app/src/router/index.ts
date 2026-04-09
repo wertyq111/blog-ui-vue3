@@ -24,6 +24,13 @@ export const constantRoutes: RouteRecordRaw[] = [
   },
 
   {
+    path: "/:pathMatch(.*)*",
+    name: "PathCatchAll",
+    component: () => import("@/views/error/404.vue"),
+    meta: { hidden: true },
+  },
+
+  {
     path: "/",
     name: "/",
     component: Layout,

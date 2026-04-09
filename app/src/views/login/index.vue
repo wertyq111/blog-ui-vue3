@@ -19,17 +19,8 @@
     </section>
 
     <section class="login-main">
-      <div class="auth-view__toolbar">
-        <el-tooltip :content="t('login.themeToggle')" placement="bottom">
-          <div class="toolbar-item">
-            <ThemeSwitch />
-          </div>
-        </el-tooltip>
-        <el-tooltip :content="t('login.languageToggle')" placement="bottom">
-          <div class="toolbar-item">
-            <LangSelect size="text-20px" />
-          </div>
-        </el-tooltip>
+      <div class="language-switch">
+        <LangSelect size="text-22px" />
       </div>
 
       <div class="login-panel">
@@ -51,13 +42,10 @@
 
 <script setup lang="ts">
 import { ref, defineAsyncComponent } from "vue";
-import { useI18n } from "vue-i18n";
-import ThemeSwitch from "@/components/ThemeSwitch/index.vue";
 import CharacterScene from "./components/CharacterScene.vue";
 
 type LayoutMap = "login" | "register" | "resetPwd";
 
-const { t } = useI18n();
 const component = ref<LayoutMap>("login");
 
 const activeField = ref("");
@@ -74,10 +62,10 @@ const formComponents = {
 <style lang="scss" scoped>
 .login-page {
   display: flex;
-  width: 100%;
   min-height: 100vh;
   overflow: hidden;
-  background-color: #f8f9fb;
+  background: transparent;
+  font-family: inherit;
 }
 
 .login-visual {
@@ -97,35 +85,16 @@ const formComponents = {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #f8f9fb;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.46), rgba(255, 255, 255, 0.2));
+  backdrop-filter: blur(18px);
 }
 
-.auth-view__toolbar {
+.language-switch {
   position: absolute;
   top: 26px;
   right: 28px;
-  z-index: 10;
-  display: inline-flex;
-  gap: 0.75rem;
-  padding: 0.5rem 0.75rem;
-  background-color: rgba(255, 255, 255, 0.85);
-  border: 1px solid rgba(22, 93, 255, 0.15);
-  border-radius: 999px;
-  box-shadow: 0 10px 30px rgba(22, 93, 255, 0.12);
-
-  .toolbar-item {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 0.5rem;
-    cursor: pointer;
-    border-radius: 8px;
-    transition: background-color 0.3s ease;
-
-    &:hover {
-      background-color: var(--el-fill-color);
-    }
-  }
+  z-index: 2;
+  color: var(--cyber-text-soft);
 }
 
 .visual-brand {
@@ -177,17 +146,23 @@ const formComponents = {
   max-width: calc(100% - 48px);
 }
 
-// Dark Mode Support
-.dark {
-  .login-page,
-  .login-main {
-    background-color: #111827;
-  }
+:global(body.cyber-theme-dark) .login-page {
+  background: transparent;
+}
 
-  .auth-view__toolbar {
-    background-color: rgba(31, 41, 55, 0.85);
-    border-color: rgba(55, 65, 81, 0.5);
-  }
+:global(body.cyber-theme-dark) .login-visual {
+  background:
+    radial-gradient(circle at 18% 20%, rgba(24, 168, 255, 0.18), transparent 34%),
+    radial-gradient(circle at 82% 18%, rgba(54, 233, 220, 0.1), transparent 28%),
+    linear-gradient(160deg, #07111d 0%, #111c2a 42%, #09111e 100%);
+}
+
+:global(body.cyber-theme-dark) .login-main {
+  background: linear-gradient(180deg, rgba(7, 17, 29, 0.56), rgba(7, 17, 29, 0.24));
+}
+
+:global(body.cyber-theme-dark) .language-switch {
+  color: rgba(202, 224, 248, 0.78);
 }
 
 /* Transitions */
@@ -214,6 +189,10 @@ const formComponents = {
 
   .login-main {
     flex: 1 1 100%;
+  }
+
+  .language-switch {
+    color: #64748b;
   }
 }
 

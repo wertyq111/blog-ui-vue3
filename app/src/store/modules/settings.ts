@@ -1,6 +1,13 @@
 import { SidebarColor, ThemeMode } from "@/enums";
 import type { LayoutMode } from "@/enums";
-import { applyTheme, generateThemeColors, toggleDarkMode, toggleSidebarColor } from "@/utils/theme";
+import { usePreferredDark } from "@vueuse/core";
+import {
+  applyTheme,
+  generateThemeColors,
+  resolveThemeMode,
+  syncThemeClass,
+  toggleSidebarColor,
+} from "@/utils/theme";
 import { STORAGE_KEYS } from "@/constants";
 import { defaults } from "@/settings";
 
@@ -25,6 +32,11 @@ export const useSettingsStore = defineStore("setting", () => {
   // 主题
   const theme = useStorage<ThemeMode>(STORAGE_KEYS.THEME, defaults.theme);
   const themeColor = useStorage(STORAGE_KEYS.THEME_COLOR, defaults.themeColor);
+  const prefersDark = usePreferredDark();
+  const resolvedTheme = computed(() => resolveThemeMode(theme.value, prefersDark.value));
+  const effectiveDarkMode = computed(() => resolvedTheme.value === ThemeMode.DARK);
+  const isDark = computed(() => effectiveDarkMode.value);
+  const themeRefreshKey = ref(0);
 
   // 特殊模式
   const grayMode = useStorage(STORAGE_KEYS.GRAY_MODE, false);
@@ -32,12 +44,26 @@ export const useSettingsStore = defineStore("setting", () => {
 
   // 主题变化监听
   watch(
-    [theme, themeColor],
+    [resolvedTheme, themeColor],
     ([t, c]: [ThemeMode, string]) => {
-      toggleDarkMode(t === ThemeMode.DARK);
+      syncThemeClass(t);
       applyTheme(generateThemeColors(c, t));
     },
     { immediate: true }
+  );
+
+  watch(
+    prefersDark,
+    (nextPrefersDark, previousPrefersDark) => {
+      if (
+        previousPrefersDark !== undefined &&
+        theme.value === ThemeMode.AUTO &&
+        nextPrefersDark !== previousPrefersDark
+      ) {
+        themeRefreshKey.value += 1;
+      }
+    },
+    { flush: "post" }
   );
 
   watch(sidebarColorScheme, (v) => toggleSidebarColor(v === SidebarColor.CLASSIC_BLUE), {
@@ -87,6 +113,10 @@ export const useSettingsStore = defineStore("setting", () => {
     layout,
     themeColor,
     theme,
+    resolvedTheme,
+    effectiveDarkMode,
+    isDark,
+    themeRefreshKey,
     resetSettings,
   };
 });

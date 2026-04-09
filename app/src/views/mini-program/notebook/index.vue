@@ -1,6 +1,6 @@
 <template>
-  <div class="develop-page">
-    <el-card shadow="never" class="develop-shell">
+  <div class="develop-page admin-workspace-page">
+    <el-card shadow="never" class="develop-shell admin-workspace-shell">
       <!-- Hero 区域 -->
       <div class="develop-hero">
         <div class="develop-hero__copy">
@@ -305,4 +305,3 @@ onMounted(async () => {
   fetchList();
 });
 </script>
-

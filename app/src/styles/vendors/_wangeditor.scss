@@ -3,7 +3,8 @@
  * 使用 Element Plus CSS 变量实现主题统一
  */
 
-html.dark {
+html.dark,
+body.cyber-theme-dark {
   /* Textarea */
   --w-e-textarea-bg-color: var(--el-bg-color);
   --w-e-textarea-color: var(--el-text-color-primary);

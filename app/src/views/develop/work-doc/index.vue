@@ -1,6 +1,6 @@
 <template>
-  <div class="develop-page develop-page--doc">
-    <el-card shadow="never" class="develop-shell">
+  <div class="develop-page develop-page--doc admin-workspace-page work-doc-page">
+    <el-card shadow="never" class="develop-shell admin-workspace-shell">
       <section class="develop-hero">
         <div class="develop-hero__copy">
           <div class="develop-hero__eyebrow">Develop Workspace</div>
@@ -190,9 +190,16 @@
       v-model="categoryDialog.visible"
       :title="categoryDialog.title"
       width="500px"
+      class="develop-dialog"
       @close="closeCategoryDialog"
     >
-      <el-form ref="categoryFormRef" :model="categoryFormData" :rules="categoryRules" label-width="100px">
+      <el-form
+        ref="categoryFormRef"
+        :model="categoryFormData"
+        :rules="categoryRules"
+        label-width="100px"
+        class="develop-dialog-form"
+      >
         <el-form-item label="分类名称" prop="name">
           <el-input v-model="categoryFormData.name" placeholder="请输入分类名称" />
         </el-form-item>
@@ -223,8 +230,14 @@
     </el-dialog>
 
     <!-- 文档编辑弹窗 -->
-    <el-dialog v-model="dialogState.visible" :title="dialogState.title" width="1000px" @close="closeDialog">
-      <el-form ref="formRef" :model="formData" :rules="rules" label-width="100px">
+    <el-dialog
+      v-model="dialogState.visible"
+      :title="dialogState.title"
+      width="1000px"
+      class="develop-dialog"
+      @close="closeDialog"
+    >
+      <el-form ref="formRef" :model="formData" :rules="rules" label-width="100px" class="develop-dialog-form">
         <el-row :gutter="20">
           <el-col :span="16">
             <el-form-item label="标题" prop="title">
