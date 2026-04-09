@@ -1,146 +1,161 @@
 <!-- 用户管理 -->
 <template>
-  <div class="app-container">
-    <!-- 用户列表 -->
-    <!-- 搜索区域 -->
-    <div class="filter-section">
-      <el-form ref="queryFormRef" :model="queryParams" :inline="true" label-width="auto">
-        <el-form-item label="用户名" prop="filter[username]">
-          <el-input
-            v-model="queryParams['filter[username]']"
-            placeholder="用户名"
-            clearable
-            @keyup.enter="handleQuery"
-          />
-        </el-form-item>
-
-        <el-form-item label="手机号" prop="filter[phone]">
-          <el-input
-            v-model="queryParams['filter[phone]']"
-            placeholder="手机号"
-            clearable
-            @keyup.enter="handleQuery"
-          />
-        </el-form-item>
-
-        <el-form-item label="状态" prop="filter[status]">
-          <el-select
-            v-model="queryParams['filter[status]']"
-            placeholder="全部"
-            clearable
-            style="width: 100px"
-          >
-            <el-option label="正常" :value="1" />
-            <el-option label="禁用" :value="0" />
-          </el-select>
-        </el-form-item>
-
-        <el-form-item class="search-buttons">
-          <el-button type="primary" icon="search" @click="handleQuery">搜索</el-button>
-          <el-button icon="refresh" @click="handleResetQuery">重置</el-button>
-        </el-form-item>
-      </el-form>
-    </div>
-
-    <el-card shadow="hover" class="table-section">
-      <div class="table-section__toolbar">
-        <div class="table-section__toolbar--actions">
-          <el-button
-            v-hasPerm="['sys:user:create']"
-            type="success"
-            icon="plus"
-            @click="handleCreateClick"
-          >
-            新增
-          </el-button>
-          <el-button
-            v-hasPerm="'sys:user:delete'"
-            type="danger"
-            icon="delete"
-            :disabled="!hasSelection"
-            @click="handleDelete()"
-          >
-            删除
-          </el-button>
+  <div class="develop-page">
+    <el-card shadow="never" class="develop-shell">
+      <!-- Hero 区域 -->
+      <div class="develop-hero">
+        <div class="develop-hero__copy">
+          <div class="develop-hero__eyebrow">USER MANAGEMENT</div>
+          <h1 class="develop-hero__title">用户管理</h1>
+          <p class="develop-hero__desc">管理系统用户账号、角色分配与状态控制</p>
         </div>
       </div>
 
-      <el-table
-        v-loading="loading"
-        :data="userList"
-        border
-        stripe
-        highlight-current-row
-        class="table-section__content"
-        row-key="id"
-        @selection-change="handleSelectionChange"
-      >
-        <el-table-column type="selection" width="50" align="center" />
-        <el-table-column label="用户名" prop="username" />
-        <el-table-column label="昵称" width="200" align="center" prop="member.nickname" />
-        <el-table-column label="性别" width="100" align="center">
-          <template #default="scope">
-            <template v-if="scope.row.member">
-              <span v-if="scope.row.member.gender === 1">男</span>
-              <span v-else-if="scope.row.member.gender === 2">女</span>
-              <span v-else>未知</span>
-            </template>
-          </template>
-        </el-table-column>
-        <el-table-column label="角色" align="center" prop="roleNames" min-width="160" />
-        <el-table-column label="手机号码" align="center" prop="phone" width="120" />
-        <el-table-column label="邮箱" align="center" prop="email" width="160" />
-        <el-table-column label="状态" align="center" prop="status" width="80">
-          <template #default="scope">
-            <el-tag :type="scope.row.status === CommonStatus.ENABLED ? 'success' : 'info'">
-              {{ scope.row.status === CommonStatus.ENABLED ? "正常" : "禁用" }}
-            </el-tag>
-          </template>
-        </el-table-column>
-        <el-table-column label="创建时间" align="center" prop="createdAt" width="180" />
-        <el-table-column label="操作" fixed="right" width="220">
-          <template #default="scope">
-            <el-button
-              v-hasPerm="'sys:user:reset-password'"
-              type="primary"
-              icon="RefreshLeft"
-              size="small"
-              link
-              @click="handleResetPassword(scope.row)"
+      <!-- 搜索面板 -->
+      <div class="develop-panel">
+        <el-form ref="queryFormRef" :model="queryParams" :inline="true" label-width="auto" class="develop-form">
+          <el-form-item label="用户名" prop="filter[username]">
+            <el-input
+              v-model="queryParams['filter[username]']"
+              placeholder="用户名"
+              clearable
+              @keyup.enter="handleQuery"
+            />
+          </el-form-item>
+
+          <el-form-item label="手机号" prop="filter[phone]">
+            <el-input
+              v-model="queryParams['filter[phone]']"
+              placeholder="手机号"
+              clearable
+              @keyup.enter="handleQuery"
+            />
+          </el-form-item>
+
+          <el-form-item label="状态" prop="filter[status]">
+            <el-select
+              v-model="queryParams['filter[status]']"
+              placeholder="全部"
+              clearable
+              style="width: 100px"
             >
-              重置密码
-            </el-button>
+              <el-option label="正常" :value="1" />
+              <el-option label="禁用" :value="0" />
+            </el-select>
+          </el-form-item>
+
+          <el-form-item class="search-buttons">
+            <el-button type="primary" icon="search" @click="handleQuery">搜索</el-button>
+            <el-button icon="refresh" @click="handleResetQuery">重置</el-button>
+          </el-form-item>
+        </el-form>
+      </div>
+
+      <!-- 表格区域 -->
+      <div class="develop-table-shell">
+        <div class="develop-table-shell__header">
+          <div>
+            <div class="develop-table-shell__title">用户数据列表</div>
+            <div class="develop-table-shell__desc">包含系统所有管理员与操作员账号，支持按用户名、手机号筛选。</div>
+          </div>
+          <div class="develop-table-shell__actions">
             <el-button
-              v-hasPerm="'sys:user:update'"
-              type="primary"
-              icon="edit"
-              link
-              size="small"
-              @click="handleEditClick(scope.row.id)"
+              v-hasPerm="['sys:user:create']"
+              type="success"
+              icon="plus"
+              @click="handleCreateClick"
             >
-              编辑
+              新增用户
             </el-button>
             <el-button
               v-hasPerm="'sys:user:delete'"
               type="danger"
               icon="delete"
-              link
-              size="small"
-              @click="handleDelete(scope.row.id)"
+              :disabled="!hasSelection"
+              @click="handleDelete()"
             >
-              删除
+              批量删除
             </el-button>
-          </template>
-        </el-table-column>
-      </el-table>
+          </div>
+        </div>
 
-      <pagination
-        v-if="total > 0"
-        v-model:total="total"
-        v-model:page="queryParams.pageNum"
-        v-model:limit="queryParams.pageSize"
-        @pagination="fetchList"
-      />
+        <el-table
+          v-loading="loading"
+          :data="userList"
+          border
+          stripe
+          highlight-current-row
+          class="develop-table"
+          row-key="id"
+          @selection-change="handleSelectionChange"
+        >
+          <el-table-column type="selection" width="50" align="center" />
+          <el-table-column label="用户名" prop="username" />
+          <el-table-column label="昵称" width="200" align="center" prop="member.nickname" />
+          <el-table-column label="性别" width="100" align="center">
+            <template #default="scope">
+              <template v-if="scope.row.member">
+                <span v-if="scope.row.member.gender === 1">男</span>
+                <span v-else-if="scope.row.member.gender === 2">女</span>
+                <span v-else>未知</span>
+              </template>
+            </template>
+          </el-table-column>
+          <el-table-column label="角色" align="center" prop="roleNames" min-width="160" />
+          <el-table-column label="手机号码" align="center" prop="phone" width="120" />
+          <el-table-column label="邮箱" align="center" prop="email" width="160" />
+          <el-table-column label="状态" align="center" prop="status" width="80">
+            <template #default="scope">
+              <el-tag :type="scope.row.status === CommonStatus.ENABLED ? 'success' : 'info'">
+                {{ scope.row.status === CommonStatus.ENABLED ? "正常" : "禁用" }}
+              </el-tag>
+            </template>
+          </el-table-column>
+          <el-table-column label="创建时间" align="center" prop="createdAt" width="180" />
+          <el-table-column label="操作" fixed="right" width="220">
+            <template #default="scope">
+              <el-button
+                v-hasPerm="'sys:user:reset-password'"
+                type="primary"
+                icon="RefreshLeft"
+                size="small"
+                link
+                @click="handleResetPassword(scope.row)"
+              >
+                重置密码
+              </el-button>
+              <el-button
+                v-hasPerm="'sys:user:update'"
+                type="primary"
+                icon="edit"
+                link
+                size="small"
+                @click="handleEditClick(scope.row.id)"
+              >
+                编辑
+              </el-button>
+              <el-button
+                v-hasPerm="'sys:user:delete'"
+                type="danger"
+                icon="delete"
+                link
+                size="small"
+                @click="handleDelete(scope.row.id)"
+              >
+                删除
+              </el-button>
+            </template>
+          </el-table-column>
+        </el-table>
+
+        <pagination
+          v-if="total > 0"
+          v-model:total="total"
+          v-model:page="queryParams.pageNum"
+          v-model:limit="queryParams.pageSize"
+          @pagination="fetchList"
+        />
+      </div>
     </el-card>
 
     <!-- 用户表单 -->
@@ -149,6 +164,7 @@
       :title="dialogState.title"
       append-to-body
       :size="drawerSize"
+      class="develop-drawer"
       @close="closeDialog"
     >
       <el-form ref="userFormRef" :model="formData" :rules="rules" label-width="80px">
