@@ -56,6 +56,17 @@ const ServerPathAPI = {
     });
   },
 
+  /** 获取全部路径配置(不分页) */
+  async getAll(): Promise<ServerPathItem[]> {
+    const res = await request<any, any>({
+      url: `${BASE_URL}/index`,
+      method: "get",
+      params: { page: 1, per_page: 999 },
+      __returnEnvelope: true,
+    } as any);
+    return res?.data ?? [];
+  },
+
   /** 路径转换转换接口 */
   convert(id: number, paths: string[]) {
     return request({

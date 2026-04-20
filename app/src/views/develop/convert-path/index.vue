@@ -37,6 +37,46 @@
             <el-button type="danger" icon="delete" :disabled="!hasSelection" @click="handleBatchDelete">
               批量删除
             </el-button>
+            <el-button
+              :icon="convertPanelVisible ? 'close' : 'sort'"
+              :type="convertPanelVisible ? 'warning' : 'primary'"
+              @click="toggleConvertPanel"
+            >路径转换</el-button>
+          </div>
+        </div>
+
+        <!-- 转换面板 -->
+        <div v-if="convertPanelVisible" class="convert-panel">
+          <div class="convert-panel__body">
+            <div class="convert-panel__col">
+              <div class="convert-panel__label">输入路径 (每行一个)</div>
+              <el-input
+                v-model="convertInput"
+                type="textarea"
+                :rows="6"
+                placeholder="粘贴或输入需要转换的路径..."
+                @input="onConvertInput"
+              />
+            </div>
+            <div class="convert-panel__col">
+              <div class="convert-panel__label">转换结果</div>
+              <el-input
+                v-model="convertOutput"
+                type="textarea"
+                :rows="6"
+                readonly
+              />
+            </div>
+          </div>
+          <div class="convert-panel__footer">
+            <el-button size="small" @click="clearConvert">清空</el-button>
+            <el-button
+              v-if="convertOutput"
+              size="small"
+              type="primary"
+              icon="document-copy"
+              @click="copyResult"
+            >复制结果</el-button>
           </div>
         </div>
 
@@ -60,11 +100,8 @@
           </el-table-column>
           <el-table-column label="服务器地址" prop="target" min-width="200" />
           <el-table-column label="排序" prop="sort" width="80" align="center" />
-          <el-table-column label="操作" fixed="right" width="200" align="center">
+          <el-table-column label="操作" fixed="right" width="130" align="center">
             <template #default="{ row }">
-              <el-button type="success" icon="refresh" link size="small" @click="handleConvertClick(row)">
-                转换
-              </el-button>
               <el-button type="primary" icon="edit" link size="small" @click="handleEditClick(row)">
                 编辑
               </el-button>
@@ -100,6 +137,9 @@
         <el-form-item label="项目名称" prop="name">
           <el-input v-model="formData.name" placeholder="请输入项目名称" maxlength="20" />
         </el-form-item>
+        <el-form-item label="网址" prop="url">
+          <el-input v-model="formData.url" placeholder="请输入网址" maxlength="120" />
+        </el-form-item>
         <el-form-item label="服务器地址" prop="target">
           <el-input v-model="formData.target" placeholder="请输入服务器地址" maxlength="200" />
         </el-form-item>
@@ -133,41 +173,12 @@
         </div>
       </template>
     </el-dialog>
-
-    <!-- 转换弹窗 -->
-    <el-dialog
-      v-model="convertState.visible"
-      title="路径转换"
-      width="700px"
-      class="develop-dialog"
-    >
-      <el-form label-position="top" class="develop-dialog-form">
-        <el-form-item label="待转换路径 (每行一个)">
-          <el-input
-            v-model="convertState.pathsText"
-            type="textarea"
-            :rows="8"
-            placeholder="请输入需要转换的本地路径"
-          />
-        </el-form-item>
-        <el-form-item v-if="convertState.result" label="转换结果">
-          <el-input v-model="convertState.result" type="textarea" :rows="8" readonly />
-        </el-form-item>
-      </el-form>
-      <template #footer>
-        <div class="develop-dialog-footer">
-          <el-button type="primary" :loading="convertState.loading" @click="handleDoConvert">
-            转 换
-          </el-button>
-          <el-button @click="convertState.visible = false">关 闭</el-button>
-        </div>
-      </template>
-    </el-dialog>
   </div>
 </template>
 
 <script setup lang="ts">
 import type { FormInstance, FormRules } from "element-plus";
+import { useDebounceFn, useClipboard } from "@vueuse/core";
 import ServerPathAPI from "@/api/develop/server-path";
 import type { ServerPathQueryParams, ServerPathItem, ServerPathForm } from "@/types/api/server-path";
 import { useTableSelection } from "@/composables";
@@ -194,17 +205,18 @@ const dialogState = reactive({
   title: "",
 });
 
-const convertState = reactive({
-  visible: false,
-  id: 0,
-  pathsText: "",
-  result: "",
-  loading: false,
-});
+// 转换面板状态
+const convertPanelVisible = ref(false);
+const convertInput = ref("");
+const convertOutput = ref("");
+const allServerPaths = ref<ServerPathItem[]>([]);
+
+const { copy } = useClipboard();
 
 const initialFormData: ServerPathForm = {
   code: "",
   name: "",
+  url: "",
   target: "",
   sources: [""],
   sort: 0,
@@ -260,6 +272,7 @@ function handleEditClick(row: ServerPathItem) {
     id: row.id,
     code: row.code,
     name: row.name,
+    url: row.url ?? "",
     target: row.target,
     sources: sources,
     sort: row.sort,
@@ -341,30 +354,110 @@ async function handleBatchDelete() {
   }
 }
 
-function handleConvertClick(row: ServerPathItem) {
-  convertState.id = row.id;
-  convertState.pathsText = "";
-  convertState.result = "";
-  convertState.visible = true;
+/* 转换面板 */
+async function toggleConvertPanel() {
+  convertPanelVisible.value = !convertPanelVisible.value;
+  if (convertPanelVisible.value && !allServerPaths.value.length) {
+    try {
+      allServerPaths.value = await ServerPathAPI.getAll();
+    } catch {
+      ElMessage.error("加载项目配置失败");
+    }
+  }
 }
 
-async function handleDoConvert() {
-  const paths = convertState.pathsText.split("\n").map(p => p.trim()).filter(p => p);
-  if (!paths.length) {
-    ElMessage.warning("请输入路径");
+function parseSources(raw: string): string[] {
+  try {
+    const parsed = typeof raw === "string" ? JSON.parse(raw) : raw;
+    return Array.isArray(parsed) ? parsed.filter(Boolean) : [];
+  } catch {
+    return [];
+  }
+}
+
+function autoConvert() {
+  const input = convertInput.value;
+  if (!input || !input.trim()) {
+    convertOutput.value = "";
     return;
   }
-  convertState.loading = true;
+  const lines = input.split("\n");
+  const results = lines.map((line) => {
+    if (!line.trim()) return "";
+    let processed = line
+      .replace(/[\u4e00-\u9fa5]/g, "")
+      .replace(/\|/g, "/")
+      .trim();
+    if (!processed) return "";
+    for (const item of allServerPaths.value) {
+      const sources = parseSources(item.sources);
+      for (const source of sources) {
+        const escaped = source.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+        if (new RegExp(escaped).test(processed)) {
+          processed = processed.replace(new RegExp(escaped), item.target);
+          return processed.replace(/\\/g, "/");
+        }
+      }
+    }
+    return processed.replace(/\\/g, "/");
+  });
+  convertOutput.value = results.filter(Boolean).join(" ");
+}
+
+const onConvertInput = useDebounceFn(autoConvert, 300);
+
+async function copyResult() {
+  if (!convertOutput.value) return;
   try {
-    const res = await ServerPathAPI.convert(convertState.id, paths);
-    convertState.result = Array.isArray(res) ? res.join("\n") : String(res);
-    ElMessage.success("转换完成");
-  } finally {
-    convertState.loading = false;
+    await copy(convertOutput.value);
+    ElMessage.success("已复制到剪贴板");
+  } catch {
+    ElMessage.error("复制失败");
   }
+}
+
+function clearConvert() {
+  convertInput.value = "";
+  convertOutput.value = "";
 }
 
 onMounted(() => {
   fetchList();
 });
 </script>
+
+<style scoped>
+.convert-panel {
+  margin: 14px 0 16px;
+  padding: 16px;
+  border-radius: 8px;
+  border: 1px dashed var(--develop-border, rgba(215, 228, 205, 0.86));
+  background: var(--develop-panel-bg, rgba(247, 251, 243, 0.6));
+}
+
+.convert-panel__body {
+  display: flex;
+  gap: 16px;
+}
+
+.convert-panel__col {
+  flex: 1;
+  min-width: 0;
+}
+
+.convert-panel__label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--develop-text-soft, #5e6e5a);
+}
+
+.convert-panel__footer {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 12px;
+}
+</style>
