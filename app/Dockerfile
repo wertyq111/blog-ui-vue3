@@ -7,7 +7,7 @@ COPY package.json pnpm-lock.yaml ./
 RUN pnpm install
 COPY . .
 EXPOSE 3000
-CMD ["pnpm", "run", "dev", "--host", "0.0.0.0"]
+CMD ["pnpm", "run", "dev"]
 
 FROM base AS build
 COPY package.json pnpm-lock.yaml ./

@@ -2,15 +2,15 @@
 
 ## Working Rule
 
-`blog-ui-vue3` uses a remote-first verification loop. Local changes are only provisional until they are synced to `/data/personal/projects/blog-ui-vue3` on `ubuntu@10.10.9.184` and checked there.
+`blog-ui-vue3` uses a remote-first verification loop. Local changes are only provisional until they are synced to `${REMOTE_BLOG_UI_VUE3_PATH}` on `${REMOTE_SSH_USER}@${REMOTE_HOST}` and checked there.
 
 ## Fixed Facts
 
 - Local repo: `/Volumes/T7/Program/Personal/blog/blog-ui-vue3`
-- Remote repo path: `/data/personal/projects/blog-ui-vue3`
-- Remote host: `ubuntu@10.10.9.184`
-- Verification URL: `http://10.10.9.184:8083/`
-- Old Vue2 frontend reference URL: `http://10.10.9.184:8082/`
+- Remote repo path: `${REMOTE_BLOG_UI_VUE3_PATH}`
+- Remote host: `${REMOTE_SSH_USER}@${REMOTE_HOST}`
+- Verification URL: `${BLOG_UI_VUE3_REMOTE_URL}`
+- Old Vue2 frontend reference URL: `${BLOG_UI_VUE2_REMOTE_URL}`
 
 ## Pre-Sync Local Cleanup
 
@@ -30,7 +30,7 @@ rsync -az --delete \
   --exclude 'node_modules' \
   --exclude '._*' \
   /Volumes/T7/Program/Personal/blog/blog-ui-vue3/ \
-  ubuntu@10.10.9.184:/data/personal/projects/blog-ui-vue3/
+  ${REMOTE_SSH_USER}@${REMOTE_HOST}:${REMOTE_BLOG_UI_VUE3_PATH}/
 ```
 
 ## Remote Cleanup
@@ -38,7 +38,7 @@ rsync -az --delete \
 After syncing, remove any `._*` files that may still exist on the remote host:
 
 ```bash
-ssh ubuntu@10.10.9.184 "find /data/personal/projects/blog-ui-vue3 -name '._*' -delete"
+ssh ${REMOTE_SSH_USER}@${REMOTE_HOST} "find ${REMOTE_BLOG_UI_VUE3_PATH} -name '._*' -delete"
 ```
 
 ## Remote Static Verification
@@ -46,28 +46,28 @@ ssh ubuntu@10.10.9.184 "find /data/personal/projects/blog-ui-vue3 -name '._*' -d
 Before any runtime startup, verify the remote tree and compose configuration without starting containers:
 
 ```bash
-ssh ubuntu@10.10.9.184 '
-  cd /data/personal/projects/blog-ui-vue3 &&
+ssh ${REMOTE_SSH_USER}@${REMOTE_HOST} "
+  cd ${REMOTE_BLOG_UI_VUE3_PATH} &&
   git remote -v &&
   git branch --show-current &&
-  find . -name "._*" | sed -n "1,40p" &&
+  find . -name '._*' | sed -n '1,40p' &&
   docker compose config >/tmp/blog-ui-vue3.compose.txt &&
-  sed -n "1,120p" /tmp/blog-ui-vue3.compose.txt
-'
+  sed -n '1,120p' /tmp/blog-ui-vue3.compose.txt
+"
 ```
 
 ## Runtime Verification Order
 
 Follow this order exactly:
 
-1. Connect to the remote host: `ssh ubuntu@10.10.9.184`
-2. Switch to the project directory: `cd /data/personal/projects/blog-ui-vue3`
+1. Connect to the remote host: `ssh ${REMOTE_SSH_USER}@${REMOTE_HOST}`
+2. Switch to the project directory: `cd ${REMOTE_BLOG_UI_VUE3_PATH}`
 3. Sync the updated local code to the remote project directory
 4. Clean any remote `._*` files
 5. Run the static verification command above
 6. Ask the user for confirmation before any `docker compose up` command
 7. Only after approval, run the required `docker compose up` command on the remote host
-8. Verify the page on `http://10.10.9.184:8083/`
+8. Verify the page on `${BLOG_UI_VUE3_REMOTE_URL}`
 
 ## Hard Constraints
 
