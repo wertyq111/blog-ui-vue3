@@ -158,7 +158,7 @@ The project supports both online and local Mock interfaces. By default, it uses 
 
 1. Get the backend source code based on `Java` and `SpringBoot` from [youlai-boot](https://gitee.com/youlaiorg/youlai-boot.git).
 2. Follow the instructions in the backend project's README.md to [set up and run locally](https://gitee.com/youlaiorg/youlai-boot#%E9%A1%B9%E7%9B%AE%E8%BF%90%E8%A1%8C).
-3. Modify the value of `VITE_APP_API_URL` in the `.env.development` file, changing it from https://api.youlai.tech to http://localhost:8989.
+3. Modify `VITE_APP_API_PROTOCOL`, `VITE_APP_API_HOST`, `VITE_APP_API_PORT`, and `VITE_APP_API_PREFIX` in `.env.development` so `VITE_APP_API_URL` points to your backend.
 
 ## Notes
 

@@ -11,7 +11,7 @@
 - Task 5 local implementation: done
 - Task 5 remote sync: done
 - Task 5 remote static verification: done
-- Remote runtime is already user-managed on `10.10.9.184:8083`
+- Remote runtime is already user-managed on `${BLOG_UI_VUE3_REMOTE_URL}`
 
 ## Wave Sequencing
 
@@ -213,4 +213,4 @@
 - `/forget` 白名单与真实路由不一致
 - 401 登录回跳参数名不一致
 - 权限数据来源存在 `authorities` 与 `permission` 双轨
-- Vue3 shell 之前把浏览器 API 请求发往 `127.0.0.1:8000/api`；该问题已在本地修复，Task 6A 期间已在远端运行态确认验证码与登录恢复
+- Vue3 shell 之前把浏览器 API 请求发往固定本机地址；该问题已改为通过 `VITE_APP_API_*` 变量配置，Task 6A 期间已在远端运行态确认验证码与登录恢复

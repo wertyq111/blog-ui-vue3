@@ -37,12 +37,13 @@ npm install
 npm run dev
 ```
 
-如果你在本机单独启动前端并连接本机后端，请在 `.env.development` 里显式设置 `VITE_API_BASE_URL`。未显式设置时，前端会按 remote-first 规则自动推导 API 地址。
+如果你在本机单独启动前端并连接本机后端，请在 `.env.development` 里显式设置 `VITE_APP_API_HOST`、`VITE_APP_API_PORT` 和 `VITE_APP_API_PREFIX`。
 
 ## Docker 开发
 
 ```bash
 cd /Volumes/T7/Program/Personal/blog/blog-ui-vue3
+cp .env.example .env
 docker compose up --build
 ```
 
@@ -53,14 +54,15 @@ docker compose up --build
 
 默认访问地址：
 
-- 新版：`http://localhost:8083/`
-- 旧版：`http://localhost:8082/`
+- 新版：`http://localhost:${VITE_APP_HOST_PORT}/`
+- 旧版：`http://localhost:${VUE2_FRONTEND_HOST_PORT}/`
 
 ## 环境变量
 
 参考 [app/.env.example](/Volumes/T7/Program/Personal/blog/blog-ui-vue3/app/.env.example)：
 
-- `VITE_API_BASE_URL`：后端 API 地址。留空时：
-  - 本机访问 `localhost/127.0.0.1` 时回落到 `http://127.0.0.1:8000/api`
-  - remote-first 场景下会按当前浏览器主机自动推导为 `http://<current-host>:3925/api`
+- `VITE_APP_HOST`：Vite 监听主机
+- `VITE_APP_PORT`：Vite 监听端口
+- `VITE_APP_API_PROTOCOL`、`VITE_APP_API_HOST`、`VITE_APP_API_PORT`、`VITE_APP_API_PREFIX`：后端 API 地址拆分变量
+- `VITE_APP_API_URL`：后端 API 完整地址，由上面的变量拼出来
 - `VITE_APP_TITLE`：页面标题

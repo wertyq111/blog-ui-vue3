@@ -16,9 +16,26 @@ const __APP_INFO__ = {
   buildTimestamp: Date.now(),
 };
 
+const requiredEnv = (env: Record<string, string>, name: string): string => {
+  const value = env[name];
+  if (!value) {
+    throw new Error(`${name} is required`);
+  }
+  return value;
+};
+
+const requiredPort = (env: Record<string, string>, name: string): number => {
+  const value = Number.parseInt(requiredEnv(env, name), 10);
+  if (!Number.isInteger(value) || value <= 0) {
+    throw new Error(`${name} must be a positive integer`);
+  }
+  return value;
+};
+
 // Vite配置  https://cn.vitejs.dev/config
-export default defineConfig(({ mode }: ConfigEnv): UserConfig => {
+export default defineConfig(({ mode, command }: ConfigEnv): UserConfig => {
   const env = loadEnv(mode, process.cwd());
+  const isServe = command === "serve";
   const isProduction = mode === "production";
 
   return {
@@ -34,20 +51,24 @@ export default defineConfig(({ mode }: ConfigEnv): UserConfig => {
         },
       },
     },
-    server: {
-      host: "0.0.0.0",
-      port: +env.VITE_APP_PORT,
-      open: true,
-      proxy: {
-        // 代理 /dev-api 的请求
-        [env.VITE_APP_BASE_API]: {
-          changeOrigin: true,
-          // 代理目标地址：https://api.youlai.tech
-          target: env.VITE_APP_API_URL,
-          rewrite: (path: string) => path.replace(new RegExp("^" + env.VITE_APP_BASE_API), ""),
-        },
-      },
-    },
+    ...(isServe
+      ? {
+          server: {
+            host: requiredEnv(env, "VITE_APP_HOST"),
+            port: requiredPort(env, "VITE_APP_PORT"),
+            open: true,
+            proxy: {
+              // 代理 /dev-api 的请求
+              [requiredEnv(env, "VITE_APP_BASE_API")]: {
+                changeOrigin: true,
+                target: requiredEnv(env, "VITE_APP_API_URL"),
+                rewrite: (path: string) =>
+                  path.replace(new RegExp("^" + requiredEnv(env, "VITE_APP_BASE_API")), ""),
+              },
+            },
+          },
+        }
+      : {}),
     plugins: [
       vue(),
       ...(env.VITE_MOCK_DEV_SERVER === "true" ? [mockDevServerPlugin()] : []),

@@ -336,7 +336,7 @@ The current scaffold is useful as a starting point, but it is still provisional.
 - Docker development compose mapping on port `8083`
 - Minimal app bootstrap with `main.ts`
 - Static router bootstrap with login and dashboard placeholder routes
-- Environment normalization helper for `VITE_APP_TITLE` and `VITE_API_BASE_URL`
+- Environment normalization helper for `VITE_APP_TITLE` and `VITE_APP_API_URL`
 - Initial domain type definitions
 - Pure-logic test coverage for access, HTTP, menu, env, and static routes
 - Local quality-gate pass on `test:run`, `lint`, `typecheck`, and `build`
@@ -458,12 +458,12 @@ Strong candidates to create or rebuild in Task 2:
   - `/system/role`
   - `/system/menu`
 - Runtime debugging also reconfirmed current remote backend has no `system/position` routes, so this module cannot be selected as the next migration wave until backend routes are introduced.
-- The remote-first API base resolution has now been corrected locally: when `VITE_API_BASE_URL` is blank, or still carries the old loopback default while the browser is already on a remote host, the frontend derives `http://<current-host>:3925/api` instead of sending browser traffic to local `127.0.0.1`.
-- For this remote runtime snapshot, `http://10.10.9.184:8083/` serves the frontend shell and backend API is exposed at `http://10.10.9.184:3925/api`.
+- The remote-first API base resolution now uses `VITE_APP_API_PROTOCOL`, `VITE_APP_API_HOST`, `VITE_APP_API_PORT`, and `VITE_APP_API_PREFIX` instead of hard-coded host URLs.
+- For this remote runtime snapshot, `${BLOG_UI_VUE3_REMOTE_URL}` serves the frontend shell and backend API is exposed at `${BLOG_BACKEND_REMOTE_API_URL}`.
 - The remote `docker compose up` lifecycle is now user-managed during this migration thread; future page debugging should attach to the existing remote runtime instead of trying to restart it from this thread.
 - SSH access can be disrupted by Clash Verge TUN routing unless the private remote address is forced to `DIRECT`; this is an environment risk, not an application contract.
 - The current backend `UsersController@index` only confirms `username`, `phone`, exact `status`, and exact `roles.id` filters. Vue2 historical `gender` filtering is therefore a risk item, not a frozen contract.
-- The remote runtime currently answers `200 OK` on `127.0.0.1:8083` from inside the remote host and serves the Vue3 Vite shell, but this workstation still cannot directly reach `http://10.10.9.184:8083/`. That remains an environment-path risk, not a blocker for the now-closed Task 6A query fix.
+- The remote runtime currently answers `200 OK` on its loopback frontend port from inside the remote host and serves the Vue3 Vite shell, but this workstation still cannot directly reach `${BLOG_UI_VUE3_REMOTE_URL}`. That remains an environment-path risk, not a blocker for the now-closed Task 6A query fix.
 
 ## Immediate Next Step
 
