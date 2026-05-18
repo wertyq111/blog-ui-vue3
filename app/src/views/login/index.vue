@@ -74,9 +74,9 @@ const formComponents = {
   min-width: 520px;
   overflow: hidden;
   background:
-    radial-gradient(circle at 24% 18%, rgba(182, 193, 208, 0.38), transparent 52%),
-    radial-gradient(circle at 82% 30%, rgba(74, 85, 105, 0.3), transparent 36%),
-    linear-gradient(160deg, #6f798b 0%, #5e6879 42%, #596476 100%);
+    radial-gradient(circle at 24% 18%, rgba(232, 168, 124, 0.28), transparent 52%),
+    radial-gradient(circle at 82% 30%, rgba(240, 190, 154, 0.22), transparent 36%),
+    linear-gradient(160deg, #e8a87c 0%, #f0be9a 42%, #f4d4b8 100%);
 }
 
 .login-main {
@@ -111,14 +111,14 @@ const formComponents = {
     height: 28px;
     object-fit: cover;
     border-radius: 6px;
-    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.22);
+    box-shadow: 0 4px 14px rgba(90, 66, 48, 0.18);
   }
 
   .brand-text {
     font-size: 28px;
     font-weight: 600;
     letter-spacing: 0.5px;
-    color: #f2f6ff;
+    color: #fff;
   }
 }
 
@@ -131,12 +131,12 @@ const formComponents = {
 
   a {
     font-size: 14px;
-    color: rgba(225, 233, 244, 0.52);
+    color: rgba(255, 255, 255, 0.58);
     text-decoration: none;
     transition: color 0.2s;
 
     &:hover {
-      color: rgba(225, 233, 244, 0.9);
+      color: rgba(255, 255, 255, 0.9);
     }
   }
 }
@@ -144,25 +144,6 @@ const formComponents = {
 .login-panel {
   width: 440px;
   max-width: calc(100% - 48px);
-}
-
-:global(body.cyber-theme-dark) .login-page {
-  background: transparent;
-}
-
-:global(body.cyber-theme-dark) .login-visual {
-  background:
-    radial-gradient(circle at 18% 20%, rgba(24, 168, 255, 0.18), transparent 34%),
-    radial-gradient(circle at 82% 18%, rgba(54, 233, 220, 0.1), transparent 28%),
-    linear-gradient(160deg, #07111d 0%, #111c2a 42%, #09111e 100%);
-}
-
-:global(body.cyber-theme-dark) .login-main {
-  background: linear-gradient(180deg, rgba(7, 17, 29, 0.56), rgba(7, 17, 29, 0.24));
-}
-
-:global(body.cyber-theme-dark) .language-switch {
-  color: rgba(202, 224, 248, 0.78);
 }
 
 /* Transitions */

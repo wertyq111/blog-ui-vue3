@@ -279,14 +279,4 @@ onMounted(() => {
   border-radius: 999px !important;
 }
 
-// 暗黑模式
-:global(body.cyber-theme-dark) {
-  .user-nickname, .panel-title, .profile-details :deep(.el-descriptions__content) {
-    color: var(--cyber-text);
-  }
-  
-  .avatar-wrapper .profile-avatar {
-    border-color: color-mix(in srgb, var(--cyber-border) 72%, transparent);
-  }
-}
 </style>

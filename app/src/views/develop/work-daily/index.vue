@@ -547,20 +547,4 @@ onMounted(async () => {
   background: rgba(255, 255, 255, 0.4);
 }
 
-// 暗黑模式
-:global(body.cyber-theme-dark) {
-  .daily-panel {
-    background: var(--el-bg-color-overlay);
-    border: 1px solid var(--el-border-color-lighter);
-  }
-  .daily-panel__title {
-    color: var(--el-text-color-primary);
-  }
-  .daily-panel__desc {
-    color: var(--el-text-color-secondary);
-  }
-  .platform-editor {
-    background: var(--el-fill-color-light);
-  }
-}
 </style>
