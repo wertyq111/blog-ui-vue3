@@ -42,7 +42,7 @@ const greeting = computed(() => {
   padding: 28px 32px;
   margin-bottom: 20px;
   border-radius: 20px;
-  background: linear-gradient(135deg, #5fa979 0%, #7bc8a4 50%, #a8dfc0 100%);
+  background: linear-gradient(135deg, #e8a87c 0%, #f0be9a 50%, #f4d4b8 100%);
   position: relative;
   overflow: hidden;
 

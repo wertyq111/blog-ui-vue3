@@ -7,20 +7,6 @@
     class="settings-drawer"
   >
     <div class="settings-content">
-      <section class="config-section">
-        <el-divider>{{ t("settings.theme") }}</el-divider>
-
-        <div class="flex-center">
-          <el-switch
-            v-model="isDark"
-            active-icon="Moon"
-            inactive-icon="Sunny"
-            class="theme-switch"
-            @change="handleThemeChange"
-          />
-        </div>
-      </section>
-
       <!-- 界面设置 -->
       <section class="config-section">
         <el-divider>{{ t("settings.interface") }}</el-divider>
@@ -71,17 +57,6 @@
           <el-switch v-model="settingsStore.colorWeak" />
         </div>
 
-        <div v-if="!isDark" class="config-item flex-x-between">
-          <span class="text-xs">{{ t("settings.sidebarColorScheme") }}</span>
-          <el-radio-group v-model="sidebarColor" @change="changeSidebarColor">
-            <el-radio :value="SidebarColor.CLASSIC_BLUE">
-              {{ t("settings.classicBlue") }}
-            </el-radio>
-            <el-radio :value="SidebarColor.MINIMAL_WHITE">
-              {{ t("settings.minimalWhite") }}
-            </el-radio>
-          </el-radio-group>
-        </div>
       </section>
 
       <!-- 布局设置 -->
@@ -166,7 +141,7 @@
 import { DocumentCopy, RefreshLeft, Check } from "@element-plus/icons-vue";
 
 const { t } = useI18n();
-import { LayoutMode, PageSwitchingAnimationOptions, SidebarColor, ThemeMode } from "@/enums";
+import { LayoutMode, PageSwitchingAnimationOptions } from "@/enums";
 import { useSettingsStore } from "@/store";
 import { themeColorPresets } from "@/settings";
 
@@ -199,12 +174,6 @@ const colorPresets = [...themeColorPresets];
 
 const settingsStore = useSettingsStore();
 
-const isDark = computed({
-  get: () => settingsStore.effectiveDarkMode,
-  set: (value: boolean) => {
-    settingsStore.theme = value ? ThemeMode.DARK : ThemeMode.LIGHT;
-  },
-});
 const sidebarColor = ref(settingsStore.sidebarColorScheme);
 
 const selectedThemeColor = computed({
@@ -218,15 +187,6 @@ const drawerVisible = computed({
   get: () => settingsStore.settingsVisible,
   set: (value) => (settingsStore.settingsVisible = value),
 });
-
-/**
- * 处理主题切换
- *
- * @param isDark 是否启用暗黑模式
- */
-const handleThemeChange = (isDark: string | number | boolean) => {
-  settingsStore.theme = isDark ? ThemeMode.DARK : ThemeMode.LIGHT;
-};
 
 /**
  * 更改侧边栏颜色

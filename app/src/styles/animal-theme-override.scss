@@ -1,0 +1,66 @@
+:root {
+  // 主色
+  --animal-primary-color: #e8a87c;
+  --animal-primary-color-hover: #f0be9a;
+  --animal-primary-color-active: #c4917c;
+  --animal-primary-color-bg: #fdf0e6;
+
+  // 语义色
+  --animal-success-color: #85b79d;
+  --animal-success-color-hover: #9dc8ad;
+  --animal-success-color-active: #6a9b81;
+  --animal-warning-color: #e8c86a;
+  --animal-warning-color-hover: #efd485;
+  --animal-warning-color-active: #d0b455;
+  --animal-error-color: #d17b5c;
+  --animal-error-color-hover: #d9917a;
+  --animal-error-color-active: #b8654a;
+
+  // 文字
+  --animal-text-color: #5a4230;
+  --animal-text-color-secondary: #8c7a68;
+  --animal-text-color-disabled: #c4b5a3;
+
+  // 边框
+  --animal-border-color: #e0d5c7;
+  --animal-border-color-hover: #c4b5a3;
+
+  // 背景
+  --animal-bg-color: #fdf6ee;
+  --animal-bg-color-secondary: #f5ede3;
+  --animal-bg-color-disabled: #f5ede3;
+
+  // 阴影
+  --animal-shadow-sm: 0 2px 4px 0 rgba(90, 66, 48, 0.06);
+  --animal-shadow-base: 0 3px 10px 0 rgba(90, 66, 48, 0.1);
+  --animal-shadow-lg: 0 8px 24px 0 rgba(90, 66, 48, 0.14);
+
+  // 字体 - 增加中文字体
+  --animal-font-family: "M PLUS Rounded 1c", "Noto Sans SC", -apple-system,
+    BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+
+// 按钮 3D 阴影色覆盖 - 主要按钮
+[class*="animal-"][class*="btn-primary"] {
+  box-shadow: 0 5px 0 0 #c4917c;
+  &:hover:not(:disabled) {
+    box-shadow: 0 6px 0 0 #c4917c;
+  }
+  &:active:not(:disabled) {
+    box-shadow: 0 1px 0 0 #c4917c;
+  }
+}
+
+// 按钮 3D 阴影色覆盖 - 默认按钮
+[class*="animal-"][class*="btn-default"],
+[class*="animal-"][class*="btn"]:not([class*="btn-primary"]):not(
+    [class*="btn-dashed"]
+  ):not([class*="btn-text"]):not([class*="btn-link"]) {
+  box-shadow: 0 5px 0 0 #d4c5b2;
+  &:hover:not(:disabled) {
+    box-shadow: 0 6px 0 0 #d4c5b2;
+  }
+  &:active:not(:disabled) {
+    box-shadow: 0 1px 0 0 #d4c5b2;
+  }
+}

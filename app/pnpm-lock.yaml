@@ -20,6 +20,9 @@ importers:
       '@wangeditor-next/editor-for-vue':
         specifier: ^5.1.14
         version: 5.1.14(@wangeditor-next/editor@5.6.56)(vue@3.5.32(typescript@5.9.3))
+      animal-island-ui-vue:
+        specifier: 0.1.0
+        version: 0.1.0(vue@3.5.32(typescript@5.9.3))
       animate.css:
         specifier: ^4.1.1
         version: 4.1.1
@@ -1463,6 +1466,11 @@ packages:
 
   alien-signals@3.1.2:
     resolution: {integrity: sha512-d9dYqZTS90WLiU0I5c6DHj/HcKkF8ZyGN3G5x8wSbslulz70KOxaqCT0hQCo9KOyhVqzqGojvNdJXoTumZOtcw==}
+
+  animal-island-ui-vue@0.1.0:
+    resolution: {integrity: sha512-MdvM5OfSpNW+8rOUjw0KwLWl1UaUw8cKh/ikdDmjLIL8m5vmJxZ+kPqETkgy3R5i10yU7W2qE+pmZAr2HsOuNw==}
+    peerDependencies:
+      vue: ^3.5.0
 
   animate.css@4.1.1:
     resolution: {integrity: sha512-+mRmCTv6SbCmtYJCN4faJMNFVNN5EuCTTprDTAo7YzIGji2KADmakjVA3+8mVDkZ2Bf09vayB35lSQIex2+QaQ==}
@@ -5485,6 +5493,10 @@ snapshots:
       require-from-string: 2.0.2
 
   alien-signals@3.1.2: {}
+
+  animal-island-ui-vue@0.1.0(vue@3.5.32(typescript@5.9.3)):
+    dependencies:
+      vue: 3.5.32(typescript@5.9.3)
 
   animate.css@4.1.1: {}
 

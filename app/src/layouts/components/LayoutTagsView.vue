@@ -408,10 +408,10 @@ useContextMenuManager();
     }
 
     &.el-tag--primary {
-      background: linear-gradient(135deg, rgba(220, 247, 185, 0.98) 0%, rgba(196, 239, 148, 0.94) 100%);
-      border-color: rgba(204, 227, 168, 0.42);
-      color: #5f8f18;
-      box-shadow: 0 8px 14px rgba(171, 192, 157, 0.08);
+      background: var(--cyber-sidebar-active-bg);
+      border-color: transparent;
+      color: #fff;
+      box-shadow: var(--cyber-sidebar-active-shadow);
     }
 
     :deep(.el-tag__close) {
@@ -431,13 +431,13 @@ useContextMenuManager();
   margin: 0;
   font-size: 13px;
   font-weight: 500;
-  color: #2a3529;
+  color: #5a4230;
   list-style-type: none;
   background: rgba(255, 255, 255, 0.92);
   backdrop-filter: blur(12px);
   border: 1px solid rgba(255, 255, 255, 0.56);
   border-radius: 16px;
-  box-shadow: 0 20px 40px rgba(150, 176, 145, 0.16);
+  box-shadow: 0 20px 40px rgba(224, 213, 199, 0.16);
 
   li {
     display: flex;
@@ -449,41 +449,10 @@ useContextMenuManager();
     transition: all 0.2s;
 
     &:hover {
-      background: rgba(244, 248, 235, 0.92);
-      color: #597921;
+      background: rgba(253, 246, 238, 0.92);
+      color: #c4917c;
     }
   }
 }
 
-:global(body.cyber-theme-dark) .tags-container,
-:global(html.sidebar-color-blue) .tags-container {
-  background: color-mix(in srgb, var(--cyber-panel-shell) 84%, transparent);
-  border-color: color-mix(in srgb, var(--cyber-border-strong) 90%, transparent);
-  box-shadow: 0 16px 28px rgba(2, 8, 19, 0.18);
-
-  .cyber-tag {
-    background: rgba(255, 255, 255, 0.05);
-    border-color: rgba(255, 255, 255, 0.1);
-    color: rgba(202, 224, 248, 0.78);
-    
-    &.el-tag--primary {
-      background: var(--cyber-sidebar-active-bg);
-      color: #fff;
-      border-color: transparent;
-      box-shadow: var(--cyber-sidebar-active-shadow);
-    }
-  }
-}
-
-:global(body.cyber-theme-dark) .contextmenu,
-:global(html.sidebar-color-blue) .contextmenu {
-  background: #111c2a;
-  border-color: rgba(103, 175, 242, 0.2);
-  color: #eef6ff;
-  
-  li:hover {
-    background: rgba(34, 80, 126, 0.36);
-    color: #fff;
-  }
-}
 </style>

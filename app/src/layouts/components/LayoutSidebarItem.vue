@@ -295,37 +295,16 @@ function resolvePath(routePath: string) {
   }
 }
 
-body.cyber-theme-dark,
-html.sidebar-color-blue {
-  .el-menu-item:hover {
-    background-color: $menu-hover;
-  }
-}
-
-// 父菜单激活状态样式 - 当子菜单激活时，父菜单显示激活状态
+// 父菜单激活状态样式
 .el-sub-menu {
-  // 当父菜单包含激活子菜单时的样式
   &.has-active-child > .el-sub-menu__title {
     color: var(--cyber-sidebar-active-text) !important;
     background: var(--cyber-sidebar-active-bg) !important;
     box-shadow: var(--cyber-sidebar-active-shadow);
+    border-radius: 14px;
 
     .menu-icon {
       color: currentcolor !important;
-    }
-  }
-
-  // 深色主题下的父菜单激活状态"
-  body.cyber-theme-dark &,
-  html.sidebar-color-blue & {
-    &.has-active-child > .el-sub-menu__title {
-      color: var(--cyber-sidebar-active-text) !important;
-      background: var(--cyber-sidebar-active-bg) !important;
-      box-shadow: var(--cyber-sidebar-active-shadow);
-
-      .menu-icon {
-        color: currentcolor !important;
-      }
     }
   }
 }

@@ -11,6 +11,7 @@
 // ============================================
 
 @use "./variables" as *;
+@use "./animal-theme-override";
 @use "./vendors";
 @use "./layouts";
 @use "./develop";

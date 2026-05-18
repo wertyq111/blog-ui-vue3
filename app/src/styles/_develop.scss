@@ -1,6 +1,4 @@
-/**
- * 共享开发管理样式 (通用 Workspace 基础)
- */
+@use "./variables" as *;
 
 .develop-page,
 .admin-workspace-page {
@@ -41,7 +39,7 @@
   font-weight: 700;
   letter-spacing: 0.14em;
   text-transform: uppercase;
-  color: color-mix(in srgb, var(--cyber-primary-strong) 82%, var(--cyber-text-soft));
+  color: var(--cyber-primary-strong);
 }
 
 .develop-hero__title {
@@ -57,7 +55,7 @@
   margin-top: 10px;
   font-size: 14px;
   line-height: 1.7;
-  color: var(--cyber-text-muted);
+  color: var(--cyber-text-mute);
 }
 
 .develop-panel,
@@ -175,93 +173,30 @@
     box-shadow 0.2s ease;
 }
 
-body.cyber-theme-light {
-  .develop-page .develop-shell,
-  .admin-workspace-page .develop-shell,
-  .admin-workspace-page .admin-workspace-shell {
-    background: linear-gradient(180deg, rgba(255, 255, 255, 0.72) 0%, rgba(251, 255, 245, 0.62) 100%);
-  }
-
-  .develop-hero__eyebrow {
-    color: #7aa126;
-  }
-
-  .develop-hero__title,
-  .develop-table-shell__title {
-    color: #2a3529;
-  }
-
-  .develop-hero__desc,
-  .develop-table-shell__desc,
-  .develop-form .el-form-item__label,
-  .field-desc {
-    color: rgba(88, 102, 86, 0.82);
-  }
-
-  .develop-table-shell .el-table thead tr,
-  .develop-table-shell .el-table thead th {
-    background: rgba(255, 255, 255, 0.7);
-  }
-
-  .develop-table-shell .el-table th.is-leaf,
-  .develop-table-shell .el-table td {
-    border-bottom-color: rgba(224, 231, 215, 0.82);
-  }
-
-  .develop-table-shell .el-table th > .cell {
-    color: #4f5a4b;
-  }
-
-  .develop-table-shell .el-table .cell {
-    color: #445042;
-  }
-
-  .develop-table-shell .el-table tbody tr:hover > td {
-    background: rgba(245, 249, 238, 0.96) !important;
-  }
+.develop-page .develop-shell,
+.admin-workspace-page .develop-shell,
+.admin-workspace-page .admin-workspace-shell {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.72) 0%, rgba(253, 246, 238, 0.62) 100%);
 }
 
-body.cyber-theme-dark {
-  .develop-shell,
-  .admin-workspace-shell,
-  .develop-panel,
-  .develop-table-shell,
-  .admin-workspace-form-panel,
-  .admin-workspace-org-users-panel,
-  .admin-workspace-tree-shell .org-tree-group,
-  .admin-workspace-tree-shell .doc-tree-group {
-    background: var(--cyber-panel-shell);
-    border-color: var(--cyber-border-strong);
-    box-shadow: var(--cyber-shadow);
-  }
+.develop-table-shell .el-table thead tr,
+.develop-table-shell .el-table thead th {
+  background: rgba(255, 255, 255, 0.7);
+}
 
-  .develop-hero__eyebrow {
-    color: var(--cyber-primary);
-  }
+.develop-table-shell .el-table th.is-leaf,
+.develop-table-shell .el-table td {
+  border-bottom-color: rgba(224, 213, 199, 0.6);
+}
 
-  .develop-hero__title {
-    color: var(--cyber-text);
-    text-shadow: 0 0 20px color-mix(in srgb, var(--cyber-primary) 12%, transparent);
-  }
+.develop-table-shell .el-table th > .cell {
+  color: #6b5542;
+}
 
-  .develop-hero__desc,
-  .develop-table-shell__desc,
-  .develop-form .el-form-item__label,
-  .field-desc {
-    color: var(--cyber-text-soft);
-  }
+.develop-table-shell .el-table .cell {
+  color: #5a4230;
+}
 
-  .develop-table-shell .el-table thead tr,
-  .develop-table-shell .el-table thead th {
-    background: rgba(16, 30, 47, 0.9);
-  }
-
-  .develop-table-shell .el-table th.is-leaf,
-  .develop-table-shell .el-table td {
-    border-bottom-color: rgba(78, 128, 184, 0.16);
-  }
-
-  .develop-table-shell .el-table tbody tr:hover > td {
-    background: rgba(30, 54, 79, 0.56) !important;
-  }
+.develop-table-shell .el-table tbody tr:hover > td {
+  background: rgba(253, 246, 238, 0.96) !important;
 }

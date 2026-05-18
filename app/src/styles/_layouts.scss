@@ -1,16 +1,12 @@
 @use "./variables" as *;
 
-/**
- * 核心框架布局
- */
-
 html,
 body,
 #app {
   min-height: 100%;
 }
 
-body.cyber-theme {
+body {
   background:
     radial-gradient(circle at 85% 10%, var(--cyber-body-glow-a), transparent 20%),
     radial-gradient(circle at 15% 78%, var(--cyber-body-glow-b), transparent 22%),
@@ -48,7 +44,7 @@ body.cyber-theme {
 }
 
 .layout__overlay {
-  background: rgba(7, 13, 22, 0.42) !important;
+  background: rgba(90, 66, 48, 0.24) !important;
   backdrop-filter: blur(6px);
 }
 
@@ -131,7 +127,7 @@ body.cyber-theme {
   border-radius: var(--cyber-shell-radius);
   box-shadow:
     inset -1px 0 0 rgba(255, 255, 255, 0.04),
-    20px 0 42px rgba(2, 7, 17, 0.24);
+    20px 0 42px rgba(90, 66, 48, 0.08);
 }
 
 .layout-mix .layout__main {
@@ -180,24 +176,8 @@ body.cyber-theme {
 .layout-top .layout__header-menu .el-sub-menu.has-active-child > .el-sub-menu__title,
 .layout-mix .layout__header-menu .el-menu-item.is-active,
 .layout-mix .layout__header-menu .el-sub-menu.has-active-child > .el-sub-menu__title {
-  background: linear-gradient(
-    135deg,
-    color-mix(in srgb, var(--cyber-primary) 18%, #fff) 0%,
-    color-mix(in srgb, var(--cyber-primary-strong) 16%, #fff) 100%
-  ) !important;
-  color: var(--cyber-sidebar-active-text) !important;
-  box-shadow: 0 10px 22px color-mix(in srgb, var(--cyber-primary) 18%, transparent);
-}
-
-body.cyber-theme-dark .layout-top .layout__header-menu .el-menu-item.is-active,
-body.cyber-theme-dark .layout-top .layout__header-menu .el-sub-menu.has-active-child > .el-sub-menu__title,
-body.cyber-theme-dark .layout-mix .layout__header-menu .el-menu-item.is-active,
-body.cyber-theme-dark .layout-mix .layout__header-menu .el-sub-menu.has-active-child > .el-sub-menu__title,
-html.sidebar-color-blue .layout-top .layout__header-menu .el-menu-item.is-active,
-html.sidebar-color-blue .layout-top .layout__header-menu .el-sub-menu.has-active-child > .el-sub-menu__title,
-html.sidebar-color-blue .layout-mix .layout__header-menu .el-menu-item.is-active,
-html.sidebar-color-blue .layout-mix .layout__header-menu .el-sub-menu.has-active-child > .el-sub-menu__title {
   background: var(--cyber-sidebar-active-bg) !important;
+  color: var(--cyber-sidebar-active-text) !important;
   box-shadow: var(--cyber-sidebar-active-shadow);
 }
 

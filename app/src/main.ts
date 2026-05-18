@@ -10,7 +10,6 @@ import App from "./App.vue";
 
 // ===== 样式导入 =====
 import "element-plus/dist/index.css";
-import "element-plus/theme-chalk/dark/css-vars.css";
 import "vxe-table/lib/style.css";
 import "@/styles/index.scss";
 import "uno.css";
@@ -26,6 +25,7 @@ import { setupStore } from "@/store";
 import * as ElementPlusIcons from "@element-plus/icons-vue";
 
 // ===== 第三方插件 =====
+import AnimalIslandUIVue from "animal-island-ui-vue";
 import VXETable from "vxe-table";
 import { InstallCodeMirror } from "codemirror-editor-vue3";
 import { configureVxeTable } from "@/plugins/vxe-table";
@@ -47,6 +47,7 @@ Object.entries(ElementPlusIcons).forEach(([name, comp]) => app.component(name, c
 
 // 3️⃣ 第三方插件
 configureVxeTable();
+app.use(AnimalIslandUIVue);
 app.use(VXETable);
 app.use(InstallCodeMirror);
 
