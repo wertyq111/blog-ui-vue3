@@ -1,12 +1,9 @@
-import { SidebarColor, ThemeMode } from "@/enums";
+import { ThemeMode } from "@/enums";
 import type { LayoutMode } from "@/enums";
-import { usePreferredDark } from "@vueuse/core";
 import {
   applyTheme,
   generateThemeColors,
-  resolveThemeMode,
   syncThemeClass,
-  toggleSidebarColor,
 } from "@/utils/theme";
 import { STORAGE_KEYS } from "@/constants";
 import { defaults } from "@/settings";
@@ -29,13 +26,12 @@ export const useSettingsStore = defineStore("setting", () => {
     defaults.sidebarColorScheme
   );
 
-  // 主题
+  // 主题（仅亮色模式，暗色相关属性保留为惰性值供兼容引用）
   const theme = useStorage<ThemeMode>(STORAGE_KEYS.THEME, defaults.theme);
   const themeColor = useStorage(STORAGE_KEYS.THEME_COLOR, defaults.themeColor);
-  const prefersDark = usePreferredDark();
-  const resolvedTheme = computed(() => resolveThemeMode(theme.value, prefersDark.value));
-  const effectiveDarkMode = computed(() => resolvedTheme.value === ThemeMode.DARK);
-  const isDark = computed(() => effectiveDarkMode.value);
+  const resolvedTheme = computed(() => ThemeMode.LIGHT);
+  const effectiveDarkMode = computed(() => false);
+  const isDark = computed(() => false);
   const themeRefreshKey = ref(0);
 
   // 特殊模式
@@ -51,24 +47,6 @@ export const useSettingsStore = defineStore("setting", () => {
     },
     { immediate: true }
   );
-
-  watch(
-    prefersDark,
-    (nextPrefersDark, previousPrefersDark) => {
-      if (
-        previousPrefersDark !== undefined &&
-        theme.value === ThemeMode.AUTO &&
-        nextPrefersDark !== previousPrefersDark
-      ) {
-        themeRefreshKey.value += 1;
-      }
-    },
-    { flush: "post" }
-  );
-
-  watch(sidebarColorScheme, (v) => toggleSidebarColor(v === SidebarColor.CLASSIC_BLUE), {
-    immediate: true,
-  });
 
   // 灰色模式监听
   watch(
