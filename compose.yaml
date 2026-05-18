@@ -4,21 +4,11 @@ services:
       context: app
       target: development
     ports:
-      - "${VITE_APP_HOST_PORT}:${VITE_APP_PORT}"
+      - "8082:3000"
     extra_hosts:
       - "host.docker.internal:host-gateway"
     environment:
-      VITE_APP_HOST: ${VITE_APP_HOST}
-      VITE_APP_PORT: ${VITE_APP_PORT}
-      VITE_APP_API_PROTOCOL: ${VITE_APP_API_PROTOCOL}
-      VITE_APP_API_HOST: ${VITE_APP_API_HOST}
-      VITE_APP_API_PORT: ${VITE_APP_API_PORT}
-      VITE_APP_API_PREFIX: ${VITE_APP_API_PREFIX}
-      VITE_APP_API_URL: ${VITE_APP_API_PROTOCOL}://${VITE_APP_API_HOST}:${VITE_APP_API_PORT}${VITE_APP_API_PREFIX}
-      VITE_APP_TITLE: ${VITE_APP_TITLE}
-      VITE_APP_BASE_API: ${VITE_APP_BASE_API}
-      VITE_MOCK_DEV_SERVER: ${VITE_MOCK_DEV_SERVER}
-      VITE_APP_TENANT_ENABLED: ${VITE_APP_TENANT_ENABLED}
+      VITE_APP_API_URL: ${VITE_APP_API_URL:-http://host.docker.internal:3925/api}
     volumes:
       - ./app:/project
       - /project/node_modules
