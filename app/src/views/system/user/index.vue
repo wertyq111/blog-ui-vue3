@@ -183,63 +183,73 @@
     </div>
 
     <!-- 用户表单 -->
-    <el-drawer
+    <el-dialog
       v-model="dialogState.visible"
       :title="dialogState.title"
-      append-to-body
-      :size="drawerSize"
-      class="develop-drawer"
+      width="680px"
+      class="develop-dialog"
       @close="closeDialog"
     >
-      <el-form ref="userFormRef" :model="formData" :rules="rules" label-width="80px">
-        <el-form-item label="用户名" prop="username">
-          <el-input v-model="formData.username" :readonly="!!formData.id" placeholder="请输入用户名" />
-        </el-form-item>
-
-        <el-form-item v-if="!formData.id" label="密码" prop="password">
-          <el-input
-            v-model="formData.password"
-            type="password"
-            placeholder="请输入密码"
-            show-password
-          />
-        </el-form-item>
-
-        <el-form-item label="角色" prop="roleIds">
-          <AnimalMultiSelect
-            v-model="roleIdsModel"
-            :options="roleSelectOptions"
-            placeholder="请选择"
-          />
-        </el-form-item>
-
-        <el-form-item label="手机号码" prop="phone">
-          <el-input v-model="formData.phone" placeholder="请输入手机号码" maxlength="11" />
-        </el-form-item>
-
-        <el-form-item label="邮箱" prop="email">
-          <el-input v-model="formData.email" placeholder="请输入邮箱" maxlength="50" />
-        </el-form-item>
-
-        <el-form-item label="状态" prop="status">
-          <el-switch
-            v-model="formData.status"
-            inline-prompt
-            active-text="正常"
-            inactive-text="禁用"
-            :active-value="CommonStatus.ENABLED"
-            :inactive-value="CommonStatus.DISABLED"
-          />
-        </el-form-item>
+      <el-form
+        ref="userFormRef"
+        :model="formData"
+        :rules="rules"
+        label-width="82px"
+        class="develop-dialog-form"
+      >
+        <div class="field-desc">维护后台账号、角色和状态，保证访问权限一致。</div>
+        <el-row :gutter="15">
+          <el-col :sm="12">
+            <el-form-item label="邮箱" prop="email">
+              <el-input v-model="formData.email" placeholder="请输入邮箱" maxlength="100" clearable />
+            </el-form-item>
+            <el-form-item label="用户账号" prop="username">
+              <el-input
+                v-model="formData.username"
+                :readonly="!!formData.id"
+                placeholder="请输入用户账号"
+                maxlength="20"
+                clearable
+              />
+            </el-form-item>
+            <el-form-item label="登录密码" prop="password">
+              <el-input
+                v-model="formData.password"
+                type="password"
+                placeholder="请输入登录密码"
+                maxlength="20"
+                show-password
+              />
+            </el-form-item>
+          </el-col>
+          <el-col :sm="12">
+            <el-form-item label="手机号" prop="phone">
+              <el-input v-model="formData.phone" placeholder="请输入手机号" maxlength="11" clearable />
+            </el-form-item>
+            <el-form-item label="角色" prop="roleIds">
+              <AnimalMultiSelect
+                v-model="roleIdsModel"
+                :options="roleSelectOptions"
+                placeholder="请选择角色"
+              />
+            </el-form-item>
+            <el-form-item label="状态" prop="status">
+              <el-radio-group v-model="formData.status">
+                <el-radio :value="CommonStatus.ENABLED">正常</el-radio>
+                <el-radio :value="CommonStatus.DISABLED">禁用</el-radio>
+              </el-radio-group>
+            </el-form-item>
+          </el-col>
+        </el-row>
       </el-form>
 
       <template #footer>
-        <div class="dialog-footer">
-          <el-button type="primary" @click="handleSubmit">确 定</el-button>
-          <el-button @click="closeDialog">取 消</el-button>
+        <div class="develop-dialog-footer">
+          <el-button @click="closeDialog">取消</el-button>
+          <el-button type="primary" @click="handleSubmit">保存</el-button>
         </div>
       </template>
-    </el-drawer>
+    </el-dialog>
   </div>
 </template>
 
@@ -381,8 +391,17 @@ const roleIdsModel = computed<string[]>({
 const drawerSize = computed(() => (appStore.device === DeviceEnum.DESKTOP ? "600px" : "90%"));
 
 const rules: FormRules = {
-  username: [{ required: true, message: "请输入用户名", trigger: "blur" }],
-  password: [{ required: true, message: "请输入密码", trigger: "blur", min: 6 }],
+  username: [{ required: true, message: "请输入用户账号", trigger: "blur" }],
+  password: [
+    {
+      trigger: "blur",
+      validator: (_rule, value, callback) => {
+        if (!formData.id && !value) return callback(new Error("请输入登录密码"));
+        if (value && value.length < 6) return callback(new Error("密码至少 6 位"));
+        callback();
+      },
+    },
+  ],
   roleIds: [{ required: true, message: "请选择用户角色", trigger: "change" }],
   email: [{ type: "email", message: "请输入正确的邮箱地址", trigger: "blur" }],
   phone: [{ pattern: /^1[3-9]\d{9}$/, message: "请输入正确的手机号码", trigger: "blur" }],
@@ -551,7 +570,9 @@ const handleSubmit = useDebounceFn(async () => {
   loading.value = true;
   try {
     if (formData.id) {
-      await UserAPI.update(formData.id, formData);
+      const payload: UserForm = { ...formData };
+      if (!payload.password) delete payload.password;
+      await UserAPI.update(formData.id, payload);
       ElMessage.success("修改用户成功");
     } else {
       await UserAPI.create(formData);

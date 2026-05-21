@@ -155,86 +155,145 @@
       </div>
     </div>
 
-    <el-drawer
-    v-model="dialogState.visible"
-    :title="dialogState.title"
-    :size="drawerSize"
-    class="develop-drawer"
-    @close="closeDialog"
-  >
-    <el-form ref="menuFormRef" :model="formData" :rules="rules" label-width="100px">
-      <el-form-item label="父级菜单" prop="pid">
-        <el-tree-select
-          v-model="formData.pid"
-          placeholder="选择上级菜单"
-          :data="menuOptions"
-          filterable
-          check-strictly
-          :render-after-expand="false"
-        />
-      </el-form-item>
+    <el-dialog
+      v-model="dialogState.visible"
+      :title="dialogState.title"
+      width="750px"
+      class="develop-dialog"
+      @close="closeDialog"
+    >
+      <el-form
+        ref="menuFormRef"
+        :model="formData"
+        :rules="rules"
+        label-width="92px"
+        class="develop-dialog-form"
+      >
+        <div class="field-desc">配置菜单层级、打开方式和权限节点，决定路由与按钮权限展示。</div>
+        <el-row :gutter="15">
+          <el-col :sm="12">
+            <el-form-item label="上级菜单" prop="pid">
+              <el-tree-select
+                v-model="formData.pid"
+                placeholder="请选择上级菜单"
+                :data="menuOptions"
+                filterable
+                check-strictly
+                :render-after-expand="false"
+              />
+            </el-form-item>
+            <el-form-item label="菜单名称" prop="title">
+              <el-input v-model="formData.title" placeholder="请输入菜单名称" clearable />
+            </el-form-item>
+          </el-col>
+          <el-col :sm="12">
+            <el-form-item label="菜单类型" prop="type">
+              <el-radio-group v-model="formData.type" @change="onMenuTypeChange">
+                <el-radio :value="0">菜单</el-radio>
+                <el-radio :value="1">按钮</el-radio>
+              </el-radio-group>
+            </el-form-item>
+            <el-form-item label="打开方式">
+              <el-radio-group
+                v-model="menuTarget"
+                :disabled="formData.type === 1"
+                @change="onTargetChange"
+              >
+                <el-radio :value="0">组件</el-radio>
+                <el-radio :value="1">内链</el-radio>
+                <el-radio :value="2">外链</el-radio>
+              </el-radio-group>
+            </el-form-item>
+          </el-col>
+        </el-row>
 
-      <el-form-item label="菜单名称" prop="title">
-        <el-input v-model="formData.title" placeholder="请输入菜单名称" />
-      </el-form-item>
+        <el-divider />
 
-      <el-form-item label="菜单类型" prop="type">
-        <el-radio-group v-model="formData.type">
-          <el-radio :value="0">菜单</el-radio>
-          <el-radio :value="1">权限</el-radio>
-        </el-radio-group>
-      </el-form-item>
+        <el-row :gutter="15">
+          <el-col :sm="12">
+            <el-form-item label="菜单图标">
+              <icon-select v-model="formData.icon" :disabled="formData.type === 1" />
+            </el-form-item>
+            <el-form-item :label="menuTarget === 2 ? '外链地址' : '路由地址'" prop="path">
+              <el-input
+                v-model="formData.path"
+                :disabled="formData.type === 1"
+                :placeholder="menuTarget === 2 ? '请输入外链地址' : '请输入路由地址'"
+                clearable
+              />
+            </el-form-item>
+            <el-form-item :label="menuTarget === 1 ? '内链地址' : '组件路径'">
+              <el-input
+                v-model="formData.component"
+                :disabled="formData.type === 1 || menuTarget === 2"
+                :placeholder="menuTarget === 1 ? '请输入内链地址' : '请输入组件路径'"
+                clearable
+              />
+            </el-form-item>
+            <el-form-item label="状态">
+              <el-radio-group v-model="formData.status">
+                <el-radio :value="1">正常</el-radio>
+                <el-radio :value="0">停用</el-radio>
+              </el-radio-group>
+            </el-form-item>
+          </el-col>
+          <el-col :sm="12">
+            <el-form-item label="权限标识">
+              <el-input
+                v-model="formData.permission"
+                :disabled="formData.type === 0"
+                placeholder="请输入权限标识"
+                clearable
+              />
+            </el-form-item>
+            <el-form-item label="排序号" prop="sort">
+              <el-input-number
+                v-model="formData.sort"
+                :min="0"
+                controls-position="right"
+                style="width: 100%"
+              />
+            </el-form-item>
+            <el-form-item label="是否可见">
+              <el-radio-group v-model="formData.hide" :disabled="formData.type === 1">
+                <el-radio :value="0">显示</el-radio>
+                <el-radio :value="1">隐藏</el-radio>
+              </el-radio-group>
+            </el-form-item>
+          </el-col>
+        </el-row>
 
-      <el-form-item v-if="formData.type === 0" label="路由路径" prop="path">
-        <el-input v-model="formData.path" placeholder="/system 或 user" />
-      </el-form-item>
+        <el-form-item v-if="formData.type === 0" label="权限节点">
+          <el-transfer
+            v-model="checkedPermNodes"
+            :data="permNodeList"
+            :titles="['全部节点', '已赋予节点']"
+          />
+        </el-form-item>
 
-      <el-form-item v-if="formData.type === 0 && !isExternalLink" label="组件路径" prop="component">
-        <el-input v-model="formData.component" placeholder="system/user/index" style="width: 95%">
-          <template #prepend>src/views/</template>
-          <template #append>.vue</template>
-        </el-input>
-      </el-form-item>
+        <el-form-item label="备注">
+          <el-input
+            v-model="formData.note"
+            type="textarea"
+            :rows="3"
+            maxlength="200"
+            placeholder="请输入备注"
+            clearable
+          />
+        </el-form-item>
+      </el-form>
 
-      <el-form-item v-if="formData.type === 0" label="显示状态" prop="hide">
-        <el-radio-group v-model="formData.hide">
-          <el-radio :value="0">显示</el-radio>
-          <el-radio :value="1">隐藏</el-radio>
-        </el-radio-group>
-      </el-form-item>
-
-      <el-form-item label="排序" prop="sort">
-        <el-input-number
-          v-model="formData.sort"
-          style="width: 100px"
-          controls-position="right"
-          :min="0"
-        />
-      </el-form-item>
-
-      <!-- 权限标识 -->
-      <el-form-item v-if="formData.type === 1" label="权限标识" prop="permission">
-        <el-input v-model="formData.permission" placeholder="sys:user:create" />
-      </el-form-item>
-
-      <el-form-item v-if="formData.type === 0" label="图标" prop="icon">
-        <icon-select v-model="formData.icon" />
-      </el-form-item>
-    </el-form>
-
-    <template #footer>
-      <div class="dialog-footer">
-        <el-button type="primary" @click="handleSubmit">确定</el-button>
-        <el-button @click="closeDialog">取消</el-button>
-      </div>
-    </template>
-    </el-drawer>
+      <template #footer>
+        <div class="develop-dialog-footer">
+          <el-button @click="closeDialog">取消</el-button>
+          <el-button type="primary" @click="handleSubmit">保存</el-button>
+        </div>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
 <script setup lang="ts">
-import { useAppStore } from "@/store/modules/app";
-import { DeviceEnum } from "@/enums/settings";
 import MenuAPI from "@/api/system/menu";
 import { Icon } from "animal-island-vue";
 import { resolveAnimalIcon } from "@/utils/menuAnimalIcon";
@@ -281,8 +340,6 @@ const Ico = defineComponent({
       });
   },
 });
-
-const appStore = useAppStore();
 
 const menuFormRef = ref<FormInstance>();
 
@@ -355,15 +412,54 @@ const initialMenuFormData: MenuForm = {
   hide: 0,
   sort: 1,
   type: 0,
+  status: 1,
 };
 const formData = ref<MenuForm>({ ...initialMenuFormData });
 
-const drawerSize = computed(() => (appStore.device === DeviceEnum.DESKTOP ? "600px" : "90%"));
+// 打开方式：0 组件 / 1 内链 / 2 外链（提交时映射为 target: _self/_blank）
+const menuTarget = ref(0);
+// 权限节点（用于自动创建权限子项）
+const checkedPermNodes = ref<number[]>([]);
+const permNodeList = [
+  { key: 1, label: "查询" },
+  { key: 5, label: "添加" },
+  { key: 10, label: "修改" },
+  { key: 15, label: "删除" },
+  { key: 20, label: "详情" },
+  { key: 25, label: "状态" },
+  { key: 30, label: "批量删除" },
+  { key: 35, label: "添加子级" },
+  { key: 40, label: "全部展开" },
+  { key: 45, label: "全部折叠" },
+  { key: 50, label: "导出数据" },
+  { key: 55, label: "导入数据" },
+  { key: 60, label: "分配权限" },
+  { key: 65, label: "重置密码" },
+];
 
-const isExternalLink = computed(
-  () =>
-    formData.value.type === 0 && !!formData.value.path && /^https?:\/\//.test(formData.value.path)
-);
+function isUrl(url?: string): boolean {
+  return !!url && (/^https?:\/\//.test(url) || url.startsWith("//"));
+}
+
+// 菜单类型切换：按钮类型禁用路由相关项，菜单类型清空权限标识
+function onMenuTypeChange(): void {
+  if (formData.value.type === 0) {
+    formData.value.permission = undefined;
+  } else {
+    menuTarget.value = 0;
+    formData.value.icon = undefined;
+    formData.value.path = undefined;
+    formData.value.component = undefined;
+    formData.value.hide = 1;
+  }
+}
+
+// 打开方式切换：外链时清空组件路径
+function onTargetChange(): void {
+  if (menuTarget.value === 2) {
+    formData.value.component = undefined;
+  }
+}
 
 const rules: FormRules = {
   pid: [{ required: true, message: "请选择父级菜单", trigger: "blur" }],
@@ -403,11 +499,15 @@ function openDialog(parentId?: number, menuId?: number): void {
       if (menuId) {
         dialogState.title = "编辑菜单";
         MenuAPI.getFormData(menuId).then((data) => {
-          formData.value = data;
+          formData.value = { ...initialMenuFormData, ...data };
+          menuTarget.value = isUrl(data.path) ? 2 : isUrl(data.component) ? 1 : 0;
+          checkedPermNodes.value = data.checkedList ?? [];
         });
       } else {
         dialogState.title = "新增菜单";
         formData.value = { ...initialMenuFormData };
+        menuTarget.value = 0;
+        checkedPermNodes.value = [];
         if (parentId !== undefined) {
           formData.value.pid = parentId;
         }
@@ -417,26 +517,27 @@ function openDialog(parentId?: number, menuId?: number): void {
 
 function handleSubmit(): void {
   menuFormRef.value?.validate((isValid) => {
-    if (isValid) {
-      const menuId = formData.value.id;
-      if (menuId) {
-        if (formData.value.pid === menuId) {
-          ElMessage.error("父级菜单不能为当前菜单");
-          return;
-        }
-        MenuAPI.update(menuId, formData.value).then(() => {
-          ElMessage.success("修改成功");
-          closeDialog();
-          fetchData();
-        });
-      } else {
-        MenuAPI.create(formData.value).then(() => {
-          ElMessage.success("新增成功");
-          closeDialog();
-          fetchData();
-        });
-      }
+    if (!isValid) return;
+
+    const menuId = formData.value.id;
+    if (menuId && formData.value.pid === menuId) {
+      ElMessage.error("父级菜单不能为当前菜单");
+      return;
     }
+
+    const payload: MenuForm = {
+      ...formData.value,
+      pid: formData.value.pid || 0,
+      target: menuTarget.value === 2 ? "_blank" : "_self",
+      checkedList: formData.value.type === 0 ? checkedPermNodes.value : [],
+    };
+
+    const action = menuId ? MenuAPI.update(menuId, payload) : MenuAPI.create(payload);
+    action.then(() => {
+      ElMessage.success(menuId ? "修改成功" : "新增成功");
+      closeDialog();
+      fetchData();
+    });
   });
 }
 
@@ -473,6 +574,8 @@ function closeDialog(): void {
   menuFormRef.value?.resetFields();
   menuFormRef.value?.clearValidate();
   formData.value = { ...initialMenuFormData };
+  menuTarget.value = 0;
+  checkedPermNodes.value = [];
 }
 
 onMounted(() => {
