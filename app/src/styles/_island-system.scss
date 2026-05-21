@@ -53,8 +53,24 @@
   }
 }
 
+.develop-hero {
+  padding: 28px 0 30px !important;
+}
+
+.develop-hero__copy {
+  max-width: 720px;
+}
+
 // Hero section: add nature-themed eyebrow styling
 .develop-hero__eyebrow {
+  display: inline-flex !important;
+  align-items: center;
+  margin-right: 6px;
+  color: #0aa898 !important;
+  font-size: 12px !important;
+  font-weight: 900 !important;
+  letter-spacing: 4px !important;
+
   &::before {
     content: "";
     display: inline-block;
@@ -67,8 +83,25 @@
   }
 }
 
+.develop-hero__title {
+  display: inline-block !important;
+  margin: 0 0 12px !important;
+  color: #794f27 !important;
+  font-size: 32px !important;
+  font-weight: 900 !important;
+  letter-spacing: 0 !important;
+}
+
+.develop-hero__desc {
+  color: #9f927d !important;
+  font-size: 14px !important;
+  font-weight: 600 !important;
+}
+
 // Filter bar: dashed nature border + wheat decoration
 .develop-panel {
+  margin-bottom: 18px !important;
+  padding: 18px 22px !important;
   border-style: dashed;
   border-width: 2px;
   border-color: rgba(74, 138, 54, 0.2);
@@ -82,7 +115,7 @@
   position: relative;
 
   &::before {
-    content: "🌾";
+    content: "";
     position: absolute;
     left: -14px;
     top: -14px;
@@ -96,6 +129,36 @@
     font-size: 14px;
     box-shadow: 0 2px 0 0 #4a8a36;
     z-index: 2;
+  }
+
+  &::after {
+    content: "";
+    position: absolute;
+    left: -3px;
+    top: -8px;
+    width: 12px;
+    height: 18px;
+    border-radius: 80% 20% 80% 20%;
+    border: 2px solid #4a8a36;
+    background: #eef9d6;
+    transform: rotate(-28deg);
+    z-index: 3;
+  }
+}
+
+.develop-form {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 14px 20px;
+
+  .el-form-item {
+    margin: 0 !important;
+  }
+
+  .el-form-item__label {
+    color: #794f27 !important;
+    font-weight: 900 !important;
   }
 }
 
@@ -123,11 +186,26 @@
   }
 }
 
-// Table shell title with scroll emoji
+// Table shell title with scroll token
 .develop-table-shell__title::before {
-  content: "📜";
-  font-size: 16px;
+  content: "";
+  display: inline-block;
+  width: 16px;
+  height: 18px;
   margin-right: 8px;
+  border: 1px solid rgba(121, 79, 39, 0.28);
+  border-radius: 3px 5px 3px 5px;
+  background:
+    linear-gradient(90deg, rgba(121, 79, 39, 0.16), transparent 35%),
+    linear-gradient(180deg, #f1d2a3, #d4ad6b);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.35);
+  vertical-align: -3px;
+}
+
+.develop-table-shell__desc {
+  margin-top: 0 !important;
+  color: #9f927d !important;
+  font-weight: 700;
 }
 
 // Table: nature-tinted header
@@ -222,7 +300,14 @@
   .el-button--success {
     border-radius: 999px;
     font-weight: 800;
+    background: linear-gradient(180deg, #84cf4f 0%, #6fba2c 100%) !important;
+    border-color: #6fba2c !important;
+    color: #fff !important;
     box-shadow: 0 3px 0 0 #5a9e1e;
+
+    &:hover {
+      background: linear-gradient(180deg, #90d65a 0%, #7cc634 100%) !important;
+    }
   }
 
   // Primary (查询/添加): GREEN gradient — declare LAST to win over --default
@@ -252,11 +337,22 @@
 .develop-table-shell__toolbar {
   display: flex;
   align-items: center;
-  gap: 10px;
+  justify-content: space-between;
+  gap: 12px;
   margin-bottom: 14px;
-  padding: 10px;
-  background: rgba(248, 250, 230, 0.7);
+  padding: 10px 12px;
+  background: rgba(248, 250, 230, 0.76);
   border-radius: 14px;
+}
+
+.develop-table-shell__toolbar .el-button.is-circle {
+  width: 34px;
+  height: 34px;
+  border-radius: 10px !important;
+  color: #794f27 !important;
+  border-color: #e8e2d6 !important;
+  background: #fffef6 !important;
+  box-shadow: 0 2px 0 0 #d4c9b4;
 }
 
 // Table shell: white bg + proper card styling
@@ -268,14 +364,21 @@
 
 // Table: better borders and cell padding
 .develop-table-shell .el-table {
+  border: 1px solid #e8e2d6 !important;
+
   th {
+    height: 50px !important;
     font-weight: 800 !important;
-    font-size: 13px !important;
+    color: #794f27 !important;
+    font-size: 14px !important;
     white-space: nowrap !important;
   }
 
   td {
-    font-size: 13px !important;
+    height: 56px !important;
+    color: #794f27 !important;
+    font-size: 14px !important;
+    font-weight: 600 !important;
   }
 }
 
@@ -283,6 +386,55 @@
 .develop-panel .el-input__wrapper,
 .develop-panel .el-select__wrapper {
   border-radius: 999px !important;
+  background: rgba(255, 255, 255, 0.82) !important;
+  box-shadow: 0 2px 0 0 #d4c9b4 !important;
+}
+
+.system-role-pill {
+  display: inline-flex;
+  align-items: center;
+  min-height: 26px;
+  padding: 0 12px;
+  border: 1px solid #8db7ff;
+  border-radius: 999px;
+  background: #e9f2ff;
+  color: #3473dc;
+  font-weight: 800;
+}
+
+.system-empty-text {
+  color: #bdaea0;
+}
+
+.system-status-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-end;
+  width: 42px;
+  height: 24px;
+  padding: 2px;
+  border-radius: 999px;
+  background: #d9d4c6;
+  box-shadow: inset 0 1px 3px rgba(61, 52, 40, 0.16);
+
+  &::before {
+    content: "";
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: #fff;
+    box-shadow: 0 1px 2px rgba(61, 52, 40, 0.22);
+    transform: translateX(-18px);
+    transition: transform 0.2s ease;
+  }
+
+  &.is-on {
+    background: #3498db;
+
+    &::before {
+      transform: translateX(0);
+    }
+  }
 }
 
 // Drawer: organic styling

@@ -228,6 +228,7 @@ onClickOutside(wrapperRef, () => (open.value = false));
   box-shadow: 0 10px 26px rgba(110, 80, 40, 0.18);
 }
 .ams__option {
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -243,6 +244,18 @@ onClickOutside(wrapperRef, () => (open.value = false));
 .ams__option:hover {
   font-weight: 700;
   background: rgba(255, 255, 255, 0.4);
+}
+.ams__option:hover::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 32px;
+  height: 32px;
+  background: url("../../assets/images/select-cursor.svg") center / contain no-repeat;
+  pointer-events: none;
+  z-index: 1;
 }
 .ams__option--selected {
   font-weight: 700;

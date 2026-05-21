@@ -28,6 +28,8 @@ export interface UserQueryParams extends BaseQueryParams {
   "filter[username]"?: string;
   /** 模糊匹配手机号 */
   "filter[phone]"?: string;
+  /** 精确匹配性别 */
+  "filter[gender]"?: number;
   /** 精确匹配状态 */
   "filter[status]"?: number;
   /** 精确匹配角色ID */
@@ -47,7 +49,9 @@ export interface UserItem {
   /** 用户状态(1:启用;0:禁用) */
   status: number;
   /** 创建时间 */
-  createdAt?: string;
+  createTime?: string;
+  /** 更新时间 */
+  updateTime?: string;
   /** 角色对象集合 */
   roles?: Array<{ id: number; code: string; name: string }>;
   /** 角色名称，多个使用英文逗号(,)分割 */
