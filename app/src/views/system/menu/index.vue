@@ -154,9 +154,8 @@
         </table>
       </div>
     </div>
-  </div>
 
-  <el-drawer
+    <el-drawer
     v-model="dialogState.visible"
     :title="dialogState.title"
     :size="drawerSize"
@@ -229,7 +228,8 @@
         <el-button @click="closeDialog">取消</el-button>
       </div>
     </template>
-  </el-drawer>
+    </el-drawer>
+  </div>
 </template>
 
 <script setup lang="ts">
