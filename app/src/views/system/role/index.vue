@@ -1,120 +1,162 @@
 <template>
-  <div class="develop-page admin-workspace-page">
-    <el-card shadow="never" class="develop-shell admin-workspace-shell">
-      <!-- Hero 区域 -->
-      <div class="develop-hero">
-        <div class="develop-hero__copy">
-          <div class="develop-hero__eyebrow">ROLE MANAGEMENT</div>
-          <h1 class="develop-hero__title">角色管理</h1>
-          <p class="develop-hero__desc">配置系统角色与权限分配</p>
-        </div>
-      </div>
+  <div class="page-card">
+    <!-- 页头 -->
+    <div class="page-head">
+      <div class="page-eyebrow">SYSTEM MANAGEMENT</div>
+      <h1 class="page-title">角色管理</h1>
+      <p class="page-desc">维护角色标识、授权能力与状态信息，统一后台权限角色体系。</p>
+    </div>
 
-      <!-- 搜索面板 -->
-      <div class="develop-panel">
-        <el-form ref="queryFormRef" :model="queryParams" :inline="true" class="develop-form">
-          <el-form-item prop="filter[name]" label="角色名称">
-            <el-input
-              v-model="queryParams['filter[name]']"
-              placeholder="角色名称"
-              clearable
-              @keyup.enter="handleQuery"
-            />
-          </el-form-item>
-
-          <el-form-item class="search-buttons">
-            <el-button type="primary" icon="search" @click="handleQuery">搜索</el-button>
-            <el-button icon="refresh" @click="handleResetQuery">重置</el-button>
-          </el-form-item>
-        </el-form>
-      </div>
-
-      <!-- 表格区域 -->
-      <div class="develop-table-shell">
-        <div class="develop-table-shell__header">
-          <div>
-            <div class="develop-table-shell__title">角色列表</div>
-            <div class="develop-table-shell__desc">管理系统权限角色，可分配菜单访问与操作权限。</div>
-          </div>
-          <div class="develop-table-shell__actions">
-            <el-button type="success" icon="plus" @click="handleCreateClick()">新增角色</el-button>
-            <el-button
-              type="danger"
-              :disabled="ids.length === 0"
-              icon="delete"
-              @click="handleBatchDelete()"
-            >
-              批量删除
-            </el-button>
-          </div>
-        </div>
-
-        <el-table
-          ref="dataTableRef"
-          v-loading="loading"
-          :data="roleList"
-          highlight-current-row
-          border
-          class="develop-table"
-          @selection-change="handleSelectionChange"
-        >
-          <el-table-column type="selection" width="55" align="center" />
-          <el-table-column label="角色名称" prop="name" min-width="100" />
-          <el-table-column label="角色编码" prop="code" width="150" />
-
-          <el-table-column label="状态" align="center" width="100">
-            <template #default="scope">
-              <el-tag v-if="scope.row.status === 1" type="success">正常</el-tag>
-              <el-tag v-else type="info">禁用</el-tag>
-            </template>
-          </el-table-column>
-
-          <el-table-column label="排序" align="center" width="80" prop="sort" />
-          <el-table-column label="备注" prop="note" min-width="150" />
-
-          <el-table-column fixed="right" label="操作" width="220">
-            <template #default="scope">
-              <el-button
-                v-hasPerm="'sys:role:permission'"
-                type="primary"
-                size="small"
-                link
-                icon="position"
-                @click="handleAssignPermClick(scope.row)"
-              >
-                分配权限
-              </el-button>
-              <el-button
-                type="primary"
-                size="small"
-                link
-                icon="edit"
-                @click="handleEditClick(scope.row)"
-              >
-                编辑
-              </el-button>
-              <el-button
-                type="danger"
-                size="small"
-                link
-                icon="delete"
-                @click="handleDelete(scope.row.id)"
-              >
-                删除
-              </el-button>
-            </template>
-          </el-table-column>
-        </el-table>
-
-        <pagination
-          v-if="total > 0"
-          v-model:total="total"
-          v-model:page="queryParams.pageNum"
-          v-model:limit="queryParams.pageSize"
-          @pagination="fetchList"
+    <!-- 搜索栏 -->
+    <div class="filter-bar">
+      <div class="filter-field">
+        <label class="filter-label">角色名称：</label>
+        <input
+          v-model="queryParams['filter[name]']"
+          class="input"
+          placeholder="请输入角色名称"
+          @keyup.enter="handleQuery"
         />
       </div>
-    </el-card>
+      <button class="btn btn-primary" type="button" @click="handleQuery">
+        <Ico name="search" :size="13" /> 查询
+      </button>
+      <button class="btn btn-default" type="button" @click="handleResetQuery">重置</button>
+    </div>
+
+    <!-- 列表卡片 -->
+    <div class="list-card">
+      <div class="list-head">
+        <div>
+          <div class="list-title">角色列表</div>
+          <div class="list-sub">支持批量删除、角色编辑与权限维护。</div>
+        </div>
+      </div>
+
+      <!-- 工具栏 -->
+      <div class="toolbar">
+        <button class="btn btn-primary" type="button" @click="handleCreateClick">
+          <Ico name="plus" :size="13" /> 添加
+        </button>
+        <button
+          class="btn btn-danger"
+          type="button"
+          :disabled="checkedIds.length === 0"
+          @click="handleBatchDelete"
+        >
+          <Ico name="trash" :size="13" /> 删除
+        </button>
+        <div class="toolbar-spacer" />
+        <div class="tool-group">
+          <button class="btn-icon" type="button" title="刷新" @click="fetchList">
+            <Ico name="refresh" :size="14" />
+          </button>
+          <button class="btn-icon" type="button" title="密度">
+            <Ico name="density" :size="14" />
+          </button>
+          <button class="btn-icon" type="button" title="列设置">
+            <Ico name="settings" :size="14" />
+          </button>
+          <button class="btn-icon" type="button" title="全屏">
+            <Ico name="full" :size="14" />
+          </button>
+        </div>
+      </div>
+
+      <!-- 表格 -->
+      <div v-loading="loading" class="tbl-wrap">
+        <table class="tbl">
+          <thead>
+            <tr>
+              <th style="width: 44px">
+                <span class="cbx" :class="{ 'is-checked': allChecked }" @click="toggleAll">
+                  <svg
+                    viewBox="0 0 12 12"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2.4"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  >
+                    <path d="M2.5 6.5l2.5 2.5 5-6" />
+                  </svg>
+                </span>
+              </th>
+              <th style="width: 60px">ID</th>
+              <th style="width: 90px">操作</th>
+              <th>角色名称</th>
+              <th>角色标识</th>
+              <th style="width: 130px">
+                职级状态
+                <span class="sort-ic"><Ico name="chev" :size="10" /></span>
+              </th>
+              <th style="width: 100px">排序号</th>
+              <th>备注</th>
+              <th style="width: 220px">操作</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="r in roleList" :key="r.id">
+              <td>
+                <span class="cbx" :class="{ 'is-checked': isChecked(r.id) }" @click="toggleRow(r.id)">
+                  <svg
+                    viewBox="0 0 12 12"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2.4"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  >
+                    <path d="M2.5 6.5l2.5 2.5 5-6" />
+                  </svg>
+                </span>
+              </td>
+              <td class="cell-num">{{ r.id }}</td>
+              <td>
+                <span class="action-link act-edit" @click="handleEditClick(r)">
+                  <Ico name="edit" :size="12" /> 修改
+                </span>
+              </td>
+              <td>{{ r.name }}</td>
+              <td class="cell-mono">{{ r.code }}</td>
+              <td>
+                <span class="swt" :class="{ 'is-on': r.status === 1 }" />
+              </td>
+              <td class="cell-num">{{ r.sort }}</td>
+              <td class="cell-note">{{ r.note || "" }}</td>
+              <td>
+                <span class="tbl-actions">
+                  <span class="action-link act-edit" @click="handleEditClick(r)">
+                    <Ico name="edit" :size="12" /> 修改
+                  </span>
+                  <span
+                    v-hasPerm="'sys:role:permission'"
+                    class="action-link act-assign"
+                    @click="handleAssignPermClick(r)"
+                  >
+                    <Ico name="shield" :size="12" /> 分配权限
+                  </span>
+                  <span class="action-link act-del" @click="handleDelete(r.id)">
+                    <Ico name="trash" :size="12" /> 删除
+                  </span>
+                </span>
+              </td>
+            </tr>
+            <tr v-if="!loading && (!roleList || roleList.length === 0)" class="empty-row">
+              <td colspan="9">暂无数据</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <pagination
+        v-if="total > 0"
+        v-model:total="total"
+        v-model:page="queryParams.pageNum"
+        v-model:limit="queryParams.pageSize"
+        @pagination="fetchList"
+      />
+    </div>
 
     <!-- 角色表单弹窗 -->
     <el-dialog
@@ -124,7 +166,13 @@
       class="develop-dialog"
       @close="closeDialog"
     >
-      <el-form ref="roleFormRef" :model="formData" :rules="rules" label-width="100px" class="develop-dialog-form">
+      <el-form
+        ref="roleFormRef"
+        :model="formData"
+        :rules="rules"
+        label-width="100px"
+        class="develop-dialog-form"
+      >
         <el-form-item label="角色名称" prop="name">
           <el-input v-model="formData.name" placeholder="请输入角色名称" />
         </el-form-item>
@@ -216,7 +264,11 @@
       </el-tree>
       <template #footer>
         <div class="dialog-footer">
-          <el-button v-hasPerm="'sys:role:permission'" type="primary" @click="handleAssignPermSubmit">
+          <el-button
+            v-hasPerm="'sys:role:permission'"
+            type="primary"
+            @click="handleAssignPermSubmit"
+          >
             确定
           </el-button>
           <el-button @click="assignPermDialogVisible = false">取消</el-button>
@@ -238,14 +290,49 @@ defineOptions({
   inheritAttrs: false,
 });
 
+// 线性图标（还原设计稿 Ico）
+const ICO_PATHS: Record<string, string> = {
+  search: '<circle cx="10" cy="10" r="6"/><path d="M14 14l4 4"/>',
+  plus: '<path d="M12 5v14M5 12h14"/>',
+  trash: '<path d="M5 7h14M9 7V4h6v3M7 7l1 13h8l1-13"/>',
+  refresh: '<path d="M4 12a8 8 0 0114-5l3 3M20 12a8 8 0 01-14 5l-3-3"/><path d="M17 4v4h-4M7 20v-4h4"/>',
+  full: '<path d="M4 8V4h4M20 8V4h-4M4 16v4h4M20 16v4h-4"/>',
+  edit: '<path d="M4 16L15 5l3 3-11 11H4v-3z"/>',
+  shield: '<path d="M12 3l8 3v6c0 5-4 8-8 9-4-1-8-4-8-9V6z"/><path d="M9 12l2 2 4-4"/>',
+  chev: '<path d="M6 9l6 6 6-6"/>',
+  density: '<path d="M4 6h16M4 10h16M4 14h16M4 18h16"/>',
+  settings:
+    '<circle cx="12" cy="12" r="3"/><path d="M19.4 13.4a7 7 0 000-2.8l2-1.6-2-3.4-2.4 1a7 7 0 00-2.4-1.4L14.2 2.5h-4l-.4 2.7a7 7 0 00-2.4 1.4l-2.4-1-2 3.4 2 1.6a7 7 0 000 2.8l-2 1.6 2 3.4 2.4-1a7 7 0 002.4 1.4l.4 2.7h4l.4-2.7a7 7 0 002.4-1.4l2.4 1 2-3.4z"/>',
+};
+
+const Ico = defineComponent({
+  name: "Ico",
+  props: {
+    name: { type: String, required: true },
+    size: { type: Number, default: 14 },
+  },
+  setup(props) {
+    return () =>
+      h("svg", {
+        viewBox: "0 0 24 24",
+        width: props.size,
+        height: props.size,
+        fill: "none",
+        stroke: "currentColor",
+        "stroke-width": 1.8,
+        "stroke-linecap": "round",
+        "stroke-linejoin": "round",
+        innerHTML: ICO_PATHS[props.name] || "",
+      });
+  },
+});
+
 const appStore = useAppStore();
 
-const queryFormRef = ref();
 const roleFormRef = ref();
 const permTreeRef = ref();
 
 const loading = ref(false);
-const ids = ref<number[]>([]);
 const total = ref(0);
 
 const queryParams = reactive<RoleQueryParams>({
@@ -257,6 +344,28 @@ const queryParams = reactive<RoleQueryParams>({
 const roleList = ref<RoleItem[]>();
 // 菜单权限树
 const menuPermOptions = ref<OptionItem[]>([]);
+
+// 选择状态（角色 id 为字符串）
+const checkedIds = ref<string[]>([]);
+const allChecked = computed(
+  () =>
+    !!roleList.value?.length &&
+    roleList.value.every((r) => r.id != null && checkedIds.value.includes(r.id))
+);
+function isChecked(id?: string): boolean {
+  return id != null && checkedIds.value.includes(id);
+}
+function toggleRow(id?: string): void {
+  if (id == null) return;
+  const idx = checkedIds.value.indexOf(id);
+  if (idx >= 0) checkedIds.value.splice(idx, 1);
+  else checkedIds.value.push(id);
+}
+function toggleAll(): void {
+  checkedIds.value = allChecked.value
+    ? []
+    : (roleList.value ?? []).map((r) => r.id).filter((id): id is string => id != null);
+}
 
 // 弹窗
 const dialogState = reactive({
@@ -327,6 +436,7 @@ async function fetchList(): Promise<void> {
     const data = await RoleAPI.getPage(queryParams);
     roleList.value = data.list;
     total.value = data.total ?? 0;
+    checkedIds.value = [];
   } finally {
     loading.value = false;
   }
@@ -342,7 +452,6 @@ function handleQuery(): void {
  * 重置查询条件
  */
 function resetQuery(): void {
-  queryFormRef.value?.resetFields();
   queryParams["filter[name]"] = undefined;
 }
 
@@ -352,11 +461,6 @@ function resetQuery(): void {
 function handleResetQuery(): void {
   resetQuery();
   handleQuery();
-}
-
-// 行复选框选中
-function handleSelectionChange(selection: any): void {
-  ids.value = selection.map((item: any) => item.id);
 }
 
 /**
@@ -437,8 +541,8 @@ async function handleSubmit(): Promise<void> {
 }
 
 // 删除角色
-function handleDelete(roleId?: number): void {
-  const roleIds = roleId ? [roleId] : ids.value;
+function handleDelete(roleId?: string): void {
+  const roleIds = roleId ? [roleId] : checkedIds.value;
   if (!roleIds.length) {
     ElMessage.warning("请勾选删除项");
     return;
@@ -453,8 +557,8 @@ function handleDelete(roleId?: number): void {
       loading.value = true;
       const promise =
         roleIds.length === 1
-          ? RoleAPI.deleteById(String(roleIds[0]))
-          : RoleAPI.batchDelete(roleIds);
+          ? RoleAPI.deleteById(roleIds[0])
+          : RoleAPI.batchDelete(roleIds.map(Number));
       promise
         .then(() => {
           ElMessage.success("删除成功");
@@ -494,8 +598,8 @@ async function handleAssignPermClick(row: RoleItem): Promise<void> {
 
       // 勾选已有权限
       await nextTick();
-      const checkedIds = permList.filter((p) => p.checked).map((p) => p.id);
-      checkedIds.forEach((menuId) => permTreeRef.value?.setChecked(menuId, true, false));
+      const checkedMenuIds = permList.filter((p) => p.checked).map((p) => p.id);
+      checkedMenuIds.forEach((menuId) => permTreeRef.value?.setChecked(menuId, true, false));
     } finally {
       loading.value = false;
     }
@@ -561,3 +665,473 @@ onMounted(() => {
   handleQuery();
 });
 </script>
+
+<style scoped lang="scss">
+@import url("https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@500;700;800;900&family=Mochiy+Pop+One&display=swap");
+
+.page-card {
+  --ai-primary: #19c8b9;
+  --ai-primary-active: #11a89b;
+  --ai-text: #794f27;
+  --ai-text-2: #9f927d;
+  --ai-text-3: #c4b89e;
+  --ai-border: #e8e2d6;
+  --ai-shadow-color: #bdaea0;
+  --ai-leaf: #7cba70;
+  --ai-leaf-d: #4a8a36;
+  --ai-leaf-l: #d8ecc6;
+  --ai-red: #fc736d;
+  --ai-info: #5b9eee;
+  --ai-success: #6fba2c;
+
+  position: relative;
+  font-family: "M PLUS Rounded 1c", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei",
+    sans-serif;
+  color: var(--ai-text);
+  font-size: 13px;
+  line-height: 1.6;
+  background:
+    radial-gradient(600px 320px at 90% -10%, rgba(216, 236, 198, 0.8) 0%, transparent 60%),
+    radial-gradient(400px 240px at 5% 100%, rgba(247, 220, 130, 0.3) 0%, transparent 60%),
+    linear-gradient(180deg, rgba(248, 250, 230, 0.78) 0%, rgba(232, 244, 210, 0.78) 100%);
+  border: 2px solid var(--ai-border);
+  border-radius: 36px 44px 32px 40px / 38px 32px 44px 36px;
+  padding: 24px 28px;
+  box-shadow:
+    0 4px 0 0 rgba(74, 138, 54, 0.06),
+    0 12px 32px rgba(110, 80, 40, 0.06);
+  overflow: hidden;
+}
+.page-card::before {
+  content: "";
+  position: absolute;
+  top: -20px;
+  right: -30px;
+  width: 200px;
+  height: 200px;
+  background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><path d="M10 90c0-40 30-80 80-80 0 50-40 80-80 80z" fill="%237cba70" opacity="0.18"/><path d="M14 88c4-30 24-58 60-72" stroke="%234a8a36" stroke-width="1.5" fill="none" opacity="0.4"/></svg>')
+    no-repeat;
+  background-size: contain;
+  pointer-events: none;
+}
+.page-card::after {
+  content: "";
+  position: absolute;
+  bottom: -30px;
+  left: -30px;
+  width: 160px;
+  height: 160px;
+  background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><path d="M90 10c0 40-30 80-80 80 0-50 40-80 80-80z" fill="%23d1da49" opacity="0.22"/><path d="M86 14c-4 30-24 58-60 72" stroke="%23a3ad28" stroke-width="1.5" fill="none" opacity="0.4"/></svg>')
+    no-repeat;
+  background-size: contain;
+  pointer-events: none;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+/* 页头 */
+.page-head {
+  margin-bottom: 16px;
+  position: relative;
+  z-index: 2;
+}
+.page-eyebrow {
+  font-size: 11px;
+  letter-spacing: 4px;
+  font-weight: 800;
+  color: var(--ai-leaf-d);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.page-eyebrow::before {
+  content: "";
+  width: 22px;
+  height: 2px;
+  background: var(--ai-leaf-d);
+  border-radius: 2px;
+}
+.page-title {
+  font-family: "Mochiy Pop One", "M PLUS Rounded 1c", sans-serif;
+  font-size: 32px;
+  font-weight: 900;
+  letter-spacing: -0.01em;
+  margin: 4px 0 6px;
+  color: var(--ai-text);
+}
+.page-desc {
+  margin: 0;
+  font-size: 13px;
+  color: var(--ai-text-2);
+  font-weight: 500;
+}
+
+/* 搜索栏 */
+.filter-bar {
+  position: relative;
+  z-index: 2;
+  background: repeating-linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0.5) 0 12px,
+    rgba(255, 255, 255, 0.4) 12px 24px
+  );
+  border: 2px dashed rgba(74, 138, 54, 0.2);
+  border-radius: 22px;
+  padding: 16px 22px;
+  display: flex;
+  align-items: center;
+  gap: 22px;
+  flex-wrap: wrap;
+}
+.filter-bar::before {
+  content: "🌾";
+  position: absolute;
+  left: -14px;
+  top: -14px;
+  width: 28px;
+  height: 28px;
+  background: var(--ai-leaf-l);
+  border: 2px solid var(--ai-leaf-d);
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  font-size: 14px;
+  box-shadow: 0 2px 0 0 var(--ai-leaf-d);
+}
+.filter-field {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.filter-label {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--ai-text);
+  white-space: nowrap;
+}
+.input {
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--ai-text);
+  background: rgba(255, 255, 255, 0.9);
+  border: 1.5px solid var(--ai-border);
+  border-radius: 999px;
+  padding: 0 14px;
+  height: 36px;
+  width: 240px;
+  outline: 0;
+  transition: border-color 0.18s, box-shadow 0.18s;
+}
+.input::placeholder {
+  color: var(--ai-text-3);
+}
+.input:focus {
+  border-color: var(--ai-primary);
+  box-shadow: 0 0 0 3px rgba(25, 200, 185, 0.15);
+}
+
+/* 按钮 */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  font-family: inherit;
+  font-weight: 800;
+  font-size: 13px;
+  padding: 0 16px;
+  height: 36px;
+  border-radius: 999px;
+  cursor: pointer;
+  border: 1.5px solid transparent;
+  transition: transform 0.16s, box-shadow 0.16s, background 0.16s, color 0.16s;
+}
+.btn-primary {
+  background: linear-gradient(180deg, #84cf4f 0%, #6fba2c 100%);
+  color: #fff;
+  border-color: #6fba2c;
+  box-shadow: 0 3px 0 0 #5a9e1e;
+}
+.btn-primary:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 0 0 #5a9e1e;
+}
+.btn-primary:active {
+  transform: translateY(2px);
+  box-shadow: 0 1px 0 0 #5a9e1e;
+}
+.btn-default {
+  background: rgba(255, 255, 255, 0.85);
+  color: var(--ai-text);
+  border-color: var(--ai-border);
+}
+.btn-default:hover {
+  background: #fff;
+  border-color: var(--ai-primary);
+  color: var(--ai-primary-active);
+}
+.btn-danger {
+  background: rgba(255, 230, 230, 0.7);
+  color: var(--ai-red);
+  border-color: rgba(252, 115, 109, 0.4);
+}
+.btn-danger:hover {
+  background: rgba(252, 115, 109, 0.15);
+}
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.btn-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.7);
+  border: 1.5px solid var(--ai-border);
+  color: var(--ai-text-2);
+  cursor: pointer;
+  transition: all 0.18s;
+}
+.btn-icon:hover {
+  background: #fff;
+  color: var(--ai-leaf-d);
+  border-color: var(--ai-leaf);
+}
+
+/* 列表卡片 */
+.list-card {
+  position: relative;
+  z-index: 2;
+  margin-top: 16px;
+  background: rgba(255, 255, 255, 0.85);
+  border: 2px solid var(--ai-border);
+  border-radius: 24px;
+  padding: 20px 22px;
+  box-shadow: 0 3px 0 0 rgba(74, 138, 54, 0.05);
+}
+.list-card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 24px;
+  right: 24px;
+  height: 4px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(124, 186, 112, 0.4) 30%,
+    rgba(124, 186, 112, 0.4) 70%,
+    transparent
+  );
+  border-radius: 0 0 6px 6px;
+}
+.list-head {
+  margin-bottom: 14px;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 14px;
+}
+.list-title {
+  font-size: 17px;
+  font-weight: 800;
+  color: var(--ai-text);
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+.list-title::before {
+  content: "📜";
+  font-size: 16px;
+}
+.list-sub {
+  font-size: 12px;
+  color: var(--ai-text-2);
+  margin-top: 3px;
+  font-weight: 600;
+}
+
+/* 工具栏 */
+.toolbar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 14px;
+  padding: 10px;
+  background: rgba(248, 250, 230, 0.7);
+  border-radius: 14px;
+}
+.toolbar-spacer {
+  flex: 1;
+}
+.tool-group {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* 表格 */
+.tbl-wrap {
+  border-radius: 14px;
+  overflow: hidden;
+  border: 1.5px solid var(--ai-border);
+  background: #fff;
+}
+.tbl {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  font-size: 13px;
+  color: var(--ai-text);
+}
+.tbl th,
+.tbl td {
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--ai-border);
+  text-align: center;
+  vertical-align: middle;
+}
+.tbl th {
+  background: linear-gradient(
+    180deg,
+    rgba(216, 236, 198, 0.45) 0%,
+    rgba(232, 244, 210, 0.45) 100%
+  );
+  font-weight: 800;
+  color: var(--ai-text);
+  font-size: 13px;
+  white-space: nowrap;
+}
+.tbl th .sort-ic {
+  color: var(--ai-text-3);
+  margin-left: 4px;
+  vertical-align: middle;
+}
+.tbl tbody tr:hover {
+  background: rgba(216, 236, 198, 0.18);
+}
+.tbl tbody tr:last-child td {
+  border-bottom: 0;
+}
+.cell-num {
+  font-family: "Mochiy Pop One", sans-serif;
+}
+.cell-mono {
+  font-family: "Mochiy Pop One", sans-serif;
+  font-size: 12px;
+  color: var(--ai-text-2);
+}
+.cell-note {
+  color: var(--ai-text-2);
+}
+.tbl-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 14px;
+  white-space: nowrap;
+}
+
+/* 复选框 */
+.cbx {
+  width: 16px;
+  height: 16px;
+  border-radius: 5px;
+  border: 1.8px solid var(--ai-text-3);
+  background: #fff;
+  display: inline-grid;
+  place-items: center;
+  cursor: pointer;
+  transition: all 0.18s;
+  vertical-align: middle;
+}
+.cbx.is-checked {
+  background: var(--ai-leaf);
+  border-color: var(--ai-leaf-d);
+  color: #fff;
+}
+.cbx svg {
+  width: 10px;
+  height: 10px;
+  opacity: 0;
+}
+.cbx.is-checked svg {
+  opacity: 1;
+}
+
+/* 开关 */
+.swt {
+  position: relative;
+  width: 44px;
+  height: 22px;
+  border-radius: 999px;
+  background: #c4cad1;
+  border: 0;
+  display: inline-block;
+  vertical-align: middle;
+  transition: background 0.18s;
+}
+.swt::after {
+  content: "";
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #fff;
+  transition: left 0.18s;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.18);
+}
+.swt.is-on {
+  background: linear-gradient(135deg, #3aa3e8, #1c79c8);
+}
+.swt.is-on::after {
+  left: 24px;
+}
+
+/* 动作链接 */
+.action-link {
+  font-size: 12.5px;
+  font-weight: 700;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+}
+.act-edit {
+  color: var(--ai-info);
+}
+.act-del {
+  color: var(--ai-red);
+}
+.act-assign {
+  color: var(--ai-success);
+}
+
+/* 空状态 */
+.empty-row td {
+  padding: 36px;
+  color: var(--ai-text-3);
+  text-align: center;
+}
+
+@media (max-width: 1024px) {
+  .filter-bar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .filter-field {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .input {
+    width: 100%;
+  }
+}
+</style>
