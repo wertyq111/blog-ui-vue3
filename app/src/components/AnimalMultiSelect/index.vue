@@ -1,9 +1,5 @@
 <template>
-  <div
-    ref="wrapperRef"
-    class="ams"
-    :class="{ 'ams--disabled': disabled, 'ams--open': open }"
-  >
+  <div ref="wrapperRef" class="ams" :class="{ 'ams--disabled': disabled, 'ams--open': open }">
     <div class="ams__trigger" @click="toggleOpen">
       <div v-if="selectedOptions.length" class="ams__tags">
         <span v-for="opt in selectedOptions" :key="opt.key" class="ams__tag">
@@ -123,8 +119,15 @@ onClickOutside(wrapperRef, () => (open.value = false));
 .ams {
   position: relative;
   width: 100%;
-  font-family: Nunito, "Noto Sans SC", "Zen Maru Gothic", -apple-system, "PingFang SC",
-    "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+  font-family:
+    Nunito,
+    "Noto Sans SC",
+    "Zen Maru Gothic",
+    -apple-system,
+    "PingFang SC",
+    "Hiragino Sans GB",
+    "Microsoft YaHei",
+    sans-serif;
   user-select: none;
 }
 
@@ -208,7 +211,9 @@ onClickOutside(wrapperRef, () => (open.value = false));
   align-items: center;
   flex-shrink: 0;
   color: #a09080;
-  transition: transform 0.2s, color 0.2s;
+  transition:
+    transform 0.2s,
+    color 0.2s;
 }
 .ams__arrow--open {
   transform: rotate(180deg);
@@ -223,6 +228,7 @@ onClickOutside(wrapperRef, () => (open.value = false));
   right: 0;
   z-index: 100;
   padding: 10px 0;
+  overflow: visible;
   background: #ffeea0;
   border-radius: 22px;
   box-shadow: 0 10px 26px rgba(110, 80, 40, 0.18);
@@ -239,7 +245,9 @@ onClickOutside(wrapperRef, () => (open.value = false));
   color: #725d42;
   cursor: pointer;
   white-space: nowrap;
-  transition: background 0.15s, font-weight 0.15s;
+  transition:
+    background 0.15s,
+    font-weight 0.15s;
 }
 .ams__option:hover {
   font-weight: 700;
@@ -248,12 +256,13 @@ onClickOutside(wrapperRef, () => (open.value = false));
 .ams__option:hover::before {
   content: "";
   position: absolute;
-  left: 0;
+  left: -12px;
   top: 50%;
   transform: translateY(-50%);
-  width: 32px;
-  height: 32px;
+  width: 35px;
+  height: 35px;
   background: url("../../assets/images/select-cursor.svg") center / contain no-repeat;
+  animation: ams-cursor-in 0.5s ease-out forwards;
   pointer-events: none;
   z-index: 1;
 }
@@ -277,11 +286,28 @@ onClickOutside(wrapperRef, () => (open.value = false));
 /* 展开动画 */
 .ams-fade-enter-active,
 .ams-fade-leave-active {
-  transition: opacity 0.18s ease, transform 0.18s ease;
+  transition:
+    opacity 0.18s ease,
+    transform 0.18s ease;
 }
 .ams-fade-enter-from,
 .ams-fade-leave-to {
   opacity: 0;
   transform: translateY(-6px);
+}
+
+@keyframes ams-cursor-in {
+  0% {
+    opacity: 0;
+    transform: translateY(-50%) translateX(-20px) rotate(-15deg);
+  }
+  60% {
+    opacity: 1;
+    transform: translateY(-50%) translateX(5px) rotate(5deg);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(-50%) translateX(0) rotate(0);
+  }
 }
 </style>

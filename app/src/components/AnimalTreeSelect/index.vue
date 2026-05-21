@@ -1,9 +1,5 @@
 <template>
-  <div
-    ref="wrapperRef"
-    class="ats"
-    :class="{ 'ats--disabled': disabled, 'ats--open': open }"
-  >
+  <div ref="wrapperRef" class="ats" :class="{ 'ats--disabled': disabled, 'ats--open': open }">
     <div class="ats__trigger" @click="toggleOpen">
       <span v-if="selectedLabel" class="ats__value">{{ selectedLabel }}</span>
       <span v-else class="ats__placeholder">{{ placeholder }}</span>
@@ -169,8 +165,15 @@ onClickOutside(wrapperRef, () => (open.value = false));
 .ats {
   position: relative;
   width: 100%;
-  font-family: Nunito, "Noto Sans SC", "Zen Maru Gothic", -apple-system, "PingFang SC",
-    "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+  font-family:
+    Nunito,
+    "Noto Sans SC",
+    "Zen Maru Gothic",
+    -apple-system,
+    "PingFang SC",
+    "Hiragino Sans GB",
+    "Microsoft YaHei",
+    sans-serif;
   user-select: none;
 }
 
@@ -218,7 +221,9 @@ onClickOutside(wrapperRef, () => (open.value = false));
   align-items: center;
   flex-shrink: 0;
   color: #a09080;
-  transition: transform 0.2s, color 0.2s;
+  transition:
+    transform 0.2s,
+    color 0.2s;
 }
 .ats__arrow--open {
   transform: rotate(180deg);
@@ -231,14 +236,14 @@ onClickOutside(wrapperRef, () => (open.value = false));
   left: 0;
   right: 0;
   z-index: 100;
-  max-height: 280px;
-  overflow-y: auto;
   padding: 10px 0;
+  overflow: visible;
   background: #ffeea0;
   border-radius: 22px;
   box-shadow: 0 10px 26px rgba(110, 80, 40, 0.18);
 }
 .ats__option {
+  position: relative;
   display: flex;
   align-items: center;
   gap: 4px;
@@ -248,7 +253,21 @@ onClickOutside(wrapperRef, () => (open.value = false));
   color: #725d42;
 }
 .ats__option:hover {
+  font-weight: 700;
   background: rgba(255, 255, 255, 0.4);
+}
+.ats__option:hover::before {
+  content: "";
+  position: absolute;
+  left: -12px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 35px;
+  height: 35px;
+  background: url("../../assets/images/select-cursor.svg") center / contain no-repeat;
+  animation: ats-cursor-in 0.5s ease-out forwards;
+  pointer-events: none;
+  z-index: 1;
 }
 .ats__option--selected {
   font-weight: 700;
@@ -290,11 +309,28 @@ onClickOutside(wrapperRef, () => (open.value = false));
 
 .ats-fade-enter-active,
 .ats-fade-leave-active {
-  transition: opacity 0.18s ease, transform 0.18s ease;
+  transition:
+    opacity 0.18s ease,
+    transform 0.18s ease;
 }
 .ats-fade-enter-from,
 .ats-fade-leave-to {
   opacity: 0;
   transform: translateY(-6px);
+}
+
+@keyframes ats-cursor-in {
+  0% {
+    opacity: 0;
+    transform: translateY(-50%) translateX(-20px) rotate(-15deg);
+  }
+  60% {
+    opacity: 1;
+    transform: translateY(-50%) translateX(5px) rotate(5deg);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(-50%) translateX(0) rotate(0);
+  }
 }
 </style>
