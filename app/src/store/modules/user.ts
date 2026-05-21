@@ -28,7 +28,7 @@ export const useUserStore = defineStore("user", () => {
   /**
    * 获取用户信息
    *
-   * 后端返回格式：{id, username, nickname, avatar, roles: [{code, name}], authorities: [{permission}]}
+   * 后端返回格式：{id, username, nickname, avatar, roles?: [{code, name}], permissions: string[]}
    * 需映射为：{userId, username, nickname, avatar, roles: string[], perms: string[]}
    */
   async function getUserInfo(): Promise<UserInfo> {
@@ -46,9 +46,11 @@ export const useUserStore = defineStore("user", () => {
       roles: Array.isArray(raw.roles)
         ? raw.roles.map((r: any) => (typeof r === "string" ? r : r.code || r.name))
         : [],
-      perms: Array.isArray(raw.authorities)
-        ? raw.authorities.map((a: any) => (typeof a === "string" ? a : a.permission))
-        : raw.perms ?? [],
+      perms: Array.isArray(raw.permissions)
+        ? raw.permissions
+        : Array.isArray(raw.authorities)
+          ? raw.authorities.map((a: any) => (typeof a === "string" ? a : a.permission))
+          : (raw.perms ?? []),
     };
 
     Object.assign(userInfo.value, mapped);

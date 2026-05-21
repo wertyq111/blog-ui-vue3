@@ -75,7 +75,7 @@
           <el-table-column fixed="right" label="操作" width="220">
             <template #default="scope">
               <el-button
-                v-hasPerm="'sys:role:assign'"
+                v-hasPerm="'sys:role:permission'"
                 type="primary"
                 size="small"
                 link
@@ -216,7 +216,7 @@
       </el-tree>
       <template #footer>
         <div class="dialog-footer">
-          <el-button v-hasPerm="'sys:role:assign'" type="primary" @click="handleAssignPermSubmit">
+          <el-button v-hasPerm="'sys:role:permission'" type="primary" @click="handleAssignPermSubmit">
             确定
           </el-button>
           <el-button @click="assignPermDialogVisible = false">取消</el-button>

@@ -1,136 +1,153 @@
 <template>
-  <div class="develop-page admin-workspace-page">
-    <el-card shadow="never" class="develop-shell admin-workspace-shell">
-      <!-- Hero 区域 -->
-      <div class="develop-hero">
-        <div class="develop-hero__copy">
-          <div class="develop-hero__eyebrow">MENU MANAGEMENT</div>
-          <h1 class="develop-hero__title">菜单管理</h1>
-          <p class="develop-hero__desc">管理系统菜单结构与路由配置</p>
+    <div class="page-card">
+      <!-- 页头 -->
+      <div class="page-head">
+        <div class="page-eyebrow">SYSTEM MANAGEMENT</div>
+        <h1 class="page-title">菜单管理</h1>
+        <p class="page-desc">维护菜单层级、路由能力与权限标识，统一后台导航入口。</p>
+      </div>
+
+      <!-- 搜索栏 -->
+      <div class="filter-bar">
+        <div class="filter-field">
+          <label class="filter-label">菜单名称：</label>
+          <input
+            v-model="queryParams['filter[title]']"
+            class="input"
+            placeholder="请输入菜单名称"
+            @keyup.enter="handleQuery"
+          />
         </div>
+        <button class="btn btn-primary" type="button" @click="handleQuery">
+          <Ico name="search" :size="13" /> 查询
+        </button>
+        <button class="btn btn-default" type="button" @click="handleResetQuery">重置</button>
       </div>
 
-      <!-- 搜索面板 -->
-      <div class="develop-panel">
-        <el-form ref="queryFormRef" :model="queryParams" :inline="true" class="develop-form">
-          <el-form-item label="菜单名称" prop="filter[title]">
-            <el-input
-              v-model="queryParams['filter[title]']"
-              placeholder="菜单名称"
-              clearable
-              @keyup.enter="handleQuery"
-            />
-          </el-form-item>
-
-          <el-form-item class="search-buttons">
-            <el-button type="primary" icon="search" @click="handleQuery">搜索</el-button>
-            <el-button icon="refresh" @click="handleResetQuery">重置</el-button>
-          </el-form-item>
-        </el-form>
-      </div>
-
-      <!-- 表格区域 -->
-      <div class="develop-table-shell">
-        <div class="develop-table-shell__header">
+      <!-- 列表卡片 -->
+      <div class="list-card">
+        <div class="list-head">
           <div>
-            <div class="develop-table-shell__title">菜单结构树</div>
-            <div class="develop-table-shell__desc">定义系统导航菜单、子菜单及功能按钮权限标识。</div>
-          </div>
-          <div class="develop-table-shell__actions">
-            <el-button
-              v-hasPerm="['sys:menu:create']"
-              type="success"
-              icon="plus"
-              @click="openDialog(0)"
-            >
-              新增菜单
-            </el-button>
+            <div class="list-title">菜单列表</div>
+            <div class="list-sub">支持层级查看、展开收起和菜单结构维护。</div>
           </div>
         </div>
 
-        <el-table
-          ref="dataTableRef"
-          v-loading="loading"
-          row-key="id"
-          :data="menuTableData"
-          :tree-props="{ children: 'children', hasChildren: 'hasChildren' }"
-          class="develop-table"
-          @row-click="handleRowClick"
-        >
-          <el-table-column label="菜单名称" min-width="200">
-            <template #default="scope">
-              <div class="menu-name-cell">
-                <span class="menu-name-cell__icon">
-                  <template v-if="scope.row.icon && scope.row.icon.startsWith('el-icon')">
-                    <el-icon style="vertical-align: -0.15em">
-                      <component :is="scope.row.icon.replace('el-icon-', '')" />
-                    </el-icon>
-                  </template>
-                  <template v-else-if="scope.row.icon">
-                    <span :class="`i-svg:${scope.row.icon}`" />
-                  </template>
-                </span>
-                <span class="menu-name-cell__text">{{ scope.row.title }}</span>
-              </div>
-            </template>
-          </el-table-column>
+        <!-- 工具栏 -->
+        <div class="toolbar">
+          <button
+            v-hasPerm="['sys:menu:addz']"
+            class="btn btn-primary"
+            type="button"
+            @click="openDialog(0)"
+          >
+            <Ico name="plus" :size="13" /> 添加
+          </button>
+          <button class="btn btn-default" type="button" @click="expandAll">
+            <Ico name="expand" :size="13" /> 展开全部
+          </button>
+          <button class="btn btn-default" type="button" @click="collapseAll">
+            <Ico name="collapse" :size="13" /> 折叠全部
+          </button>
+          <div class="toolbar-spacer" />
+          <div class="tool-group">
+            <button class="btn-icon" type="button" title="刷新" @click="fetchData">
+              <Ico name="refresh" :size="14" />
+            </button>
+            <button class="btn-icon" type="button" title="全屏">
+              <Ico name="full" :size="14" />
+            </button>
+          </div>
+        </div>
 
-          <el-table-column label="类型" align="center" width="80">
-            <template #default="scope">
-              <el-tag v-if="scope.row.type === 0" type="success">菜单</el-tag>
-              <el-tag v-if="scope.row.type === 1" type="danger">权限</el-tag>
-            </template>
-          </el-table-column>
-          <el-table-column label="路由路径" align="left" width="150" prop="path" />
-          <el-table-column label="组件路径" align="left" width="250" prop="component" />
-          <el-table-column label="权限标识" align="center" width="200" prop="permission" />
-
-          <el-table-column label="状态" align="center" width="80">
-            <template #default="scope">
-              <el-tag v-if="scope.row.hide === 0" type="success">显示</el-tag>
-              <el-tag v-else type="info">隐藏</el-tag>
-            </template>
-          </el-table-column>
-          <el-table-column label="排序" align="center" width="80" prop="sort" />
-          <el-table-column fixed="right" align="center" label="操作" width="220">
-            <template #default="scope">
-              <el-button
-                v-if="scope.row.type === 0"
-                v-hasPerm="['sys:menu:create']"
-                type="primary"
-                link
-                size="small"
-                icon="plus"
-                @click.stop="openDialog(scope.row.id)"
-              >
-                新增
-              </el-button>
-
-              <el-button
-                v-hasPerm="['sys:menu:update']"
-                type="primary"
-                link
-                size="small"
-                icon="edit"
-                @click.stop="openDialog(undefined, scope.row.id)"
-              >
-                编辑
-              </el-button>
-              <el-button
-                v-hasPerm="['sys:menu:delete']"
-                type="danger"
-                link
-                size="small"
-                icon="delete"
-                @click.stop="handleDelete(scope.row.id)"
-              >
-                删除
-              </el-button>
-            </template>
-          </el-table-column>
-        </el-table>
+        <!-- 表格 -->
+        <div v-loading="loading" class="tbl-wrap">
+          <table class="tbl">
+            <thead>
+              <tr>
+                <th style="width: 60px">序</th>
+                <th class="tbl-name-cell">菜单名称</th>
+                <th style="width: 100px">菜单类型</th>
+                <th>路由地址</th>
+                <th>组件路径</th>
+                <th>权限标识</th>
+                <th style="width: 110px">排序</th>
+                <th style="width: 80px">状态</th>
+                <th style="width: 220px">操作</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="(r, i) in flatRows" :key="r.id">
+                <td class="cell-num">{{ i + 1 }}</td>
+                <td class="tbl-name-cell">
+                  <span class="tree-indent" :style="{ paddingLeft: r.depth * 20 + 'px' }">
+                    <button
+                      v-if="r.hasChildren"
+                      class="tree-caret"
+                      :class="{ open: isOpen(r.id) }"
+                      type="button"
+                      @click="toggle(r.id)"
+                    >
+                      <Ico name="chevRight" :size="11" />
+                    </button>
+                    <span v-else class="tree-caret-spacer" />
+                    <span class="tree-name">
+                      <span v-if="r.type === 0" class="tree-name-ico">
+                        <Icon :name="resolveAnimalIcon(r.icon, r.path)" :size="14" />
+                      </span>
+                      {{ r.title }}
+                    </span>
+                  </span>
+                </td>
+                <td>
+                  <span class="pill" :class="r.type === 0 ? 'pill-menu' : 'pill-button'">
+                    {{ r.type === 0 ? "菜单" : "按钮" }}
+                  </span>
+                </td>
+                <td class="cell-mono">{{ r.path || "" }}</td>
+                <td class="cell-mono">{{ r.component || "" }}</td>
+                <td class="cell-mono">{{ r.permission || "" }}</td>
+                <td class="cell-num">{{ r.sort }}</td>
+                <td>
+                  <span class="pill" :class="r.hide === 0 ? 'pill-status-on' : 'pill-status-off'">
+                    {{ r.hide === 0 ? "正常" : "隐藏" }}
+                  </span>
+                </td>
+                <td>
+                  <span class="tbl-actions">
+                    <span
+                      v-if="r.type === 0"
+                      v-hasPerm="['sys:menu:addz']"
+                      class="action-link act-add"
+                      @click="openDialog(r.id)"
+                    >
+                      <Ico name="plus" :size="11" /> 添加
+                    </span>
+                    <span
+                      v-hasPerm="['sys:menu:edit']"
+                      class="action-link act-edit"
+                      @click="openDialog(undefined, r.id)"
+                    >
+                      <Ico name="edit" :size="11" /> 修改
+                    </span>
+                    <span
+                      v-hasPerm="['sys:menu:delete']"
+                      class="action-link act-del"
+                      @click="handleDelete(r.id)"
+                    >
+                      <Ico name="trash" :size="11" /> 删除
+                    </span>
+                  </span>
+                </td>
+              </tr>
+              <tr v-if="!loading && flatRows.length === 0" class="empty-row">
+                <td colspan="9">暂无数据</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
       </div>
-    </el-card>
+    </div>
 
     <el-drawer
       v-model="dialogState.visible"
@@ -206,13 +223,14 @@
         </div>
       </template>
     </el-drawer>
-  </div>
 </template>
 
 <script setup lang="ts">
 import { useAppStore } from "@/store/modules/app";
 import { DeviceEnum } from "@/enums/settings";
 import MenuAPI from "@/api/system/menu";
+import { Icon } from "animal-island-vue";
+import { resolveAnimalIcon } from "@/utils/menuAnimalIcon";
 import type { MenuQueryParams, MenuForm, MenuItem } from "@/types/api";
 import type { FormInstance, FormRules } from "element-plus";
 
@@ -221,9 +239,43 @@ defineOptions({
   inheritAttrs: false,
 });
 
+// 线性图标（还原设计稿 Ico）
+const ICO_PATHS: Record<string, string> = {
+  search: '<circle cx="10" cy="10" r="6"/><path d="M14 14l4 4"/>',
+  plus: '<path d="M12 5v14M5 12h14"/>',
+  expand: '<path d="M4 14v6h6M20 10V4h-6M4 4l6 6M20 20l-6-6"/>',
+  collapse: '<path d="M9 4v6H3M15 20v-6h6M3 10l6-6M21 14l-6 6"/>',
+  refresh: '<path d="M4 12a8 8 0 0114-5l3 3M20 12a8 8 0 01-14 5l-3-3"/><path d="M17 4v4h-4M7 20v-4h4"/>',
+  full: '<path d="M4 8V4h4M20 8V4h-4M4 16v4h4M20 16v4h-4"/>',
+  chevRight: '<path d="M9 6l6 6-6 6"/>',
+  edit: '<path d="M4 16L15 5l3 3-11 11H4v-3z"/>',
+  trash: '<path d="M5 7h14M9 7V4h6v3M7 7l1 13h8l1-13"/>',
+};
+
+const Ico = defineComponent({
+  name: "Ico",
+  props: {
+    name: { type: String, required: true },
+    size: { type: Number, default: 14 },
+  },
+  setup(props) {
+    return () =>
+      h("svg", {
+        viewBox: "0 0 24 24",
+        width: props.size,
+        height: props.size,
+        fill: "none",
+        stroke: "currentColor",
+        "stroke-width": 1.8,
+        "stroke-linecap": "round",
+        "stroke-linejoin": "round",
+        innerHTML: ICO_PATHS[props.name] || "",
+      });
+  },
+});
+
 const appStore = useAppStore();
 
-const queryFormRef = ref<FormInstance>();
 const menuFormRef = ref<FormInstance>();
 
 const queryParams = reactive<MenuQueryParams>({});
@@ -231,6 +283,58 @@ const queryParams = reactive<MenuQueryParams>({});
 const menuTableData = ref<MenuItem[]>([]);
 const menuOptions = ref<OptionItem[]>([]);
 const loading = ref(false);
+
+// 树形展开状态
+const openMap = ref<Record<number, boolean>>({});
+
+interface FlatRow extends MenuItem {
+  depth: number;
+  hasChildren: boolean;
+}
+
+function collectFlat(nodes: MenuItem[], depth: number, out: FlatRow[]): void {
+  for (const node of nodes) {
+    const kids = node.children && node.children.length ? node.children : null;
+    out.push({ ...node, depth, hasChildren: !!kids });
+    if (kids && openMap.value[node.id!]) {
+      collectFlat(kids, depth + 1, out);
+    }
+  }
+}
+
+const flatRows = computed<FlatRow[]>(() => {
+  const out: FlatRow[] = [];
+  collectFlat(menuTableData.value, 0, out);
+  return out;
+});
+
+function collectParentIds(nodes: MenuItem[], acc: number[]): number[] {
+  for (const node of nodes) {
+    if (node.children && node.children.length) {
+      acc.push(node.id!);
+      collectParentIds(node.children, acc);
+    }
+  }
+  return acc;
+}
+
+function isOpen(id?: number): boolean {
+  return id != null && !!openMap.value[id];
+}
+
+function toggle(id?: number): void {
+  if (id == null) return;
+  openMap.value = { ...openMap.value, [id]: !openMap.value[id] };
+}
+
+function expandAll(): void {
+  const ids = collectParentIds(menuTableData.value, []);
+  openMap.value = Object.fromEntries(ids.map((id) => [id, true]));
+}
+
+function collapseAll(): void {
+  openMap.value = {};
+}
 
 const dialogState = reactive({
   title: "新增菜单",
@@ -245,7 +349,6 @@ const initialMenuFormData: MenuForm = {
   type: 0,
 };
 const formData = ref<MenuForm>({ ...initialMenuFormData });
-const selectedMenuId = ref<number | undefined>();
 
 const drawerSize = computed(() => (appStore.device === DeviceEnum.DESKTOP ? "600px" : "90%"));
 
@@ -268,6 +371,7 @@ function fetchData(): void {
   MenuAPI.getList(queryParams)
     .then((data) => {
       menuTableData.value = data;
+      expandAll();
     })
     .finally(() => {
       loading.value = false;
@@ -279,13 +383,8 @@ function handleQuery(): void {
 }
 
 function handleResetQuery(): void {
-  queryFormRef.value?.resetFields();
   queryParams["filter[title]"] = undefined;
   fetchData();
-}
-
-function handleRowClick(row: MenuItem): void {
-  selectedMenuId.value = row.id;
 }
 
 function openDialog(parentId?: number, menuId?: number): void {
@@ -335,7 +434,7 @@ function handleSubmit(): void {
   });
 }
 
-function handleDelete(menuId: number): void {
+function handleDelete(menuId?: number): void {
   if (!menuId) {
     ElMessage.warning("请勾选删除项");
     return;
@@ -375,25 +474,480 @@ onMounted(() => {
 });
 </script>
 
-<style scoped>
-.menu-name-cell {
-  display: inline-flex;
-  align-items: center;
-  max-width: 100%;
+<style scoped lang="scss">
+@import url("https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@500;700;800;900&family=Mochiy+Pop+One&display=swap");
+
+.menu-design-page {
+  --ai-primary: #19c8b9;
+  --ai-primary-active: #11a89b;
+  --ai-text: #794f27;
+  --ai-text-2: #9f927d;
+  --ai-text-3: #c4b89e;
+  --ai-border: #e8e2d6;
+  --ai-shadow-color: #bdaea0;
+  --ai-leaf: #7cba70;
+  --ai-leaf-d: #4a8a36;
+  --ai-leaf-l: #d8ecc6;
+  --ai-red: #fc736d;
+  --ai-info: #5b9eee;
+  --ai-success: #6fba2c;
+
+  min-height: 100%;
+  padding: 14px 18px 60px;
+  font-family: "M PLUS Rounded 1c", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei",
+    sans-serif;
+  color: var(--ai-text);
+  font-size: 13px;
+  line-height: 1.6;
+  background:
+    radial-gradient(900px 500px at 10% -10%, #e2f1d1 0%, transparent 60%),
+    radial-gradient(700px 600px at 100% 10%, #f0f7d8 0%, transparent 60%),
+    linear-gradient(180deg, #f0f6e0 0%, #e4eed0 100%);
 }
 
-.menu-name-cell__icon {
+* {
+  box-sizing: border-box;
+}
+
+/* 页面容器 */
+.page-card {
+  position: relative;
+  background:
+    radial-gradient(600px 320px at 90% -10%, rgba(216, 236, 198, 0.8) 0%, transparent 60%),
+    radial-gradient(400px 240px at 5% 100%, rgba(247, 220, 130, 0.3) 0%, transparent 60%),
+    linear-gradient(180deg, rgba(248, 250, 230, 0.78) 0%, rgba(232, 244, 210, 0.78) 100%);
+  border: 2px solid var(--ai-border);
+  border-radius: 36px 44px 32px 40px / 38px 32px 44px 36px;
+  padding: 24px 28px;
+  box-shadow:
+    0 4px 0 0 rgba(74, 138, 54, 0.06),
+    0 12px 32px rgba(110, 80, 40, 0.06);
+  overflow: hidden;
+}
+.page-card::before {
+  content: "";
+  position: absolute;
+  top: -20px;
+  right: -30px;
+  width: 200px;
+  height: 200px;
+  background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><path d="M10 90c0-40 30-80 80-80 0 50-40 80-80 80z" fill="%237cba70" opacity="0.18"/><path d="M14 88c4-30 24-58 60-72" stroke="%234a8a36" stroke-width="1.5" fill="none" opacity="0.4"/></svg>')
+    no-repeat;
+  background-size: contain;
+  pointer-events: none;
+}
+.page-card::after {
+  content: "";
+  position: absolute;
+  bottom: -30px;
+  left: -30px;
+  width: 160px;
+  height: 160px;
+  background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><path d="M90 10c0 40-30 80-80 80 0-50 40-80 80-80z" fill="%23d1da49" opacity="0.22"/><path d="M86 14c-4 30-24 58-60 72" stroke="%23a3ad28" stroke-width="1.5" fill="none" opacity="0.4"/></svg>')
+    no-repeat;
+  background-size: contain;
+  pointer-events: none;
+}
+
+/* 页头 */
+.page-head {
+  margin-bottom: 16px;
+  position: relative;
+  z-index: 2;
+}
+.page-eyebrow {
+  font-size: 11px;
+  letter-spacing: 4px;
+  font-weight: 800;
+  color: var(--ai-leaf-d);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.page-eyebrow::before {
+  content: "";
+  width: 22px;
+  height: 2px;
+  background: var(--ai-leaf-d);
+  border-radius: 2px;
+}
+.page-title {
+  font-family: "Mochiy Pop One", "M PLUS Rounded 1c", sans-serif;
+  font-size: 32px;
+  font-weight: 900;
+  letter-spacing: -0.01em;
+  margin: 4px 0 6px;
+  color: var(--ai-text);
+}
+.page-desc {
+  margin: 0;
+  font-size: 13px;
+  color: var(--ai-text-2);
+  font-weight: 500;
+}
+
+/* 搜索栏 */
+.filter-bar {
+  position: relative;
+  z-index: 2;
+  background: repeating-linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0.5) 0 12px,
+    rgba(255, 255, 255, 0.4) 12px 24px
+  );
+  border: 2px dashed rgba(74, 138, 54, 0.2);
+  border-radius: 22px;
+  padding: 16px 22px;
+  display: flex;
+  align-items: center;
+  gap: 22px;
+  flex-wrap: wrap;
+}
+.filter-bar::before {
+  content: "🌾";
+  position: absolute;
+  left: -14px;
+  top: -14px;
+  width: 28px;
+  height: 28px;
+  background: var(--ai-leaf-l);
+  border: 2px solid var(--ai-leaf-d);
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  font-size: 14px;
+  box-shadow: 0 2px 0 0 var(--ai-leaf-d);
+}
+.filter-field {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.filter-label {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--ai-text);
+  white-space: nowrap;
+}
+.input {
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--ai-text);
+  background: rgba(255, 255, 255, 0.9);
+  border: 1.5px solid var(--ai-border);
+  border-radius: 999px;
+  padding: 0 14px;
+  height: 36px;
+  width: 240px;
+  outline: 0;
+  transition: border-color 0.18s, box-shadow 0.18s;
+}
+.input::placeholder {
+  color: var(--ai-text-3);
+}
+.input:focus {
+  border-color: var(--ai-primary);
+  box-shadow: 0 0 0 3px rgba(25, 200, 185, 0.15);
+}
+
+/* 按钮 */
+.btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 18px;
-  min-width: 18px;
-  margin-right: 6px;
+  gap: 6px;
+  font-family: inherit;
+  font-weight: 800;
+  font-size: 13px;
+  padding: 0 16px;
+  height: 36px;
+  border-radius: 999px;
+  cursor: pointer;
+  border: 1.5px solid transparent;
+  transition: transform 0.16s, box-shadow 0.16s, background 0.16s, color 0.16s;
+}
+.btn-primary {
+  background: linear-gradient(180deg, #84cf4f 0%, #6fba2c 100%);
+  color: #fff;
+  border-color: #6fba2c;
+  box-shadow: 0 3px 0 0 #5a9e1e;
+}
+.btn-primary:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 0 0 #5a9e1e;
+}
+.btn-primary:active {
+  transform: translateY(2px);
+  box-shadow: 0 1px 0 0 #5a9e1e;
+}
+.btn-default {
+  background: rgba(255, 255, 255, 0.85);
+  color: var(--ai-text);
+  border-color: var(--ai-border);
+}
+.btn-default:hover {
+  background: #fff;
+  border-color: var(--ai-primary);
+  color: var(--ai-primary-active);
+}
+.btn-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.7);
+  border: 1.5px solid var(--ai-border);
+  color: var(--ai-text-2);
+  cursor: pointer;
+  transition: all 0.18s;
+}
+.btn-icon:hover {
+  background: #fff;
+  color: var(--ai-leaf-d);
+  border-color: var(--ai-leaf);
 }
 
-.menu-name-cell__text {
+/* 列表卡片 */
+.list-card {
+  position: relative;
+  z-index: 2;
+  margin-top: 16px;
+  background: rgba(255, 255, 255, 0.85);
+  border: 2px solid var(--ai-border);
+  border-radius: 24px;
+  padding: 20px 22px;
+  box-shadow: 0 3px 0 0 rgba(74, 138, 54, 0.05);
+}
+.list-card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 24px;
+  right: 24px;
+  height: 4px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(124, 186, 112, 0.4) 30%,
+    rgba(124, 186, 112, 0.4) 70%,
+    transparent
+  );
+  border-radius: 0 0 6px 6px;
+}
+.list-head {
+  margin-bottom: 14px;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 14px;
+}
+.list-title {
+  font-size: 17px;
+  font-weight: 800;
+  color: var(--ai-text);
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+.list-title::before {
+  content: "📜";
+  font-size: 16px;
+}
+.list-sub {
+  font-size: 12px;
+  color: var(--ai-text-2);
+  margin-top: 3px;
+  font-weight: 600;
+}
+
+/* 工具栏 */
+.toolbar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 14px;
+  padding: 10px;
+  border-radius: 14px;
+}
+.toolbar-spacer {
+  flex: 1;
+}
+.tool-group {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* 表格 */
+.tbl-wrap {
+  border-radius: 14px;
   overflow: hidden;
-  text-overflow: ellipsis;
+  border: 1.5px solid var(--ai-border);
+  background: #fff;
+}
+.tbl {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  font-size: 13px;
+  color: var(--ai-text);
+}
+.tbl th,
+.tbl td {
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--ai-border);
+  text-align: center;
+  vertical-align: middle;
+}
+.tbl th {
+  background: linear-gradient(
+    180deg,
+    rgba(216, 236, 198, 0.45) 0%,
+    rgba(232, 244, 210, 0.45) 100%
+  );
+  font-weight: 800;
+  color: var(--ai-text);
+  font-size: 13px;
   white-space: nowrap;
+}
+.tbl tbody tr:hover {
+  background: rgba(216, 236, 198, 0.18);
+}
+.tbl tbody tr:last-child td {
+  border-bottom: 0;
+}
+.tbl-name-cell {
+  text-align: left;
+}
+.cell-num {
+  font-family: "Mochiy Pop One", sans-serif;
+}
+.cell-mono {
+  font-family: "Mochiy Pop One", sans-serif;
+  font-size: 12px;
+  color: var(--ai-text-2);
+}
+.tbl-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 14px;
+  white-space: nowrap;
+}
+
+/* 动作链接 */
+.action-link {
+  font-size: 12.5px;
+  font-weight: 700;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+}
+.act-edit {
+  color: var(--ai-info);
+}
+.act-del {
+  color: var(--ai-red);
+}
+.act-add {
+  color: var(--ai-info);
+}
+
+/* 标签 */
+.pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 12px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 700;
+  border: 1.5px solid;
+  white-space: nowrap;
+}
+.pill-menu {
+  color: #3a78d4;
+  border-color: #b4c8ee;
+  background: #e9efff;
+}
+.pill-button {
+  color: #6a7280;
+  border-color: #d6d8dd;
+  background: #f1f3f5;
+}
+.pill-status-on {
+  color: var(--ai-success);
+  border-color: rgba(111, 186, 44, 0.4);
+  background: rgba(111, 186, 44, 0.12);
+}
+.pill-status-on::before {
+  content: "•";
+  margin-right: 4px;
+  font-size: 18px;
+  line-height: 0;
+}
+.pill-status-off {
+  color: var(--ai-text-2);
+  border-color: var(--ai-border);
+  background: rgba(0, 0, 0, 0.03);
+}
+
+/* 树形 */
+.tree-indent {
+  display: inline-flex;
+  align-items: center;
+}
+.tree-caret {
+  width: 16px;
+  height: 16px;
+  display: inline-grid;
+  place-items: center;
+  color: var(--ai-text-2);
+  transition: transform 0.18s;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  padding: 0;
+}
+.tree-caret.open {
+  transform: rotate(90deg);
+}
+.tree-caret-spacer {
+  display: inline-block;
+  width: 16px;
+}
+.tree-name {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+}
+.tree-name-ico {
+  color: var(--ai-text-2);
+  display: inline-grid;
+  place-items: center;
+}
+
+/* 空状态 */
+.empty-row td {
+  padding: 36px;
+  color: var(--ai-text-3);
+  text-align: center;
+}
+
+@media (max-width: 1024px) {
+  .filter-bar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .filter-field {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .input {
+    width: 100%;
+  }
 }
 </style>
