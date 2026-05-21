@@ -201,30 +201,29 @@
         <el-row :gutter="15">
           <el-col :sm="12">
             <el-form-item label="邮箱" prop="email">
-              <el-input v-model="formData.email" placeholder="请输入邮箱" maxlength="100" clearable />
+              <Input v-model="formData.email" placeholder="请输入邮箱" :maxlength="100" allow-clear />
             </el-form-item>
             <el-form-item label="用户账号" prop="username">
-              <el-input
+              <Input
                 v-model="formData.username"
                 :readonly="!!formData.id"
                 placeholder="请输入用户账号"
-                maxlength="20"
-                clearable
+                :maxlength="20"
+                allow-clear
               />
             </el-form-item>
             <el-form-item label="登录密码" prop="password">
-              <el-input
+              <Input
                 v-model="formData.password"
                 type="password"
                 placeholder="请输入登录密码"
-                maxlength="20"
-                show-password
+                :maxlength="20"
               />
             </el-form-item>
           </el-col>
           <el-col :sm="12">
             <el-form-item label="手机号" prop="phone">
-              <el-input v-model="formData.phone" placeholder="请输入手机号" maxlength="11" clearable />
+              <Input v-model="formData.phone" placeholder="请输入手机号" :maxlength="11" allow-clear />
             </el-form-item>
             <el-form-item label="角色" prop="roleIds">
               <AnimalMultiSelect
@@ -234,10 +233,10 @@
               />
             </el-form-item>
             <el-form-item label="状态" prop="status">
-              <el-radio-group v-model="formData.status">
-                <el-radio :value="CommonStatus.ENABLED">正常</el-radio>
-                <el-radio :value="CommonStatus.DISABLED">禁用</el-radio>
-              </el-radio-group>
+              <Switch v-model="statusOn">
+                <template #checked>正常</template>
+                <template #unchecked>禁用</template>
+              </Switch>
             </el-form-item>
           </el-col>
         </el-row>
@@ -259,7 +258,7 @@ import { useDebounceFn } from "@vueuse/core";
 import { ElMessage, ElMessageBox, type FormInstance, type FormRules } from "element-plus";
 import type { UserForm, UserQueryParams, UserItem } from "@/types/api";
 import UserAPI from "@/api/system/user";
-import { Select } from "animal-island-vue";
+import { Input, Select, Switch } from "animal-island-vue";
 import AnimalMultiSelect from "@/components/AnimalMultiSelect/index.vue";
 import { useUserStore, useAppStore } from "@/store";
 import { DeviceEnum, DialogMode, CommonStatus } from "@/enums";
@@ -385,6 +384,14 @@ const roleIdsModel = computed<string[]>({
   get: () => (formData.roleIds ?? []).map((id) => String(id)),
   set: (keys) => {
     formData.roleIds = keys.map((k) => Number(k));
+  },
+});
+
+// 动森 Switch 用布尔，状态做布尔↔枚举转换
+const statusOn = computed<boolean>({
+  get: () => formData.status === CommonStatus.ENABLED,
+  set: (v) => {
+    formData.status = v ? CommonStatus.ENABLED : CommonStatus.DISABLED;
   },
 });
 

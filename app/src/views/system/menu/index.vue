@@ -173,36 +173,27 @@
         <el-row :gutter="15">
           <el-col :sm="12">
             <el-form-item label="上级菜单" prop="pid">
-              <el-tree-select
+              <AnimalTreeSelect
                 v-model="formData.pid"
+                :options="menuOptions"
                 placeholder="请选择上级菜单"
-                :data="menuOptions"
-                filterable
-                check-strictly
-                :render-after-expand="false"
               />
             </el-form-item>
             <el-form-item label="菜单名称" prop="title">
-              <el-input v-model="formData.title" placeholder="请输入菜单名称" clearable />
+              <Input v-model="formData.title" placeholder="请输入菜单名称" allow-clear />
             </el-form-item>
           </el-col>
           <el-col :sm="12">
             <el-form-item label="菜单类型" prop="type">
-              <el-radio-group v-model="formData.type" @change="onMenuTypeChange">
-                <el-radio :value="0">菜单</el-radio>
-                <el-radio :value="1">按钮</el-radio>
-              </el-radio-group>
+              <Select v-model="typeModel" :options="menuTypeOptions" placeholder="请选择菜单类型" />
             </el-form-item>
             <el-form-item label="打开方式">
-              <el-radio-group
-                v-model="menuTarget"
+              <Select
+                v-model="targetModel"
+                :options="menuTargetOptions"
+                placeholder="请选择打开方式"
                 :disabled="formData.type === 1"
-                @change="onTargetChange"
-              >
-                <el-radio :value="0">组件</el-radio>
-                <el-radio :value="1">内链</el-radio>
-                <el-radio :value="2">外链</el-radio>
-              </el-radio-group>
+              />
             </el-form-item>
           </el-col>
         </el-row>
@@ -215,50 +206,45 @@
               <icon-select v-model="formData.icon" :disabled="formData.type === 1" />
             </el-form-item>
             <el-form-item :label="menuTarget === 2 ? '外链地址' : '路由地址'" prop="path">
-              <el-input
+              <Input
                 v-model="formData.path"
                 :disabled="formData.type === 1"
                 :placeholder="menuTarget === 2 ? '请输入外链地址' : '请输入路由地址'"
-                clearable
+                allow-clear
               />
             </el-form-item>
             <el-form-item :label="menuTarget === 1 ? '内链地址' : '组件路径'">
-              <el-input
+              <Input
                 v-model="formData.component"
                 :disabled="formData.type === 1 || menuTarget === 2"
                 :placeholder="menuTarget === 1 ? '请输入内链地址' : '请输入组件路径'"
-                clearable
+                allow-clear
               />
             </el-form-item>
             <el-form-item label="状态">
-              <el-radio-group v-model="formData.status">
-                <el-radio :value="1">正常</el-radio>
-                <el-radio :value="0">停用</el-radio>
-              </el-radio-group>
+              <Switch v-model="menuStatusOn">
+                <template #checked>正常</template>
+                <template #unchecked>停用</template>
+              </Switch>
             </el-form-item>
           </el-col>
           <el-col :sm="12">
             <el-form-item label="权限标识">
-              <el-input
+              <Input
                 v-model="formData.permission"
                 :disabled="formData.type === 0"
                 placeholder="请输入权限标识"
-                clearable
+                allow-clear
               />
             </el-form-item>
             <el-form-item label="排序号" prop="sort">
-              <el-input-number
-                v-model="formData.sort"
-                :min="0"
-                controls-position="right"
-                style="width: 100%"
-              />
+              <Input v-model="sortModel" type="number" placeholder="请输入排序号" />
             </el-form-item>
             <el-form-item label="是否可见">
-              <el-radio-group v-model="formData.hide" :disabled="formData.type === 1">
-                <el-radio :value="0">显示</el-radio>
-                <el-radio :value="1">隐藏</el-radio>
-              </el-radio-group>
+              <Switch v-model="visibleOn" :disabled="formData.type === 1">
+                <template #checked>显示</template>
+                <template #unchecked>隐藏</template>
+              </Switch>
             </el-form-item>
           </el-col>
         </el-row>
@@ -295,7 +281,8 @@
 
 <script setup lang="ts">
 import MenuAPI from "@/api/system/menu";
-import { Icon } from "animal-island-vue";
+import { Icon, Input, Select, Switch } from "animal-island-vue";
+import AnimalTreeSelect from "@/components/AnimalTreeSelect/index.vue";
 import { resolveAnimalIcon } from "@/utils/menuAnimalIcon";
 import type { MenuQueryParams, MenuForm, MenuItem } from "@/types/api";
 import type { FormInstance, FormRules } from "element-plus";
@@ -460,6 +447,49 @@ function onTargetChange(): void {
     formData.value.component = undefined;
   }
 }
+
+// 动森组件值代理（动森 Select 用字符串、Switch 用布尔、Input 用字符串）
+const menuTypeOptions = [
+  { key: "0", label: "菜单" },
+  { key: "1", label: "按钮" },
+];
+const menuTargetOptions = [
+  { key: "0", label: "组件" },
+  { key: "1", label: "内链" },
+  { key: "2", label: "外链" },
+];
+const typeModel = computed<string>({
+  get: () => String(formData.value.type ?? 0),
+  set: (v) => {
+    formData.value.type = Number(v);
+    onMenuTypeChange();
+  },
+});
+const targetModel = computed<string>({
+  get: () => String(menuTarget.value),
+  set: (v) => {
+    menuTarget.value = Number(v);
+    onTargetChange();
+  },
+});
+const menuStatusOn = computed<boolean>({
+  get: () => formData.value.status === 1,
+  set: (v) => {
+    formData.value.status = v ? 1 : 0;
+  },
+});
+const visibleOn = computed<boolean>({
+  get: () => formData.value.hide === 0,
+  set: (v) => {
+    formData.value.hide = v ? 0 : 1;
+  },
+});
+const sortModel = computed<string>({
+  get: () => (formData.value.sort == null ? "" : String(formData.value.sort)),
+  set: (v) => {
+    formData.value.sort = v === "" ? undefined : Number(v);
+  },
+});
 
 const rules: FormRules = {
   pid: [{ required: true, message: "请选择父级菜单", trigger: "blur" }],
