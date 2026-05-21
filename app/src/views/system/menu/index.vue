@@ -477,7 +477,7 @@ onMounted(() => {
 <style scoped lang="scss">
 @import url("https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@500;700;800;900&family=Mochiy+Pop+One&display=swap");
 
-.menu-design-page {
+.page-card {
   --ai-primary: #19c8b9;
   --ai-primary-active: #11a89b;
   --ai-text: #794f27;
@@ -492,17 +492,11 @@ onMounted(() => {
   --ai-info: #5b9eee;
   --ai-success: #6fba2c;
 
-  min-height: 100%;
-  padding: 14px 18px 60px;
   font-family: "M PLUS Rounded 1c", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei",
     sans-serif;
   color: var(--ai-text);
   font-size: 13px;
   line-height: 1.6;
-  background:
-    radial-gradient(900px 500px at 10% -10%, #e2f1d1 0%, transparent 60%),
-    radial-gradient(700px 600px at 100% 10%, #f0f7d8 0%, transparent 60%),
-    linear-gradient(180deg, #f0f6e0 0%, #e4eed0 100%);
 }
 
 * {

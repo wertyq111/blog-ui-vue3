@@ -4,14 +4,14 @@ WORKDIR /project
 
 FROM base AS development
 COPY package.json pnpm-lock.yaml ./
-RUN pnpm install
+RUN pnpm install --ignore-scripts
 COPY . .
 EXPOSE 3000
 CMD ["pnpm", "run", "dev"]
 
 FROM base AS build
 COPY package.json pnpm-lock.yaml ./
-RUN pnpm install --frozen-lockfile
+RUN pnpm install --frozen-lockfile --ignore-scripts
 COPY . .
 RUN pnpm run build-only
 
