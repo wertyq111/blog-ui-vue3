@@ -6,13 +6,7 @@
           <slot>
             <el-input v-model="selectedIcon" readonly placeholder="点击选择图标" class="reference">
               <template #prepend>
-                <!-- 根据图标类型展示 -->
-                <el-icon v-if="isElementIcon">
-                  <component :is="selectedIcon.replace('el-icon-', '')" />
-                </el-icon>
-                <template v-else>
-                  <div :class="`i-svg:${selectedIcon}`" />
-                </template>
+                <Icon v-if="selectedIcon" :name="resolveAnimalIcon(selectedIcon)" :size="18" />
               </template>
               <template #suffix>
                 <!-- 清空按钮 -->
@@ -38,115 +32,47 @@
         </div>
       </template>
 
-      <!-- 图标选择弹窗 -->
+      <!-- 动森图标选择弹窗 -->
       <div ref="popoverContentRef">
-        <el-input v-model="filterText" placeholder="搜索图标" clearable @input="filterIcons" />
-        <el-tabs v-model="activeTab" @tab-click="handleTabClick">
-          <el-tab-pane label="SVG 图标" name="svg">
-            <el-scrollbar height="300px">
-              <ul class="icon-grid">
-                <li
-                  v-for="icon in filteredSvgIcons"
-                  :key="'svg-' + icon"
-                  class="icon-grid-item"
-                  @click="selectIcon(icon)"
-                >
-                  <el-tooltip :content="icon" placement="bottom" effect="light">
-                    <div :class="`i-svg:${icon}`" />
-                  </el-tooltip>
-                </li>
-              </ul>
-            </el-scrollbar>
-          </el-tab-pane>
-          <el-tab-pane label="Element 图标" name="element">
-            <el-scrollbar height="300px">
-              <ul class="icon-grid">
-                <li
-                  v-for="icon in filteredElementIcons"
-                  :key="icon"
-                  class="icon-grid-item"
-                  @click="selectIcon(icon)"
-                >
-                  <el-icon>
-                    <component :is="icon" />
-                  </el-icon>
-                </li>
-              </ul>
-            </el-scrollbar>
-          </el-tab-pane>
-        </el-tabs>
+        <el-scrollbar max-height="320px">
+          <ul class="icon-grid">
+            <li
+              v-for="name in ANIMAL_ICON_NAMES"
+              :key="name"
+              class="icon-grid-item"
+              :class="{ 'is-active': selectedIcon === name }"
+              @click="selectIcon(name)"
+            >
+              <el-tooltip :content="name" placement="bottom" effect="light">
+                <Icon :name="name" :size="28" />
+              </el-tooltip>
+            </li>
+          </ul>
+        </el-scrollbar>
       </div>
     </el-popover>
   </div>
 </template>
 
 <script setup lang="ts">
-import * as ElementPlusIconsVue from "@element-plus/icons-vue";
+import { Icon } from "animal-island-vue";
+import { ANIMAL_ICON_NAMES, resolveAnimalIcon } from "@/utils/menuAnimalIcon";
 
 const props = defineProps({
-  modelValue: {
-    type: String,
-    default: "",
-  },
   width: {
     type: String,
-    default: "500px",
+    default: "320px",
   },
 });
 
-const emit = defineEmits(["update:modelValue"]);
+const selectedIcon = defineModel<string>("modelValue", { default: "" });
 
 const iconSelectRef = ref();
 const popoverContentRef = ref();
 const popoverVisible = ref(false);
-const activeTab = ref("svg");
 
-const svgIcons = ref<string[]>([]);
-const elementIcons = ref<string[]>(Object.keys(ElementPlusIconsVue));
-const selectedIcon = defineModel("modelValue", {
-  type: String,
-  required: true,
-  default: "",
-});
-
-const filterText = ref("");
-const filteredSvgIcons = ref<string[]>([]);
-const filteredElementIcons = ref<string[]>(elementIcons.value);
-const isElementIcon = computed(() => {
-  return selectedIcon.value && selectedIcon.value.startsWith("el-icon");
-});
-
-function loadIcons() {
-  const icons = import.meta.glob("../../assets/icons/*.svg");
-  for (const path in icons) {
-    const iconName = path.replace(/.*\/(.*)\.svg$/, "$1");
-    svgIcons.value.push(iconName);
-  }
-  filteredSvgIcons.value = svgIcons.value;
-}
-
-function handleTabClick(tabPane: any) {
-  activeTab.value = tabPane.props.name;
-  filterIcons();
-}
-
-function filterIcons() {
-  if (activeTab.value === "svg") {
-    filteredSvgIcons.value = filterText.value
-      ? svgIcons.value.filter((icon) => icon.toLowerCase().includes(filterText.value.toLowerCase()))
-      : svgIcons.value;
-  } else {
-    filteredElementIcons.value = filterText.value
-      ? elementIcons.value.filter((icon) =>
-          icon.toLowerCase().includes(filterText.value.toLowerCase())
-        )
-      : elementIcons.value;
-  }
-}
-
-function selectIcon(icon: string) {
-  const iconName = activeTab.value === "element" ? "el-icon-" + icon : icon;
-  emit("update:modelValue", iconName);
+function selectIcon(name: string) {
+  selectedIcon.value = name;
   popoverVisible.value = false;
 }
 
@@ -154,26 +80,12 @@ function togglePopover() {
   popoverVisible.value = !popoverVisible.value;
 }
 
-onClickOutside(iconSelectRef, () => (popoverVisible.value = false), {
-  ignore: [popoverContentRef],
-});
-
-/**
- * 清空已选图标
- */
 function clearSelectedIcon() {
   selectedIcon.value = "";
 }
 
-onMounted(() => {
-  loadIcons();
-  if (selectedIcon.value) {
-    if (elementIcons.value.includes(selectedIcon.value.replace("el-icon-", ""))) {
-      activeTab.value = "element";
-    } else {
-      activeTab.value = "svg";
-    }
-  }
+onClickOutside(iconSelectRef, () => (popoverVisible.value = false), {
+  ignore: [popoverContentRef],
 });
 </script>
 
@@ -186,22 +98,30 @@ onMounted(() => {
 .icon-grid {
   display: flex;
   flex-wrap: wrap;
+  padding: 4px;
+  margin: 0;
+  list-style: none;
 }
 
 .icon-grid-item {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 8px;
-  margin: 4px;
+  padding: 10px;
+  margin: 5px;
   cursor: pointer;
-  border: 1px solid #dcdfe6;
-  border-radius: 4px;
-  transition: all 0.3s;
+  border: 2px solid #e8e2d6;
+  border-radius: 14px;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .icon-grid-item:hover {
-  border-color: #4080ff;
-  transform: scale(1.2);
+  border-color: #19c8b9;
+  transform: translateY(-2px);
+}
+
+.icon-grid-item.is-active {
+  border-color: #19c8b9;
+  background: #e6f9f6;
 }
 </style>

@@ -49,7 +49,8 @@ export function setupPermissionGuard() {
           router.addRoute(route);
         });
 
-        return { ...to, replace: true };
+        // 按 path 重新解析，避免沿用兜底路由的 name(PathCatchAll)再次落到 404
+        return { path: to.path, query: to.query, hash: to.hash, replace: true };
       }
 
       // 路由 404 检查

@@ -59,8 +59,8 @@ import path from "path-browserify";
 import { RouteRecordRaw } from "vue-router";
 import { isExternal } from "@/utils";
 import { translateRouteTitle } from "@/lang/utils";
-import { ElIcon } from "element-plus";
-import * as ElementPlusIcons from "@element-plus/icons-vue";
+import { Icon as AnimalIcon } from "animal-island-vue";
+import { resolveAnimalIcon } from "@/utils/menuAnimalIcon";
 
 defineOptions({
   name: "LayoutSidebarItem",
@@ -68,62 +68,17 @@ defineOptions({
 });
 
 // 菜单图标组件
+// 菜单图标统一渲染为动森（animal-island-vue）图标
 const MenuIcon = defineComponent({
+  name: "MenuIcon",
   props: { icon: String },
   setup(props) {
-    const ICON_MAP: Record<string, string> = {
-      "s-management": "Setting",
-      "_user-group": "UserFilled",
-      "s-operation": "Operation",
-      "_surveying": "MapLocation",
-      "s-grid": "Grid",
-      "s-order": "Document",
-      "user-solid": "UserFilled",
-      "notebook-2": "Notebook",
-      "mobile-phone": "Cellphone",
-      "picture-outline-round": "PictureRounded",
-    };
-
-    const toPascalCase = (name: string) =>
-      name
-        .replace(/^[\W_]+/, "")
-        .split(/[^a-zA-Z0-9]+/)
-        .filter(Boolean)
-        .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
-        .join("");
-
-    const isElIcon = computed(() => props.icon?.startsWith("el-icon-"));
-
-    const resolvedElIconName = computed(() => {
-      const rawName = props.icon?.replace("el-icon-", "");
-      if (!rawName) {
-        return "";
-      }
-
-      if (ICON_MAP[rawName]) {
-        return ICON_MAP[rawName];
-      }
-
-      return toPascalCase(rawName);
-    });
-
-    return () => {
-      if (!props.icon) {
-        return h("div", { class: "i-svg:menu" });
-      }
-
-      // Element Plus 图标
-      if (isElIcon.value) {
-        const iconComponent = ElementPlusIcons[resolvedElIconName.value as keyof typeof ElementPlusIcons];
-        if (iconComponent) {
-          return h(ElIcon, null, () => h(iconComponent));
-        }
-        return h("div", { class: "i-svg:menu" });
-      }
-
-      // SVG 图标
-      return h("div", { class: `i-svg:${props.icon}` });
-    };
+    return () =>
+      h(AnimalIcon, {
+        name: resolveAnimalIcon(props.icon),
+        size: 18,
+        class: "menu-icon",
+      });
   },
 });
 

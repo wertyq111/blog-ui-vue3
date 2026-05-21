@@ -60,7 +60,7 @@
           </div>
           <div class="develop-table-shell__actions">
             <el-button
-              v-hasPerm="['sys:user:create']"
+              v-hasPerm="['sys:user:add']"
               type="success"
               icon="plus"
               @click="handleCreateClick"
@@ -115,7 +115,7 @@
           <el-table-column label="操作" fixed="right" width="220">
             <template #default="scope">
               <el-button
-                v-hasPerm="'sys:user:reset-password'"
+                v-hasPerm="'sys:user:resetPwd'"
                 type="primary"
                 icon="RefreshLeft"
                 size="small"
@@ -125,7 +125,7 @@
                 重置密码
               </el-button>
               <el-button
-                v-hasPerm="'sys:user:update'"
+                v-hasPerm="'sys:user:edit'"
                 type="primary"
                 icon="edit"
                 link
