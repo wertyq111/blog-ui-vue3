@@ -258,11 +258,15 @@ onMounted(() => {
   :deep(.el-menu-item),
   :deep(.el-sub-menu__title) {
     position: relative;
-    margin: 6px 12px;
-    min-height: 42px;
-    border-radius: 18px;
+    height: 43px;
+    min-height: 43px;
+    margin: 5px 2px;
+    padding: 0 12px !important;
+    border-radius: 14px;
     color: var(--cyber-sidebar-text);
-    transition: all 0.26s ease;
+    font-size: 12px;
+    font-weight: 700;
+    transition: all 0.20s ease;
 
     i,
     .el-icon {
@@ -270,16 +274,37 @@ onMounted(() => {
     }
 
     &:hover {
-      background: var(--cyber-sidebar-hover) !important;
+      background: rgba(255, 255, 255, 0.58) !important;
       color: var(--cyber-text) !important;
-      box-shadow: 0 12px 24px color-mix(in srgb, var(--cyber-primary) 14%, transparent);
+      box-shadow: none;
     }
   }
 
   :deep(.el-menu-item.is-active) {
-    color: var(--cyber-sidebar-active-text) !important;
-    background: var(--cyber-sidebar-active-bg) !important;
-    box-shadow: var(--cyber-sidebar-active-shadow);
+    color: #4a8a36 !important;
+    background: linear-gradient(135deg, #d8ecc6 0%, #c4e3a4 100%) !important;
+    box-shadow: inset 0 0 0 1.5px rgba(74, 138, 54, 0.15);
+
+    // 左侧绿色高亮条
+    &::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      top: 50%;
+      width: 4px;
+      height: 24px;
+      background: #4a8a36;
+      border-radius: 0 4px 4px 0;
+      transform: translateY(-50%);
+    }
+
+    // 右侧叶子
+    &::after {
+      content: "🍃";
+      position: absolute;
+      right: 12px;
+      font-size: 12px;
+    }
     
     i, .el-icon {
       color: currentcolor !important;
@@ -287,9 +312,17 @@ onMounted(() => {
   }
 
   :deep(.el-sub-menu.has-active-child > .el-sub-menu__title) {
-    color: var(--cyber-sidebar-text);
+    color: var(--cyber-sidebar-active-text);
     font-weight: 700;
-    background: color-mix(in srgb, var(--cyber-primary) 10%, transparent) !important;
+    background: rgba(216, 236, 198, 0.50) !important;
+  }
+
+  :deep(.el-sub-menu .el-menu-item) {
+    height: 36px;
+    min-height: 36px;
+    margin: 4px 2px;
+    padding-left: 28px !important;
+    font-size: 12px;
   }
 }
 </style>

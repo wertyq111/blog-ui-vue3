@@ -5,6 +5,14 @@ export const Layout = () => import("@/layouts/index.vue");
 
 // 静态路由
 export const constantRoutes: RouteRecordRaw[] = [
+  // 公开首页（不需要 Layout 包裹）
+  {
+    path: "/",
+    name: "Home",
+    component: () => import("@/views/home/index.vue"),
+    meta: { hidden: true },
+  },
+
   {
     path: "/redirect",
     component: Layout,
@@ -30,14 +38,15 @@ export const constantRoutes: RouteRecordRaw[] = [
     meta: { hidden: true },
   },
 
+  // 工作台及后台页面（需要认证，使用 Layout 包裹）
   {
-    path: "/",
-    name: "/",
+    path: "/app",
     component: Layout,
     redirect: "/dashboard",
+    meta: { hidden: true },
     children: [
       {
-        path: "dashboard",
+        path: "/dashboard",
         component: () => import("@/views/dashboard/index.vue"),
         // 用于 keep-alive 功能，需要与 SFC 中自动推导或显式声明的组件名称一致
         // 参考文档: https://cn.vuejs.org/guide/built-ins/keep-alive.html#include-exclude
@@ -45,22 +54,28 @@ export const constantRoutes: RouteRecordRaw[] = [
         meta: {
           title: "dashboard",
           icon: "homepage",
+          activeMenu: "/dashboard/workplace",
           affix: true,
           keepAlive: true,
         },
       },
       {
-        path: "401",
+        path: "/dashboard/workplace",
+        redirect: "/dashboard",
+        meta: { hidden: true },
+      },
+      {
+        path: "/401",
         component: () => import("@/views/error/401.vue"),
         meta: { hidden: true },
       },
       {
-        path: "404",
+        path: "/404",
         component: () => import("@/views/error/404.vue"),
         meta: { hidden: true },
       },
       {
-        path: "profile",
+        path: "/profile",
         name: "Profile",
         component: () => import("@/views/profile/index.vue"),
         meta: { title: "个人中心", icon: "user", hidden: true },

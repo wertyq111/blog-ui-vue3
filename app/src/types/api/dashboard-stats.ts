@@ -68,6 +68,12 @@ export interface DashboardRecentLog {
   log_date: string
   content: any
   create_time: number
+  tags?: string[]
+}
+
+export interface DashboardTagRanking {
+  name: string
+  count: number
 }
 
 export interface DashboardOverviewData {
@@ -80,4 +86,5 @@ export interface DashboardOverviewData {
   trend_30d: DashboardTrendItem[]
   platform_dist: DashboardPlatformDist[]
   recent_logs: DashboardRecentLog[]
+  tag_ranking?: DashboardTagRanking[]
 }

@@ -1,109 +1,193 @@
 <template>
-  <div class="wb-chart-card">
-    <div class="wb-chart-card__header">
-      <span class="wb-chart-card__title">24h 写作分布</span>
+  <div class="card chart-card">
+    <div class="card-head">
+      <div>
+        <div class="card-title">24 小时时段分布</div>
+        <div class="card-sub" v-if="!loading && hourDist.length">
+          高产时段 {{ peakHour.toString().padStart(2, '0') }}:00 · 平均 {{ avgPerHour }} 字/时
+        </div>
+      </div>
     </div>
-    <div v-if="loading" class="wb-chart-card__skeleton">
-      <el-skeleton-item variant="rect" style="width:100%;height:140px;border-radius:8px;" />
+    <div v-if="loading" class="chart-skeleton">
+      <el-skeleton-item variant="rect" style="width:100%;height:200px;border-radius:12px;" />
     </div>
-    <div v-else ref="chartEl" class="wb-chart-card__body"></div>
+    <div v-else class="clock-wrap">
+      <svg :viewBox="`0 0 ${size} ${size}`" class="clock-svg">
+        <!-- hour ticks (radial bars) -->
+        <line
+          v-for="d in clockData"
+          :key="d.h"
+          :x1="d.x1" :y1="d.y1"
+          :x2="d.x2" :y2="d.y2"
+          :stroke="d.isPeak ? '#11a89b' : d.isWindow ? '#19c8b9' : '#9adcd1'"
+          stroke-width="6"
+          stroke-linecap="round"
+          :opacity="d.value === 0 ? 0.25 : 1"
+        />
+        <!-- 0 / 6 / 12 / 18 labels -->
+        <text
+          v-for="lbl in axisLabels"
+          :key="lbl.h"
+          :x="lbl.x"
+          :y="lbl.y"
+          text-anchor="middle"
+          class="clock-label"
+        >{{ lbl.text }}</text>
+        <!-- center stat -->
+        <text :x="cx" :y="cy - 4" text-anchor="middle" class="clock-center-big">
+          {{ peakHour }}<tspan class="clock-center-unit">时</tspan>
+        </text>
+        <text :x="cx" :y="cy + 18" text-anchor="middle" class="clock-center-sm">
+          {{ peakPeriod }}最有产出
+        </text>
+      </svg>
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, watch, onMounted, onBeforeUnmount } from "vue";
-import * as echarts from "echarts/core";
-import { BarChart } from "echarts/charts";
-import { GridComponent, TooltipComponent } from "echarts/components";
-import { SVGRenderer } from "echarts/renderers";
-
-echarts.use([SVGRenderer, BarChart, GridComponent, TooltipComponent]);
+import { computed } from "vue";
 
 const props = defineProps<{
   hourDist: number[];
   loading: boolean;
 }>();
 
-const chartEl = ref<HTMLDivElement | null>(null);
-let chart: echarts.ECharts | null = null;
+const size = 260;
+const cx = size / 2;
+const cy = size / 2;
+const innerR = 56;
+const outerR = 112;
 
-function buildOption(dist: number[]) {
-  const hours = Array.from({ length: 24 }, (_, i) => `${i}h`);
-  const max = Math.max(...dist, 1);
-  return {
-    tooltip: {
-      trigger: "axis",
-      formatter: (p: any[]) => `${p[0].axisValue}<br/>字数：${p[0].value.toLocaleString()}`,
-    },
-    grid: { top: 8, right: 8, bottom: 22, left: 42 },
-    xAxis: {
-      type: "category",
-      data: hours,
-      axisTick: { show: false },
-      axisLine: { lineStyle: { color: "rgba(150,163,150,0.2)" } },
-      axisLabel: { color: "#94a38a", fontSize: 9, interval: 5 },
-    },
-    yAxis: {
-      type: "value",
-      splitLine: { lineStyle: { color: "rgba(150,163,150,0.12)", type: "dashed" } },
-      axisLabel: { color: "#94a38a", fontSize: 10 },
-    },
-    series: [
-      {
-        type: "bar",
-        data: dist.map((v) => ({
-          value: v,
-          itemStyle: {
-            color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
-              { offset: 0, color: v / max > 0.6 ? "#5fa979" : "#a8dfc0" },
-              { offset: 1, color: "rgba(95,169,121,0.3)" },
-            ]),
-            borderRadius: [3, 3, 0, 0],
-          },
-        })),
-        barMaxWidth: 14,
-      },
-    ],
-  };
-}
-
-function initChart() {
-  if (!chartEl.value) return;
-  if (!chart) chart = echarts.init(chartEl.value, null, { renderer: "svg" });
-  chart.setOption(buildOption(props.hourDist));
-}
-
-watch(() => props.hourDist, (v) => {
-  if (v && chartEl.value) {
-    if (!chart) chart = echarts.init(chartEl.value, null, { renderer: "svg" });
-    chart.setOption(buildOption(v));
-  }
+const peakHour = computed(() => {
+  if (!props.hourDist?.length) return 0;
+  let maxVal = 0;
+  let maxH = 0;
+  props.hourDist.forEach((v, i) => {
+    if (v > maxVal) { maxVal = v; maxH = i; }
+  });
+  return maxH;
 });
 
-onMounted(() => { if (!props.loading) initChart(); });
-onBeforeUnmount(() => { chart?.dispose(); });
+const peakPeriod = computed(() => {
+  const h = peakHour.value;
+  if (h >= 6 && h < 12) return "上午";
+  if (h >= 12 && h < 14) return "中午";
+  if (h >= 14 && h < 18) return "下午";
+  if (h >= 18 && h < 22) return "晚上";
+  return "深夜";
+});
+
+const avgPerHour = computed(() => {
+  if (!props.hourDist?.length) return 0;
+  const total = props.hourDist.reduce((s, v) => s + v, 0);
+  return Math.round(total / 24);
+});
+
+const clockData = computed(() => {
+  const dist = props.hourDist?.length === 24 ? props.hourDist : new Array(24).fill(0);
+  const max = Math.max(...dist, 1);
+  const peak = peakHour.value;
+
+  return dist.map((value, h) => {
+    const angle = (h / 24) * Math.PI * 2 - Math.PI / 2;
+    const len = innerR + (value / max) * (outerR - innerR);
+    const x1 = cx + Math.cos(angle) * innerR;
+    const y1 = cy + Math.sin(angle) * innerR;
+    const x2 = cx + Math.cos(angle) * len;
+    const y2 = cy + Math.sin(angle) * len;
+    const isPeak = h === peak;
+    const isWindow = h >= 14 && h <= 16;
+    return { h, value, x1, y1, x2, y2, isPeak, isWindow };
+  });
+});
+
+const axisLabels = computed(() => {
+  return [0, 6, 12, 18].map((h) => {
+    const angle = (h / 24) * Math.PI * 2 - Math.PI / 2;
+    const r = outerR + 14;
+    const x = cx + Math.cos(angle) * r;
+    const y = cy + Math.sin(angle) * r + 4;
+    return { h, x, y, text: h.toString().padStart(2, "0") };
+  });
+});
 </script>
 
 <style lang="scss" scoped>
-.wb-chart-card {
-  padding: 18px 20px;
-  background: var(--cyber-panel-strong);
-  border: 1px solid var(--cyber-border);
-  border-radius: 18px;
+.card {
+  background: var(--ai-paper, #fdfdf5);
+  border: 2px solid var(--ai-border, #e8e2d6);
+  border-radius: 24px;
+  padding: 18px 22px;
+  position: relative;
+}
 
-  &__header { margin-bottom: 12px; }
+.chart-card {
+  display: flex;
+  flex-direction: column;
+}
 
-  &__title {
-    font-size: 13px;
-    font-weight: 700;
-    color: var(--cyber-text);
-  }
+.card-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 14px;
+  gap: 12px;
+}
 
-  &__body {
-    width: 100%;
-    height: 150px;
-  }
+.card-title {
+  font-size: 15px;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  color: var(--ai-text, #794f27);
+}
 
-  &__skeleton { padding: 4px 0; }
+.card-sub {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--ai-text-2, #9f927d);
+  margin-top: 3px;
+}
+
+.chart-skeleton { padding: 4px 0; }
+
+.clock-wrap {
+  display: grid;
+  place-items: center;
+  padding: 10px 0;
+  flex: 1;
+}
+
+.clock-svg {
+  width: 100%;
+  max-width: 260px;
+}
+
+.clock-label {
+  fill: var(--ai-text-2, #9f927d);
+  font-family: inherit;
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.clock-center-big {
+  font-size: 30px;
+  font-weight: 800;
+  fill: var(--ai-text, #794f27);
+  font-family: "Mochiy Pop One", "M PLUS Rounded 1c", Nunito, "Noto Sans SC", sans-serif;
+}
+
+.clock-center-unit {
+  font-size: 12px;
+  fill: var(--ai-text-2, #9f927d);
+  font-weight: 700;
+  font-family: inherit;
+}
+
+.clock-center-sm {
+  font-size: 10.5px;
+  fill: var(--ai-text-2, #9f927d);
+  font-weight: 700;
+  font-family: inherit;
 }
 </style>

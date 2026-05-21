@@ -318,11 +318,12 @@ onBeforeUnmount(() => {
 <style scoped lang="scss">
 .character-scene {
   position: absolute;
-  bottom: 92px;
+  bottom: 78px;
   left: 50%;
   width: 520px;
   height: 420px;
   transform: translateX(-50%);
+  z-index: 5;
 }
 
 .char {
@@ -345,6 +346,7 @@ onBeforeUnmount(() => {
     transform 0.7s ease-in-out,
     height 0.15s ease;
   transform-origin: center center;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.08);
 }
 
 .pupil {
@@ -360,68 +362,191 @@ onBeforeUnmount(() => {
     transform 0.1s ease-out,
     opacity 0.2s ease;
   transform: translate(0, 0);
+
+  &::after {
+    content: "";
+    position: absolute;
+    top: 1px;
+    right: 1px;
+    width: 4px;
+    height: 4px;
+    background: #fff;
+    border-radius: 50%;
+    opacity: 0.7;
+  }
 }
 
+/* Purple — leafy hooded character */
 .char-purple {
   bottom: 0;
   left: 78px;
   width: 178px;
   height: 300px;
-  background: linear-gradient(180deg, #6d47f4 0%, #5c35db 100%);
-  border-radius: 12px 12px 0 0;
+  background: linear-gradient(180deg, #b77dee 0%, #8a52c2 100%);
+  border-radius: 70px 70px 14px 14px;
+  box-shadow: inset 0 -10px 0 rgba(0, 0, 0, 0.08), 0 6px 0 0 rgba(0, 0, 0, 0.12);
+
+  &::before {
+    content: "";
+    position: absolute;
+    top: -32px;
+    left: 50%;
+    transform: translateX(-50%) rotate(-10deg);
+    width: 90px;
+    height: 56px;
+    background: linear-gradient(135deg, #8ac68a 0%, #5c9c5c 100%);
+    border-radius: 0 90px 0 90px;
+    box-shadow: inset -4px -4px 0 rgba(0, 0, 0, 0.08);
+  }
+
+  &::after {
+    content: "";
+    position: absolute;
+    top: 84px;
+    left: 22px;
+    width: 18px;
+    height: 10px;
+    border-radius: 50%;
+    background: rgba(255, 138, 168, 0.55);
+    box-shadow: 110px 0 rgba(255, 138, 168, 0.55);
+  }
 
   .eye-left {
-    top: 24px;
+    top: 30px;
     left: 30px;
   }
 
   .eye-right {
-    top: 24px;
+    top: 30px;
     left: 82px;
   }
 }
 
+/* Black — cat-ear character */
 .char-black {
   bottom: 0;
   left: 242px;
   width: 122px;
   height: 210px;
   background: #2e3036;
-  border-radius: 10px 10px 0 0;
+  border-radius: 14px 14px 10px 10px;
+  box-shadow: inset 0 -8px 0 rgba(255, 255, 255, 0.05), 0 6px 0 0 rgba(0, 0, 0, 0.18);
+
+  &::before {
+    content: "";
+    position: absolute;
+    top: -20px;
+    left: 12px;
+    width: 0;
+    height: 0;
+    border-left: 18px solid transparent;
+    border-right: 18px solid transparent;
+    border-bottom: 26px solid #2e3036;
+    box-shadow: 60px 0 0 -2px #2e3036;
+    filter: drop-shadow(2px 0 0 #2e3036);
+  }
+
+  &::after {
+    content: "";
+    position: absolute;
+    top: -2px;
+    left: -4px;
+    right: -4px;
+    height: 16px;
+    background: var(--cyber-primary);
+    border-radius: 6px;
+    box-shadow: 0 3px 0 0 var(--cyber-primary-strong);
+  }
 
   .eye-left {
-    top: 18px;
+    top: 22px;
     left: 10px;
     width: 24px;
     height: 24px;
   }
 
   .eye-right {
-    top: 18px;
+    top: 22px;
     left: 50px;
     width: 24px;
     height: 24px;
   }
 }
 
+/* Orange — apple-shaped fella */
 .char-orange {
   bottom: 0;
   left: 20px;
   z-index: 3;
   width: 240px;
   height: 200px;
-  background: #f59462;
-  border-radius: 120px 120px 0 0;
+  background: radial-gradient(circle at 30% 30%, #ffb285 0%, #e59266 60%, #c8703c 100%);
+  border-radius: 130px 130px 30px 30px;
+  box-shadow: inset 0 -10px 0 rgba(0, 0, 0, 0.08), 0 6px 0 0 rgba(0, 0, 0, 0.18);
+
+  &::before {
+    content: "";
+    position: absolute;
+    top: -16px;
+    left: 50%;
+    transform: translateX(-50%) rotate(-25deg);
+    width: 40px;
+    height: 22px;
+    background: #8ac68a;
+    border-radius: 0 22px 0 22px;
+    box-shadow: inset -3px -3px 0 rgba(0, 0, 0, 0.08);
+  }
+
+  &::after {
+    content: "";
+    position: absolute;
+    top: 100px;
+    left: 50px;
+    width: 22px;
+    height: 12px;
+    border-radius: 50%;
+    background: rgba(220, 80, 100, 0.4);
+    box-shadow: 110px 0 rgba(220, 80, 100, 0.4);
+  }
 }
 
+/* Yellow — chubby smiley */
 .char-yellow {
   bottom: 0;
   left: 320px;
   z-index: 4;
   width: 142px;
   height: 230px;
-  background: #e5d758;
-  border-radius: 72px 72px 0 0;
+  background: radial-gradient(circle at 30% 30%, #ffe48a 0%, #f7cd67 60%, #d5a830 100%);
+  border-radius: 80px 80px 24px 24px;
+  box-shadow: inset 0 -8px 0 rgba(0, 0, 0, 0.06), 0 6px 0 0 rgba(0, 0, 0, 0.18);
+
+  &::before {
+    content: "";
+    position: absolute;
+    top: -20px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 28px;
+    height: 28px;
+    background:
+      radial-gradient(circle at center, #fff 0 6px, transparent 7px),
+      radial-gradient(circle at center, #f8a6b2 0 14px, transparent 15px);
+    border-radius: 50%;
+    filter: drop-shadow(0 2px 0 #d6788a);
+  }
+
+  &::after {
+    content: "";
+    position: absolute;
+    top: 80px;
+    left: 18px;
+    width: 18px;
+    height: 10px;
+    border-radius: 50%;
+    background: rgba(255, 138, 168, 0.55);
+    box-shadow: 84px 0 rgba(255, 138, 168, 0.55);
+  }
 }
 
 .dot {
@@ -432,6 +557,18 @@ onBeforeUnmount(() => {
   background: #2c3037;
   border-radius: 50%;
   transition: transform 0.2s ease-out;
+
+  &::after {
+    content: "";
+    position: absolute;
+    top: 2px;
+    right: 2px;
+    width: 4px;
+    height: 4px;
+    background: #fff;
+    border-radius: 50%;
+    opacity: 0.85;
+  }
 }
 
 .char-orange .dot-left {
@@ -445,23 +582,23 @@ onBeforeUnmount(() => {
 }
 
 .char-yellow .dot-left {
-  top: 34px;
+  top: 38px;
   left: 34px;
 }
 
 .char-yellow .dot-right {
-  top: 34px;
+  top: 38px;
   left: 70px;
 }
 
 .char-yellow .mouth {
   position: absolute;
-  top: 84px;
-  left: 30px;
-  width: 80px;
-  height: 6px;
-  background: #333840;
-  border-radius: 6px;
+  top: 92px;
+  left: 36px;
+  width: 70px;
+  height: 8px;
+  background: #5b4a30;
+  border-radius: 8px;
   transition: transform 0.2s ease-out;
 }
 </style>

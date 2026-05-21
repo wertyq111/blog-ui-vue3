@@ -1,0 +1,547 @@
+@use "./variables" as *;
+
+// ============================================
+// Animal Island — System Page Style Enhancements
+// Adds organic decorations and nature theme to
+// existing develop-* system page structure
+// ============================================
+
+// Page card: organic rounded border + leaf decorations
+.develop-page .develop-shell,
+.admin-workspace-page .admin-workspace-shell {
+  border-radius: 36px 44px 32px 40px / 38px 32px 44px 36px;
+  border-width: 2px;
+  box-shadow:
+    0 4px 0 0 rgba(74, 138, 54, 0.06),
+    0 12px 32px rgba(110, 80, 40, 0.06);
+  overflow: visible;
+  position: relative;
+
+  // Corner leaf — top right
+  &::before {
+    content: "";
+    position: absolute;
+    top: -20px;
+    right: -30px;
+    width: 200px;
+    height: 200px;
+    background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><path d="M10 90c0-40 30-80 80-80 0 50-40 80-80 80z" fill="%237cba70" opacity="0.18"/><path d="M14 88c4-30 24-58 60-72" stroke="%234a8a36" stroke-width="1.5" fill="none" opacity="0.4"/></svg>')
+      no-repeat;
+    background-size: contain;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  // Corner leaf — bottom left
+  &::after {
+    content: "";
+    position: absolute;
+    bottom: -30px;
+    left: -30px;
+    width: 160px;
+    height: 160px;
+    background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><path d="M90 10c0 40-30 80-80 80 0-50 40-80 80-80z" fill="%23d1da49" opacity="0.22"/><path d="M86 14c-4 30-24 58-60 72" stroke="%23a3ad28" stroke-width="1.5" fill="none" opacity="0.4"/></svg>')
+      no-repeat;
+    background-size: contain;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  > .el-card__body {
+    position: relative;
+    z-index: 1;
+  }
+}
+
+// Hero section: add nature-themed eyebrow styling
+.develop-hero__eyebrow {
+  &::before {
+    content: "";
+    display: inline-block;
+    width: 22px;
+    height: 2px;
+    background: var(--cyber-primary-strong, #4a8a36);
+    border-radius: 2px;
+    margin-right: 6px;
+    vertical-align: middle;
+  }
+}
+
+// Filter bar: dashed nature border + wheat decoration
+.develop-panel {
+  border-style: dashed;
+  border-width: 2px;
+  border-color: rgba(74, 138, 54, 0.2);
+  border-radius: 22px;
+  background:
+    repeating-linear-gradient(
+      90deg,
+      rgba(255, 255, 255, 0.5) 0 12px,
+      rgba(255, 255, 255, 0.4) 12px 24px
+    );
+  position: relative;
+
+  &::before {
+    content: "🌾";
+    position: absolute;
+    left: -14px;
+    top: -14px;
+    width: 28px;
+    height: 28px;
+    background: #d8ecc6;
+    border: 2px solid #4a8a36;
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    font-size: 14px;
+    box-shadow: 0 2px 0 0 #4a8a36;
+    z-index: 2;
+  }
+}
+
+// Table shell: green top bar + enhanced styling
+.develop-table-shell {
+  border-radius: 24px;
+  position: relative;
+
+  &::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 24px;
+    right: 24px;
+    height: 4px;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      rgba(124, 186, 112, 0.4) 30%,
+      rgba(124, 186, 112, 0.4) 70%,
+      transparent
+    );
+    border-radius: 0 0 6px 6px;
+    z-index: 1;
+  }
+}
+
+// Table shell title with scroll emoji
+.develop-table-shell__title::before {
+  content: "📜";
+  font-size: 16px;
+  margin-right: 8px;
+}
+
+// Table: nature-tinted header
+.develop-table-shell .el-table thead tr,
+.develop-table-shell .el-table thead th {
+  background: linear-gradient(
+    180deg,
+    rgba(216, 236, 198, 0.35) 0%,
+    rgba(232, 244, 210, 0.35) 100%
+  ) !important;
+}
+
+// Table: organic border radius for wrapper
+.develop-table-shell .el-table {
+  border-radius: 14px;
+  overflow: hidden;
+}
+
+// Table hover: nature tint
+.develop-table-shell .el-table tbody tr:hover > td {
+  background: rgba(216, 236, 198, 0.18) !important;
+}
+
+// Action link colors — match design spec
+.develop-table-shell .el-table {
+  .el-button--primary.is-link {
+    color: #5b9eee;
+  }
+
+  .el-button--danger.is-link {
+    color: #fc736d;
+  }
+
+  .el-button--success.is-link {
+    color: #6fba2c;
+  }
+}
+
+// El-Tag as pill badges
+.develop-table-shell .el-tag {
+  border-radius: 999px;
+  font-weight: 700;
+}
+
+// 3D button enhancements for system pages
+// NOTE: search button has BOTH el-button--primary AND el-button--default,
+// so default must come FIRST and primary LAST to win cascade.
+.develop-table-shell__actions,
+.develop-panel {
+  // Default (重置): white with border — declare FIRST
+  .el-button--default {
+    border-radius: 999px;
+    font-weight: 800;
+    background: rgba(255, 255, 255, 0.85) !important;
+    color: #794f27 !important;
+    border-color: #e8e2d6 !important;
+
+    &:hover {
+      background: #fff !important;
+      border-color: #19c8b9 !important;
+      color: #11a89b !important;
+    }
+  }
+
+  .el-button--info {
+    border-radius: 999px;
+    font-weight: 800;
+    background: rgba(255, 255, 255, 0.85) !important;
+    color: #794f27 !important;
+    border-color: #e8e2d6 !important;
+
+    &:hover {
+      background: #fff !important;
+      border-color: #19c8b9 !important;
+      color: #11a89b !important;
+    }
+  }
+
+  // Danger (删除): pink background + red text
+  .el-button--danger {
+    border-radius: 999px;
+    font-weight: 800;
+    background: rgba(255, 230, 230, 0.7) !important;
+    color: #fc736d !important;
+    border-color: rgba(252, 115, 109, 0.4) !important;
+
+    &:hover {
+      background: rgba(252, 115, 109, 0.15) !important;
+    }
+  }
+
+  .el-button--success {
+    border-radius: 999px;
+    font-weight: 800;
+    box-shadow: 0 3px 0 0 #5a9e1e;
+  }
+
+  // Primary (查询/添加): GREEN gradient — declare LAST to win over --default
+  .el-button--primary {
+    border-radius: 999px;
+    font-weight: 800;
+    background: linear-gradient(180deg, #84cf4f 0%, #6fba2c 100%) !important;
+    border-color: #6fba2c !important;
+    color: #fff !important;
+    box-shadow: 0 3px 0 0 #5a9e1e;
+    transition: transform 0.16s, box-shadow 0.16s;
+
+    &:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 0 0 #5a9e1e;
+      background: linear-gradient(180deg, #90d65a 0%, #7cc634 100%) !important;
+    }
+
+    &:active {
+      transform: translateY(2px);
+      box-shadow: 0 1px 0 0 #5a9e1e;
+    }
+  }
+}
+
+// Table shell: toolbar bar styling (toolbar above the table)
+.develop-table-shell__toolbar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 14px;
+  padding: 10px;
+  background: rgba(248, 250, 230, 0.7);
+  border-radius: 14px;
+}
+
+// Table shell: white bg + proper card styling
+.develop-table-shell {
+  background: rgba(255, 255, 255, 0.85) !important;
+  border: 2px solid #e8e2d6 !important;
+  box-shadow: 0 3px 0 0 rgba(74, 138, 54, 0.05) !important;
+}
+
+// Table: better borders and cell padding
+.develop-table-shell .el-table {
+  th {
+    font-weight: 800 !important;
+    font-size: 13px !important;
+    white-space: nowrap !important;
+  }
+
+  td {
+    font-size: 13px !important;
+  }
+}
+
+// Search form inputs: pill shape
+.develop-panel .el-input__wrapper,
+.develop-panel .el-select__wrapper {
+  border-radius: 999px !important;
+}
+
+// Drawer: organic styling
+.develop-drawer {
+  .el-drawer__header {
+    border-bottom: 2px dashed rgba(74, 138, 54, 0.15);
+    padding-bottom: 14px;
+  }
+
+  .el-drawer__body {
+    background: linear-gradient(
+      180deg,
+      rgba(248, 250, 230, 0.4) 0%,
+      rgba(255, 255, 255, 0.6) 100%
+    );
+  }
+}
+
+// ============================================
+// Animal Island — Sidebar Style Enhancements
+// Wood-board background, leaf active states,
+// grass hills & mascot decorations
+// ============================================
+
+// Override sidebar variables for Island leaf theme
+:root {
+  --cyber-sidebar-shell:
+    repeating-linear-gradient(
+      180deg,
+      rgba(216, 236, 198, 0.4) 0 36px,
+      rgba(232, 244, 210, 0.4) 36px 72px
+    ),
+    rgba(248, 250, 230, 0.6);
+  --cyber-sidebar-border: #e8e2d6;
+  --cyber-sidebar-hover: rgba(255, 255, 255, 0.6);
+  --cyber-sidebar-active-bg: linear-gradient(135deg, #d8ecc6 0%, #c4e3a4 100%);
+  --cyber-sidebar-active-text: #4a8a36;
+  --cyber-sidebar-active-shadow: inset 0 0 0 1.5px rgba(74, 138, 54, 0.15);
+}
+
+// Shell: ensure position context for grass/mascot + remove dark shadow
+.layout-sidebar__shell {
+  position: relative;
+  box-shadow:
+    inset -1px 0 0 rgba(255, 255, 255, 0.3),
+    8px 0 24px rgba(74, 138, 54, 0.06) !important;
+}
+
+// ISLAND·MENU golden tag badge
+.layout-sidebar__island-tag {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 2px 14px;
+  padding: 8px 14px;
+  background: linear-gradient(180deg, #fff7d6 0%, #f7e7a3 100%);
+  border: 2px solid #d4ad6b;
+  border-radius: 12px;
+  font-weight: 800;
+  font-size: 12px;
+  color: #5a3a18;
+  letter-spacing: 2px;
+  box-shadow:
+    0 2px 0 0 #b88e2a,
+    inset 0 0 0 1px rgba(255, 255, 255, 0.4);
+  flex-shrink: 0;
+  position: relative;
+  z-index: 3;
+
+  &::before {
+    content: "🌿";
+    font-size: 14px;
+  }
+}
+
+.layout-sidebar__island-tag-sm {
+  font-size: 10px;
+  font-weight: 700;
+  color: #8a6a3a;
+  letter-spacing: 3px;
+}
+
+// Grass hills decoration at sidebar bottom
+.layout-sidebar__grass {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 96px;
+  pointer-events: none;
+  z-index: 3;
+  border-radius: 0 0 28px 28px;
+  overflow: hidden;
+  background: linear-gradient(180deg, transparent 0%, rgba(216, 236, 198, 0.5) 100%);
+}
+
+// Mascot peeking from bottom
+.layout-sidebar__mascot {
+  position: absolute;
+  bottom: 14px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 56px;
+  height: 56px;
+  z-index: 4;
+  pointer-events: none;
+}
+
+// Scroll area: add bottom padding above grass hills
+.layout-sidebar__scroll {
+  :deep(.el-scrollbar__view) {
+    padding-bottom: 100px;
+  }
+}
+
+// Active menu item: green leaf gradient + left bar + 🍃 emoji
+// Use doubled class for higher specificity to beat scoped styles
+.el-menu .el-menu-item.is-active.is-active {
+  background: linear-gradient(135deg, #d8ecc6 0%, #c4e3a4 100%) !important;
+  color: #4a8a36 !important;
+  box-shadow: inset 0 0 0 1.5px rgba(74, 138, 54, 0.15) !important;
+
+  i,
+  .el-icon,
+  [class^="i-svg:"] {
+    color: #4a8a36 !important;
+  }
+
+  &::before {
+    content: "";
+    position: absolute;
+    left: -6px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 4px;
+    height: 24px;
+    background: #4a8a36;
+    border-radius: 0 4px 4px 0;
+  }
+
+  &::after {
+    content: "🍃";
+    position: absolute;
+    right: 12px;
+    font-size: 12px;
+  }
+}
+
+// Parent menu with active child: subtle green, NOT solid teal
+// Doubled class for higher specificity
+.el-menu .el-sub-menu.has-active-child.has-active-child > .el-sub-menu__title {
+  color: #4a8a36 !important;
+  background: rgba(216, 236, 198, 0.3) !important;
+  box-shadow: none !important;
+  border-radius: 18px;
+
+  i,
+  .el-icon,
+  [class^="i-svg:"] {
+    color: #4a8a36 !important;
+  }
+}
+
+// Remove teal glow shadow on hover
+.el-menu .el-menu-item:hover,
+.el-menu .el-sub-menu__title:hover {
+  box-shadow: none !important;
+}
+
+// ============================================
+// Animal Island — Navbar & TagsView overrides removed
+// (now fully in scoped component styles per design spec)
+// ============================================
+
+// ============================================
+// Animal Island — Topbar Style Enhancements
+// User chip, icon buttons, brand mark
+// ============================================
+
+// Plain icon buttons in navbar (not the bell): transparent bg
+.navbar-actions__item {
+  color: #9f927d !important;
+
+  :deep([class^="i-svg:"]) {
+    color: #9f927d !important;
+  }
+
+  &:hover {
+    background: rgba(0, 0, 0, 0.05) !important;
+
+    :deep([class^="i-svg:"]) {
+      color: #794f27 !important;
+    }
+  }
+}
+
+// User profile: pill chip with border + 3D shadow
+.user-profile {
+  padding: 4px 14px 4px 4px !important;
+  background: #fff;
+  border: 2px solid #e8e2d6;
+  border-radius: 999px !important;
+  box-shadow: 0 3px 0 0 #bdaea0;
+  cursor: pointer;
+  transition: transform 0.18s, box-shadow 0.18s;
+
+  &:hover {
+    background: #fff !important;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 0 0 #bdaea0;
+  }
+
+  .user-profile__avatar {
+    border: none !important;
+    background: linear-gradient(135deg, #f7cd67, #e59266) !important;
+    color: #fff !important;
+    font-weight: 800;
+    font-size: 13px;
+  }
+
+  .user-profile__name {
+    font-weight: 800 !important;
+    color: #794f27 !important;
+    font-size: 13px;
+  }
+
+  .user-profile__arrow {
+    color: #9f927d !important;
+  }
+}
+
+// Notification item: 3D circle button (only the bell)
+.navbar-actions__item:has(.el-badge) {
+  width: 36px !important;
+  min-width: 36px !important;
+  height: 36px !important;
+  padding: 0 !important;
+  border-radius: 50% !important;
+  background: #fff;
+  border: 2px solid #e8e2d6;
+  display: grid !important;
+  place-items: center;
+  box-shadow: 0 2px 0 0 #bdaea0;
+  transition: transform 0.18s, box-shadow 0.18s;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 0 0 #bdaea0 !important;
+    background: #fff !important;
+  }
+}
+
+// Notification badge: red pill
+.navbar-actions__item .el-badge__content {
+  background: #fc736d;
+  border: 2px solid #fff;
+  border-radius: 999px;
+  font-size: 10px;
+  font-weight: 800;
+  min-width: 18px;
+  padding: 1px 5px;
+}

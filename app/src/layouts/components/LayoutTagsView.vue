@@ -7,13 +7,28 @@
       :view-style="{ height: '100%' }"
       @wheel="handleScroll"
     >
-      <div h-full flex-y-center gap-8px>
+      <div h-full flex-y-center gap-6px>
+        <a href="/#/" class="tab tab-home" title="返回博客首页">
+          <svg
+            viewBox="0 0 24 24"
+            width="13"
+            height="13"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.8"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path d="M3 11l9-8 9 8" />
+            <path d="M5 9v11h14V9" />
+          </svg>
+          主页
+        </a>
         <el-tag
           v-for="tag in visitedViews"
           :key="tag.fullPath"
-          h-28px
           cursor-pointer
-          class="cyber-tag"
+          class="tab"
           :closable="!tag.affix"
           :effect="tagsViewStore.isActive(tag) ? 'dark' : 'light'"
           :type="tagsViewStore.isActive(tag) ? 'primary' : 'info'"
@@ -31,6 +46,22 @@
         </el-tag>
       </div>
     </el-scrollbar>
+    <!-- Tabbar spacer + dropdown button -->
+    <div class="tabbar-spacer" />
+    <button class="tabbar-drop" title="更多标签" @click="openTabMenu">
+      <svg
+        viewBox="0 0 24 24"
+        width="14"
+        height="14"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="1.8"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      >
+        <path d="M6 9l6 6 6-6" />
+      </svg>
+    </button>
 
     <!-- 标签右键菜单 -->
     <Teleport to="body">
@@ -366,61 +397,141 @@ onMounted(() => {
   initAffixTags();
 });
 
+/**
+ * 打开标签下拉菜单（复用右键菜单逻辑，定位到下拉按钮位置）
+ */
+const openTabMenu = (event: MouseEvent) => {
+  const target = event.currentTarget as HTMLElement;
+  const rect = target.getBoundingClientRect();
+  contextMenu.x = rect.left;
+  contextMenu.y = rect.bottom + 4;
+  contextMenu.visible = true;
+  // 选择最后一个标签作为上下文
+  selectedTag.value = visitedViews.value[visitedViews.value.length - 1] || null;
+};
+
 // 启用右键菜单管理
 useContextMenuManager();
 </script>
 
 <style lang="scss" scoped>
 .tags-container {
+  display: flex;
+  align-items: center;
+  gap: 6px;
   width: auto;
   height: var(--tags-view-height);
-  margin: 0;
-  padding: 0 10px 0 12px;
+  margin: 10px 0 10px 0;
+  padding: 8px 14px;
   box-sizing: border-box;
-  background: color-mix(in srgb, var(--cyber-panel) 58%, transparent);
-  backdrop-filter: blur(18px);
-  border: 1px solid color-mix(in srgb, var(--cyber-border-strong) 82%, transparent);
-  border-radius: 22px;
-  box-shadow: 0 14px 28px color-mix(in srgb, var(--cyber-primary) 5%, transparent);
+  background:
+    url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 40"><circle cx="90" cy="10" r="3" fill="%23d1da49" opacity="0.3"/><circle cx="80" cy="20" r="2" fill="%237cba70" opacity="0.3"/></svg>')
+      no-repeat right top,
+    rgba(216, 236, 198, 0.6);
+  border: 2px solid #e8e2d6;
+  border-radius: 18px;
+  box-shadow: 0 3px 0 0 rgba(74, 138, 54, 0.08);
+  backdrop-filter: none;
 
   .scroll-container {
     display: flex;
     align-items: center;
     height: 100%;
     white-space: nowrap;
+    flex: 1;
+    min-width: 0;
   }
 
-  .cyber-tag {
+  .tab-home {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    text-decoration: none;
+    flex-shrink: 0;
+    height: 30px;
+    padding: 0 16px;
     border-radius: 999px;
-    height: 28px;
-    padding: 0 13px;
-    border: 1px solid color-mix(in srgb, var(--cyber-border) 85%, transparent);
-    background: color-mix(in srgb, var(--cyber-panel-strong) 82%, transparent);
-    color: var(--cyber-text-soft);
+    font-weight: 700;
     font-size: 13px;
-    font-weight: 600;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    color: #794f27;
+    background: transparent;
+    border: 0;
+    cursor: pointer;
+    transition: background 0.18s;
 
     &:hover {
-      background: color-mix(in srgb, var(--cyber-primary) 10%, var(--cyber-panel-strong));
-      border-color: color-mix(in srgb, var(--cyber-primary) 22%, transparent);
-      color: var(--cyber-text);
+      background: rgba(255, 255, 255, 0.7);
+    }
+  }
+
+  .tab {
+    border-radius: 999px;
+    height: 30px;
+    padding: 0 16px;
+    border: 0;
+    background: transparent;
+    color: #794f27;
+    font-size: 13px;
+    font-weight: 700;
+    transition: background 0.18s;
+    box-shadow: none;
+
+    &:hover {
+      background: rgba(255, 255, 255, 0.7);
     }
 
+    // Active tab: green leaf gradient + seedling emoji
     &.el-tag--primary {
-      background: var(--cyber-sidebar-active-bg);
-      border-color: transparent;
-      color: #fff;
-      box-shadow: var(--cyber-sidebar-active-shadow);
+      background: linear-gradient(135deg, #d8ecc6 0%, #b4dc9c 100%);
+      color: #4a8a36;
+      font-weight: 800;
+      box-shadow:
+        0 2px 0 0 rgba(74, 138, 54, 0.2),
+        inset 0 0 0 1.5px rgba(74, 138, 54, 0.15);
+
+      &::before {
+        content: "\1F331"; // 🌱
+        font-size: 11px;
+        margin-right: 4px;
+      }
     }
 
     :deep(.el-tag__close) {
-      color: color-mix(in srgb, var(--cyber-text-soft) 76%, transparent);
+      color: #794f27;
+      opacity: 0.55;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+
       &:hover {
-        background-color: color-mix(in srgb, var(--cyber-primary) 18%, transparent);
-        color: var(--cyber-text);
+        background-color: rgba(74, 138, 54, 0.15);
+        color: #4a8a36;
+        opacity: 1;
       }
     }
+  }
+}
+
+.tabbar-spacer {
+  flex: 1;
+}
+
+.tabbar-drop {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.7);
+  border: 0;
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  color: #9f927d;
+  flex-shrink: 0;
+  transition: background 0.18s;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.9);
+    color: #794f27;
   }
 }
 
@@ -454,5 +565,4 @@ useContextMenuManager();
     }
   }
 }
-
 </style>

@@ -1,111 +1,214 @@
 <template>
-  <div class="wb-chart-card">
-    <div class="wb-chart-card__header">
-      <span class="wb-chart-card__title">近 30 天字数趋势</span>
+  <div class="card chart-card">
+    <div class="card-head">
+      <div>
+        <div class="card-title">近 30 日字数走势</div>
+        <div class="card-sub" v-if="!loading && trend.length">
+          日均 {{ avgWords.toLocaleString() }} 字 · 峰值 {{ peakItem.words.toLocaleString() }} 字 ({{ peakItem.date.slice(5) }})
+        </div>
+      </div>
+      <div v-if="!loading" class="card-meta">
+        <span class="dot dot-green" /> 字数
+      </div>
     </div>
-    <div v-if="loading" class="wb-chart-card__skeleton">
-      <el-skeleton-item variant="rect" style="width:100%;height:140px;border-radius:8px;" />
+    <div v-if="loading" class="chart-skeleton">
+      <el-skeleton-item variant="rect" style="width:100%;height:160px;border-radius:12px;" />
     </div>
-    <div v-else ref="chartEl" class="wb-chart-card__body"></div>
+    <svg v-else :viewBox="`0 0 ${CHART_WIDTH} ${CHART_HEIGHT}`" class="chart-svg">
+      <defs>
+        <linearGradient id="trendFill" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#19c8b9" stop-opacity="0.35" />
+          <stop offset="100%" stop-color="#19c8b9" stop-opacity="0.02" />
+        </linearGradient>
+      </defs>
+      <line
+        v-for="line in gridLines"
+        :key="line"
+        :x1="PAD.l"
+        :x2="CHART_WIDTH - PAD.r"
+        :y1="line"
+        :y2="line"
+        stroke="#eef2ee"
+        stroke-dasharray="2 4"
+      />
+      <path v-if="areaPath" :d="areaPath" fill="url(#trendFill)" />
+      <path v-if="linePath" :d="linePath" fill="none" stroke="#19c8b9" stroke-width="2.5" />
+      <g v-if="peakPoint">
+        <circle :cx="peakPoint.x" :cy="peakPoint.y" r="5" fill="#fff" stroke="#11a89b" stroke-width="2" />
+        <text :x="peakPoint.x" :y="peakPoint.y - 10" text-anchor="middle" class="peak-label">
+          {{ peakItem.words.toLocaleString() }}
+        </text>
+      </g>
+      <text
+        v-for="tick in ticks"
+        :key="tick.label + tick.x"
+        :x="tick.x"
+        :y="CHART_HEIGHT - 6"
+        text-anchor="middle"
+        class="axis-label"
+      >
+        {{ tick.label }}
+      </text>
+    </svg>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, watch, onMounted, onBeforeUnmount } from "vue";
-import * as echarts from "echarts/core";
-import { LineChart } from "echarts/charts";
-import { GridComponent, TooltipComponent } from "echarts/components";
-import { SVGRenderer } from "echarts/renderers";
+import { computed } from "vue";
 import type { DashboardTrendItem } from "@/types/api/dashboard-stats";
-
-echarts.use([SVGRenderer, LineChart, GridComponent, TooltipComponent]);
 
 const props = defineProps<{
   trend: DashboardTrendItem[];
   loading: boolean;
 }>();
 
-const chartEl = ref<HTMLDivElement | null>(null);
-let chart: echarts.ECharts | null = null;
+const CHART_WIDTH = 640;
+const CHART_HEIGHT = 200;
+const PAD = { l: 8, r: 8, t: 18, b: 22 };
+const innerWidth = CHART_WIDTH - PAD.l - PAD.r;
+const innerHeight = CHART_HEIGHT - PAD.t - PAD.b;
 
-function buildOption(trend: DashboardTrendItem[]) {
-  const dates = trend.map((d) => d.date.slice(5));
-  const values = trend.map((d) => d.words);
-  return {
-    tooltip: {
-      trigger: "axis",
-      formatter: (params: any[]) => `${params[0].axisValue}<br/>字数：${params[0].value.toLocaleString()}`,
-    },
-    grid: { top: 10, right: 8, bottom: 22, left: 42, containLabel: false },
-    xAxis: {
-      type: "category",
-      data: dates,
-      axisTick: { show: false },
-      axisLine: { lineStyle: { color: "rgba(150,163,150,0.2)" } },
-      axisLabel: { color: "#94a38a", fontSize: 10, interval: 6 },
-    },
-    yAxis: {
-      type: "value",
-      splitLine: { lineStyle: { color: "rgba(150,163,150,0.12)", type: "dashed" } },
-      axisLabel: { color: "#94a38a", fontSize: 10 },
-    },
-    series: [
-      {
-        type: "line",
-        data: values,
-        smooth: true,
-        symbol: "none",
-        lineStyle: { color: "#5fa979", width: 2 },
-        areaStyle: {
-          color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
-            { offset: 0, color: "rgba(95,169,121,0.28)" },
-            { offset: 1, color: "rgba(95,169,121,0.02)" },
-          ]),
-        },
-      },
-    ],
-  };
-}
-
-function initChart() {
-  if (!chartEl.value) return;
-  if (!chart) chart = echarts.init(chartEl.value, null, { renderer: "svg" });
-  chart.setOption(buildOption(props.trend));
-}
-
-watch(() => props.trend, (v) => {
-  if (v && chartEl.value) {
-    if (!chart) chart = echarts.init(chartEl.value, null, { renderer: "svg" });
-    chart.setOption(buildOption(v));
-  }
+const peakItem = computed(() => {
+  if (!props.trend?.length) return { date: "", words: 0 };
+  return props.trend.reduce((m, d) => (d.words > m.words ? d : m), props.trend[0]);
 });
 
-onMounted(() => { if (!props.loading) initChart(); });
-onBeforeUnmount(() => { chart?.dispose(); });
+const avgWords = computed(() => {
+  if (!props.trend?.length) return 0;
+  const total = props.trend.reduce((s, d) => s + d.words, 0);
+  return Math.round(total / props.trend.length);
+});
+
+const points = computed(() => {
+  const trend = props.trend ?? [];
+  if (trend.length < 2) return [];
+  const max = Math.max(...trend.map((d) => d.words), 1);
+  return trend.map((d, i) => ({
+    date: d.date,
+    words: d.words,
+    x: PAD.l + (i / (trend.length - 1)) * innerWidth,
+    y: PAD.t + innerHeight - (d.words / max) * innerHeight,
+  }));
+});
+
+const linePath = computed(() => smoothPath(points.value));
+
+const areaPath = computed(() => {
+  if (!linePath.value) return "";
+  return `${linePath.value} L ${PAD.l + innerWidth} ${PAD.t + innerHeight} L ${PAD.l} ${PAD.t + innerHeight} Z`;
+});
+
+const gridLines = computed(() => [0.25, 0.5, 0.75].map((p) => PAD.t + innerHeight * p));
+
+const ticks = computed(() => {
+  const trend = props.trend ?? [];
+  return [0, 6, 12, 18, 24, 29]
+    .filter((i) => i < trend.length && trend.length > 1)
+    .map((i) => ({
+      x: PAD.l + (i / (trend.length - 1)) * innerWidth,
+      label: trend[i].date.slice(5),
+    }));
+});
+
+const peakPoint = computed(() => {
+  if (!points.value.length) return null;
+  return points.value.find((p) => p.date === peakItem.value.date) ?? null;
+});
+
+function smoothPath(pts: Array<{ x: number; y: number }>) {
+  if (pts.length < 2) return "";
+
+  let d = `M ${pts[0].x} ${pts[0].y}`;
+  for (let i = 0; i < pts.length - 1; i += 1) {
+    const p0 = pts[i - 1] || pts[i];
+    const p1 = pts[i];
+    const p2 = pts[i + 1];
+    const p3 = pts[i + 2] || p2;
+    const cp1x = p1.x + (p2.x - p0.x) / 6;
+    const cp1y = p1.y + (p2.y - p0.y) / 6;
+    const cp2x = p2.x - (p3.x - p1.x) / 6;
+    const cp2y = p2.y - (p3.y - p1.y) / 6;
+    d += ` C ${cp1x} ${cp1y}, ${cp2x} ${cp2y}, ${p2.x} ${p2.y}`;
+  }
+  return d;
+}
 </script>
 
 <style lang="scss" scoped>
-.wb-chart-card {
-  padding: 18px 20px;
-  background: var(--cyber-panel-strong);
-  border: 1px solid var(--cyber-border);
-  border-radius: 18px;
+.card {
+  background: var(--ai-paper, #fdfdf5);
+  border: 2px solid var(--ai-border, #e8e2d6);
+  border-radius: 24px;
+  padding: 18px 22px;
+  position: relative;
+}
 
-  &__header {
-    margin-bottom: 12px;
-  }
+.chart-card {
+  display: flex;
+  flex-direction: column;
+}
 
-  &__title {
-    font-size: 13px;
-    font-weight: 700;
-    color: var(--cyber-text);
-  }
+.card-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 14px;
+  gap: 12px;
+}
 
-  &__body {
-    width: 100%;
-    height: 150px;
-  }
+.card-title {
+  font-size: 15px;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  color: var(--ai-text, #794f27);
+}
 
-  &__skeleton { padding: 4px 0; }
+.card-sub {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--ai-text-2, #9f927d);
+  margin-top: 3px;
+}
+
+.card-meta {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--ai-text-2, #9f927d);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+.dot-green {
+  background: var(--ai-primary-active, #11a89b);
+}
+
+.chart-skeleton { padding: 4px 0; }
+
+.chart-svg {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.axis-label {
+  font-family: inherit;
+  font-size: 10px;
+  font-weight: 700;
+  fill: var(--ai-text-2, #9f927d);
+}
+
+.peak-label {
+  font-family: inherit;
+  font-size: 11px;
+  font-weight: 800;
+  fill: var(--ai-primary-active, #11a89b);
 }
 </style>

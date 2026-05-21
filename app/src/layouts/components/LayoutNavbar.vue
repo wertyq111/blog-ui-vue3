@@ -1,12 +1,51 @@
 <template>
   <div class="navbar">
-    <div class="navbar__leading">
-      <!-- 菜单折叠按钮 -->
-      <Hamburger :is-active="isSidebarOpened" @toggle-click="toggleSideBar" />
-      <!-- 面包屑导行栏-->
-      <Breadcrumb />
-    </div>
-    <!-- 导航栏操作区域-->
+    <!-- Brand mark — per design spec (leaf icon + "个人博客") -->
+    <a class="navbar-brand" href="/#/" title="返回博客首页">
+      <div class="navbar-brand__mark">
+        <svg
+          viewBox="0 0 24 24"
+          width="22"
+          height="22"
+          fill="none"
+          stroke="#fff"
+          stroke-width="1.8"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <path d="M3 21c4 0 8-2 11-7 2-3 3-7 3-11-4 0-8 1-11 4-3 3-5 7-5 12 0 1 0 2 2 2z" />
+        </svg>
+      </div>
+      <span class="navbar-brand__name">个人博客</span>
+    </a>
+
+    <!-- Hamburger (menu toggle) -->
+    <Hamburger :is-active="isSidebarOpened" @toggle-click="toggleSideBar" />
+
+    <!-- Refresh button -->
+    <button class="icon-btn icon-btn-plain" title="刷新" @click="handleRefresh">
+      <svg
+        viewBox="0 0 24 24"
+        width="18"
+        height="18"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="1.8"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      >
+        <path d="M4 12a8 8 0 0114-5l3 3M20 12a8 8 0 01-14 5l-3-3" />
+        <path d="M17 4v4h-4M7 20v-4h4" />
+      </svg>
+    </button>
+
+    <!-- Breadcrumb -->
+    <Breadcrumb />
+
+    <!-- Spacer -->
+    <div class="navbar-spacer" />
+
+    <!-- Right actions -->
     <div class="navbar__actions">
       <LayoutToolbar />
     </div>
@@ -15,86 +54,169 @@
 
 <script setup lang="ts">
 import { useAppStore } from "@/store";
+import { useRoute, useRouter } from "vue-router";
+import { useTagsViewStore } from "@/store";
 import Hamburger from "@/components/Hamburger/index.vue";
 import Breadcrumb from "@/components/Breadcrumb/index.vue";
 
 const appStore = useAppStore();
+const router = useRouter();
+const route = useRoute();
+const tagsViewStore = useTagsViewStore();
 
 const isSidebarOpened = computed(() => appStore.sidebar.opened);
 
 function toggleSideBar() {
   appStore.toggleSidebar();
 }
+
+function handleRefresh() {
+  tagsViewStore.delCachedView({
+    name: route.name as string,
+    title: route.meta?.title || "",
+    path: route.path,
+    fullPath: route.fullPath,
+    affix: false,
+    keepAlive: false,
+  });
+  nextTick(() => {
+    router.replace("/redirect" + route.fullPath);
+  });
+}
 </script>
 
 <style lang="scss" scoped>
 .navbar {
+  position: sticky;
+  top: 0;
+  z-index: 30;
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  gap: 12px;
   height: var(--navbar-height);
   min-width: 0;
-  padding: 0 18px 0 14px;
-  border-radius: 30px;
-  background: var(--cyber-panel-shell);
-  border: 1px solid var(--cyber-border-strong);
-  box-shadow: var(--cyber-shadow);
-  backdrop-filter: blur(18px);
+  padding: 12px 22px;
+  border: 0;
+  border-bottom: 2px solid #e8e2d6;
+  border-radius: 0;
+  background: rgba(253, 253, 245, 0.85);
+  backdrop-filter: blur(14px);
+  box-shadow: none;
+}
 
-  &__leading {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    min-width: 0;
-    flex: 1;
-  }
+.navbar-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 200px;
+  flex-shrink: 0;
+  text-decoration: none;
 
-  &__actions {
-    display: flex;
-    align-items: center;
-    height: 100%;
-    gap: 4px;
-    padding-left: 12px;
-    color: var(--el-text-color-regular);
+  &__mark {
+    width: 38px;
+    height: 38px;
+    background: linear-gradient(135deg, #19c8b9 0%, #82d5bb 100%);
+    border-radius: 50% 45% 50% 48% / 48% 50% 45% 50%;
+    display: grid;
+    place-items: center;
+    box-shadow: 0 3px 0 0 #11a89b;
+    color: #fff;
+    position: relative;
+    overflow: hidden;
+    flex-shrink: 0;
 
-    :deep(.toolbar-item) {
-      margin: 0 4px;
-      padding: 0 8px;
-      height: 36px;
-      min-width: 36px;
-      border-radius: 999px;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      transition: all 0.2s ease;
-
-      &:hover {
-        background: var(--cyber-header-tool-hover-bg);
-        color: var(--cyber-header-tool-hover-text);
-      }
+    &::after {
+      content: "";
+      position: absolute;
+      top: 5px;
+      left: 7px;
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.55);
     }
   }
 
-  :deep(.el-breadcrumb) {
-    min-width: 0;
-    overflow: hidden;
-    white-space: nowrap;
+  &__name {
+    font-size: 16px;
+    font-weight: 800;
+    color: #794f27;
+    letter-spacing: 0.5px;
   }
+}
 
-  :deep(.el-breadcrumb__item) {
-    display: inline-flex;
-    align-items: center;
-  }
+.icon-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: #fff;
+  border: 2px solid #e8e2d6;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  color: #794f27;
+  box-shadow: 0 2px 0 0 #bdaea0;
+  transition:
+    transform 0.18s,
+    box-shadow 0.18s;
+  position: relative;
+  flex-shrink: 0;
 
-  :deep(.el-breadcrumb__inner),
-  :deep(.el-breadcrumb__inner a) {
-    color: var(--cyber-text-soft);
-    font-size: 13px;
-    font-weight: 500 !important;
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 0 0 #bdaea0;
   }
+}
 
-  :deep(.el-breadcrumb__separator) {
-    color: color-mix(in srgb, var(--cyber-text-soft) 52%, transparent);
+.icon-btn-plain {
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+  color: #9f927d;
+
+  &:hover {
+    background: rgba(0, 0, 0, 0.05);
+    transform: none;
+    box-shadow: none;
+    color: #794f27;
   }
+}
+
+.navbar-spacer {
+  flex: 1;
+}
+
+.navbar__actions {
+  display: flex;
+  align-items: center;
+  height: 100%;
+  gap: 2px;
+  color: var(--el-text-color-regular);
+}
+
+:deep(.el-breadcrumb) {
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+:deep(.el-breadcrumb__item) {
+  display: inline-flex;
+  align-items: center;
+}
+
+:deep(.el-breadcrumb__inner),
+:deep(.el-breadcrumb__inner a) {
+  color: #9f927d;
+  font-size: 13px;
+  font-weight: 700 !important;
+}
+
+:deep(.el-breadcrumb__item:last-child .el-breadcrumb__inner) {
+  color: #794f27;
+}
+
+:deep(.el-breadcrumb__separator) {
+  color: #c4b89e;
 }
 </style>

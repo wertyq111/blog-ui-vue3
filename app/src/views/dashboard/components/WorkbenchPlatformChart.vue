@@ -1,113 +1,208 @@
 <template>
-  <div class="wb-chart-card">
-    <div class="wb-chart-card__header">
-      <span class="wb-chart-card__title">平台分布</span>
+  <div class="card chart-card">
+    <div class="card-head">
+      <div>
+        <div class="card-title">平台字数分布</div>
+        <div class="card-sub" v-if="!loading && arcs.length">
+          主力 {{ arcs[0].name }} · {{ (arcs[0].share * 100).toFixed(0) }}%
+        </div>
+      </div>
     </div>
-    <div v-if="loading" class="wb-chart-card__skeleton">
-      <el-skeleton-item variant="rect" style="width:100%;height:140px;border-radius:8px;" />
+    <div v-if="loading" class="chart-skeleton">
+      <el-skeleton-item variant="rect" style="width:100%;height:180px;border-radius:12px;" />
     </div>
-    <div v-else-if="!platformDist.length" class="wb-chart-card__empty">暂无数据</div>
-    <div v-else ref="chartEl" class="wb-chart-card__body"></div>
+    <div v-else-if="!platformDist.length" class="chart-empty">暂无数据</div>
+    <div v-else class="donut-wrap">
+      <svg :viewBox="`0 0 ${donutSize} ${donutSize}`" class="donut-svg">
+        <path
+          v-for="a in arcs"
+          :key="a.name"
+          :d="a.path"
+          :fill="a.color"
+        />
+        <text :x="donutCx" :y="donutCy - 4" text-anchor="middle" class="donut-center-big">
+          {{ topValueLabel }}
+        </text>
+        <text :x="donutCx" :y="donutCy + 16" text-anchor="middle" class="donut-center-sm">
+          {{ arcs[0]?.name ?? '' }}
+        </text>
+      </svg>
+      <div class="donut-legend">
+        <div v-for="a in arcs" :key="a.name" class="legend-row">
+          <span class="legend-dot" :style="{ background: a.color }" />
+          <span class="legend-name">{{ a.name }}</span>
+          <span class="legend-val">{{ a.value.toLocaleString() }}</span>
+          <span class="legend-share">{{ (a.share * 100).toFixed(0) }}%</span>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, watch, onMounted, onBeforeUnmount } from "vue";
-import * as echarts from "echarts/core";
-import { PieChart } from "echarts/charts";
-import { TooltipComponent, LegendComponent } from "echarts/components";
-import { SVGRenderer } from "echarts/renderers";
+import { computed } from "vue";
 import type { DashboardPlatformDist } from "@/types/api/dashboard-stats";
-
-echarts.use([SVGRenderer, PieChart, TooltipComponent, LegendComponent]);
 
 const props = defineProps<{
   platformDist: DashboardPlatformDist[];
   loading: boolean;
 }>();
 
-const chartEl = ref<HTMLDivElement | null>(null);
-let chart: echarts.ECharts | null = null;
+const COLORS = ["#19c8b9", "#f7cd67", "#f8a6b2", "#889df0", "#82d5bb", "#8ac68a"];
 
-const PALETTE = ["#5fa979", "#7bc8a4", "#a8dfc0", "#3a8f5e", "#d8ecdb", "#9ed4b5"];
+const donutSize = 200;
+const donutCx = donutSize / 2;
+const donutCy = donutSize / 2;
+const R = 90;
+const r = 60;
 
-function buildOption(dist: DashboardPlatformDist[]) {
-  return {
-    tooltip: {
-      trigger: "item",
-      formatter: "{b}: {c} 字 ({d}%)",
-    },
-    legend: {
-      orient: "vertical",
-      right: 8,
-      top: "center",
-      itemWidth: 10,
-      itemHeight: 10,
-      textStyle: { color: "#94a38a", fontSize: 11 },
-    },
-    series: [
-      {
-        type: "pie",
-        radius: ["42%", "68%"],
-        center: ["38%", "50%"],
-        data: dist.map((d, i) => ({
-          name: d.name,
-          value: d.words,
-          itemStyle: { color: PALETTE[i % PALETTE.length] },
-        })),
-        label: { show: false },
-        labelLine: { show: false },
-      },
-    ],
-  };
-}
+const arcs = computed(() => {
+  if (!props.platformDist?.length) return [];
+  const total = props.platformDist.reduce((s, d) => s + d.words, 0);
+  if (total === 0) return [];
 
-function initChart() {
-  if (!chartEl.value) return;
-  if (!chart) chart = echarts.init(chartEl.value, null, { renderer: "svg" });
-  chart.setOption(buildOption(props.platformDist));
-}
+  let acc = 0;
+  return props.platformDist.map((d, i) => {
+    const start = (acc / total) * Math.PI * 2 - Math.PI / 2;
+    acc += d.words;
+    const end = (acc / total) * Math.PI * 2 - Math.PI / 2;
+    const large = (end - start) > Math.PI ? 1 : 0;
 
-watch(() => props.platformDist, (v) => {
-  if (v?.length && chartEl.value) {
-    if (!chart) chart = echarts.init(chartEl.value, null, { renderer: "svg" });
-    chart.setOption(buildOption(v));
-  }
+    const sx = donutCx + Math.cos(start) * R;
+    const sy = donutCy + Math.sin(start) * R;
+    const ex = donutCx + Math.cos(end) * R;
+    const ey = donutCy + Math.sin(end) * R;
+    const sx2 = donutCx + Math.cos(end) * r;
+    const sy2 = donutCy + Math.sin(end) * r;
+    const ex2 = donutCx + Math.cos(start) * r;
+    const ey2 = donutCy + Math.sin(start) * r;
+
+    const path = `M ${sx} ${sy} A ${R} ${R} 0 ${large} 1 ${ex} ${ey} L ${sx2} ${sy2} A ${r} ${r} 0 ${large} 0 ${ex2} ${ey2} Z`;
+
+    return {
+      name: d.name,
+      value: d.words,
+      share: d.words / total,
+      color: COLORS[i % COLORS.length],
+      path,
+    };
+  });
 });
 
-onMounted(() => { if (!props.loading && props.platformDist.length) initChart(); });
-onBeforeUnmount(() => { chart?.dispose(); });
+const topValueLabel = computed(() => {
+  if (!arcs.value.length) return "";
+  const v = arcs.value[0].value;
+  if (v >= 1000) return (v / 1000).toFixed(1) + "k";
+  return v.toString();
+});
 </script>
 
 <style lang="scss" scoped>
-.wb-chart-card {
-  padding: 18px 20px;
-  background: var(--cyber-panel-strong);
-  border: 1px solid var(--cyber-border);
-  border-radius: 18px;
+.card {
+  background: var(--ai-paper, #fdfdf5);
+  border: 2px solid var(--ai-border, #e8e2d6);
+  border-radius: 24px;
+  padding: 18px 22px;
+  position: relative;
+}
 
-  &__header { margin-bottom: 12px; }
+.chart-card {
+  display: flex;
+  flex-direction: column;
+}
 
-  &__title {
-    font-size: 13px;
-    font-weight: 700;
-    color: var(--cyber-text);
-  }
+.card-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 14px;
+  gap: 12px;
+}
 
-  &__body {
-    width: 100%;
-    height: 150px;
-  }
+.card-title {
+  font-size: 15px;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  color: var(--ai-text, #794f27);
+}
 
-  &__skeleton { padding: 4px 0; }
+.card-sub {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--ai-text-2, #9f927d);
+  margin-top: 3px;
+}
 
-  &__empty {
-    height: 150px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 13px;
-    color: var(--cyber-text-mute);
-  }
+.chart-skeleton { padding: 4px 0; }
+
+.chart-empty {
+  height: 150px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  color: var(--ink-3, #8a9a8d);
+}
+
+.donut-wrap {
+  display: grid;
+  grid-template-columns: 200px 1fr;
+  gap: 14px;
+  align-items: center;
+  flex: 1;
+}
+
+.donut-svg {
+  width: 100%;
+}
+
+.donut-center-big {
+  font-size: 24px;
+  font-weight: 800;
+  fill: var(--ai-text, #794f27);
+  font-family: "Mochiy Pop One", "M PLUS Rounded 1c", Nunito, "Noto Sans SC", sans-serif;
+}
+
+.donut-center-sm {
+  font-size: 10.5px;
+  font-weight: 700;
+  fill: var(--ai-text-2, #9f927d);
+  font-family: inherit;
+}
+
+.donut-legend {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.legend-row {
+  display: grid;
+  grid-template-columns: 12px 1fr auto auto;
+  gap: 8px;
+  align-items: center;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.legend-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 4px;
+}
+
+.legend-name {
+  color: var(--ai-text, #794f27);
+}
+
+.legend-val {
+  color: var(--ai-text-2, #9f927d);
+  font-variant-numeric: tabular-nums;
+}
+
+.legend-share {
+  color: var(--ai-text-2, #9f927d);
+  width: 30px;
+  text-align: right;
 }
 </style>

@@ -162,6 +162,8 @@ function normalizeBackendMenus(menus: any[]): RouteItem[] {
         icon: item.icon,
         hidden: item.hide === 1,
         keepAlive: true,
+        // 顶层目录始终展示父菜单，防止 hasOneShowingChild 折叠
+        ...(item.pid === 0 && children.length > 0 ? { alwaysShow: true } : {}),
       };
 
       // 递归处理子菜单

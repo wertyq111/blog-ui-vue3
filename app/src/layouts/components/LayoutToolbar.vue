@@ -2,19 +2,9 @@
   <div :class="['navbar-actions', navbarActionsClass]">
     <!-- 桌面端工具项 -->
     <template v-if="isDesktop">
-      <!-- 搜索 -->
-      <div class="navbar-actions__item">
-        <CommandPalette />
-      </div>
-
       <!-- 全屏 -->
       <div class="navbar-actions__item">
         <Fullscreen />
-      </div>
-
-      <!-- 布局大小 -->
-      <div class="navbar-actions__item">
-        <SizeSelect />
       </div>
 
       <!-- 语言选择 -->
@@ -60,9 +50,14 @@
       </el-dropdown>
     </div>
 
-    <!-- 系统设置 -->
-    <div v-if="defaults.showSettings" class="navbar-actions__item" @click="handleSettingsClick">
-      <div class="i-svg:setting" />
+    <!-- 更多（系统设置）-->
+    <div
+      v-if="defaults.showSettings"
+      class="navbar-actions__item"
+      title="更多"
+      @click="handleSettingsClick"
+    >
+      <div class="i-svg:more" />
     </div>
   </div>
 </template>
@@ -75,9 +70,7 @@ import { DeviceEnum } from "@/enums/settings";
 import { useAppStore, useSettingsStore, useUserStore } from "@/store";
 
 // 导入子组件
-import CommandPalette from "@/components/CommandPalette/index.vue";
 import Fullscreen from "@/components/Fullscreen/index.vue";
-import SizeSelect from "@/components/SizeSelect/index.vue";
 import LangSelect from "@/components/LangSelect/index.vue";
 import NoticeDropdown from "@/components/NoticeDropdown/index.vue";
 import TenantSwitcher from "@/components/TenantSwitcher/index.vue";
@@ -106,7 +99,9 @@ const showTenantSwitcher = computed(() => {
   return tenantStore.tenantList.length > 1;
 });
 
-const displayName = computed(() => userStore.userInfo.nickname || userStore.userInfo.username || "");
+const displayName = computed(
+  () => userStore.userInfo.nickname || userStore.userInfo.username || ""
+);
 const avatarSrc = computed(() => userStore.userInfo.avatar || "");
 const avatarFallback = computed(() => {
   const name = displayName.value.trim();
@@ -170,19 +165,19 @@ function handleSettingsClick() {
 .navbar-actions {
   display: flex;
   align-items: center;
-  min-height: 44px;
+  min-height: 32px;
 
   &__item {
     position: relative;
     display: flex;
     align-items: center;
     justify-content: center;
-    min-width: 44px; /* 增加最小点击区域到44px，符合人机交互标准 */
-    height: 44px;
-    padding: 0 8px;
+    min-width: 32px;
+    height: 32px;
+    padding: 0 6px;
     text-align: center;
     cursor: pointer;
-    border-radius: 12px;
+    border-radius: 999px;
     transition: all 0.3s;
 
     // 确保子元素居中
@@ -199,7 +194,7 @@ function handleSettingsClick() {
       align-items: center;
       justify-content: center;
       width: 100%;
-      height: 44px;
+      height: 32px;
     }
 
     :deep(.i-svg\:language) {
@@ -213,7 +208,7 @@ function handleSettingsClick() {
 
     // 图标样式
     :deep([class^="i-svg:"]) {
-      font-size: 18px;
+      font-size: 16px;
       line-height: 1;
       color: var(--cyber-header-tool-text);
       transition: color 0.3s;
@@ -232,9 +227,12 @@ function handleSettingsClick() {
     display: flex;
     align-items: center;
     justify-content: center;
-    height: 44px;
-    padding: 0 8px;
-    border-radius: 12px;
+    height: 32px;
+    padding: 0 10px 0 3px;
+    border: 1px solid rgba(224, 216, 199, 0.88);
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.72);
+    box-shadow: 0 2px 0 rgba(151, 135, 104, 0.22);
     transition:
       background-color 0.3s ease,
       color 0.3s ease;
@@ -249,7 +247,9 @@ function handleSettingsClick() {
     }
 
     &__name {
-      margin-left: 8px;
+      margin-left: 7px;
+      font-size: 12px;
+      font-weight: 800;
       color: var(--app-text-soft, var(--el-text-color-regular));
       white-space: nowrap;
       transition: color 0.3s;
@@ -257,7 +257,7 @@ function handleSettingsClick() {
 
     &__arrow {
       margin-left: 6px;
-      font-size: 14px;
+      font-size: 13px;
       color: var(--app-text-mute, var(--el-text-color-secondary));
       transition: color 0.3s;
     }

@@ -298,13 +298,84 @@ function resolvePath(routePath: string) {
 // 父菜单激活状态样式
 .el-sub-menu {
   &.has-active-child > .el-sub-menu__title {
-    color: var(--cyber-sidebar-active-text) !important;
-    background: var(--cyber-sidebar-active-bg) !important;
-    box-shadow: var(--cyber-sidebar-active-shadow);
-    border-radius: 14px;
+    color: #4a8a36 !important;
+    background: rgba(255, 255, 255, 0.58) !important;
+    border-radius: 12px;
 
     .menu-icon {
       color: currentcolor !important;
+    }
+  }
+}
+
+.sidebar-wrapper--vertical {
+  .el-sub-menu {
+    .el-menu {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      padding: 4px 0 8px;
+      background: transparent !important;
+    }
+  }
+
+  .el-menu-item {
+    position: relative;
+    height: 38px !important;
+    min-height: 38px;
+    margin: 0;
+    padding: 0 38px 0 36px !important;
+    border-radius: 12px;
+    color: #9f927d !important;
+    font-size: 13px;
+    font-weight: 700;
+    line-height: 38px !important;
+    text-decoration: none;
+    transition:
+      background 0.18s ease,
+      color 0.18s ease,
+      box-shadow 0.18s ease;
+
+    .el-icon,
+    [class^="i-svg:"] {
+      position: absolute;
+      left: 14px;
+      color: #c4b89e !important;
+    }
+
+    &:hover {
+      color: #794f27 !important;
+      background: rgba(255, 255, 255, 0.7) !important;
+    }
+
+    &.is-active {
+      color: #4a8a36 !important;
+      background: linear-gradient(135deg, #d8ecc6 0%, #c4e3a4 100%) !important;
+      box-shadow: inset 0 0 0 1.5px rgba(74, 138, 54, 0.15);
+
+      &::before {
+        position: absolute;
+        top: 50%;
+        left: -6px;
+        width: 4px;
+        height: 24px;
+        content: "";
+        background: #4a8a36;
+        border-radius: 0 4px 4px 0;
+        transform: translateY(-50%);
+      }
+
+      &::after {
+        position: absolute;
+        right: 12px;
+        content: "🍃";
+        font-size: 12px;
+      }
+
+      .el-icon,
+      [class^="i-svg:"] {
+        color: #4a8a36 !important;
+      }
     }
   }
 }

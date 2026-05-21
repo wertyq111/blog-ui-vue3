@@ -20,9 +20,9 @@ importers:
       '@wangeditor-next/editor-for-vue':
         specifier: ^5.1.14
         version: 5.1.14(@wangeditor-next/editor@5.6.56)(vue@3.5.32(typescript@5.9.3))
-      animal-island-ui-vue:
+      animal-island-vue:
         specifier: 0.1.0
-        version: 0.1.0(vue@3.5.32(typescript@5.9.3))
+        version: 0.1.0(typescript@5.9.3)(vue@3.5.32(typescript@5.9.3))
       animate.css:
         specifier: ^4.1.1
         version: 4.1.1
@@ -549,6 +549,15 @@ packages:
 
   '@floating-ui/utils@0.2.11':
     resolution: {integrity: sha512-RiB/yIh78pcIxl6lLMG0CgBXAZ2Y0eVHqMPYugu+9U0AeT6YBeiJpf7lbdJNIugFP5SIjwNRgo4DhR1Qxi26Gg==}
+
+  '@fontsource/noto-sans-sc@5.2.9':
+    resolution: {integrity: sha512-bTUIWGBgJDpwi5qAr+x0/lcgv80IHTB9vl6s2f6EymZEa7qYV99yNRBZuKFT+SYDKVunZrjCEhWtpxqmbXWl5Q==}
+
+  '@fontsource/nunito@5.2.7':
+    resolution: {integrity: sha512-pmtBq0H9ex9nk+RtJYEJOD9pag393iHETnl/PVKleF4i06cd0ttngK5ZCTgYb5eOqR3Xdlrjtev8m7bmgYprew==}
+
+  '@fontsource/zen-maru-gothic@5.2.8':
+    resolution: {integrity: sha512-6RkH33+rgEJy1hkUdDAf+3PyQ7oUjX3vj7cekmfx/bT/9BEPd07FqrjcGBQDe4uWmUebEKuIZep3phDjsnJ6vA==}
 
   '@hapi/bourne@3.0.0':
     resolution: {integrity: sha512-Waj1cwPXJDucOib4a3bAISsKJVb15MKi9IvmTI/7ssVEm6sywXGjVJDhl6/umt1pK1ZS7PacXU3A1PmFKHEZ2w==}
@@ -1467,10 +1476,10 @@ packages:
   alien-signals@3.1.2:
     resolution: {integrity: sha512-d9dYqZTS90WLiU0I5c6DHj/HcKkF8ZyGN3G5x8wSbslulz70KOxaqCT0hQCo9KOyhVqzqGojvNdJXoTumZOtcw==}
 
-  animal-island-ui-vue@0.1.0:
-    resolution: {integrity: sha512-MdvM5OfSpNW+8rOUjw0KwLWl1UaUw8cKh/ikdDmjLIL8m5vmJxZ+kPqETkgy3R5i10yU7W2qE+pmZAr2HsOuNw==}
+  animal-island-vue@0.1.0:
+    resolution: {integrity: sha512-axX2Lzu7Mu+9o6/vY9YWJEIpkR0oY67HCsA408ZYrWqnoSmrxWNbiSzPMTuZxZh9XsmLvAdQ/xM8QrAiTz3NPw==}
     peerDependencies:
-      vue: ^3.5.0
+      vue: '>=3.4.0'
 
   animate.css@4.1.1:
     resolution: {integrity: sha512-+mRmCTv6SbCmtYJCN4faJMNFVNN5EuCTTprDTAo7YzIGji2KADmakjVA3+8mVDkZ2Bf09vayB35lSQIex2+QaQ==}
@@ -4505,6 +4514,12 @@ snapshots:
 
   '@floating-ui/utils@0.2.11': {}
 
+  '@fontsource/noto-sans-sc@5.2.9': {}
+
+  '@fontsource/nunito@5.2.7': {}
+
+  '@fontsource/zen-maru-gothic@5.2.8': {}
+
   '@hapi/bourne@3.0.0': {}
 
   '@humanfs/core@0.19.1': {}
@@ -5494,9 +5509,15 @@ snapshots:
 
   alien-signals@3.1.2: {}
 
-  animal-island-ui-vue@0.1.0(vue@3.5.32(typescript@5.9.3)):
+  animal-island-vue@0.1.0(typescript@5.9.3)(vue@3.5.32(typescript@5.9.3)):
     dependencies:
+      '@fontsource/noto-sans-sc': 5.2.9
+      '@fontsource/nunito': 5.2.7
+      '@fontsource/zen-maru-gothic': 5.2.8
+      '@vueuse/core': 12.0.0(typescript@5.9.3)
       vue: 3.5.32(typescript@5.9.3)
+    transitivePeerDependencies:
+      - typescript
 
   animate.css@4.1.1: {}
 

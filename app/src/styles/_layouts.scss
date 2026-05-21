@@ -8,9 +8,9 @@ body,
 
 body {
   background:
-    radial-gradient(circle at 85% 10%, var(--cyber-body-glow-a), transparent 20%),
-    radial-gradient(circle at 15% 78%, var(--cyber-body-glow-b), transparent 22%),
-    linear-gradient(135deg, var(--cyber-bg-start) 0%, var(--cyber-bg-end) 46%, var(--cyber-bg-deep) 100%);
+    radial-gradient(1050px 520px at 86% 9%, rgba(196, 236, 160, 0.38), transparent 62%),
+    radial-gradient(680px 520px at 9% 84%, rgba(181, 221, 187, 0.20), transparent 64%),
+    linear-gradient(135deg, var(--cyber-bg-start) 0%, var(--cyber-bg-end) 50%, var(--cyber-bg-deep) 100%);
   background-attachment: fixed;
   color: var(--cyber-text);
 }
@@ -44,33 +44,25 @@ body {
 }
 
 .layout__overlay {
-  background: rgba(90, 66, 48, 0.24) !important;
+  background: rgba(121, 79, 39, 0.24) !important;
   backdrop-filter: blur(6px);
 }
 
-.navbar,
-.tags-container,
+// Navbar and tags-container are now fully styled in their own scoped components.
+// Only keep global overrides for top/mix layout headers.
 .layout-top .layout__header,
 .layout-mix .layout__header {
   border: 1px solid var(--cyber-border-strong);
-  background: var(--cyber-panel-shell);
-  box-shadow: var(--cyber-shadow);
-  backdrop-filter: blur(18px);
+  background: rgba(253, 253, 245, 0.54);
+  box-shadow: none;
+  backdrop-filter: blur(16px);
 }
 
+// Layout-left margin resets (styling is in scoped components now)
 .layout-left .navbar,
 .layout-left .tags-container {
-  margin-right: $workspace-gap;
-}
-
-.layout-left .navbar {
-  margin-top: $workspace-gap;
-}
-
-.layout-left .tags-container {
-  margin-top: 10px;
-  background: color-mix(in srgb, var(--cyber-panel) 58%, transparent);
-  box-shadow: 0 14px 28px color-mix(in srgb, var(--cyber-primary) 5%, transparent);
+  margin-right: 0;
+  margin-top: 0;
 }
 
 .layout-top .layout__header,
@@ -102,7 +94,7 @@ body {
 }
 
 .layout-left .app-main {
-  min-height: calc(100vh - #{$navbar-height});
+  min-height: calc(100vh - #{$navbar-height + $tags-view-height});
 }
 
 .layout-top .layout__main,

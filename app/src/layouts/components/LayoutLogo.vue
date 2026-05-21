@@ -13,7 +13,7 @@
 
 <script lang="ts" setup>
 import { appConfig } from "@/settings";
-import logo from "@/assets/images/logo.png";
+import logo from "@/assets/images/logo-leaf.svg";
 
 defineProps({
   collapse: {
@@ -36,18 +36,19 @@ defineProps({
   }
 
   .logo-img {
-    width: 24px;
-    height: 24px;
-    filter: drop-shadow(0 8px 18px color-mix(in srgb, var(--cyber-primary) 22%, transparent));
+    width: 22px;
+    height: 22px;
+    color: var(--cyber-primary);
+    filter: none;
   }
 
   .title {
     flex-shrink: 0;
-    margin-left: 10px;
-    font-size: 18px;
+    margin-left: 9px;
+    font-size: 14px;
     font-weight: 800;
     color: var(--cyber-text);
-    letter-spacing: -0.5px;
+    letter-spacing: 0;
   }
 }
 </style>

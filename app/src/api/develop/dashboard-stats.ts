@@ -4,11 +4,11 @@ import type { DashboardOverviewData } from "@/types/api/dashboard-stats";
 const BASE_URL = "/dashboard";
 
 const DashboardStatsAPI = {
-  getOverview(): Promise<DashboardOverviewData> {
+  getStats(view = "overview", range = "all"): Promise<DashboardOverviewData> {
     return request<any, DashboardOverviewData>({
       url: `${BASE_URL}/stats`,
       method: "get",
-      params: { view: "overview", range: "all" },
+      params: { view, range },
     });
   },
 };

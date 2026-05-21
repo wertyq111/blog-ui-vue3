@@ -2,11 +2,13 @@
   <div class="auth-panel-form">
     <div class="mobile-brand">
       <img class="brand-logo" src="/favicon.ico" alt="网站图标" />
-      <span>个人博客</span>
+      <span>博客小岛</span>
     </div>
 
-    <h1 class="panel-title">欢迎回来！</h1>
-    <p class="panel-subtitle">请填写账号信息继续访问后台</p>
+    <h1 class="panel-title">欢迎回来 🌿</h1>
+    <p class="panel-subtitle">
+      也来这座 <span class="em">小岛</span> 逛逛 —— 填好通行证就能上岸
+    </p>
 
     <el-form
       ref="loginFormRef"
@@ -108,14 +110,13 @@
           class="main-login-btn"
           @click="handleLoginSubmit"
         >
-          {{ loading ? "登录中..." : "登录" }}
+          {{ loading ? "登岛中..." : "上岛" }}
         </el-button>
       </el-form-item>
     </el-form>
 
     <div class="signup-tip">
-      没有账号？
-      <span>请联系管理员开通</span>
+      还不是岛民？<span>请联系岛主开通</span>
     </div>
   </div>
 </template>
@@ -207,7 +208,7 @@ async function handleLoginSubmit() {
   try {
     await userStore.login(loginFormData).then(
       async () => {
-        const redirectPath = (route.query.redirect as string) || "/";
+        const redirectPath = (route.query.redirect as string) || "/dashboard";
         await router.push(decodeURIComponent(redirectPath));
       },
       (error) => {
@@ -284,18 +285,28 @@ defineExpose({ loginFormData });
 
 .panel-title {
   margin: 0;
-  font-size: 54px;
-  font-weight: 700;
-  line-height: 1.16;
+  font-size: 36px;
+  font-weight: 900;
+  line-height: 1.1;
   color: var(--cyber-text);
   text-align: center;
+  letter-spacing: -0.01em;
 }
 
 .panel-subtitle {
-  margin: 14px 0 36px;
-  font-size: 16px;
-  color: var(--cyber-text-muted);
+  margin: 12px 0 26px;
+  font-size: 14px;
+  color: var(--cyber-text-soft);
   text-align: center;
+  font-weight: 600;
+
+  .em {
+    background: #e6f9f6;
+    color: var(--cyber-primary-strong);
+    padding: 2px 8px;
+    border-radius: 999px;
+    font-weight: 800;
+  }
 }
 
 .field-title {
@@ -356,25 +367,34 @@ defineExpose({ loginFormData });
 
 .main-login-btn {
   width: 100%;
-  height: 52px;
+  height: 54px;
   margin: 0;
-  font-size: 18px;
-  font-weight: 600;
-  border-radius: 26px;
+  font-size: 16px;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  border-radius: 50px;
   color: #fff !important;
-  background: linear-gradient(135deg, var(--cyber-primary) 0%, var(--cyber-primary-strong) 100%) !important;
-  border: none !important;
+  background: linear-gradient(180deg, #3dd4c6 0%, var(--cyber-primary) 100%) !important;
+  border: 2px solid var(--cyber-primary) !important;
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.18),
-    0 16px 30px color-mix(in srgb, var(--cyber-primary) 26%, transparent) !important;
+    0 6px 0 0 var(--cyber-primary-strong),
+    0 0 0 4px rgba(25, 200, 185, 0.18) !important;
+  transition: transform 0.18s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.18s;
 
   &:hover,
   &:focus {
     color: #fff !important;
-    background: linear-gradient(135deg, var(--cyber-primary) 0%, var(--cyber-primary-strong) 100%) !important;
+    transform: translateY(-2px);
     box-shadow:
-      inset 0 1px 0 rgba(255, 255, 255, 0.24),
-      0 18px 34px color-mix(in srgb, var(--cyber-primary) 30%, transparent) !important;
+      0 8px 0 0 var(--cyber-primary-strong),
+      0 0 0 4px rgba(25, 200, 185, 0.18) !important;
+  }
+
+  &:active {
+    transform: translateY(3px);
+    box-shadow:
+      0 1px 0 0 var(--cyber-primary-strong),
+      0 0 0 4px rgba(25, 200, 185, 0.18) !important;
   }
 }
 
@@ -391,23 +411,6 @@ defineExpose({ loginFormData });
 }
 
 /* Responsive */
-@media screen and (max-width: 1280px) {
-  .panel-title {
-    font-size: 46px;
-  }
-
-  .panel-subtitle {
-    font-size: 15px;
-  }
-
-  .field-title,
-  .remember-row :deep(.el-checkbox__label),
-  .main-login-btn,
-  .signup-tip {
-    font-size: 15px;
-  }
-}
-
 @media screen and (max-width: 1024px) {
   .mobile-brand {
     display: flex;
@@ -421,11 +424,7 @@ defineExpose({ loginFormData });
 
 @media screen and (max-width: 768px) {
   .panel-title {
-    font-size: 40px;
-  }
-
-  .main-login-btn {
-    height: 46px;
+    font-size: 28px;
   }
 }
 </style>

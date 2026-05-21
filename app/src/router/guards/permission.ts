@@ -11,7 +11,7 @@ import { setupSse } from "@/composables";
  * 处理登录验证、动态路由生成、404检测等
  */
 export function setupPermissionGuard() {
-  const whiteList = ["/login"];
+  const whiteList = ["/", "/login"];
 
   router.beforeEach(async (to) => {
     NProgress.start();
@@ -29,9 +29,9 @@ export function setupPermissionGuard() {
         }
       }
 
-      // 已登录访问登录页，重定向到首页
+      // 已登录访问登录页，重定向到工作台
       if (to.path === "/login") {
-        return { path: "/" };
+        return { path: "/dashboard" };
       }
 
       const permissionStore = usePermissionStore();
