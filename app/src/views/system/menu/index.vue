@@ -1,228 +1,235 @@
 <template>
-    <div class="page-card">
-      <!-- 页头 -->
-      <div class="page-head">
-        <div class="page-eyebrow">SYSTEM MANAGEMENT</div>
-        <h1 class="page-title">菜单管理</h1>
-        <p class="page-desc">维护菜单层级、路由能力与权限标识，统一后台导航入口。</p>
-      </div>
-
-      <!-- 搜索栏 -->
-      <div class="filter-bar">
-        <div class="filter-field">
-          <label class="filter-label">菜单名称：</label>
-          <input
-            v-model="queryParams['filter[title]']"
-            class="input"
-            placeholder="请输入菜单名称"
-            @keyup.enter="handleQuery"
-          />
-        </div>
-        <button class="btn btn-primary" type="button" @click="handleQuery">
-          <Ico name="search" :size="13" /> 查询
-        </button>
-        <button class="btn btn-default" type="button" @click="handleResetQuery">重置</button>
-      </div>
-
-      <!-- 列表卡片 -->
-      <div class="list-card">
-        <div class="list-head">
-          <div>
-            <div class="list-title">菜单列表</div>
-            <div class="list-sub">支持层级查看、展开收起和菜单结构维护。</div>
-          </div>
-        </div>
-
-        <!-- 工具栏 -->
-        <div class="toolbar">
-          <button
-            v-hasPerm="['sys:menu:addz']"
-            class="btn btn-primary"
-            type="button"
-            @click="openDialog(0)"
-          >
-            <Ico name="plus" :size="13" /> 添加
-          </button>
-          <button class="btn btn-default" type="button" @click="expandAll">
-            <Ico name="expand" :size="13" /> 展开全部
-          </button>
-          <button class="btn btn-default" type="button" @click="collapseAll">
-            <Ico name="collapse" :size="13" /> 折叠全部
-          </button>
-          <div class="toolbar-spacer" />
-          <div class="tool-group">
-            <button class="btn-icon" type="button" title="刷新" @click="fetchData">
-              <Ico name="refresh" :size="14" />
-            </button>
-            <button class="btn-icon" type="button" title="全屏">
-              <Ico name="full" :size="14" />
-            </button>
-          </div>
-        </div>
-
-        <!-- 表格 -->
-        <div v-loading="loading" class="tbl-wrap">
-          <table class="tbl">
-            <thead>
-              <tr>
-                <th style="width: 60px">序</th>
-                <th class="tbl-name-cell">菜单名称</th>
-                <th style="width: 100px">菜单类型</th>
-                <th>路由地址</th>
-                <th>组件路径</th>
-                <th>权限标识</th>
-                <th style="width: 110px">排序</th>
-                <th style="width: 80px">状态</th>
-                <th style="width: 220px">操作</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr v-for="(r, i) in flatRows" :key="r.id">
-                <td class="cell-num">{{ i + 1 }}</td>
-                <td class="tbl-name-cell">
-                  <span class="tree-indent" :style="{ paddingLeft: r.depth * 20 + 'px' }">
-                    <button
-                      v-if="r.hasChildren"
-                      class="tree-caret"
-                      :class="{ open: isOpen(r.id) }"
-                      type="button"
-                      @click="toggle(r.id)"
-                    >
-                      <Ico name="chevRight" :size="11" />
-                    </button>
-                    <span v-else class="tree-caret-spacer" />
-                    <span class="tree-name">
-                      <span v-if="r.type === 0" class="tree-name-ico">
-                        <Icon :name="resolveAnimalIcon(r.icon, r.path)" :size="14" />
-                      </span>
-                      {{ r.title }}
-                    </span>
-                  </span>
-                </td>
-                <td>
-                  <span class="pill" :class="r.type === 0 ? 'pill-menu' : 'pill-button'">
-                    {{ r.type === 0 ? "菜单" : "按钮" }}
-                  </span>
-                </td>
-                <td class="cell-mono">{{ r.path || "" }}</td>
-                <td class="cell-mono">{{ r.component || "" }}</td>
-                <td class="cell-mono">{{ r.permission || "" }}</td>
-                <td class="cell-num">{{ r.sort }}</td>
-                <td>
-                  <span class="pill" :class="r.hide === 0 ? 'pill-status-on' : 'pill-status-off'">
-                    {{ r.hide === 0 ? "正常" : "隐藏" }}
-                  </span>
-                </td>
-                <td>
-                  <span class="tbl-actions">
-                    <span
-                      v-if="r.type === 0"
-                      v-hasPerm="['sys:menu:addz']"
-                      class="action-link act-add"
-                      @click="openDialog(r.id)"
-                    >
-                      <Ico name="plus" :size="11" /> 添加
-                    </span>
-                    <span
-                      v-hasPerm="['sys:menu:edit']"
-                      class="action-link act-edit"
-                      @click="openDialog(undefined, r.id)"
-                    >
-                      <Ico name="edit" :size="11" /> 修改
-                    </span>
-                    <span
-                      v-hasPerm="['sys:menu:delete']"
-                      class="action-link act-del"
-                      @click="handleDelete(r.id)"
-                    >
-                      <Ico name="trash" :size="11" /> 删除
-                    </span>
-                  </span>
-                </td>
-              </tr>
-              <tr v-if="!loading && flatRows.length === 0" class="empty-row">
-                <td colspan="9">暂无数据</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
+  <div class="page-card">
+    <!-- 页头 -->
+    <div class="page-head">
+      <div class="page-eyebrow">SYSTEM MANAGEMENT</div>
+      <h1 class="page-title">菜单管理</h1>
+      <p class="page-desc">维护菜单层级、路由能力与权限标识，统一后台导航入口。</p>
     </div>
 
-    <el-drawer
-      v-model="dialogState.visible"
-      :title="dialogState.title"
-      :size="drawerSize"
-      class="develop-drawer"
-      @close="closeDialog"
-    >
-      <el-form ref="menuFormRef" :model="formData" :rules="rules" label-width="100px">
-        <el-form-item label="父级菜单" prop="pid">
-          <el-tree-select
-            v-model="formData.pid"
-            placeholder="选择上级菜单"
-            :data="menuOptions"
-            filterable
-            check-strictly
-            :render-after-expand="false"
-          />
-        </el-form-item>
+    <!-- 搜索栏 -->
+    <div class="filter-bar">
+      <div class="filter-field">
+        <label class="filter-label">菜单名称：</label>
+        <input
+          v-model="queryParams['filter[title]']"
+          class="input"
+          placeholder="请输入菜单名称"
+          @keyup.enter="handleQuery"
+        />
+      </div>
+      <button class="btn btn-primary" type="button" @click="handleQuery">
+        <Ico name="search" :size="13" />
+        查询
+      </button>
+      <button class="btn btn-default" type="button" @click="handleResetQuery">重置</button>
+    </div>
 
-        <el-form-item label="菜单名称" prop="title">
-          <el-input v-model="formData.title" placeholder="请输入菜单名称" />
-        </el-form-item>
-
-        <el-form-item label="菜单类型" prop="type">
-          <el-radio-group v-model="formData.type">
-            <el-radio :value="0">菜单</el-radio>
-            <el-radio :value="1">权限</el-radio>
-          </el-radio-group>
-        </el-form-item>
-
-        <el-form-item v-if="formData.type === 0" label="路由路径" prop="path">
-          <el-input v-model="formData.path" placeholder="/system 或 user" />
-        </el-form-item>
-
-        <el-form-item v-if="formData.type === 0 && !isExternalLink" label="组件路径" prop="component">
-          <el-input v-model="formData.component" placeholder="system/user/index" style="width: 95%">
-            <template #prepend>src/views/</template>
-            <template #append>.vue</template>
-          </el-input>
-        </el-form-item>
-
-        <el-form-item v-if="formData.type === 0" label="显示状态" prop="hide">
-          <el-radio-group v-model="formData.hide">
-            <el-radio :value="0">显示</el-radio>
-            <el-radio :value="1">隐藏</el-radio>
-          </el-radio-group>
-        </el-form-item>
-
-        <el-form-item label="排序" prop="sort">
-          <el-input-number
-            v-model="formData.sort"
-            style="width: 100px"
-            controls-position="right"
-            :min="0"
-          />
-        </el-form-item>
-
-        <!-- 权限标识 -->
-        <el-form-item v-if="formData.type === 1" label="权限标识" prop="permission">
-          <el-input v-model="formData.permission" placeholder="sys:user:create" />
-        </el-form-item>
-
-        <el-form-item v-if="formData.type === 0" label="图标" prop="icon">
-          <icon-select v-model="formData.icon" />
-        </el-form-item>
-      </el-form>
-
-      <template #footer>
-        <div class="dialog-footer">
-          <el-button type="primary" @click="handleSubmit">确定</el-button>
-          <el-button @click="closeDialog">取消</el-button>
+    <!-- 列表卡片 -->
+    <div class="list-card">
+      <div class="list-head">
+        <div>
+          <div class="list-title">菜单列表</div>
+          <div class="list-sub">支持层级查看、展开收起和菜单结构维护。</div>
         </div>
-      </template>
-    </el-drawer>
+      </div>
+
+      <!-- 工具栏 -->
+      <div class="toolbar">
+        <button
+          v-hasPerm="['sys:menu:addz']"
+          class="btn btn-primary"
+          type="button"
+          @click="openDialog(0)"
+        >
+          <Ico name="plus" :size="13" />
+          添加
+        </button>
+        <button class="btn btn-default" type="button" @click="expandAll">
+          <Ico name="expand" :size="13" />
+          展开全部
+        </button>
+        <button class="btn btn-default" type="button" @click="collapseAll">
+          <Ico name="collapse" :size="13" />
+          折叠全部
+        </button>
+        <div class="toolbar-spacer" />
+        <div class="tool-group">
+          <button class="btn-icon" type="button" title="刷新" @click="fetchData">
+            <Ico name="refresh" :size="14" />
+          </button>
+          <button class="btn-icon" type="button" title="全屏">
+            <Ico name="full" :size="14" />
+          </button>
+        </div>
+      </div>
+
+      <!-- 表格 -->
+      <div v-loading="loading" class="tbl-wrap">
+        <table class="tbl">
+          <thead>
+            <tr>
+              <th style="width: 60px">序</th>
+              <th class="tbl-name-cell">菜单名称</th>
+              <th style="width: 100px">菜单类型</th>
+              <th>路由地址</th>
+              <th>组件路径</th>
+              <th>权限标识</th>
+              <th style="width: 110px">排序</th>
+              <th style="width: 80px">状态</th>
+              <th style="width: 220px">操作</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="(r, i) in flatRows" :key="r.id">
+              <td class="cell-num">{{ i + 1 }}</td>
+              <td class="tbl-name-cell">
+                <span class="tree-indent" :style="{ paddingLeft: r.depth * 20 + 'px' }">
+                  <button
+                    v-if="r.hasChildren"
+                    class="tree-caret"
+                    :class="{ open: isOpen(r.id) }"
+                    type="button"
+                    @click="toggle(r.id)"
+                  >
+                    <Ico name="chevRight" :size="11" />
+                  </button>
+                  <span v-else class="tree-caret-spacer" />
+                  <span class="tree-name">
+                    <span v-if="r.type === 0" class="tree-name-ico">
+                      <Icon :name="resolveAnimalIcon(r.icon, r.path)" :size="14" />
+                    </span>
+                    {{ r.title }}
+                  </span>
+                </span>
+              </td>
+              <td>
+                <span class="pill" :class="r.type === 0 ? 'pill-menu' : 'pill-button'">
+                  {{ r.type === 0 ? "菜单" : "按钮" }}
+                </span>
+              </td>
+              <td class="cell-mono">{{ r.path || "" }}</td>
+              <td class="cell-mono">{{ r.component || "" }}</td>
+              <td class="cell-mono">{{ r.permission || "" }}</td>
+              <td class="cell-num">{{ r.sort }}</td>
+              <td>
+                <span class="pill" :class="r.hide === 0 ? 'pill-status-on' : 'pill-status-off'">
+                  {{ r.hide === 0 ? "正常" : "隐藏" }}
+                </span>
+              </td>
+              <td>
+                <span class="tbl-actions">
+                  <span
+                    v-if="r.type === 0"
+                    v-hasPerm="['sys:menu:addz']"
+                    class="action-link act-add"
+                    @click="openDialog(r.id)"
+                  >
+                    <Ico name="plus" :size="11" />
+                    添加
+                  </span>
+                  <span
+                    v-hasPerm="['sys:menu:edit']"
+                    class="action-link act-edit"
+                    @click="openDialog(undefined, r.id)"
+                  >
+                    <Ico name="edit" :size="11" />
+                    修改
+                  </span>
+                  <span
+                    v-hasPerm="['sys:menu:delete']"
+                    class="action-link act-del"
+                    @click="handleDelete(r.id)"
+                  >
+                    <Ico name="trash" :size="11" />
+                    删除
+                  </span>
+                </span>
+              </td>
+            </tr>
+            <tr v-if="!loading && flatRows.length === 0" class="empty-row">
+              <td colspan="9">暂无数据</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <el-drawer
+    v-model="dialogState.visible"
+    :title="dialogState.title"
+    :size="drawerSize"
+    class="develop-drawer"
+    @close="closeDialog"
+  >
+    <el-form ref="menuFormRef" :model="formData" :rules="rules" label-width="100px">
+      <el-form-item label="父级菜单" prop="pid">
+        <el-tree-select
+          v-model="formData.pid"
+          placeholder="选择上级菜单"
+          :data="menuOptions"
+          filterable
+          check-strictly
+          :render-after-expand="false"
+        />
+      </el-form-item>
+
+      <el-form-item label="菜单名称" prop="title">
+        <el-input v-model="formData.title" placeholder="请输入菜单名称" />
+      </el-form-item>
+
+      <el-form-item label="菜单类型" prop="type">
+        <el-radio-group v-model="formData.type">
+          <el-radio :value="0">菜单</el-radio>
+          <el-radio :value="1">权限</el-radio>
+        </el-radio-group>
+      </el-form-item>
+
+      <el-form-item v-if="formData.type === 0" label="路由路径" prop="path">
+        <el-input v-model="formData.path" placeholder="/system 或 user" />
+      </el-form-item>
+
+      <el-form-item v-if="formData.type === 0 && !isExternalLink" label="组件路径" prop="component">
+        <el-input v-model="formData.component" placeholder="system/user/index" style="width: 95%">
+          <template #prepend>src/views/</template>
+          <template #append>.vue</template>
+        </el-input>
+      </el-form-item>
+
+      <el-form-item v-if="formData.type === 0" label="显示状态" prop="hide">
+        <el-radio-group v-model="formData.hide">
+          <el-radio :value="0">显示</el-radio>
+          <el-radio :value="1">隐藏</el-radio>
+        </el-radio-group>
+      </el-form-item>
+
+      <el-form-item label="排序" prop="sort">
+        <el-input-number
+          v-model="formData.sort"
+          style="width: 100px"
+          controls-position="right"
+          :min="0"
+        />
+      </el-form-item>
+
+      <!-- 权限标识 -->
+      <el-form-item v-if="formData.type === 1" label="权限标识" prop="permission">
+        <el-input v-model="formData.permission" placeholder="sys:user:create" />
+      </el-form-item>
+
+      <el-form-item v-if="formData.type === 0" label="图标" prop="icon">
+        <icon-select v-model="formData.icon" />
+      </el-form-item>
+    </el-form>
+
+    <template #footer>
+      <div class="dialog-footer">
+        <el-button type="primary" @click="handleSubmit">确定</el-button>
+        <el-button @click="closeDialog">取消</el-button>
+      </div>
+    </template>
+  </el-drawer>
 </template>
 
 <script setup lang="ts">
@@ -245,7 +252,8 @@ const ICO_PATHS: Record<string, string> = {
   plus: '<path d="M12 5v14M5 12h14"/>',
   expand: '<path d="M4 14v6h6M20 10V4h-6M4 4l6 6M20 20l-6-6"/>',
   collapse: '<path d="M9 4v6H3M15 20v-6h6M3 10l6-6M21 14l-6 6"/>',
-  refresh: '<path d="M4 12a8 8 0 0114-5l3 3M20 12a8 8 0 01-14 5l-3-3"/><path d="M17 4v4h-4M7 20v-4h4"/>',
+  refresh:
+    '<path d="M4 12a8 8 0 0114-5l3 3M20 12a8 8 0 01-14 5l-3-3"/><path d="M17 4v4h-4M7 20v-4h4"/>',
   full: '<path d="M4 8V4h4M20 8V4h-4M4 16v4h4M20 16v4h-4"/>',
   chevRight: '<path d="M9 6l6 6-6 6"/>',
   edit: '<path d="M4 16L15 5l3 3-11 11H4v-3z"/>',
@@ -354,9 +362,7 @@ const drawerSize = computed(() => (appStore.device === DeviceEnum.DESKTOP ? "600
 
 const isExternalLink = computed(
   () =>
-    formData.value.type === 0 &&
-    !!formData.value.path &&
-    /^https?:\/\//.test(formData.value.path)
+    formData.value.type === 0 && !!formData.value.path && /^https?:\/\//.test(formData.value.path)
 );
 
 const rules: FormRules = {
@@ -492,8 +498,8 @@ onMounted(() => {
   --ai-info: #5b9eee;
   --ai-success: #6fba2c;
 
-  font-family: "M PLUS Rounded 1c", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei",
-    sans-serif;
+  font-family:
+    "M PLUS Rounded 1c", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
   color: var(--ai-text);
   font-size: 13px;
   line-height: 1.6;
@@ -635,7 +641,9 @@ onMounted(() => {
   height: 36px;
   width: 240px;
   outline: 0;
-  transition: border-color 0.18s, box-shadow 0.18s;
+  transition:
+    border-color 0.18s,
+    box-shadow 0.18s;
 }
 .input::placeholder {
   color: var(--ai-text-3);
@@ -659,7 +667,11 @@ onMounted(() => {
   border-radius: 999px;
   cursor: pointer;
   border: 1.5px solid transparent;
-  transition: transform 0.16s, box-shadow 0.16s, background 0.16s, color 0.16s;
+  transition:
+    transform 0.16s,
+    box-shadow 0.16s,
+    background 0.16s,
+    color 0.16s;
 }
 .btn-primary {
   background: linear-gradient(180deg, #84cf4f 0%, #6fba2c 100%);
@@ -797,11 +809,7 @@ onMounted(() => {
   vertical-align: middle;
 }
 .tbl th {
-  background: linear-gradient(
-    180deg,
-    rgba(216, 236, 198, 0.45) 0%,
-    rgba(232, 244, 210, 0.45) 100%
-  );
+  background: linear-gradient(180deg, rgba(216, 236, 198, 0.45) 0%, rgba(232, 244, 210, 0.45) 100%);
   font-weight: 800;
   color: var(--ai-text);
   font-size: 13px;
