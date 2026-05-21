@@ -175,6 +175,17 @@
   backdrop-filter: blur(18px);
 }
 
+/* 下拉/选择器弹层圆角裁切：外层 popper 默认小圆角会让边角看起来是直角，统一裁切成圆角 */
+.el-popper.el-dropdown__popper,
+.el-popper.el-select__popper {
+  border-radius: 16px !important;
+  overflow: hidden;
+}
+.el-popper.el-dropdown__popper .el-popper__arrow,
+.el-popper.el-select__popper .el-popper__arrow {
+  display: none;
+}
+
 .el-dialog__header,
 .el-dialog__footer,
 .el-message-box__header {

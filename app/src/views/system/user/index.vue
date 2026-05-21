@@ -21,16 +21,16 @@
       </div>
       <div class="filter-field">
         <label class="filter-label">性别：</label>
-        <select
-          class="select"
-          :value="queryParams['filter[gender]'] ?? ''"
-          @change="onGenderChange"
+        <el-select
+          v-model="queryParams['filter[gender]']"
+          class="filter-select"
+          placeholder="请选择性别"
+          clearable
         >
-          <option value="">请选择性别</option>
-          <option value="1">男</option>
-          <option value="2">女</option>
-          <option value="3">未知</option>
-        </select>
+          <el-option label="男" :value="1" />
+          <el-option label="女" :value="2" />
+          <el-option label="未知" :value="3" />
+        </el-select>
       </div>
       <button class="btn btn-primary" type="button" @click="handleQuery">
         <Ico name="search" :size="13" /> 查询
@@ -398,14 +398,6 @@ async function loadFormOptions(): Promise<void> {
 }
 
 /**
- * 性别筛选变更
- */
-function onGenderChange(e: Event): void {
-  const v = (e.target as HTMLSelectElement).value;
-  queryParams["filter[gender]"] = v === "" ? undefined : Number(v);
-}
-
-/**
  * 执行查询（重置页码）
  */
 function handleQuery(): void {
@@ -737,8 +729,7 @@ onMounted(() => {
   color: var(--ai-text);
   white-space: nowrap;
 }
-.input,
-.select {
+.input {
   font-family: inherit;
   font-size: 13px;
   font-weight: 500;
@@ -755,17 +746,25 @@ onMounted(() => {
 .input::placeholder {
   color: var(--ai-text-3);
 }
-.input:focus,
-.select:focus {
+.input:focus {
   border-color: var(--ai-primary);
   box-shadow: 0 0 0 3px rgba(25, 200, 185, 0.15);
 }
-.select {
-  appearance: none;
-  padding-right: 32px;
-  background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="none" stroke="%239f927d" stroke-width="2" stroke-linecap="round"><path d="M3 5l3 3 3-3"/></svg>');
-  background-repeat: no-repeat;
-  background-position: right 14px center;
+
+/* 性别选择器：药丸触发器，与文本框保持一致 */
+.filter-select {
+  width: 240px;
+}
+.filter-select :deep(.el-select__wrapper) {
+  min-height: 36px;
+  border-radius: 999px !important;
+  background: rgba(255, 255, 255, 0.9) !important;
+  border: 1.5px solid var(--ai-border) !important;
+  box-shadow: none !important;
+}
+.filter-select :deep(.el-select__wrapper.is-focused) {
+  border-color: var(--ai-primary) !important;
+  box-shadow: 0 0 0 3px rgba(25, 200, 185, 0.15) !important;
 }
 
 /* 按钮 */
