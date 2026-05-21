@@ -21,16 +21,12 @@
       </div>
       <div class="filter-field">
         <label class="filter-label">性别：</label>
-        <el-select
-          v-model="queryParams['filter[gender]']"
+        <Select
+          v-model="genderModel"
           class="filter-select"
           placeholder="请选择性别"
-          clearable
-        >
-          <el-option label="男" :value="1" />
-          <el-option label="女" :value="2" />
-          <el-option label="未知" :value="3" />
-        </el-select>
+          :options="genderOptions"
+        />
       </div>
       <button class="btn btn-primary" type="button" @click="handleQuery">
         <Ico name="search" :size="13" /> 查询
@@ -256,6 +252,7 @@ import { useDebounceFn } from "@vueuse/core";
 import { ElMessage, ElMessageBox, type FormInstance, type FormRules } from "element-plus";
 import type { UserForm, UserQueryParams, UserItem } from "@/types/api";
 import UserAPI from "@/api/system/user";
+import { Select } from "animal-island-vue";
 import { useUserStore, useAppStore } from "@/store";
 import { DeviceEnum, DialogMode, CommonStatus } from "@/enums";
 
@@ -313,6 +310,20 @@ const queryParams = reactive<UserQueryParams>({
   "filter[phone]": "",
   "filter[gender]": undefined,
   "filter[status]": undefined,
+});
+
+// 性别筛选（动森 Select 仅接受字符串，做一层 string↔number 转换；"" 表示全部）
+const genderOptions = [
+  { key: "", label: "全部" },
+  { key: "1", label: "男" },
+  { key: "2", label: "女" },
+  { key: "3", label: "未知" },
+];
+const genderModel = computed<string>({
+  get: () => (queryParams["filter[gender]"] == null ? "" : String(queryParams["filter[gender]"])),
+  set: (v) => {
+    queryParams["filter[gender]"] = v === "" ? undefined : Number(v);
+  },
 });
 
 // 列表数据
@@ -751,20 +762,9 @@ onMounted(() => {
   box-shadow: 0 0 0 3px rgba(25, 200, 185, 0.15);
 }
 
-/* 性别选择器：药丸触发器，与文本框保持一致 */
+/* 性别选择器：动森 Select，撑满筛选位宽度 */
 .filter-select {
   width: 240px;
-}
-.filter-select :deep(.el-select__wrapper) {
-  min-height: 36px;
-  border-radius: 999px !important;
-  background: rgba(255, 255, 255, 0.9) !important;
-  border: 1.5px solid var(--ai-border) !important;
-  box-shadow: none !important;
-}
-.filter-select :deep(.el-select__wrapper.is-focused) {
-  border-color: var(--ai-primary) !important;
-  box-shadow: 0 0 0 3px rgba(25, 200, 185, 0.15) !important;
 }
 
 /* 按钮 */
