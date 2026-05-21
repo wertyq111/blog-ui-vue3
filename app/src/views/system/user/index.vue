@@ -206,14 +206,11 @@
         </el-form-item>
 
         <el-form-item label="角色" prop="roleIds">
-          <el-select v-model="formData.roleIds" multiple placeholder="请选择">
-            <el-option
-              v-for="item in roleOptions"
-              :key="item.value"
-              :label="item.label"
-              :value="item.value"
-            />
-          </el-select>
+          <AnimalMultiSelect
+            v-model="roleIdsModel"
+            :options="roleSelectOptions"
+            placeholder="请选择"
+          />
         </el-form-item>
 
         <el-form-item label="手机号码" prop="phone">
@@ -253,6 +250,7 @@ import { ElMessage, ElMessageBox, type FormInstance, type FormRules } from "elem
 import type { UserForm, UserQueryParams, UserItem } from "@/types/api";
 import UserAPI from "@/api/system/user";
 import { Select } from "animal-island-vue";
+import AnimalMultiSelect from "@/components/AnimalMultiSelect/index.vue";
 import { useUserStore, useAppStore } from "@/store";
 import { DeviceEnum, DialogMode, CommonStatus } from "@/enums";
 
@@ -368,6 +366,17 @@ const formData = reactive<UserForm>({ ...initialFormData });
 
 // 下拉选项
 const roleOptions = ref<any[]>();
+
+// 动森多选适配：选项 {key,label}；值在 string[](组件) 与 number[](表单) 间转换
+const roleSelectOptions = computed(() =>
+  (roleOptions.value ?? []).map((item) => ({ key: String(item.value), label: item.label }))
+);
+const roleIdsModel = computed<string[]>({
+  get: () => (formData.roleIds ?? []).map((id) => String(id)),
+  set: (keys) => {
+    formData.roleIds = keys.map((k) => Number(k));
+  },
+});
 
 const drawerSize = computed(() => (appStore.device === DeviceEnum.DESKTOP ? "600px" : "90%"));
 
