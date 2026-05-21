@@ -250,21 +250,19 @@
         </el-row>
 
         <el-form-item v-if="formData.type === 0" label="权限节点">
-          <el-transfer
-            v-model="checkedPermNodes"
-            :data="permNodeList"
-            :titles="['全部节点', '已赋予节点']"
+          <AnimalMultiSelect
+            v-model="permNodesModel"
+            :options="permNodeOptions"
+            placeholder="请选择权限节点"
           />
         </el-form-item>
 
         <el-form-item label="备注">
-          <el-input
+          <AnimalTextarea
             v-model="formData.note"
-            type="textarea"
             :rows="3"
-            maxlength="200"
+            :maxlength="200"
             placeholder="请输入备注"
-            clearable
           />
         </el-form-item>
       </el-form>
@@ -283,6 +281,8 @@
 import MenuAPI from "@/api/system/menu";
 import { Icon, Input, Select, Switch } from "animal-island-vue";
 import AnimalTreeSelect from "@/components/AnimalTreeSelect/index.vue";
+import AnimalMultiSelect from "@/components/AnimalMultiSelect/index.vue";
+import AnimalTextarea from "@/components/AnimalTextarea/index.vue";
 import { resolveAnimalIcon } from "@/utils/menuAnimalIcon";
 import type { MenuQueryParams, MenuForm, MenuItem } from "@/types/api";
 import type { FormInstance, FormRules } from "element-plus";
@@ -488,6 +488,15 @@ const sortModel = computed<string>({
   get: () => (formData.value.sort == null ? "" : String(formData.value.sort)),
   set: (v) => {
     formData.value.sort = v === "" ? undefined : Number(v);
+  },
+});
+
+// 权限节点：动森多选用 {key,label} + string[]，与 checkedPermNodes(number[]) 互转
+const permNodeOptions = permNodeList.map((p) => ({ key: String(p.key), label: p.label }));
+const permNodesModel = computed<string[]>({
+  get: () => checkedPermNodes.value.map((k) => String(k)),
+  set: (keys) => {
+    checkedPermNodes.value = keys.map((k) => Number(k));
   },
 });
 

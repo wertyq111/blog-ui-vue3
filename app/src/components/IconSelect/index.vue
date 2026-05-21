@@ -1,127 +1,230 @@
 <template>
-  <div ref="iconSelectRef" :style="{ width: props.width }">
-    <el-popover :visible="popoverVisible" :width="props.width" placement="bottom-end">
-      <template #reference>
-        <div @click="popoverVisible = !popoverVisible">
-          <slot>
-            <el-input v-model="selectedIcon" readonly placeholder="点击选择图标" class="reference">
-              <template #prepend>
-                <Icon v-if="selectedIcon" :name="resolveAnimalIcon(selectedIcon)" :size="18" />
-              </template>
-              <template #suffix>
-                <!-- 清空按钮 -->
-                <el-icon
-                  v-if="selectedIcon"
-                  style="margin-right: 8px"
-                  @click.stop="clearSelectedIcon"
-                >
-                  <CircleClose />
-                </el-icon>
+  <div
+    ref="wrapperRef"
+    class="ais"
+    :class="{ 'ais--disabled': disabled, 'ais--open': open }"
+    :style="{ width }"
+  >
+    <div class="ais__trigger" @click="toggleOpen">
+      <span v-if="selectedIcon" class="ais__value">
+        <Icon :name="resolveAnimalIcon(selectedIcon)" :size="18" />
+        <span class="ais__value-name">{{ selectedIcon }}</span>
+      </span>
+      <span v-else class="ais__placeholder">点击选择图标</span>
 
-                <el-icon
-                  :style="{
-                    transform: popoverVisible ? 'rotate(180deg)' : 'rotate(0)',
-                    transition: 'transform .5s',
-                  }"
-                >
-                  <ArrowDown @click.stop="togglePopover" />
-                </el-icon>
-              </template>
-            </el-input>
-          </slot>
-        </div>
-      </template>
+      <span
+        v-if="selectedIcon && !disabled"
+        class="ais__clear"
+        @click.stop="clearSelectedIcon"
+      >
+        ×
+      </span>
+      <span class="ais__arrow" :class="{ 'ais__arrow--open': open }">
+        <svg
+          viewBox="0 0 24 24"
+          width="16"
+          height="16"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2.2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <path d="M6 9l6 6 6-6" />
+        </svg>
+      </span>
+    </div>
 
-      <!-- 动森图标选择弹窗 -->
-      <div ref="popoverContentRef">
-        <el-scrollbar max-height="320px">
-          <ul class="icon-grid">
-            <li
-              v-for="name in ANIMAL_ICON_NAMES"
-              :key="name"
-              class="icon-grid-item"
-              :class="{ 'is-active': selectedIcon === name }"
-              @click="selectIcon(name)"
-            >
-              <el-tooltip :content="name" placement="bottom" effect="light">
-                <Icon :name="name" :size="28" />
-              </el-tooltip>
-            </li>
-          </ul>
-        </el-scrollbar>
+    <transition name="ais-fade">
+      <div v-if="open" class="ais__dropdown">
+        <ul class="ais__grid">
+          <li
+            v-for="name in ANIMAL_ICON_NAMES"
+            :key="name"
+            class="ais__item"
+            :class="{ 'is-active': selectedIcon === name }"
+            @click="selectIcon(name)"
+          >
+            <el-tooltip :content="name" placement="bottom" effect="light">
+              <Icon :name="name" :size="28" />
+            </el-tooltip>
+          </li>
+        </ul>
       </div>
-    </el-popover>
+    </transition>
   </div>
 </template>
 
 <script setup lang="ts">
+import { ref } from "vue";
+import { onClickOutside } from "@vueuse/core";
 import { Icon } from "animal-island-vue";
 import { ANIMAL_ICON_NAMES, resolveAnimalIcon } from "@/utils/menuAnimalIcon";
 
-const props = defineProps({
-  width: {
-    type: String,
-    default: "320px",
-  },
-});
+withDefaults(
+  defineProps<{
+    width?: string;
+    disabled?: boolean;
+  }>(),
+  {
+    width: "100%",
+    disabled: false,
+  }
+);
 
 const selectedIcon = defineModel<string>("modelValue", { default: "" });
 
-const iconSelectRef = ref();
-const popoverContentRef = ref();
-const popoverVisible = ref(false);
+const wrapperRef = ref<HTMLElement>();
+const open = ref(false);
 
-function selectIcon(name: string) {
+function toggleOpen(): void {
+  open.value = !open.value;
+}
+
+function selectIcon(name: string): void {
   selectedIcon.value = name;
-  popoverVisible.value = false;
+  open.value = false;
 }
 
-function togglePopover() {
-  popoverVisible.value = !popoverVisible.value;
-}
-
-function clearSelectedIcon() {
+function clearSelectedIcon(): void {
   selectedIcon.value = "";
 }
 
-onClickOutside(iconSelectRef, () => (popoverVisible.value = false), {
-  ignore: [popoverContentRef],
-});
+onClickOutside(wrapperRef, () => (open.value = false));
 </script>
 
 <style scoped lang="scss">
-.reference :deep(.el-input__wrapper),
-.reference :deep(.el-input__inner) {
-  cursor: pointer;
+.ais {
+  position: relative;
+  font-family: Nunito, "Noto Sans SC", "Zen Maru Gothic", -apple-system, "PingFang SC",
+    "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+  user-select: none;
 }
 
-.icon-grid {
+.ais__trigger {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 40px;
+  padding: 5px 12px;
+  background: #fff;
+  border: 2px solid #e8dcc8;
+  border-radius: 14px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.ais__trigger:hover {
+  border-color: #d4c4a8;
+  background: #fffdf7;
+}
+.ais--open .ais__trigger {
+  border-color: #19c8b9;
+  background: #fffdf7;
+}
+.ais--disabled .ais__trigger {
+  opacity: 0.5;
+  cursor: not-allowed;
+  background: #f5f5f0;
+  pointer-events: none;
+}
+
+.ais__value {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+  min-width: 0;
+  color: #725d42;
+  font-weight: 600;
+}
+.ais__value-name {
+  font-size: 13px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.ais__placeholder {
+  flex: 1;
+  font-size: 14px;
+  color: #a09080;
+  font-weight: 400;
+}
+.ais__clear {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  color: #a09080;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.ais__clear:hover {
+  color: #725d42;
+  background: rgba(114, 93, 66, 0.1);
+}
+.ais__arrow {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+  color: #a09080;
+  transition: transform 0.2s, color 0.2s;
+}
+.ais__arrow--open {
+  transform: rotate(180deg);
+  color: #19c8b9;
+}
+
+.ais__dropdown {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  right: 0;
+  z-index: 100;
+  padding: 12px;
+  background: #ffeea0;
+  border-radius: 22px;
+  box-shadow: 0 10px 26px rgba(110, 80, 40, 0.18);
+}
+.ais__grid {
   display: flex;
   flex-wrap: wrap;
-  padding: 4px;
+  gap: 8px;
   margin: 0;
+  padding: 0;
   list-style: none;
 }
-
-.icon-grid-item {
+.ais__item {
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 10px;
-  margin: 5px;
   cursor: pointer;
-  border: 2px solid #e8e2d6;
+  color: #725d42;
+  background: rgba(255, 255, 255, 0.55);
+  border: 2px solid transparent;
   border-radius: 14px;
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
-
-.icon-grid-item:hover {
+.ais__item:hover {
   border-color: #19c8b9;
   transform: translateY(-2px);
 }
-
-.icon-grid-item.is-active {
+.ais__item.is-active {
   border-color: #19c8b9;
   background: #e6f9f6;
+}
+
+.ais-fade-enter-active,
+.ais-fade-leave-active {
+  transition: opacity 0.18s ease, transform 0.18s ease;
+}
+.ais-fade-enter-from,
+.ais-fade-leave-to {
+  opacity: 0;
+  transform: translateY(-6px);
 }
 </style>
