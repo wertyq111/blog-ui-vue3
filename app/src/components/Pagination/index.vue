@@ -1,7 +1,7 @@
 <!-- 动森风格专属分页组件：完全独立于 element-plus，使用纯原生 HTML + SCSS 与自带 select / input 完成高品质圆润奶油纸片换页 -->
 <template>
-  <AnimalScrollbar>
-    <div :class="{ hidden: hidden }" class="pagination animal-pagination">
+  <div :class="{ hidden: hidden }" class="animal-pagination-container">
+    <div class="pagination animal-pagination">
       <!-- 1. 共 X 条 -->
       <span class="animal-pagination__total">共 {{ total }} 条</span>
 
@@ -86,14 +86,13 @@
         页
       </div>
     </div>
-  </AnimalScrollbar>
+  </div>
 </template>
 
 <script setup lang="ts">
 import { computed, ref, watch } from "vue";
 import type { PropType } from "vue";
 import { Select } from "animal-island-vue";
-import AnimalScrollbar from "@/components/AnimalScrollbar/index.vue";
 
 defineOptions({
   name: "Pagination",
@@ -226,9 +225,15 @@ function handlePageChange(val: number) {
 </script>
 
 <style lang="scss" scoped>
-.pagination {
-  padding: 12px 12px 60px 12px;
+.animal-pagination-container {
+  padding-top: 12px;
+  padding-bottom: 72px; /* 提供充足的底部溢出安全空间，彻底防遮挡 */
+  display: flex;
+  justify-content: center;
+  width: 100%;
+}
 
+.pagination {
   &.hidden {
     display: none;
   }
@@ -375,11 +380,5 @@ function handlePageChange(val: number) {
       background: #fff;
     }
   }
-}
-
-/* 解决绝对定位 Select 弹出菜单在滚动条包裹下的溢出裁剪与高度挤压问题 */
-:deep(.animal-scrollbar),
-:deep(.animal-scrollbar__wrap) {
-  overflow: visible !important;
 }
 </style>

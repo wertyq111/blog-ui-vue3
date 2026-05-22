@@ -141,7 +141,7 @@
                 </span>
               </td>
               <td class="cell-num">{{ row.id }}</td>
-              <td>
+              <td class="tbl-name-cell">
                 <div class="todo-title-cell">
                   <span :class="{ 'todo-title--done': row.status === 2 }">{{ row.title }}</span>
                   <div v-if="row.tags && row.tags.length" class="todo-tags-inline">
@@ -489,6 +489,12 @@ onMounted(async () => {
   text-align: left;
   gap: 4px;
   width: 100%;
+
+  span {
+    display: block;
+    width: 100%;
+    text-align: left;
+  }
 }
 
 .todo-title--done {
