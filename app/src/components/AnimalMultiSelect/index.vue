@@ -25,39 +25,41 @@
       </span>
     </div>
 
-    <transition name="ams-fade">
-      <div v-if="open" class="ams__dropdown">
-        <div
-          v-for="opt in options"
-          :key="opt.key"
-          class="ams__option"
-          :class="{ 'ams__option--selected': isSelected(opt.key) }"
-          @click="selectOption(opt.key)"
-        >
-          <span class="ams__option-label">{{ opt.label }}</span>
-          <span v-if="isSelected(opt.key)" class="ams__check">
-            <svg
-              viewBox="0 0 24 24"
-              width="16"
-              height="16"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2.6"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-            >
-              <path d="M4 12l5 5 11-11" />
-            </svg>
-          </span>
+    <Teleport to="body">
+      <transition name="ams-fade">
+        <div v-if="open" ref="dropdownRef" class="ams__dropdown" :style="dropdownStyle">
+          <div
+            v-for="opt in options"
+            :key="opt.key"
+            class="ams__option"
+            :class="{ 'ams__option--selected': isSelected(opt.key) }"
+            @click="selectOption(opt.key)"
+          >
+            <span class="ams__option-label">{{ opt.label }}</span>
+            <span v-if="isSelected(opt.key)" class="ams__check">
+              <svg
+                viewBox="0 0 24 24"
+                width="16"
+                height="16"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2.6"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path d="M4 12l5 5 11-11" />
+              </svg>
+            </span>
+          </div>
+          <div v-if="!options.length" class="ams__empty">暂无选项</div>
         </div>
-        <div v-if="!options.length" class="ams__empty">暂无选项</div>
-      </div>
-    </transition>
+      </transition>
+    </Teleport>
   </div>
 </template>
 
 <script setup lang="ts">
-import { computed, ref } from "vue";
+import { computed, nextTick, onBeforeUnmount, ref } from "vue";
 import { onClickOutside } from "@vueuse/core";
 
 interface AnimalSelectOption {
@@ -83,7 +85,9 @@ const emit = defineEmits<{ (e: "change", value: string[]): void }>();
 const model = defineModel<string[]>({ default: () => [] });
 
 const wrapperRef = ref<HTMLElement>();
+const dropdownRef = ref<HTMLElement>();
 const open = ref(false);
+const dropdownStyle = ref<Record<string, string>>({});
 
 const selectedOptions = computed(() => props.options.filter((o) => model.value.includes(o.key)));
 
@@ -94,6 +98,7 @@ function isSelected(key: string): boolean {
 function toggleOpen(): void {
   if (props.disabled) return;
   open.value = !open.value;
+  if (open.value) nextTick(updateDropdownPosition);
 }
 
 function selectOption(key: string): void {
@@ -112,7 +117,35 @@ function removeTag(key: string): void {
   emit("change", next);
 }
 
-onClickOutside(wrapperRef, () => (open.value = false));
+function updateDropdownPosition(): void {
+  const rect = wrapperRef.value?.getBoundingClientRect();
+  if (!rect) return;
+
+  const maxHeight = Math.max(220, window.innerHeight - rect.bottom - 24);
+  dropdownStyle.value = {
+    left: `${rect.left}px`,
+    top: `${rect.bottom + 6}px`,
+    width: `${rect.width}px`,
+    maxHeight: `${Math.min(420, maxHeight)}px`,
+  };
+}
+
+function handleWindowMove(): void {
+  if (open.value) updateDropdownPosition();
+}
+
+window.addEventListener("resize", handleWindowMove);
+window.addEventListener("scroll", handleWindowMove, true);
+
+onBeforeUnmount(() => {
+  window.removeEventListener("resize", handleWindowMove);
+  window.removeEventListener("scroll", handleWindowMove, true);
+});
+
+onClickOutside(wrapperRef, (event) => {
+  if (dropdownRef.value?.contains(event.target as Node)) return;
+  open.value = false;
+});
 </script>
 
 <style scoped lang="scss">
@@ -222,13 +255,11 @@ onClickOutside(wrapperRef, () => (open.value = false));
 
 /* 下拉面板 */
 .ams__dropdown {
-  position: absolute;
-  top: calc(100% + 6px);
-  left: 0;
-  right: 0;
-  z-index: 100;
+  position: fixed;
+  z-index: 2600;
   padding: 10px 0;
-  overflow: visible;
+  overflow-x: visible;
+  overflow-y: auto;
   background: #ffeea0;
   border-radius: 22px;
   box-shadow: 0 10px 26px rgba(110, 80, 40, 0.18);

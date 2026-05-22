@@ -10,16 +10,32 @@
       content="vue,element-plus,typescript,vue-element-admin,vue3-element-admin"
     />
     <title>%VITE_APP_TITLE%</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@800;900&family=Noto+Sans+SC:wght@700;900&display=swap" rel="stylesheet">
   </head>
 
   <body>
     <div id="app">
-      <div class="loading-container">
-        <div class="loading-spinner">
-          <div class="loading-bar"></div>
-          <div class="loading-bar"></div>
-          <div class="loading-bar"></div>
+      <div class="ac-loading-screen">
+        <div class="ac-loading-content">
+          <!-- 动森标志性绿叶 3D 卡片 -->
+          <div class="ac-leaf-wrapper">
+            <svg class="ac-loading-leaf" viewBox="0 0 80 80">
+              <!-- 绿叶主体 -->
+              <path d="M5 75c0-30 25-65 70-65 0 45-35 70-70 65z" fill="#7cba70" stroke="#4a8a36" stroke-width="3" stroke-linejoin="round" />
+              <!-- 叶脉 -->
+              <path d="M5 75q35-25 70-65" stroke="#4a8a36" stroke-width="2.5" fill="none" stroke-linecap="round" />
+            </svg>
+          </div>
+          <!-- 动森可爱弹跳文字 -->
+          <div class="ac-loading-text">
+            <span>L</span><span>o</span><span>a</span><span>d</span><span>i</span><span>n</span><span>g</span>
+            <span class="dot">.</span><span class="dot">.</span><span class="dot">.</span>
+          </div>
         </div>
+        <!-- 底部草地波浪装饰 -->
+        <div class="ac-loading-ground"></div>
       </div>
     </div>
   </body>
@@ -30,63 +46,140 @@
     body,
     #app {
       position: relative;
-      display: flex;
-      align-items: center;
-      justify-content: center;
       width: 100%;
       height: 100%;
+      margin: 0;
+      padding: 0;
+      background-color: #fdfdf5;
+      font-family: 'Nunito', 'Noto Sans SC', sans-serif;
+      overflow: hidden;
     }
 
-    .loading-container {
+    .ac-loading-screen {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
       display: flex;
       flex-direction: column;
-      gap: 24px;
       align-items: center;
       justify-content: center;
+      background-color: #fdfdf5;
+      z-index: 9999;
     }
 
-    .loading-spinner {
+    .ac-loading-content {
       display: flex;
-      gap: 6px;
+      flex-direction: column;
       align-items: center;
       justify-content: center;
-      height: 40px;
+      gap: 24px;
     }
 
-    .loading-bar {
-      width: 4px;
-      height: 24px;
-      background-color: #498cff;
-      border-radius: 2px;
-      animation: loading-animation 1.2s ease-in-out infinite;
+    /* 动森 3D 有机圆角卡片 wrapper */
+    .ac-leaf-wrapper {
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 110px;
+      height: 110px;
+      background: #ffffff;
+      border: 3.5px solid #794f27;
+      border-radius: 35px 28px 38px 30px / 30px 35px 28px 38px;
+      box-shadow: 
+        0 8px 0 0 #bdaea0,
+        0 12px 24px rgba(61, 52, 40, 0.12);
+      animation: ac-card-bounce 2.2s ease-in-out infinite;
     }
 
-    .loading-bar:nth-child(1) {
-      animation-delay: 0s;
+    .ac-loading-leaf {
+      width: 58px;
+      height: 58px;
+      transform-origin: 20px 60px;
+      animation: ac-leaf-swing 1.8s ease-in-out infinite;
     }
 
-    .loading-bar:nth-child(2) {
-      animation-delay: 0.2s;
+    /* 动森风格跳跃 Loading 字体 */
+    .ac-loading-text {
+      display: flex;
+      align-items: center;
+      font-size: 22px;
+      font-weight: 900;
+      color: #794f27;
+      letter-spacing: 2px;
+      text-shadow: 0 1px 0 #ffffff;
     }
 
-    .loading-bar:nth-child(3) {
-      animation-delay: 0.4s;
+    .ac-loading-text span {
+      display: inline-block;
+      animation: ac-text-jump 1.6s ease-in-out infinite;
     }
 
-    @keyframes loading-animation {
-      0% {
-        opacity: 0.3;
-        transform: scaleY(0.5);
+    /* 逐字跳跃延迟 */
+    .ac-loading-text span:nth-child(1) { animation-delay: 0s; }
+    .ac-loading-text span:nth-child(2) { animation-delay: 0.1s; }
+    .ac-loading-text span:nth-child(3) { animation-delay: 0.2s; }
+    .ac-loading-text span:nth-child(4) { animation-delay: 0.3s; }
+    .ac-loading-text span:nth-child(5) { animation-delay: 0.4s; }
+    .ac-loading-text span:nth-child(6) { animation-delay: 0.5s; }
+    .ac-loading-text span:nth-child(7) { animation-delay: 0.6s; }
+    
+    /* 弹跳省略号 */
+    .ac-loading-text .dot:nth-child(8) { animation-delay: 0.7s; }
+    .ac-loading-text .dot:nth-child(9) { animation-delay: 0.8s; }
+    .ac-loading-text .dot:nth-child(10) { animation-delay: 0.9s; }
+
+    /* 底部地平面装饰 */
+    .ac-loading-ground {
+      position: absolute;
+      bottom: -10px;
+      left: -5%;
+      width: 110%;
+      height: 48px;
+      background-color: #7cba70;
+      border-top: 4px solid #4a8a36;
+      border-radius: 50% 50% 0 0 / 24px 24px 0 0;
+      box-shadow: inset 0 4px 0 rgba(255, 255, 255, 0.2);
+      animation: ac-ground-wave 12s ease-in-out infinite;
+    }
+
+    /* 动画定义 */
+    @keyframes ac-card-bounce {
+      0%, 100% {
+        transform: translateY(0) rotate(0deg);
       }
-
       50% {
-        opacity: 1;
-        transform: scaleY(1.2);
+        transform: translateY(-10px) rotate(3deg);
       }
+    }
 
-      100% {
-        opacity: 0.3;
-        transform: scaleY(0.5);
+    @keyframes ac-leaf-swing {
+      0%, 100% {
+        transform: rotate(-8deg) scale(1);
+      }
+      50% {
+        transform: rotate(18deg) scale(1.1);
+      }
+    }
+
+    @keyframes ac-text-jump {
+      0%, 100% {
+        transform: translateY(0);
+      }
+      50% {
+        transform: translateY(-6px);
+        color: #19c8b9;
+      }
+    }
+
+    @keyframes ac-ground-wave {
+      0%, 100% {
+        transform: translateY(0) scaleY(1);
+      }
+      50% {
+        transform: translateY(3px) scaleY(0.92);
       }
     }
   </style>

@@ -1,11 +1,10 @@
 <template>
-  <el-dialog
-    :model-value="visible"
+  <AdminAnimalModal
+    :visible="visible"
     :title="title"
-    width="750px"
-    class="develop-dialog"
-    @update:model-value="handleVisibleChange"
-    @close="closeDialog"
+    width="960px"
+    content-class="admin-animal-modal__content--wide"
+    @update:visible="handleVisibleChange"
   >
     <el-form
       ref="formRef"
@@ -118,12 +117,13 @@
         <Button type="primary" :loading="loading" @click="handleSubmit">保存</Button>
       </div>
     </template>
-  </el-dialog>
+  </AdminAnimalModal>
 </template>
 
 <script setup lang="ts">
 import { computed, nextTick, ref, watch } from "vue";
 import { ElMessage, type FormInstance, type FormRules } from "element-plus";
+import AdminAnimalModal from "@/components/AdminPage/AdminAnimalModal.vue";
 import { Button, Input, Select, Switch } from "animal-island-vue";
 import AnimalTreeSelect from "@/components/AnimalTreeSelect/index.vue";
 import AnimalMultiSelect from "@/components/AnimalMultiSelect/index.vue";

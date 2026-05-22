@@ -10,6 +10,7 @@
     range-separator="至"
     :value-format="valueFormat"
     :clearable="clearable"
+    popper-class="animal-datepicker-popper"
     v-bind="$attrs"
   />
 </template>

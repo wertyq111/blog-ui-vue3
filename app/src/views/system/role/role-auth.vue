@@ -1,9 +1,9 @@
 <template>
-  <el-drawer
-    :model-value="visible"
+  <AdminAnimalModal
+    :visible="visible"
     :title="`【${role?.name ?? ''}】权限分配`"
-    :size="drawerSize"
-    @update:model-value="handleVisibleChange"
+    width="760px"
+    @update:visible="handleVisibleChange"
   >
     <div class="assign-toolbar">
       <Input v-model="permKeywords" allow-clear class="assign-search" placeholder="菜单权限名称">
@@ -50,7 +50,7 @@
     </el-tree>
 
     <template #footer>
-      <div class="dialog-footer">
+      <div class="develop-dialog-footer">
         <Button
           v-hasPerm="'sys:role:permission'"
           type="primary"
@@ -62,15 +62,14 @@
         <Button type="default" @click="closeDrawer">取消</Button>
       </div>
     </template>
-  </el-drawer>
+  </AdminAnimalModal>
 </template>
 
 <script setup lang="ts">
-import { computed, nextTick, ref, watch } from "vue";
+import { nextTick, ref, watch } from "vue";
 import { ElMessage } from "element-plus";
 import { Button, Input, Switch } from "animal-island-vue";
-import { useAppStore } from "@/store/modules/app";
-import { DeviceEnum } from "@/enums/settings";
+import AdminAnimalModal from "@/components/AdminPage/AdminAnimalModal.vue";
 import RoleAPI from "@/api/system/role";
 import type { BackendPermissionItem, OptionItem, RoleItem } from "@/types/api";
 import SystemIco from "@/components/AdminPage/SystemIco.vue";
@@ -85,9 +84,6 @@ const emit = defineEmits<{
   "update:visible": [value: boolean];
   done: [];
 }>();
-
-const appStore = useAppStore();
-const drawerSize = computed(() => (appStore.device === DeviceEnum.DESKTOP ? "600px" : "90%"));
 
 const permTreeRef = ref<any>();
 const loading = ref(false);

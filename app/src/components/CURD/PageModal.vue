@@ -66,9 +66,10 @@
     </template>
     <!-- dialog -->
     <template v-else>
-      <el-dialog
-        v-model="modalVisible"
-        v-bind="{ destroyOnClose: true, alignCenter: true, ...modalConfig.dialog }"
+      <AdminAnimalModal
+        v-model:visible="modalVisible"
+        :title="dialogTitle"
+        :width="dialogWidth"
         @close="handleClose"
       >
         <el-form ref="formRef" v-bind="modalConfig.form" :model="formData" :rules="formRules">
@@ -124,10 +125,10 @@
         </el-form>
 
         <template #footer>
-          <el-button v-if="!formDisable" type="primary" @click="handleSubmit">确定</el-button>
-          <el-button @click="handleClose">关闭</el-button>
+          <Button v-if="!formDisable" type="primary" @click="handleSubmit">确定</Button>
+          <Button type="default" @click="handleClose">关闭</Button>
         </template>
-      </el-dialog>
+      </AdminAnimalModal>
     </template>
   </div>
 </template>
@@ -136,6 +137,8 @@
 import { useThrottleFn } from "@vueuse/core";
 import cloneDeep from "lodash-es/cloneDeep";
 import type { FormInstance, FormRules } from "element-plus";
+import { Button } from "animal-island-vue";
+import AdminAnimalModal from "@/components/AdminPage/AdminAnimalModal.vue";
 import type { IComponentType, IModalConfig, IObject } from "./types";
 import InputTag from "@/components/InputTag/index.vue";
 import IconSelect from "@/components/IconSelect/index.vue";
@@ -180,6 +183,8 @@ const formItems = reactive(props.modalConfig.formItems ?? []); // 表单配置�
 const formData = reactive<IObject>({}); // 表单数据
 const formRules: FormRules = {}; // 表单验证规则
 const formDisable = ref(false); // 表单禁用状态"
+const dialogTitle = computed(() => String(props.modalConfig.dialog?.title ?? ""));
+const dialogWidth = computed(() => props.modalConfig.dialog?.width ?? 680);
 
 // 获取 tooltip 提示框属性
 const getTooltipProps = (tips: string | IObject) => {

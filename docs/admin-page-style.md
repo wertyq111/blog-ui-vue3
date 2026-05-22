@@ -60,13 +60,14 @@ views/<module>/<page>/
 └─ <page>-auth.vue    权限分配等复杂抽屉/弹窗（按需）
 ```
 
-`index.vue` 不直接写大段 `el-dialog` / `el-drawer` 表单。弹窗组件通过 `v-model:visible` 控制显示，保存成功后 `emit("done")` 让列表刷新。
+`index.vue` 不直接写大段表单。编辑、授权、导入导出等弹窗统一用 `AdminAnimalModal`，组件通过 `v-model:visible` 控制显示，保存成功后 `emit("done")` 让列表刷新。
 
 ---
 
-## 四、编辑表单页（弹窗）
+## 四、编辑表单页（动森弹窗）
 
-- 用 `el-dialog`（`class="develop-dialog"`）承载表单，表单 `class="develop-dialog-form"`，footer `class="develop-dialog-footer"`（这些是全局动森样式）。
+- 用 `app/src/components/AdminPage/AdminAnimalModal.vue` 承载弹窗，不再直接写 `el-dialog`。它基于 `animal-island-vue` 的 `Modal`，统一 blob 外形、遮罩、缩放动画、标题和 footer。
+- 表单 `class="develop-dialog-form"`，footer `class="develop-dialog-footer"`；宽度按内容设 `520px` / `680px` / `900px` / `1000px`。
 - 顶部一行 `.field-desc` 说明；主体用 `el-row :gutter="15"` + 两列 `el-col :sm="12"` 布局。
 - **表单字段沿用 Vue2（blog-ui）对应编辑表单的结构与字段**，控件换成动森系：
   | 字段类型 | 用什么 |
@@ -88,6 +89,7 @@ views/<module>/<page>/
 | 类型 | 路径 | 用途 |
 |---|---|---|
 | 页面样式 | `app/src/styles/_system-management.scss` | 后台列表页/编辑页公共动森样式 |
+| 动森弹窗 | `app/src/components/AdminPage/AdminAnimalModal.vue` | 新增/编辑/授权/导入导出弹窗，替代直接使用 `el-dialog` |
 | 线性图标 | `app/src/components/AdminPage/SystemIco.vue` | 查询、添加、删除、刷新等列表页图标 |
 | 动森标签 | `app/src/components/AnimalTag/index.vue` | 动森风标签（角色/等级/类型/状态展示），替代 `.pill` |
 | 表格勾选 | `app/src/composables/useTableSelection.ts` | 自定义 table 勾选、全选、清空 |
@@ -98,7 +100,7 @@ views/<module>/<page>/
 | 图标选择 | `app/src/components/IconSelect/index.vue` | 动森图标选择器 |
 | 菜单图标映射 | `app/src/utils/menuAnimalIcon.ts` | 菜单/侧边栏图标 → 动森 Icon 映射 |
 
-Element Plus 弹层（el-select/el-dropdown/dialog 等）的动森风全局样式在 `app/src/styles/vendors/_element-plus.scss`。
+Element Plus 下拉弹层（el-select/el-dropdown/popover 等）的动森风全局样式在 `app/src/styles/vendors/_element-plus.scss`；业务弹窗不要直接使用 `el-dialog`，全走 `AdminAnimalModal`。
 
 ---
 

@@ -261,3 +261,361 @@
     background: rgba(25, 200, 185, 0.08);
   }
 }
+
+/* ==========================================================================
+   追加的动森动效与双日历、日期框覆写样式
+   ========================================================================== */
+
+/* 1. 下拉框 hover 小手入场与回弹动画 */
+@keyframes animal-dropdown-cursor-in {
+  0% {
+    opacity: 0;
+    transform: translateY(-50%) translate(-8px) rotate(-15deg);
+  }
+  60% {
+    opacity: 1;
+    transform: translateY(-50%) translate(2px) rotate(5deg);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(-50%) translate(0) rotate(0);
+  }
+}
+
+/* 2. 动森高精度日期选择弹窗 - 双日历范围与单日期定制扩展 */
+.el-popper.el-picker__popper.animal-datepicker-popper {
+  background: #fdfbf7 !important;
+  border: 2px solid #e8e2d6 !important;
+  border-radius: 20px !important;
+  box-shadow: 0 8px 30px rgba(121, 79, 39, 0.08) !important;
+  padding: 0 !important;
+  overflow: hidden;
+
+  .el-picker-panel,
+  .el-date-picker,
+  .el-date-range-picker {
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+  }
+
+  // 头部样式
+  .el-date-picker__header,
+  .el-date-range-picker__header {
+    color: #794f27 !important;
+    font-weight: 800 !important;
+    font-size: 14px !important;
+    margin-bottom: 8px !important;
+
+    span, div {
+      color: #794f27 !important;
+      font-weight: 800 !important;
+    }
+
+    button {
+      color: #9f927d !important;
+      &:hover {
+        color: #19c8b9 !important;
+      }
+    }
+  }
+
+  // 星期表头
+  .el-date-table th {
+    color: #9f927d !important;
+    font-weight: 700 !important;
+    border-bottom: 1px solid rgba(232, 226, 214, 0.5) !important;
+  }
+
+  // 日期格子
+  .el-date-table td {
+    color: #794f27 !important;
+
+    &.next-month,
+    &.prev-month {
+      color: #c4b89e !important;
+      opacity: 0.6;
+    }
+
+    .el-date-table-cell {
+      height: 30px !important;
+      line-height: 30px !important;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      
+      .el-date-table-cell__text {
+        width: 24px !important;
+        height: 24px !important;
+        line-height: 24px !important;
+        border-radius: 50% !important;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.15s ease !important;
+      }
+    }
+
+    // hover 效果
+    &:not(.is-disabled):hover {
+      .el-date-table-cell__text {
+        background-color: rgba(25, 200, 185, 0.08) !important;
+        color: #19c8b9 !important;
+      }
+    }
+
+    // 今天
+    &.today {
+      .el-date-table-cell__text {
+        color: #19c8b9 !important;
+        font-weight: 800 !important;
+        border: 1.5px solid #19c8b9 !important;
+      }
+    }
+
+    // 选中（单日期）
+    &.current {
+      .el-date-table-cell__text {
+        background-color: #7cba70 !important;
+        color: #ffffff !important;
+        font-weight: 900 !important;
+        box-shadow: 0 2px 6px rgba(124, 186, 112, 0.3) !important;
+      }
+    }
+
+    // 范围内的日期（双日期）
+    &.in-range {
+      .el-date-table-cell {
+        background-color: rgba(124, 186, 112, 0.1) !important;
+        
+        .el-date-table-cell__text {
+          color: #794f27 !important;
+          background-color: transparent !important;
+          border-radius: 0 !important;
+        }
+      }
+    }
+
+    // 范围起点
+    &.start-date {
+      .el-date-table-cell {
+        background: linear-gradient(90deg, transparent 50%, rgba(124, 186, 112, 0.1) 50%) !important;
+        
+        .el-date-table-cell__text {
+          background-color: #7cba70 !important;
+          color: #ffffff !important;
+          border-radius: 50% !important;
+          font-weight: 900 !important;
+          box-shadow: 0 2px 6px rgba(124, 186, 112, 0.3) !important;
+        }
+      }
+    }
+
+    // 范围终点
+    &.end-date {
+      .el-date-table-cell {
+        background: linear-gradient(90deg, rgba(124, 186, 112, 0.1) 50%, transparent 50%) !important;
+        
+        .el-date-table-cell__text {
+          background-color: #7cba70 !important;
+          color: #ffffff !important;
+          border-radius: 50% !important;
+          font-weight: 900 !important;
+          box-shadow: 0 2px 6px rgba(124, 186, 112, 0.3) !important;
+        }
+      }
+    }
+
+    &.start-date.end-date {
+      .el-date-table-cell {
+        background: transparent !important;
+      }
+    }
+  }
+
+  // 双日历特定的布局
+  .el-date-range-picker {
+    width: 640px !important;
+
+    &__content {
+      padding: 12px 15px !important;
+      
+      &.is-left {
+        border-right: 1.5px dashed rgba(232, 226, 214, 0.6) !important;
+      }
+    }
+  }
+
+  // 隐藏箭头
+  .el-popper__arrow {
+    display: none !important;
+  }
+}
+
+/* 3. 动森风格日期框外层设计 (包含单日期与双日期 daterange) */
+.el-date-editor.animal-date {
+  --el-date-editor-width: 100% !important;
+  width: 100% !important;
+}
+
+.el-date-editor.animal-date.el-range-editor {
+  box-shadow: none !important;
+  background-color: #f7f3df !important;
+  border: 2px solid #c4b89e !important;
+  border-radius: 50px !important;
+  padding: 3px 16px !important;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  box-sizing: border-box !important;
+
+  &:hover {
+    border-color: #a89878 !important;
+  }
+
+  &.is-active,
+  &:focus-within {
+    border-color: #19c8b9 !important;
+    background-color: #fff !important;
+    box-shadow: 0 0 0 2px rgba(25, 200, 185, 0.15) !important;
+  }
+
+  .el-range__icon {
+    color: #a0936e !important;
+    font-size: 14px !important;
+    margin-right: 8px !important;
+  }
+
+  .el-range-input {
+    color: #725d42 !important;
+    font-family: inherit !important;
+    font-weight: 700 !important;
+    background: transparent !important;
+    font-size: 13px !important;
+
+    &::placeholder {
+      color: #c4b89e !important;
+      font-weight: 500 !important;
+    }
+  }
+
+  .el-range-separator {
+    color: #725d42 !important;
+    font-weight: 700 !important;
+    font-size: 13px !important;
+    padding: 0 8px !important;
+  }
+
+  .el-range__close-icon {
+    color: #c4b89e !important;
+    font-size: 14px !important;
+    transition: color 0.15s !important;
+
+    &:hover {
+      color: #fc736d !important;
+    }
+  }
+}
+
+.el-input.animal-date {
+  box-shadow: none !important;
+  
+  .el-input__wrapper {
+    background-color: #f7f3df !important;
+    border: 2px solid #c4b89e !important;
+    border-radius: 50px !important;
+    padding: 1px 16px !important;
+    box-shadow: none !important;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
+
+    &:hover {
+      border-color: #a89878 !important;
+    }
+
+    &.is-focus,
+    &:focus-within {
+      border-color: #19c8b9 !important;
+      background-color: #fff !important;
+      box-shadow: 0 0 0 2px rgba(25, 200, 185, 0.15) !important;
+    }
+  }
+
+  .el-input__inner {
+    color: #725d42 !important;
+    font-weight: 700 !important;
+    font-size: 13px !important;
+
+    &::placeholder {
+      color: #c4b89e !important;
+      font-weight: 500 !important;
+    }
+  }
+
+  .el-input__prefix-inner {
+    color: #a0936e !important;
+    font-size: 14px !important;
+  }
+
+  .el-input__suffix-inner {
+    color: #c4b89e !important;
+    
+    .el-input__clear {
+      &:hover {
+        color: #fc736d !important;
+      }
+    }
+  }
+}
+
+/* 4. 动森高精度下拉选择弹窗专属样式 (覆盖状态、优先级、平台) */
+.el-popper.el-dropdown__popper.animal-dropdown-popper {
+  background: #fdfbf7 !important;
+  border: 2px solid #e8e2d6 !important;
+  border-radius: 20px !important;
+  box-shadow: 0 4px 16px rgba(121, 79, 39, 0.08) !important;
+  padding: 6px 0 !important;
+
+  .el-dropdown-menu {
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+  }
+
+  .el-dropdown-menu__item {
+    position: relative;
+    color: #794f27 !important;
+    font-weight: 700 !important;
+    font-size: 13px !important;
+    padding: 8px 16px 8px 16px !important;
+    transition: all 0.2s ease !important;
+
+    &:not(.is-disabled):hover,
+    &:focus {
+      background: rgba(25, 200, 185, 0.06) !important;
+      color: #11a89b !important;
+      padding-left: 28px !important;
+
+      &:before {
+        content: "";
+        position: absolute;
+        left: 6px;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 18px;
+        height: 18px;
+        background: url("../../assets/select-cursor.svg") no-repeat center / contain;
+        animation: animal-dropdown-cursor-in 0.3s ease-out forwards;
+        pointer-events: none;
+      }
+    }
+
+    &.is-active {
+      background: rgba(124, 186, 112, 0.1) !important;
+      color: #4a8a36 !important;
+      font-weight: 800 !important;
+    }
+  }
+
+  .el-popper__arrow {
+    display: none !important;
+  }
+}

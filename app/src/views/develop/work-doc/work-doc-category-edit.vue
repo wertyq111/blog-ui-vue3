@@ -1,11 +1,9 @@
 <template>
-  <el-dialog
-    :model-value="visible"
+  <AdminAnimalModal
+    :visible="visible"
     :title="title"
     width="520px"
-    class="develop-dialog"
-    @update:model-value="handleVisibleChange"
-    @close="closeDialog"
+    @update:visible="handleVisibleChange"
   >
     <el-form
       ref="formRef"
@@ -50,13 +48,14 @@
         <Button type="primary" :loading="loading" @click="handleSubmit">保存</Button>
       </div>
     </template>
-  </el-dialog>
+  </AdminAnimalModal>
 </template>
 
 <script setup lang="ts">
 import { computed, nextTick, reactive, ref, watch } from "vue";
 import { useDebounceFn } from "@vueuse/core";
 import { ElMessage, type FormInstance, type FormRules } from "element-plus";
+import AdminAnimalModal from "@/components/AdminPage/AdminAnimalModal.vue";
 import { Button, Input, Select } from "animal-island-vue";
 import WorkDocCategoryAPI from "@/api/develop/work-doc-category";
 import type { WorkDocCategoryForm, WorkDocCategoryItem } from "@/types/api/work-doc-category";
