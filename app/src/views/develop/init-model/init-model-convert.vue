@@ -1,12 +1,10 @@
 <!-- 模型初始化转换：输入列定义，生成初始化代码 -->
 <template>
-  <el-dialog
-    :model-value="visible"
+  <AdminAnimalModal
+    :visible="visible"
     title="模型初始化转换"
     width="720px"
-    class="develop-dialog"
-    @update:model-value="handleVisibleChange"
-    @close="closeDialog"
+    @update:visible="handleVisibleChange"
   >
     <el-form label-position="top" class="develop-dialog-form">
       <div class="field-desc">粘贴列 definition（每行一个），生成对应框架的初始化代码。</div>
@@ -24,13 +22,14 @@
         <Button type="primary" :loading="loading" @click="handleConvert">生成</Button>
       </div>
     </template>
-  </el-dialog>
+  </AdminAnimalModal>
 </template>
 
 <script setup lang="ts">
 import { ref, watch } from "vue";
 import { ElMessage } from "element-plus";
 import { Button } from "animal-island-vue";
+import AdminAnimalModal from "@/components/AdminPage/AdminAnimalModal.vue";
 import InitModelAPI from "@/api/develop/init-model";
 
 const props = defineProps<{

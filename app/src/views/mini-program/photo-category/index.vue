@@ -37,7 +37,12 @@
           </div>
           <div class="develop-table-shell__actions">
             <el-button type="success" icon="plus" @click="handleCreateClick">新增分类</el-button>
-            <el-button type="danger" icon="delete" :disabled="!hasSelection" @click="handleDelete()">
+            <el-button
+              type="danger"
+              icon="delete"
+              :disabled="!hasSelection"
+              @click="handleDelete()"
+            >
               批量删除
             </el-button>
           </div>
@@ -61,7 +66,13 @@
               <el-button type="primary" icon="edit" link size="small" @click="handleEditClick(row)">
                 编辑
               </el-button>
-              <el-button type="danger" icon="delete" link size="small" @click="handleDelete(row.id)">
+              <el-button
+                type="danger"
+                icon="delete"
+                link
+                size="small"
+                @click="handleDelete(row.id)"
+              >
                 删除
               </el-button>
             </template>
@@ -78,14 +89,19 @@
       </div>
     </el-card>
 
-    <el-dialog
-      v-model="dialogState.visible"
+    <AdminAnimalModal
+      v-model:visible="dialogState.visible"
       :title="dialogState.title"
       width="500px"
-      class="develop-dialog"
       @close="closeDialog"
     >
-      <el-form ref="formRef" :model="formData" :rules="rules" label-width="100px" class="develop-dialog-form">
+      <el-form
+        ref="formRef"
+        :model="formData"
+        :rules="rules"
+        label-width="100px"
+        class="develop-dialog-form"
+      >
         <el-form-item label="分类名称" prop="name">
           <el-input v-model="formData.name" placeholder="请输入分类名称" maxlength="20" />
         </el-form-item>
@@ -95,16 +111,18 @@
       </el-form>
       <template #footer>
         <div class="develop-dialog-footer">
-          <el-button type="primary" @click="handleSubmit">确 定</el-button>
-          <el-button @click="closeDialog">取 消</el-button>
+          <Button type="primary" @click="handleSubmit">确定</Button>
+          <Button type="default" @click="closeDialog">取消</Button>
         </div>
       </template>
-    </el-dialog>
+    </AdminAnimalModal>
   </div>
 </template>
 
 <script setup lang="ts">
 import type { FormInstance, FormRules } from "element-plus";
+import { Button } from "animal-island-vue";
+import AdminAnimalModal from "@/components/AdminPage/AdminAnimalModal.vue";
 import PhotoCategoryAPI from "@/api/mini-program/photo-category";
 import type {
   PhotoCategoryQueryParams,

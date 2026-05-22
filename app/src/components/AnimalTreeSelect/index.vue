@@ -19,46 +19,48 @@
       </span>
     </div>
 
-    <transition name="ats-fade">
-      <div v-if="open" class="ats__dropdown">
-        <div
-          v-for="node in flatNodes"
-          :key="String(node.value)"
-          class="ats__option"
-          :class="{ 'ats__option--selected': node.value === model }"
-          :style="{ paddingLeft: 14 + node.depth * 18 + 'px' }"
-        >
-          <button
-            v-if="node.hasChildren"
-            class="ats__caret"
-            :class="{ open: isExpanded(node.value) }"
-            type="button"
-            @click.stop="toggleExpand(node.value)"
+    <Teleport to="body">
+      <transition name="ats-fade">
+        <div v-if="open" ref="dropdownRef" class="ats__dropdown" :style="dropdownStyle">
+          <div
+            v-for="node in flatNodes"
+            :key="String(node.value)"
+            class="ats__option"
+            :class="{ 'ats__option--selected': node.value === model }"
+            :style="{ paddingLeft: 14 + node.depth * 18 + 'px' }"
           >
-            <svg
-              viewBox="0 0 24 24"
-              width="11"
-              height="11"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2.4"
-              stroke-linecap="round"
-              stroke-linejoin="round"
+            <button
+              v-if="node.hasChildren"
+              class="ats__caret"
+              :class="{ open: isExpanded(node.value) }"
+              type="button"
+              @click.stop="toggleExpand(node.value)"
             >
-              <path d="M9 6l6 6-6 6" />
-            </svg>
-          </button>
-          <span v-else class="ats__caret-spacer" />
-          <span class="ats__option-label" @click="selectNode(node.value)">{{ node.label }}</span>
+              <svg
+                viewBox="0 0 24 24"
+                width="11"
+                height="11"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2.4"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path d="M9 6l6 6-6 6" />
+              </svg>
+            </button>
+            <span v-else class="ats__caret-spacer" />
+            <span class="ats__option-label" @click="selectNode(node.value)">{{ node.label }}</span>
+          </div>
+          <div v-if="!flatNodes.length" class="ats__empty">暂无选项</div>
         </div>
-        <div v-if="!flatNodes.length" class="ats__empty">暂无选项</div>
-      </div>
-    </transition>
+      </transition>
+    </Teleport>
   </div>
 </template>
 
 <script setup lang="ts">
-import { computed, ref, watch } from "vue";
+import { computed, nextTick, onBeforeUnmount, ref, watch } from "vue";
 import { onClickOutside } from "@vueuse/core";
 
 type TreeValue = string | number;
@@ -90,8 +92,10 @@ const props = withDefaults(
 const model = defineModel<TreeValue>();
 
 const wrapperRef = ref<HTMLElement>();
+const dropdownRef = ref<HTMLElement>();
 const open = ref(false);
 const expandedMap = ref<Record<string, boolean>>({});
+const dropdownStyle = ref<Record<string, string>>({});
 
 function isExpanded(value: TreeValue): boolean {
   return !!expandedMap.value[String(value)];
@@ -142,7 +146,10 @@ const selectedLabel = computed(() => {
 function toggleOpen(): void {
   if (props.disabled) return;
   open.value = !open.value;
-  if (open.value) expandAll(props.options);
+  if (open.value) {
+    expandAll(props.options);
+    nextTick(updateDropdownPosition);
+  }
 }
 
 function selectNode(value: TreeValue): void {
@@ -158,7 +165,35 @@ watch(
   }
 );
 
-onClickOutside(wrapperRef, () => (open.value = false));
+function updateDropdownPosition(): void {
+  const rect = wrapperRef.value?.getBoundingClientRect();
+  if (!rect) return;
+
+  const maxHeight = Math.max(220, window.innerHeight - rect.bottom - 24);
+  dropdownStyle.value = {
+    left: `${rect.left}px`,
+    top: `${rect.bottom + 6}px`,
+    width: `${rect.width}px`,
+    maxHeight: `${Math.min(420, maxHeight)}px`,
+  };
+}
+
+function handleWindowMove(): void {
+  if (open.value) updateDropdownPosition();
+}
+
+window.addEventListener("resize", handleWindowMove);
+window.addEventListener("scroll", handleWindowMove, true);
+
+onBeforeUnmount(() => {
+  window.removeEventListener("resize", handleWindowMove);
+  window.removeEventListener("scroll", handleWindowMove, true);
+});
+
+onClickOutside(wrapperRef, (event) => {
+  if (dropdownRef.value?.contains(event.target as Node)) return;
+  open.value = false;
+});
 </script>
 
 <style scoped lang="scss">
@@ -231,13 +266,11 @@ onClickOutside(wrapperRef, () => (open.value = false));
 }
 
 .ats__dropdown {
-  position: absolute;
-  top: calc(100% + 6px);
-  left: 0;
-  right: 0;
-  z-index: 100;
+  position: fixed;
+  z-index: 2600;
   padding: 10px 0;
-  overflow: visible;
+  overflow-x: visible;
+  overflow-y: auto;
   background: #ffeea0;
   border-radius: 22px;
   box-shadow: 0 10px 26px rgba(110, 80, 40, 0.18);

@@ -14,8 +14,18 @@
       <div class="develop-panel">
         <el-form ref="queryFormRef" :model="queryParams" :inline="true" class="develop-form">
           <el-form-item label="相册" prop="categoryId">
-            <el-select v-model="queryParams.categoryId" placeholder="请选择相册" clearable style="width: 180px">
-              <el-option v-for="item in categoryList" :key="item.id" :label="item.name" :value="item.id" />
+            <el-select
+              v-model="queryParams.categoryId"
+              placeholder="请选择相册"
+              clearable
+              style="width: 180px"
+            >
+              <el-option
+                v-for="item in categoryList"
+                :key="item.id"
+                :label="item.name"
+                :value="item.id"
+              />
             </el-select>
           </el-form-item>
           <el-form-item label="描述" prop="remark">
@@ -42,7 +52,12 @@
           </div>
           <div class="develop-table-shell__actions">
             <el-button type="success" icon="plus" @click="handleCreateClick">新增图片</el-button>
-            <el-button type="danger" icon="delete" :disabled="!hasSelection" @click="handleDelete()">
+            <el-button
+              type="danger"
+              icon="delete"
+              :disabled="!hasSelection"
+              @click="handleDelete()"
+            >
               批量删除
             </el-button>
           </div>
@@ -83,7 +98,13 @@
               <el-button type="primary" icon="edit" link size="small" @click="handleEditClick(row)">
                 编辑
               </el-button>
-              <el-button type="danger" icon="delete" link size="small" @click="handleDelete(row.id)">
+              <el-button
+                type="danger"
+                icon="delete"
+                link
+                size="small"
+                @click="handleDelete(row.id)"
+              >
                 删除
               </el-button>
             </template>
@@ -100,17 +121,27 @@
       </div>
     </el-card>
 
-    <el-dialog
-      v-model="dialogState.visible"
+    <AdminAnimalModal
+      v-model:visible="dialogState.visible"
       :title="dialogState.title"
       width="500px"
-      class="develop-dialog"
       @close="closeDialog"
     >
-      <el-form ref="formRef" :model="formData" :rules="rules" label-width="100px" class="develop-dialog-form">
+      <el-form
+        ref="formRef"
+        :model="formData"
+        :rules="rules"
+        label-width="100px"
+        class="develop-dialog-form"
+      >
         <el-form-item label="相册" prop="categoryId">
           <el-select v-model="formData.categoryId" placeholder="请选择相册" style="width: 100%">
-            <el-option v-for="item in categoryList" :key="item.id" :label="item.name" :value="item.id" />
+            <el-option
+              v-for="item in categoryList"
+              :key="item.id"
+              :label="item.name"
+              :value="item.id"
+            />
           </el-select>
         </el-form-item>
         <el-form-item label="原图URL" prop="url">
@@ -122,16 +153,18 @@
       </el-form>
       <template #footer>
         <div class="develop-dialog-footer">
-          <el-button type="primary" @click="handleSubmit">确 定</el-button>
-          <el-button @click="closeDialog">取 消</el-button>
+          <Button type="primary" @click="handleSubmit">确定</Button>
+          <Button type="default" @click="closeDialog">取消</Button>
         </div>
       </template>
-    </el-dialog>
+    </AdminAnimalModal>
   </div>
 </template>
 
 <script setup lang="ts">
 import type { FormInstance, FormRules } from "element-plus";
+import { Button } from "animal-island-vue";
+import AdminAnimalModal from "@/components/AdminPage/AdminAnimalModal.vue";
 import PhotoAPI from "@/api/mini-program/photo";
 import type { PhotoCategoryItem } from "@/types/api/photo-category";
 import type { PhotoQueryParams, PhotoItem, PhotoForm } from "@/types/api/photo";

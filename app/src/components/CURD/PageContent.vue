@@ -186,23 +186,23 @@
     </el-table>
 
     <!-- 分页 -->
-    <div v-if="showPagination" class="mt-4">
-      <el-scrollbar :class="['h-8!', { 'flex-x-end': contentConfig?.pagePosition === 'right' }]">
-        <el-pagination
-          v-bind="pagination"
-          @size-change="handleSizeChange"
-          @current-change="handleCurrentChange"
-        />
-      </el-scrollbar>
+    <div v-if="showPagination" class="mt-4" :class="{ 'flex-x-end': contentConfig?.pagePosition === 'right' }">
+      <pagination
+        v-model:page="pagination.currentPage"
+        v-model:limit="pagination.pageSize"
+        :total="pagination.total"
+        :page-sizes="pagination.pageSizes"
+        :layout="pagination.layout"
+        :background="pagination.background"
+        @pagination="handlePagination"
+      />
     </div>
 
     <!-- 导出弹窗 -->
-    <el-dialog
-      v-model="exportsModalVisible"
-      :align-center="true"
+    <AdminAnimalModal
+      v-model:visible="exportsModalVisible"
       title="导出数据"
       width="600px"
-      style="padding-right: 0"
       @close="handleCloseExportsModal"
     >
       <!-- 滚动 -->
@@ -246,19 +246,15 @@
       </el-scrollbar>
       <!-- 弹窗底部操作按钮 -->
       <template #footer>
-        <div style="padding-right: var(--el-dialog-padding-primary)">
-          <el-button type="primary" @click="handleExportsSubmit">确定</el-button>
-          <el-button @click="handleCloseExportsModal">取消</el-button>
-        </div>
+        <Button type="primary" @click="handleExportsSubmit">确定</Button>
+        <Button type="default" @click="handleCloseExportsModal">取消</Button>
       </template>
-    </el-dialog>
+    </AdminAnimalModal>
     <!-- 导入弹窗 -->
-    <el-dialog
-      v-model="importModalVisible"
-      :align-center="true"
+    <AdminAnimalModal
+      v-model:visible="importModalVisible"
       title="导入数据"
       width="600px"
-      style="padding-right: 0"
       @close="handleCloseImportModal"
     >
       <!-- 滚动 -->
@@ -306,18 +302,16 @@
       </el-scrollbar>
       <!-- 弹窗底部操作按钮 -->
       <template #footer>
-        <div style="padding-right: var(--el-dialog-padding-primary)">
-          <el-button
-            type="primary"
-            :disabled="importFormData.files.length === 0"
-            @click="handleImportSubmit"
-          >
-            确定
-          </el-button>
-          <el-button @click="handleCloseImportModal">取消</el-button>
-        </div>
+        <Button
+          type="primary"
+          :disabled="importFormData.files.length === 0"
+          @click="handleImportSubmit"
+        >
+          确定
+        </Button>
+        <Button type="default" @click="handleCloseImportModal">取消</Button>
       </template>
-    </el-dialog>
+    </AdminAnimalModal>
   </div>
 </template>
 
@@ -333,8 +327,10 @@ import {
   type UploadUserFile,
   type TableInstance,
 } from "element-plus";
+import { Button } from "animal-island-vue";
 import ExcelJS from "exceljs";
 import { reactive, ref, computed } from "vue";
+import AdminAnimalModal from "@/components/AdminPage/AdminAnimalModal.vue";
 import type { IContentConfig, IObject, IOperateData } from "./types";
 import type { IToolsButton } from "./types";
 
@@ -820,12 +816,9 @@ function handleModify(field: string, value: boolean | string | number, row: Reco
 }
 
 // 分页切换
-function handleSizeChange(value: number) {
-  pagination.pageSize = value;
-  handleRefresh();
-}
-function handleCurrentChange(value: number) {
-  pagination.currentPage = value;
+function handlePagination(data: { page: number; limit: number }) {
+  pagination.currentPage = data.page;
+  pagination.pageSize = data.limit;
   handleRefresh();
 }
 
