@@ -454,8 +454,8 @@
 
 /* 3. 动森风格日期框外层设计 (包含单日期与双日期 daterange) */
 .el-date-editor.animal-date {
-  --el-date-editor-width: 100% !important;
-  width: 100% !important;
+  --el-date-editor-width: 100%;
+  width: 100%;
 }
 
 .el-date-editor.animal-date.el-range-editor {
@@ -618,4 +618,16 @@
   .el-popper__arrow {
     display: none !important;
   }
+}
+
+/* 限制动森 Select 下拉选项的最大高度，防止过多选项溢出屏幕 */
+.animal-select__dropdown {
+  max-height: 250px !important;
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+}
+
+/* 限制 Element Plus 选择器下拉列表最大高度 */
+.el-select-dropdown__wrap {
+  max-height: 250px !important;
 }
