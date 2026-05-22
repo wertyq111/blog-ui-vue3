@@ -11,17 +11,19 @@
     <div class="filter-bar">
       <div class="filter-field">
         <label class="filter-label">角色名称：</label>
-        <input
+        <Input
           v-model="queryParams['filter[name]']"
-          class="input"
+          class="filter-input"
           placeholder="请输入角色名称"
+          allow-clear
           @keyup.enter="handleQuery"
         />
       </div>
-      <button class="btn btn-primary" type="button" @click="handleQuery">
-        <Ico name="search" :size="13" /> 查询
-      </button>
-      <button class="btn btn-default" type="button" @click="handleResetQuery">重置</button>
+      <Button type="primary" size="small" @click="handleQuery">
+        <Ico name="search" :size="13" />
+        查询
+      </Button>
+      <Button type="default" size="small" @click="handleResetQuery">重置</Button>
     </div>
 
     <!-- 列表卡片 -->
@@ -35,31 +37,34 @@
 
       <!-- 工具栏 -->
       <div class="toolbar">
-        <button class="btn btn-primary" type="button" @click="handleCreateClick">
-          <Ico name="plus" :size="13" /> 添加
-        </button>
-        <button
-          class="btn btn-danger"
-          type="button"
+        <Button type="primary" size="small" @click="handleCreateClick">
+          <Ico name="plus" :size="13" />
+          添加
+        </Button>
+        <Button
+          type="default"
+          size="small"
+          danger
           :disabled="checkedIds.length === 0"
           @click="handleBatchDelete"
         >
-          <Ico name="trash" :size="13" /> 删除
-        </button>
+          <Ico name="trash" :size="13" />
+          删除
+        </Button>
         <div class="toolbar-spacer" />
         <div class="tool-group">
-          <button class="btn-icon" type="button" title="刷新" @click="fetchList">
+          <Button class="btn-icon" type="default" size="small" title="刷新" @click="fetchList">
             <Ico name="refresh" :size="14" />
-          </button>
-          <button class="btn-icon" type="button" title="密度">
+          </Button>
+          <Button class="btn-icon" type="default" size="small" title="密度">
             <Ico name="density" :size="14" />
-          </button>
-          <button class="btn-icon" type="button" title="列设置">
+          </Button>
+          <Button class="btn-icon" type="default" size="small" title="列设置">
             <Ico name="settings" :size="14" />
-          </button>
-          <button class="btn-icon" type="button" title="全屏">
+          </Button>
+          <Button class="btn-icon" type="default" size="small" title="全屏">
             <Ico name="full" :size="14" />
-          </button>
+          </Button>
         </div>
       </div>
 
@@ -98,7 +103,11 @@
           <tbody>
             <tr v-for="r in roleList" :key="r.id">
               <td>
-                <span class="cbx" :class="{ 'is-checked': isChecked(r.id) }" @click="toggleRow(r.id)">
+                <span
+                  class="cbx"
+                  :class="{ 'is-checked': isChecked(r.id) }"
+                  @click="toggleRow(r.id)"
+                >
                   <svg
                     viewBox="0 0 12 12"
                     fill="none"
@@ -114,7 +123,8 @@
               <td class="cell-num">{{ r.id }}</td>
               <td>
                 <span class="action-link act-edit" @click="handleEditClick(r)">
-                  <Ico name="edit" :size="12" /> 修改
+                  <Ico name="edit" :size="12" />
+                  修改
                 </span>
               </td>
               <td>{{ r.name }}</td>
@@ -127,17 +137,20 @@
               <td>
                 <span class="tbl-actions">
                   <span class="action-link act-edit" @click="handleEditClick(r)">
-                    <Ico name="edit" :size="12" /> 修改
+                    <Ico name="edit" :size="12" />
+                    修改
                   </span>
                   <span
                     v-hasPerm="'sys:role:permission'"
                     class="action-link act-assign"
                     @click="handleAssignPermClick(r)"
                   >
-                    <Ico name="shield" :size="12" /> 分配权限
+                    <Ico name="shield" :size="12" />
+                    分配权限
                   </span>
                   <span class="action-link act-del" @click="handleDelete(r.id)">
-                    <Ico name="trash" :size="12" /> 删除
+                    <Ico name="trash" :size="12" />
+                    删除
                   </span>
                 </span>
               </td>
@@ -173,38 +186,39 @@
         label-width="100px"
         class="develop-dialog-form"
       >
+        <div class="field-desc">维护角色名称、权限编码与启用状态，决定后台权限范围。</div>
         <el-form-item label="角色名称" prop="name">
-          <el-input v-model="formData.name" placeholder="请输入角色名称" />
+          <Input v-model="formData.name" placeholder="请输入角色名称" allow-clear />
         </el-form-item>
 
         <el-form-item label="角色编码" prop="code">
-          <el-input v-model="formData.code" placeholder="请输入角色编码" />
+          <Input v-model="formData.code" placeholder="请输入角色编码" allow-clear />
         </el-form-item>
 
         <el-form-item label="状态" prop="status">
-          <el-radio-group v-model="formData.status">
-            <el-radio :value="1">正常</el-radio>
-            <el-radio :value="0">停用</el-radio>
-          </el-radio-group>
+          <Switch v-model="statusOn">
+            <template #checked>正常</template>
+            <template #unchecked>停用</template>
+          </Switch>
         </el-form-item>
 
         <el-form-item label="排序" prop="sort">
-          <el-input-number
-            v-model="formData.sort"
-            controls-position="right"
-            :min="0"
-            style="width: 100px"
-          />
+          <Input v-model="sortModel" type="number" placeholder="请输入排序" />
         </el-form-item>
 
         <el-form-item label="备注" prop="note">
-          <el-input v-model="formData.note" type="textarea" placeholder="请输入备注" />
+          <AnimalTextarea
+            v-model="formData.note"
+            :rows="3"
+            :maxlength="200"
+            placeholder="请输入备注"
+          />
         </el-form-item>
       </el-form>
       <template #footer>
         <div class="develop-dialog-footer">
-          <el-button type="primary" @click="handleSubmit">确定</el-button>
-          <el-button @click="closeDialog">取消</el-button>
+          <Button type="primary" @click="handleSubmit">确定</Button>
+          <Button type="default" @click="closeDialog">取消</Button>
         </div>
       </template>
     </el-dialog>
@@ -215,27 +229,26 @@
       :title="'【' + checkedRole.name + '】权限分配'"
       :size="drawerSize"
     >
-      <div class="flex-x-between">
-        <el-input v-model="permKeywords" clearable class="w-[150px]" placeholder="菜单权限名称">
+      <div class="assign-toolbar">
+        <Input v-model="permKeywords" allow-clear class="assign-search" placeholder="菜单权限名称">
           <template #prefix>
-            <Search />
+            <Ico name="search" :size="13" />
           </template>
-        </el-input>
+        </Input>
 
-        <div class="flex-center ml-5">
-          <el-button type="primary" size="small" plain @click="togglePermTree">
-            <template #icon>
-              <Switch />
-            </template>
+        <div class="assign-actions">
+          <Button type="primary" size="small" @click="togglePermTree">
+            <Ico name="chev" :size="12" />
             {{ isExpanded ? "收缩" : "展开" }}
-          </el-button>
-          <el-checkbox
-            v-model="parentChildLinked"
-            class="ml-5"
-            @change="handleParentChildLinkedChange"
-          >
-            父子联动
-          </el-checkbox>
+          </Button>
+          <label class="linked-switch">
+            <span>父子联动</span>
+            <Switch
+              v-model="parentChildLinked"
+              size="small"
+              @change="handleParentChildLinkedChange"
+            />
+          </label>
 
           <el-tooltip placement="bottom">
             <template #content>
@@ -264,14 +277,10 @@
       </el-tree>
       <template #footer>
         <div class="dialog-footer">
-          <el-button
-            v-hasPerm="'sys:role:permission'"
-            type="primary"
-            @click="handleAssignPermSubmit"
-          >
+          <Button v-hasPerm="'sys:role:permission'" type="primary" @click="handleAssignPermSubmit">
             确定
-          </el-button>
-          <el-button @click="assignPermDialogVisible = false">取消</el-button>
+          </Button>
+          <Button type="default" @click="assignPermDialogVisible = false">取消</Button>
         </div>
       </template>
     </el-drawer>
@@ -284,6 +293,8 @@ import { DeviceEnum } from "@/enums/settings";
 
 import RoleAPI from "@/api/system/role";
 import type { RoleItem, RoleForm, RoleQueryParams, BackendPermissionItem } from "@/types/api";
+import { Button, Input, Switch } from "animal-island-vue";
+import AnimalTextarea from "@/components/AnimalTextarea/index.vue";
 
 defineOptions({
   name: "Role",
@@ -295,7 +306,8 @@ const ICO_PATHS: Record<string, string> = {
   search: '<circle cx="10" cy="10" r="6"/><path d="M14 14l4 4"/>',
   plus: '<path d="M12 5v14M5 12h14"/>',
   trash: '<path d="M5 7h14M9 7V4h6v3M7 7l1 13h8l1-13"/>',
-  refresh: '<path d="M4 12a8 8 0 0114-5l3 3M20 12a8 8 0 01-14 5l-3-3"/><path d="M17 4v4h-4M7 20v-4h4"/>',
+  refresh:
+    '<path d="M4 12a8 8 0 0114-5l3 3M20 12a8 8 0 01-14 5l-3-3"/><path d="M17 4v4h-4M7 20v-4h4"/>',
   full: '<path d="M4 8V4h4M20 8V4h-4M4 16v4h4M20 16v4h-4"/>',
   edit: '<path d="M4 16L15 5l3 3-11 11H4v-3z"/>',
   shield: '<path d="M12 3l8 3v6c0 5-4 8-8 9-4-1-8-4-8-9V6z"/><path d="M9 12l2 2 4-4"/>',
@@ -379,6 +391,20 @@ const drawerSize = computed(() => (appStore.device === DeviceEnum.DESKTOP ? "600
 const formData = reactive<RoleForm>({
   sort: 1,
   status: 1,
+});
+
+const statusOn = computed<boolean>({
+  get: () => formData.status === 1,
+  set: (v) => {
+    formData.status = v ? 1 : 0;
+  },
+});
+
+const sortModel = computed<string>({
+  get: () => (formData.sort == null ? "" : String(formData.sort)),
+  set: (v) => {
+    formData.sort = v === "" ? undefined : Number(v);
+  },
 });
 
 const rules = reactive({
@@ -486,6 +512,8 @@ function resetForm(): void {
   roleFormRef.value?.clearValidate();
 
   formData.id = undefined;
+  formData.name = undefined;
+  formData.code = undefined;
   formData.sort = 1;
   formData.status = 1;
   formData.note = undefined;
@@ -685,8 +713,8 @@ onMounted(() => {
   --ai-success: #6fba2c;
 
   position: relative;
-  font-family: "M PLUS Rounded 1c", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei",
-    sans-serif;
+  font-family:
+    "M PLUS Rounded 1c", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
   color: var(--ai-text);
   font-size: 13px;
   line-height: 1.6;
@@ -811,26 +839,30 @@ onMounted(() => {
   color: var(--ai-text);
   white-space: nowrap;
 }
-.input {
-  font-family: inherit;
-  font-size: 13px;
-  font-weight: 500;
-  color: var(--ai-text);
-  background: rgba(255, 255, 255, 0.9);
-  border: 1.5px solid var(--ai-border);
-  border-radius: 999px;
-  padding: 0 14px;
-  height: 36px;
+.filter-input {
   width: 240px;
-  outline: 0;
-  transition: border-color 0.18s, box-shadow 0.18s;
 }
-.input::placeholder {
-  color: var(--ai-text-3);
+
+.assign-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
 }
-.input:focus {
-  border-color: var(--ai-primary);
-  box-shadow: 0 0 0 3px rgba(25, 200, 185, 0.15);
+.assign-search {
+  width: 180px;
+}
+.assign-actions {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.linked-switch {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--ai-text);
+  font-weight: 700;
 }
 
 /* 按钮 */
@@ -847,7 +879,11 @@ onMounted(() => {
   border-radius: 999px;
   cursor: pointer;
   border: 1.5px solid transparent;
-  transition: transform 0.16s, box-shadow 0.16s, background 0.16s, color 0.16s;
+  transition:
+    transform 0.16s,
+    box-shadow 0.16s,
+    background 0.16s,
+    color 0.16s;
 }
 .btn-primary {
   background: linear-gradient(180deg, #84cf4f 0%, #6fba2c 100%);
@@ -998,11 +1034,7 @@ onMounted(() => {
   vertical-align: middle;
 }
 .tbl th {
-  background: linear-gradient(
-    180deg,
-    rgba(216, 236, 198, 0.45) 0%,
-    rgba(232, 244, 210, 0.45) 100%
-  );
+  background: linear-gradient(180deg, rgba(216, 236, 198, 0.45) 0%, rgba(232, 244, 210, 0.45) 100%);
   font-weight: 800;
   color: var(--ai-text);
   font-size: 13px;
@@ -1130,8 +1162,12 @@ onMounted(() => {
     flex-direction: column;
     align-items: flex-start;
   }
-  .input {
+  .filter-input {
     width: 100%;
+  }
+  .assign-toolbar {
+    align-items: flex-start;
+    flex-direction: column;
   }
 }
 </style>

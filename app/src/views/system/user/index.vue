@@ -12,10 +12,11 @@
     <div class="filter-bar">
       <div class="filter-field">
         <label class="filter-label">用户账号：</label>
-        <input
+        <Input
           v-model="queryParams['filter[username]']"
-          class="input"
+          class="filter-input"
           placeholder="请输入用户账号"
+          allow-clear
           @keyup.enter="handleQuery"
         />
       </div>
@@ -28,10 +29,11 @@
           :options="genderOptions"
         />
       </div>
-      <button class="btn btn-primary" type="button" @click="handleQuery">
-        <Ico name="search" :size="13" /> 查询
-      </button>
-      <button class="btn btn-default" type="button" @click="handleResetQuery">重置</button>
+      <Button type="primary" size="small" @click="handleQuery">
+        <Ico name="search" :size="13" />
+        查询
+      </Button>
+      <Button type="default" size="small" @click="handleResetQuery">重置</Button>
     </div>
 
     <!-- 列表卡片 -->
@@ -45,37 +47,35 @@
 
       <!-- 工具栏 -->
       <div class="toolbar">
-        <button
-          v-hasPerm="['sys:user:add']"
-          class="btn btn-primary"
-          type="button"
-          @click="handleCreateClick"
-        >
-          <Ico name="plus" :size="13" /> 添加
-        </button>
-        <button
+        <Button v-hasPerm="['sys:user:add']" type="primary" size="small" @click="handleCreateClick">
+          <Ico name="plus" :size="13" />
+          添加
+        </Button>
+        <Button
           v-hasPerm="'sys:user:delete'"
-          class="btn btn-danger"
-          type="button"
+          type="default"
+          size="small"
+          danger
           :disabled="!hasSelection"
           @click="handleDelete()"
         >
-          <Ico name="trash" :size="13" /> 删除
-        </button>
+          <Ico name="trash" :size="13" />
+          删除
+        </Button>
         <div class="toolbar-spacer" />
         <div class="tool-group">
-          <button class="btn-icon" type="button" title="刷新" @click="fetchList">
+          <Button class="btn-icon" type="default" size="small" title="刷新" @click="fetchList">
             <Ico name="refresh" :size="14" />
-          </button>
-          <button class="btn-icon" type="button" title="密度">
+          </Button>
+          <Button class="btn-icon" type="default" size="small" title="密度">
             <Ico name="density" :size="14" />
-          </button>
-          <button class="btn-icon" type="button" title="列设置">
+          </Button>
+          <Button class="btn-icon" type="default" size="small" title="列设置">
             <Ico name="settings" :size="14" />
-          </button>
-          <button class="btn-icon" type="button" title="全屏">
+          </Button>
+          <Button class="btn-icon" type="default" size="small" title="全屏">
             <Ico name="full" :size="14" />
-          </button>
+          </Button>
         </div>
       </div>
 
@@ -111,7 +111,11 @@
           <tbody>
             <tr v-for="r in userList" :key="r.id">
               <td>
-                <span class="cbx" :class="{ 'is-checked': isChecked(r.id) }" @click="toggleRow(r.id)">
+                <span
+                  class="cbx"
+                  :class="{ 'is-checked': isChecked(r.id) }"
+                  @click="toggleRow(r.id)"
+                >
                   <svg
                     viewBox="0 0 12 12"
                     fill="none"
@@ -147,21 +151,24 @@
                     class="action-link act-edit"
                     @click="handleEditClick(r.id)"
                   >
-                    <Ico name="edit" :size="12" /> 修改
+                    <Ico name="edit" :size="12" />
+                    修改
                   </span>
                   <span
                     v-hasPerm="'sys:user:delete'"
                     class="action-link act-del"
                     @click="handleDelete(r.id)"
                   >
-                    <Ico name="trash" :size="12" /> 删除
+                    <Ico name="trash" :size="12" />
+                    删除
                   </span>
                   <span
                     v-hasPerm="'sys:user:resetPwd'"
                     class="action-link act-reset"
                     @click="handleResetPassword(r)"
                   >
-                    <Ico name="key" :size="12" /> 重置密码
+                    <Ico name="key" :size="12" />
+                    重置密码
                   </span>
                 </span>
               </td>
@@ -201,7 +208,12 @@
         <el-row :gutter="15">
           <el-col :sm="12">
             <el-form-item label="邮箱" prop="email">
-              <Input v-model="formData.email" placeholder="请输入邮箱" :maxlength="100" allow-clear />
+              <Input
+                v-model="formData.email"
+                placeholder="请输入邮箱"
+                :maxlength="100"
+                allow-clear
+              />
             </el-form-item>
             <el-form-item label="用户账号" prop="username">
               <Input
@@ -223,7 +235,12 @@
           </el-col>
           <el-col :sm="12">
             <el-form-item label="手机号" prop="phone">
-              <Input v-model="formData.phone" placeholder="请输入手机号" :maxlength="11" allow-clear />
+              <Input
+                v-model="formData.phone"
+                placeholder="请输入手机号"
+                :maxlength="11"
+                allow-clear
+              />
             </el-form-item>
             <el-form-item label="角色" prop="roleIds">
               <AnimalMultiSelect
@@ -244,8 +261,8 @@
 
       <template #footer>
         <div class="develop-dialog-footer">
-          <el-button @click="closeDialog">取消</el-button>
-          <el-button type="primary" @click="handleSubmit">保存</el-button>
+          <Button type="default" @click="closeDialog">取消</Button>
+          <Button type="primary" @click="handleSubmit">保存</Button>
         </div>
       </template>
     </el-dialog>
@@ -258,10 +275,10 @@ import { useDebounceFn } from "@vueuse/core";
 import { ElMessage, ElMessageBox, type FormInstance, type FormRules } from "element-plus";
 import type { UserForm, UserQueryParams, UserItem } from "@/types/api";
 import UserAPI from "@/api/system/user";
-import { Input, Select, Switch } from "animal-island-vue";
+import { Button, Input, Select, Switch } from "animal-island-vue";
 import AnimalMultiSelect from "@/components/AnimalMultiSelect/index.vue";
-import { useUserStore, useAppStore } from "@/store";
-import { DeviceEnum, DialogMode, CommonStatus } from "@/enums";
+import { useUserStore } from "@/store";
+import { DialogMode, CommonStatus } from "@/enums";
 
 defineOptions({
   name: "User",
@@ -273,7 +290,8 @@ const ICO_PATHS: Record<string, string> = {
   search: '<circle cx="10" cy="10" r="6"/><path d="M14 14l4 4"/>',
   plus: '<path d="M12 5v14M5 12h14"/>',
   trash: '<path d="M5 7h14M9 7V4h6v3M7 7l1 13h8l1-13"/>',
-  refresh: '<path d="M4 12a8 8 0 0114-5l3 3M20 12a8 8 0 01-14 5l-3-3"/><path d="M17 4v4h-4M7 20v-4h4"/>',
+  refresh:
+    '<path d="M4 12a8 8 0 0114-5l3 3M20 12a8 8 0 01-14 5l-3-3"/><path d="M17 4v4h-4M7 20v-4h4"/>',
   full: '<path d="M4 8V4h4M20 8V4h-4M4 16v4h4M20 16v4h-4"/>',
   edit: '<path d="M4 16L15 5l3 3-11 11H4v-3z"/>',
   key: '<circle cx="8" cy="15" r="3"/><path d="M11 15l9-9-2-2-2 2-2-2-2 2"/>',
@@ -304,7 +322,6 @@ const Ico = defineComponent({
   },
 });
 
-const appStore = useAppStore();
 const userStore = useUserStore();
 
 const userFormRef = ref<FormInstance>();
@@ -395,8 +412,6 @@ const statusOn = computed<boolean>({
   },
 });
 
-const drawerSize = computed(() => (appStore.device === DeviceEnum.DESKTOP ? "600px" : "90%"));
-
 const rules: FormRules = {
   username: [{ required: true, message: "请输入用户账号", trigger: "blur" }],
   password: [
@@ -464,7 +479,10 @@ function resetQuery(): void {
 function formatDateTime(value?: string): string {
   if (!value) return "—";
 
-  return value.replace("T", " ").replace(/\.\d+Z$/, "").slice(0, 19);
+  return value
+    .replace("T", " ")
+    .replace(/\.\d+Z$/, "")
+    .slice(0, 19);
 }
 
 /**
@@ -651,8 +669,8 @@ onMounted(() => {
   --ai-success: #6fba2c;
 
   position: relative;
-  font-family: "M PLUS Rounded 1c", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei",
-    sans-serif;
+  font-family:
+    "M PLUS Rounded 1c", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
   color: var(--ai-text);
   font-size: 13px;
   line-height: 1.6;
@@ -777,26 +795,8 @@ onMounted(() => {
   color: var(--ai-text);
   white-space: nowrap;
 }
-.input {
-  font-family: inherit;
-  font-size: 13px;
-  font-weight: 500;
-  color: var(--ai-text);
-  background: rgba(255, 255, 255, 0.9);
-  border: 1.5px solid var(--ai-border);
-  border-radius: 999px;
-  padding: 0 14px;
-  height: 36px;
+.filter-input {
   width: 240px;
-  outline: 0;
-  transition: border-color 0.18s, box-shadow 0.18s;
-}
-.input::placeholder {
-  color: var(--ai-text-3);
-}
-.input:focus {
-  border-color: var(--ai-primary);
-  box-shadow: 0 0 0 3px rgba(25, 200, 185, 0.15);
 }
 
 /* 性别选择器：动森 Select，撑满筛选位宽度 */
@@ -818,7 +818,11 @@ onMounted(() => {
   border-radius: 999px;
   cursor: pointer;
   border: 1.5px solid transparent;
-  transition: transform 0.16s, box-shadow 0.16s, background 0.16s, color 0.16s;
+  transition:
+    transform 0.16s,
+    box-shadow 0.16s,
+    background 0.16s,
+    color 0.16s;
 }
 .btn-primary {
   background: linear-gradient(180deg, #84cf4f 0%, #6fba2c 100%);
@@ -969,11 +973,7 @@ onMounted(() => {
   vertical-align: middle;
 }
 .tbl th {
-  background: linear-gradient(
-    180deg,
-    rgba(216, 236, 198, 0.45) 0%,
-    rgba(232, 244, 210, 0.45) 100%
-  );
+  background: linear-gradient(180deg, rgba(216, 236, 198, 0.45) 0%, rgba(232, 244, 210, 0.45) 100%);
   font-weight: 800;
   color: var(--ai-text);
   font-size: 13px;
@@ -1113,7 +1113,7 @@ onMounted(() => {
     flex-direction: column;
     align-items: flex-start;
   }
-  .input,
+  .filter-input,
   .select {
     width: 100%;
   }

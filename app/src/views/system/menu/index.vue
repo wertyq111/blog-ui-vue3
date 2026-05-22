@@ -11,18 +11,19 @@
     <div class="filter-bar">
       <div class="filter-field">
         <label class="filter-label">菜单名称：</label>
-        <input
+        <Input
           v-model="queryParams['filter[title]']"
-          class="input"
+          class="filter-input"
           placeholder="请输入菜单名称"
+          allow-clear
           @keyup.enter="handleQuery"
         />
       </div>
-      <button class="btn btn-primary" type="button" @click="handleQuery">
+      <Button type="primary" size="small" @click="handleQuery">
         <Ico name="search" :size="13" />
         查询
-      </button>
-      <button class="btn btn-default" type="button" @click="handleResetQuery">重置</button>
+      </Button>
+      <Button type="default" size="small" @click="handleResetQuery">重置</Button>
     </div>
 
     <!-- 列表卡片 -->
@@ -36,31 +37,26 @@
 
       <!-- 工具栏 -->
       <div class="toolbar">
-        <button
-          v-hasPerm="['sys:menu:addz']"
-          class="btn btn-primary"
-          type="button"
-          @click="openDialog(0)"
-        >
+        <Button v-hasPerm="['sys:menu:addz']" type="primary" size="small" @click="openDialog(0)">
           <Ico name="plus" :size="13" />
           添加
-        </button>
-        <button class="btn btn-default" type="button" @click="expandAll">
+        </Button>
+        <Button type="default" size="small" @click="expandAll">
           <Ico name="expand" :size="13" />
           展开全部
-        </button>
-        <button class="btn btn-default" type="button" @click="collapseAll">
+        </Button>
+        <Button type="default" size="small" @click="collapseAll">
           <Ico name="collapse" :size="13" />
           折叠全部
-        </button>
+        </Button>
         <div class="toolbar-spacer" />
         <div class="tool-group">
-          <button class="btn-icon" type="button" title="刷新" @click="fetchData">
+          <Button class="btn-icon" type="default" size="small" title="刷新" @click="fetchData">
             <Ico name="refresh" :size="14" />
-          </button>
-          <button class="btn-icon" type="button" title="全屏">
+          </Button>
+          <Button class="btn-icon" type="default" size="small" title="全屏">
             <Ico name="full" :size="14" />
-          </button>
+          </Button>
         </div>
       </div>
 
@@ -269,8 +265,8 @@
 
       <template #footer>
         <div class="develop-dialog-footer">
-          <el-button @click="closeDialog">取消</el-button>
-          <el-button type="primary" @click="handleSubmit">保存</el-button>
+          <Button type="default" @click="closeDialog">取消</Button>
+          <Button type="primary" @click="handleSubmit">保存</Button>
         </div>
       </template>
     </el-dialog>
@@ -279,7 +275,7 @@
 
 <script setup lang="ts">
 import MenuAPI from "@/api/system/menu";
-import { Icon, Input, Select, Switch } from "animal-island-vue";
+import { Button, Icon, Input, Select, Switch } from "animal-island-vue";
 import AnimalTreeSelect from "@/components/AnimalTreeSelect/index.vue";
 import AnimalMultiSelect from "@/components/AnimalMultiSelect/index.vue";
 import AnimalTextarea from "@/components/AnimalTextarea/index.vue";
@@ -771,28 +767,8 @@ onMounted(() => {
   color: var(--ai-text);
   white-space: nowrap;
 }
-.input {
-  font-family: inherit;
-  font-size: 13px;
-  font-weight: 500;
-  color: var(--ai-text);
-  background: rgba(255, 255, 255, 0.9);
-  border: 1.5px solid var(--ai-border);
-  border-radius: 999px;
-  padding: 0 14px;
-  height: 36px;
+.filter-input {
   width: 240px;
-  outline: 0;
-  transition:
-    border-color 0.18s,
-    box-shadow 0.18s;
-}
-.input::placeholder {
-  color: var(--ai-text-3);
-}
-.input:focus {
-  border-color: var(--ai-primary);
-  box-shadow: 0 0 0 3px rgba(25, 200, 185, 0.15);
 }
 
 /* 按钮 */
@@ -1090,7 +1066,7 @@ onMounted(() => {
     flex-direction: column;
     align-items: flex-start;
   }
-  .input {
+  .filter-input {
     width: 100%;
   }
 }
