@@ -227,7 +227,7 @@ function handlePageChange(val: number) {
 
 <style lang="scss" scoped>
 .pagination {
-  padding: 12px;
+  padding: 12px 12px 60px 12px;
 
   &.hidden {
     display: none;
@@ -375,5 +375,11 @@ function handlePageChange(val: number) {
       background: #fff;
     }
   }
+}
+
+/* 解决绝对定位 Select 弹出菜单在滚动条包裹下的溢出裁剪与高度挤压问题 */
+:deep(.animal-scrollbar),
+:deep(.animal-scrollbar__wrap) {
+  overflow: visible !important;
 }
 </style>

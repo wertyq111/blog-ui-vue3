@@ -485,7 +485,10 @@ onMounted(async () => {
 .todo-title-cell {
   display: flex;
   flex-direction: column;
+  align-items: flex-start;
+  text-align: left;
   gap: 4px;
+  width: 100%;
 }
 
 .todo-title--done {
