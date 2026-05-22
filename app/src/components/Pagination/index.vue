@@ -243,7 +243,9 @@ function handlePageChange(val: number) {
   background: #fdfbf7;
   border: 2px solid #e8e2d6;
   border-radius: 20px;
-  padding: 6px 18px;
+  padding: 10px 18px;
+  min-height: 48px;
+  box-sizing: border-box;
   display: inline-flex;
   align-items: center;
   gap: 16px;
