@@ -2,12 +2,10 @@
 <template>
   <div class="page-card">
     <section class="develop-hero">
-      <div class="develop-hero__copy">
-        <div class="develop-hero__eyebrow">DEVELOP WORKSPACE</div>
-        <h1 class="develop-hero__title">待办列表</h1>
-        <p class="develop-hero__desc">
-          统一管理开发任务与待办事项，支持状态跟踪、优先级管理和平台关联。
-        </p>
+      <div class="page-head">
+        <div class="page-eyebrow">DEVELOP WORKSPACE</div>
+        <h1 class="page-title">待办列表</h1>
+        <p class="page-desc">统一管理开发任务与待办事项，支持状态跟踪、优先级管理和平台关联。</p>
       </div>
       <!-- 右上角按照精美动森徽章贴纸风格显示的统计项 -->
       <div class="develop-hero__meta">

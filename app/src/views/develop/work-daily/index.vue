@@ -92,10 +92,9 @@
                   >
                     <template #reference>
                       <div class="daily-brief">
-                        <span class="daily-brief__platform">【{{ p.platform_name }}】</span>
-                        <span class="daily-brief__text">
-                          {{ stripHtml(p.content).substring(0, 100) }}
-                        </span>
+                        <div class="daily-cell-markdown">
+                          <AnimalMarkdown :model-value="p.content || ''" preview-only height="auto" />
+                        </div>
                       </div>
                     </template>
                     <div class="daily-preview">
@@ -103,8 +102,23 @@
                     </div>
                   </el-popover>
                 </div>
-                <div v-else class="daily-brief">
-                  {{ stripHtml(String(row.content)).substring(0, 200) }}
+                <div v-else class="daily-summary">
+                  <el-popover
+                    trigger="hover"
+                    :width="520"
+                    placement="top"
+                  >
+                    <template #reference>
+                      <div class="daily-brief">
+                        <div class="daily-cell-markdown">
+                          <AnimalMarkdown :model-value="String(row.content)" preview-only height="auto" />
+                        </div>
+                      </div>
+                    </template>
+                    <div class="daily-preview">
+                      <AnimalMarkdown :model-value="String(row.content)" preview-only height="auto" />
+                    </div>
+                  </el-popover>
                 </div>
               </td>
               <td class="cell-mono">{{ row.createTime }}</td>
@@ -277,6 +291,23 @@ onMounted(async () => {
 .daily-brief__platform {
   color: var(--ai-primary-active, #11a89b);
   font-weight: 700;
+}
+
+.daily-cell-markdown {
+  max-height: 80px;
+  overflow: hidden;
+  position: relative;
+
+  &::after {
+    content: "";
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 24px;
+    background: linear-gradient(to bottom, transparent, var(--ai-bg-card, #fcfaf2));
+    pointer-events: none;
+  }
 }
 
 .daily-preview {

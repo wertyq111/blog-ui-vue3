@@ -24,6 +24,7 @@ export interface WorkDailyItem {
   content: any; // object or string
   createUser: number;
   platform?: WorkPlatformItem;
+  tags?: Array<{ id: number; name: string }>;
   createTime: string;
   updateTime: string;
 }
@@ -37,6 +38,7 @@ export interface WorkDailyForm {
     platform_name?: string;
     content: string;
   }>;
+  tag_ids?: number[];
 }
 
 /** 工作日常分页结果 */

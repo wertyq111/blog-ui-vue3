@@ -15,6 +15,7 @@
         placeholder="选择月份"
         value-format="YYYY-MM"
         class="report-field"
+        style="width: 160px !important;"
       />
       <AnimalDatePicker
         v-else-if="config.type === 'week'"
@@ -22,6 +23,7 @@
         type="daterange"
         value-format="YYYY-MM-DD"
         class="report-field-wide"
+        style="width: 240px !important;"
       />
       <AnimalDatePicker
         v-else
@@ -30,11 +32,12 @@
         placeholder="选择年份"
         value-format="YYYY"
         class="report-field"
+        style="width: 160px !important;"
       />
 
       <Select
         v-model="config.model"
-        class="report-field"
+        class="report-field report-field-model"
         placeholder="AI模型(可选)"
         :options="modelOptions"
       />
@@ -42,12 +45,23 @@
       <Button type="primary" size="small" :loading="exporting" @click="handleExport">
         导出报表
       </Button>
-      <AnimalUpload accept=".md" @change="handleImport">
-        <Button type="default" size="small">
-          <SystemIco name="plus" :size="13" />
-          导入 MD
-        </Button>
-      </AnimalUpload>
+
+      <div class="import-group">
+        <AnimalDatePicker
+          v-model="config.importYear"
+          type="year"
+          placeholder="导入年份"
+          value-format="YYYY"
+          class="report-field-import"
+          style="width: 120px !important;"
+        />
+        <AnimalUpload accept=".md" @change="handleImport">
+          <Button type="default" size="small">
+            <SystemIco name="plus" :size="13" />
+            导入 MD
+          </Button>
+        </AnimalUpload>
+      </div>
     </div>
   </div>
 </template>
@@ -72,6 +86,7 @@ const config = reactive({
   weekRange: [] as string[],
   year: new Date().getFullYear().toString(),
   model: "",
+  importYear: new Date().getFullYear().toString(),
 });
 
 const typeOptions = [
@@ -142,7 +157,7 @@ async function handleImport(file: UploadFile): Promise<void> {
   const raw = file.raw;
   if (!raw) return;
   try {
-    await WorkDailyAPI.importMarkdown(raw);
+    await WorkDailyAPI.importMarkdown(raw, config.importYear);
     ElMessage.success("导入成功");
     emit("imported");
   } catch {
@@ -182,16 +197,41 @@ onMounted(fetchModels);
 
 .report-panel__row {
   display: flex;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   align-items: center;
   gap: 12px;
+  overflow: visible;
+  padding-bottom: 4px;
 }
 
-.report-field {
-  width: 160px;
+.import-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
 }
+</style>
 
-.report-field-wide {
-  width: 240px;
+<style lang="scss">
+.report-panel {
+  .report-field {
+    width: 160px !important;
+    flex-shrink: 0;
+  }
+
+  .report-field-wide {
+    width: 240px !important;
+    flex-shrink: 0;
+  }
+
+  .report-field-model {
+    width: 280px !important;
+    flex-shrink: 0;
+  }
+
+  .report-field-import {
+    width: 120px !important;
+    flex-shrink: 0;
+  }
 }
 </style>

@@ -112,6 +112,23 @@ const WorkDailyAPI = {
       method: "get",
     });
   },
+
+  /** 获取标签列表 */
+  getTags() {
+    return request<any, Array<{ id: number; name: string }>>({
+      url: "/work-daily-tag/list",
+      method: "get",
+    });
+  },
+
+  /** 新增标签 */
+  createTag(name: string) {
+    return request<any, { id: number; name: string }>({
+      url: "/work-daily-tag/add",
+      method: "post",
+      data: { name },
+    });
+  },
 };
 
 export default WorkDailyAPI;

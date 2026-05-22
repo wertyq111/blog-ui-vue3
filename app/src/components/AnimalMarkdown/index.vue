@@ -1,12 +1,14 @@
 <!-- 动森风 Markdown 编辑/预览组件：包装 md-editor-v3 + 动森皮肤 -->
 <template>
-  <MdEditor v-model="model" v-bind="editorAttrs" />
+  <MdPreview v-if="previewOnly" v-model="model" v-bind="previewAttrs" />
+  <MdEditor v-else v-model="model" v-bind="editorAttrs" />
 </template>
 
 <script setup lang="ts">
 import { computed } from "vue";
-import { MdEditor } from "md-editor-v3";
+import { MdEditor, MdPreview } from "md-editor-v3";
 import "md-editor-v3/lib/style.css";
+import "md-editor-v3/lib/preview.css";
 import { useSettingsStore } from "@/store/modules/settings";
 
 const DEFAULT_TOOLBARS = [
@@ -67,12 +69,19 @@ const model = computed({
 
 // md-editor-v3 prop 类型较复杂，用 Record 透传，避免逐 prop 严格校验
 const editorAttrs = computed<Record<string, any>>(() => ({
-  class: ["animal-md", { "animal-md--preview": props.previewOnly }],
+  class: ["animal-md"],
   theme: isDark.value ? "dark" : "light",
   style: { height: props.height },
-  previewOnly: props.previewOnly,
+  previewOnly: false,
   disabled: !props.editable,
   toolbars: props.toolbars ?? DEFAULT_TOOLBARS,
+}));
+
+const previewAttrs = computed<Record<string, any>>(() => ({
+  class: ["animal-md", "animal-md--preview"],
+  theme: isDark.value ? "dark" : "light",
+  style: { height: props.height },
+  previewOnly: true,
 }));
 </script>
 
@@ -108,5 +117,7 @@ const editorAttrs = computed<Record<string, any>>(() => ({
   border: 0;
   border-radius: 0;
   box-shadow: none;
+  background: transparent !important;
 }
 </style>
+

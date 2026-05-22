@@ -279,6 +279,7 @@ function handlePageChange(val: number) {
 .animal-pagination__sizes {
   display: flex;
   align-items: center;
+  margin-top: -14px;
 }
 
 /* 前后页按钮 */
