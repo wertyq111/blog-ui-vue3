@@ -504,7 +504,8 @@ onMounted(async () => {
 
 .todo-tags-inline {
   display: flex;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
+  align-items: center;
   gap: 4px;
 }
 
