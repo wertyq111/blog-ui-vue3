@@ -91,7 +91,10 @@ const clockData = computed(() => {
 
   return dist.map((value, h) => {
     const angle = (h / 24) * Math.PI * 2 - Math.PI / 2;
-    const len = innerR + (value / max) * (outerR - innerR);
+    // sqrt 压缩离群值（如批量补录造成的单点畸高），并给非零小时一个最小可见长度
+    const ratio = value > 0 ? Math.sqrt(value / max) : 0;
+    const minLen = value > 0 ? 8 : 0;
+    const len = innerR + minLen + ratio * (outerR - innerR - minLen);
     const x1 = cx + Math.cos(angle) * innerR;
     const y1 = cy + Math.sin(angle) * innerR;
     const x2 = cx + Math.cos(angle) * len;

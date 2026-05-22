@@ -61,6 +61,20 @@ const MemberAPI = {
   },
 
   /**
+   * 修改会员状态
+   *
+   * @param id 会员ID
+   * @param status 状态(1:正常;0:禁用)
+   */
+  updateStatus(id: number, status: number) {
+    return request({
+      url: `${BASE_URL}/status/${id}`,
+      method: "post",
+      data: { status },
+    });
+  },
+
+  /**
    * 删除会员
    *
    * @param id 会员ID

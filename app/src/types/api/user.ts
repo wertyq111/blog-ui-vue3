@@ -14,6 +14,8 @@ export interface UserInfo {
   nickname?: string;
   /** 头像URL */
   avatar?: string;
+  /** 性别(0:保密;1:男;2:女) */
+  gender?: number;
   /** 租户切换权限（true 可切换租户） */
   canSwitchTenant?: boolean;
   /** 角色集合 */

@@ -16,6 +16,7 @@
 @use "./layouts";
 @use "./develop";
 @use "./island-system";
+@use "./system-management";
 
 // ============================================
 // 2. 基础重置
@@ -37,8 +38,14 @@ html {
 body {
   margin: 0;
   font-family:
-    "M PLUS Rounded 1c", "Noto Sans SC", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
-    Roboto, sans-serif;
+    "M PLUS Rounded 1c",
+    "Noto Sans SC",
+    system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    Roboto,
+    sans-serif;
   line-height: 1.5;
   -moz-osx-font-smoothing: grayscale;
   -webkit-font-smoothing: antialiased;

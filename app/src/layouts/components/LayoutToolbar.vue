@@ -76,6 +76,7 @@ import NoticeDropdown from "@/components/NoticeDropdown/index.vue";
 import TenantSwitcher from "@/components/TenantSwitcher/index.vue";
 import { useTenantStoreHook } from "@/store/modules/tenant";
 import { ArrowDown } from "@element-plus/icons-vue";
+import { resolveAvatar } from "@/utils/avatar";
 
 const { t } = useI18n();
 const appStore = useAppStore();
@@ -102,7 +103,9 @@ const showTenantSwitcher = computed(() => {
 const displayName = computed(
   () => userStore.userInfo.nickname || userStore.userInfo.username || ""
 );
-const avatarSrc = computed(() => userStore.userInfo.avatar || "");
+const avatarSrc = computed(() =>
+  resolveAvatar(userStore.userInfo.avatar, userStore.userInfo.gender)
+);
 const avatarFallback = computed(() => {
   const name = displayName.value.trim();
   if (!name) {

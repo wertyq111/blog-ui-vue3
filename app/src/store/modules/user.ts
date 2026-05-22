@@ -28,8 +28,9 @@ export const useUserStore = defineStore("user", () => {
   /**
    * 获取用户信息
    *
-   * 后端返回格式：{id, username, nickname, avatar, roles?: [{code, name}], permissions: string[]}
-   * 需映射为：{userId, username, nickname, avatar, roles: string[], perms: string[]}
+   * 后端返回格式：{id, username, nickname, avatar, member: {nickname, gender, avatar, ...}, roles?: [{code, name}], permissions: string[]}
+   * 昵称、性别、头像优先取 member 表数据
+   * 需映射为：{userId, username, nickname, avatar, gender, roles: string[], perms: string[]}
    */
   async function getUserInfo(): Promise<UserInfo> {
     const raw: any = await UserAPI.getInfo();
@@ -41,8 +42,9 @@ export const useUserStore = defineStore("user", () => {
     const mapped: UserInfo = {
       userId: String(raw.id ?? raw.userId ?? ""),
       username: raw.username,
-      nickname: raw.nickname,
-      avatar: raw.avatar,
+      nickname: raw.member?.nickname || raw.nickname || raw.username,
+      avatar: raw.member?.avatar || raw.avatar || "",
+      gender: raw.member?.gender ?? raw.gender ?? 0,
       roles: Array.isArray(raw.roles)
         ? raw.roles.map((r: any) => (typeof r === "string" ? r : r.code || r.name))
         : [],

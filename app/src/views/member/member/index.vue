@@ -1,249 +1,220 @@
 <!-- 会员管理 -->
 <template>
-  <div class="develop-page admin-workspace-page">
-    <el-card shadow="never" class="develop-shell admin-workspace-shell">
-      <!-- Hero 区域 -->
-      <div class="develop-hero">
-        <div class="develop-hero__copy">
-          <div class="develop-hero__eyebrow">MEMBER MANAGEMENT</div>
-          <h1 class="develop-hero__title">会员管理</h1>
-          <p class="develop-hero__desc">管理注册会员信息与状态</p>
-        </div>
-      </div>
+  <div class="page-card">
+    <div class="page-head">
+      <div class="page-eyebrow">MEMBER MANAGEMENT</div>
+      <h1 class="page-title">会员管理</h1>
+      <p class="page-desc">管理注册会员的资料、等级与账户状态，统一维护会员体系。</p>
+    </div>
 
-      <!-- 搜索面板 -->
-      <div class="develop-panel">
-        <el-form ref="queryFormRef" :model="queryParams" :inline="true" class="develop-form">
-          <el-form-item label="昵称" prop="nickname">
-            <el-input
-              v-model="queryParams.nickname"
-              placeholder="请输入昵称"
-              clearable
-              @keyup.enter="handleQuery"
-            />
-          </el-form-item>
-          <el-form-item label="手机号" prop="phone">
-            <el-input
-              v-model="queryParams.phone"
-              placeholder="请输入手机号"
-              clearable
-              @keyup.enter="handleQuery"
-            />
-          </el-form-item>
-          <el-form-item label="会员等级" prop="memberLevel">
-            <el-select
-              v-model="queryParams.memberLevel"
-              placeholder="全部"
-              clearable
-              style="width: 150px"
-            >
-              <el-option
-                v-for="item in levelOptions"
-                :key="item.value"
-                :label="item.label"
-                :value="item.value"
-              />
-            </el-select>
-          </el-form-item>
-          <el-form-item label="状态" prop="status">
-            <el-select v-model="queryParams.status" placeholder="全部" clearable style="width: 100px">
-              <el-option label="正常" :value="1" />
-              <el-option label="禁用" :value="0" />
-            </el-select>
-          </el-form-item>
-          <el-form-item class="search-buttons">
-            <el-button type="primary" icon="search" @click="handleQuery">搜索</el-button>
-            <el-button icon="refresh" @click="handleResetQuery">重置</el-button>
-          </el-form-item>
-        </el-form>
-      </div>
-
-      <!-- 表格区域 -->
-      <div class="develop-table-shell">
-        <div class="develop-table-shell__header">
-          <div>
-            <div class="develop-table-shell__title">会员列表</div>
-            <div class="develop-table-shell__desc">所有注册会员的基础信息与账户状态。</div>
-          </div>
-          <div class="develop-table-shell__actions">
-            <el-button type="success" icon="plus" @click="handleCreateClick">新增会员</el-button>
-            <el-button
-              type="danger"
-              icon="delete"
-              :disabled="!hasSelection"
-              @click="handleDelete()"
-            >
-              批量删除
-            </el-button>
-          </div>
-        </div>
-
-        <el-table
-          v-loading="loading"
-          :data="dataList"
-          border
-          stripe
-          highlight-current-row
-          class="develop-table"
-          @selection-change="handleSelectionChange"
-        >
-          <el-table-column type="selection" width="50" align="center" />
-          <el-table-column label="ID" prop="id" width="80" align="center" />
-          <el-table-column label="头像" width="100" align="center">
-            <template #default="scope">
-              <el-avatar :size="40" :src="scope.row.avatar" />
-            </template>
-          </el-table-column>
-          <el-table-column label="昵称" prop="nickname" align="center" min-width="120" />
-          <el-table-column label="真实姓名" prop="realname" align="center" width="120" />
-          <el-table-column label="性别" width="80" align="center">
-            <template #default="scope">
-              <span v-if="scope.row.gender === 1">男</span>
-              <span v-else-if="scope.row.gender === 2">女</span>
-              <span v-else>保密</span>
-            </template>
-          </el-table-column>
-          <el-table-column label="会员等级" align="center" width="120">
-            <template #default="scope">
-              {{ getLevelName(scope.row.memberLevel) }}
-            </template>
-          </el-table-column>
-          <el-table-column label="状态" align="center" width="80">
-            <template #default="scope">
-              <el-tag :type="scope.row.status === 1 ? 'success' : 'info'">
-                {{ scope.row.status === 1 ? "正常" : "禁用" }}
-              </el-tag>
-            </template>
-          </el-table-column>
-          <el-table-column label="设备" prop="device" align="center" width="100" />
-          <el-table-column label="登录次数" prop="loginCount" align="center" width="100" />
-          <el-table-column label="创建时间" prop="createTime" align="center" width="180" />
-          <el-table-column label="操作" fixed="right" width="150" align="center">
-            <template #default="scope">
-              <el-button type="primary" icon="edit" link size="small" @click="handleEditClick(scope.row)">
-                编辑
-              </el-button>
-              <el-button type="danger" icon="delete" link size="small" @click="handleDelete(scope.row.id)">
-                删除
-              </el-button>
-            </template>
-          </el-table-column>
-        </el-table>
-
-        <pagination
-          v-if="total > 0"
-          v-model:total="total"
-          v-model:page="queryParams.pageNum"
-          v-model:limit="queryParams.pageSize"
-          @pagination="fetchList"
+    <div class="filter-bar">
+      <div class="filter-field">
+        <label class="filter-label">昵称：</label>
+        <Input
+          v-model="queryParams.nickname"
+          class="filter-input"
+          placeholder="请输入昵称"
+          allow-clear
+          @keyup.enter="handleQuery"
         />
       </div>
-    </el-card>
+      <div class="filter-field">
+        <label class="filter-label">手机号：</label>
+        <Input
+          v-model="queryParams.phone"
+          class="filter-input"
+          placeholder="请输入手机号"
+          allow-clear
+          @keyup.enter="handleQuery"
+        />
+      </div>
+      <div class="filter-field">
+        <label class="filter-label">会员等级：</label>
+        <Select
+          v-model="levelModel"
+          class="filter-select"
+          placeholder="全部"
+          :options="levelFilterOptions"
+        />
+      </div>
+      <div class="filter-field">
+        <label class="filter-label">状态：</label>
+        <Select
+          v-model="statusModel"
+          class="filter-select"
+          placeholder="全部"
+          :options="statusOptions"
+        />
+      </div>
+      <Button type="primary" size="small" @click="handleQuery">
+        <SystemIco name="search" :size="13" />
+        查询
+      </Button>
+      <Button type="default" size="small" @click="handleResetQuery">重置</Button>
+    </div>
 
-    <!-- 表单弹窗 -->
-    <el-dialog
-      v-model="dialogState.visible"
-      :title="dialogState.title"
-      width="600px"
-      class="develop-dialog"
-      @close="closeDialog"
-    >
-      <el-form ref="formRef" :model="formData" :rules="rules" label-width="100px" class="develop-dialog-form">
-        <el-row :gutter="20">
-          <el-col :span="12">
-            <el-form-item label="昵称" prop="nickname">
-              <el-input v-model="formData.nickname" placeholder="请输入昵称" />
-            </el-form-item>
-          </el-col>
-          <el-col :span="12">
-            <el-form-item label="真实姓名" prop="realname">
-              <el-input v-model="formData.realname" placeholder="请输入真实姓名" />
-            </el-form-item>
-          </el-col>
-        </el-row>
-
-        <el-row :gutter="20">
-          <el-col :span="12">
-            <el-form-item label="性别" prop="gender">
-              <el-select v-model="formData.gender" placeholder="请选择性别">
-                <el-option label="男" :value="1" />
-                <el-option label="女" :value="2" />
-                <el-option label="保密" :value="0" />
-              </el-select>
-            </el-form-item>
-          </el-col>
-          <el-col :span="12">
-            <el-form-item label="会员等级" prop="memberLevel">
-              <el-select v-model="formData.memberLevel" placeholder="请选择等级">
-                <el-option
-                  v-for="item in levelOptions"
-                  :key="item.value"
-                  :label="item.label"
-                  :value="item.value"
-                />
-              </el-select>
-            </el-form-item>
-          </el-col>
-        </el-row>
-
-        <el-row :gutter="20">
-          <el-col :span="12">
-            <el-form-item label="手机号" prop="phone">
-              <el-input v-model="formData.phone" placeholder="请输入手机号" />
-            </el-form-item>
-          </el-col>
-          <el-col :span="12">
-            <el-form-item label="生日" prop="birthday">
-              <el-date-picker
-                v-model="formData.birthday"
-                type="date"
-                placeholder="选择日期"
-                value-format="timestamp"
-                style="width: 100%"
-              />
-            </el-form-item>
-          </el-col>
-        </el-row>
-
-        <el-form-item label="头像" prop="avatar">
-          <single-upload v-model="formData.avatar" />
-        </el-form-item>
-
-        <el-form-item label="状态" prop="status">
-          <el-switch
-            v-model="formData.status"
-            :active-value="1"
-            :inactive-value="0"
-            active-text="正常"
-            inactive-text="禁用"
-            inline-prompt
-          />
-        </el-form-item>
-      </el-form>
-      <template #footer>
-        <div class="develop-dialog-footer">
-          <el-button type="primary" @click="handleSubmit">确 定</el-button>
-          <el-button @click="closeDialog">取 消</el-button>
+    <div class="list-card">
+      <div class="list-head">
+        <div>
+          <div class="list-title">会员列表</div>
+          <div class="list-sub">所有注册会员的基础信息与账户状态。</div>
         </div>
-      </template>
-    </el-dialog>
+      </div>
+
+      <div class="toolbar">
+        <Button v-hasPerm="'sys:member:add'" type="primary" size="small" @click="handleCreateClick">
+          <SystemIco name="plus" :size="13" />
+          添加
+        </Button>
+        <Button
+          v-hasPerm="'sys:member:delete'"
+          type="default"
+          size="small"
+          danger
+          :disabled="!hasSelection"
+          @click="handleDelete()"
+        >
+          <SystemIco name="trash" :size="13" />
+          删除
+        </Button>
+        <div class="toolbar-spacer" />
+        <div class="tool-group">
+          <Button class="btn-icon" type="default" size="small" title="刷新" @click="fetchList">
+            <SystemIco name="refresh" :size="14" />
+          </Button>
+          <Button class="btn-icon" type="default" size="small" title="密度">
+            <SystemIco name="density" :size="14" />
+          </Button>
+          <Button class="btn-icon" type="default" size="small" title="列设置">
+            <SystemIco name="settings" :size="14" />
+          </Button>
+          <Button class="btn-icon" type="default" size="small" title="全屏">
+            <SystemIco name="full" :size="14" />
+          </Button>
+        </div>
+      </div>
+
+      <div v-loading="loading" class="tbl-wrap">
+        <table class="tbl">
+          <thead>
+            <tr>
+              <th style="width: 44px">
+                <span class="cbx" :class="{ 'is-checked': allChecked }" @click="toggleAll">
+                  <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2.4">
+                    <path d="M2.5 6.5l2.5 2.5 5-6" />
+                  </svg>
+                </span>
+              </th>
+              <th style="width: 70px">ID</th>
+              <th style="width: 80px">头像</th>
+              <th>昵称</th>
+              <th>真实姓名</th>
+              <th style="width: 80px">性别</th>
+              <th>会员等级</th>
+              <th style="width: 90px">状态</th>
+              <th style="width: 110px">设备</th>
+              <th style="width: 90px">登录次数</th>
+              <th>创建时间</th>
+              <th style="width: 150px">操作</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="row in memberList" :key="row.id">
+              <td>
+                <span
+                  class="cbx"
+                  :class="{ 'is-checked': isChecked(row.id) }"
+                  @click="toggleRow(row.id)"
+                >
+                  <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2.4">
+                    <path d="M2.5 6.5l2.5 2.5 5-6" />
+                  </svg>
+                </span>
+              </td>
+              <td class="cell-num">{{ row.id }}</td>
+              <td>
+                <img
+                  class="member-avatar"
+                  :src="resolveAvatar(row.avatar, row.gender)"
+                  :alt="row.nickname"
+                />
+              </td>
+              <td>{{ row.nickname }}</td>
+              <td>{{ row.realname || "-" }}</td>
+              <td>{{ genderText(row.gender) }}</td>
+              <td>
+                <AnimalTag type="primary">{{ getLevelName(row.memberLevel) }}</AnimalTag>
+              </td>
+              <td>
+                <Switch
+                  v-hasPerm="'sys:member:status'"
+                  :model-value="row.status === 1"
+                  size="small"
+                  :loading="statusLoadingId === row.id"
+                  @update:model-value="(val: boolean) => handleStatusToggle(row, val)"
+                />
+              </td>
+              <td class="cell-mono">{{ row.device || "-" }}</td>
+              <td class="cell-num">{{ row.loginCount ?? 0 }}</td>
+              <td class="cell-mono">{{ row.createTime }}</td>
+              <td>
+                <span class="tbl-actions">
+                  <span
+                    v-hasPerm="'sys:member:edit'"
+                    class="action-link act-edit"
+                    @click="handleEditClick(row)"
+                  >
+                    <SystemIco name="edit" :size="12" />
+                    修改
+                  </span>
+                  <span
+                    v-hasPerm="'sys:member:delete'"
+                    class="action-link act-del"
+                    @click="handleDelete(row.id)"
+                  >
+                    <SystemIco name="trash" :size="12" />
+                    删除
+                  </span>
+                </span>
+              </td>
+            </tr>
+            <tr v-if="!loading && memberList.length === 0" class="empty-row">
+              <td colspan="12">暂无数据</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <pagination
+        v-if="total > 0"
+        v-model:total="total"
+        v-model:page="queryParams.pageNum"
+        v-model:limit="queryParams.pageSize"
+        @pagination="fetchList"
+      />
+    </div>
+
+    <MemberEdit v-model:visible="editVisible" :data="editingMember" @done="handleQuery" />
   </div>
 </template>
 
 <script setup lang="ts">
-import { onMounted, reactive, ref } from "vue";
-import { ElMessage, ElMessageBox, type FormInstance, type FormRules } from "element-plus";
+import { computed, onMounted, reactive, ref } from "vue";
+import { ElMessage, ElMessageBox } from "element-plus";
+import { Button, Input, Select, Switch } from "animal-island-vue";
 import MemberAPI from "@/api/member/member";
 import MemberLevelAPI from "@/api/member/member-level";
-import type { MemberItem, MemberQueryParams, MemberForm } from "@/types/api";
-import { useTableSelection } from "@/composables";
+import type { MemberItem, MemberQueryParams } from "@/types/api";
+import MemberEdit from "./member-edit.vue";
+import SystemIco from "@/components/AdminPage/SystemIco.vue";
+import AnimalTag from "@/components/AnimalTag/index.vue";
+import { useTableSelection } from "@/composables/useTableSelection";
+import { resolveAvatar } from "@/utils/avatar";
 
 defineOptions({
   name: "Member",
+  inheritAttrs: false,
 });
-
-const queryFormRef = ref<FormInstance>();
-const formRef = ref<FormInstance>();
 
 const queryParams = reactive<MemberQueryParams>({
   pageNum: 1,
@@ -254,115 +225,106 @@ const queryParams = reactive<MemberQueryParams>({
   memberLevel: undefined,
 });
 
-const loading = ref(false);
+const memberList = ref<MemberItem[]>([]);
 const total = ref(0);
-const dataList = ref<MemberItem[]>([]);
-const levelOptions = ref<any[]>([]);
+const loading = ref(false);
+const editVisible = ref(false);
+const editingMember = ref<MemberItem | null>(null);
+const levelOptions = ref<Array<{ label: string; value: number }>>([]);
+const statusLoadingId = ref<number | null>(null);
 
-const { selectedIds, hasSelection, handleSelectionChange } = useTableSelection<MemberItem>();
+const statusOptions = [
+  { key: "", label: "全部" },
+  { key: "1", label: "正常" },
+  { key: "0", label: "禁用" },
+];
 
-const dialogState = reactive({
-  visible: false,
-  title: "",
+const levelFilterOptions = computed(() => [
+  { key: "", label: "全部" },
+  ...levelOptions.value.map((item) => ({ key: String(item.value), label: item.label })),
+]);
+
+const statusModel = computed<string>({
+  get: () => (queryParams.status == null ? "" : String(queryParams.status)),
+  set: (value) => {
+    queryParams.status = value === "" ? undefined : Number(value);
+  },
 });
 
-const initialFormData: MemberForm = {
-  nickname: "",
-  realname: "",
-  gender: 0,
-  avatar: "",
-  birthday: undefined,
-  memberLevel: 0,
-  phone: "",
-  status: 1,
-};
+const levelModel = computed<string>({
+  get: () => (queryParams.memberLevel == null ? "" : String(queryParams.memberLevel)),
+  set: (value) => {
+    queryParams.memberLevel = value === "" ? undefined : Number(value);
+  },
+});
 
-const formData = reactive<MemberForm>({ ...initialFormData });
+const { checkedIds, allChecked, hasSelection, isChecked, toggleRow, toggleAll, clearSelection } =
+  useTableSelection(memberList, (row) => row.id);
 
-const rules: FormRules = {
-  nickname: [{ required: true, message: "请输入昵称", trigger: "blur" }],
-  memberLevel: [{ required: true, message: "请选择会员等级", trigger: "change" }],
-  phone: [{ pattern: /^1[3-9]\d{9}$/, message: "请输入正确的手机号码", trigger: "blur" }],
-};
+function genderText(gender?: number): string {
+  if (gender === 1) return "男";
+  if (gender === 2) return "女";
+  return "保密";
+}
 
-async function fetchList() {
+function getLevelName(levelId?: number): string {
+  const level = levelOptions.value.find((item) => item.value === levelId);
+  return level ? level.label : "未分级";
+}
+
+async function fetchLevelOptions(): Promise<void> {
+  levelOptions.value = await MemberLevelAPI.getOptions();
+}
+
+async function fetchList(): Promise<void> {
   loading.value = true;
   try {
     const data = await MemberAPI.getPage(queryParams);
-    dataList.value = data.list;
-    total.value = data.total;
+    memberList.value = data.list;
+    total.value = data.total ?? 0;
+    clearSelection();
   } finally {
     loading.value = false;
   }
 }
 
-async function fetchLevelOptions() {
-  const options = await MemberLevelAPI.getOptions();
-  levelOptions.value = options;
-}
-
-function getLevelName(levelId: number) {
-  const level = levelOptions.value.find((item) => item.value === levelId);
-  return level ? level.label : "未知等级";
-}
-
-function handleQuery() {
+function handleQuery(): void {
   queryParams.pageNum = 1;
   fetchList();
 }
 
-function handleResetQuery() {
-  queryFormRef.value?.resetFields();
+function handleResetQuery(): void {
+  queryParams.nickname = "";
+  queryParams.phone = "";
+  queryParams.status = undefined;
+  queryParams.memberLevel = undefined;
   handleQuery();
 }
 
-function handleCreateClick() {
-  dialogState.title = "新增会员";
-  Object.assign(formData, initialFormData);
-  dialogState.visible = true;
-}
-
-function handleEditClick(row: MemberItem) {
-  dialogState.title = "编辑会员";
-  Object.assign(formData, {
-    id: row.id,
-    nickname: row.nickname,
-    realname: row.realname,
-    gender: row.gender,
-    avatar: row.avatar,
-    birthday: row.birthday,
-    memberLevel: row.memberLevel,
-    phone: row.phone,
-    status: row.status,
-  });
-  dialogState.visible = true;
-}
-
-function closeDialog() {
-  dialogState.visible = false;
-  formRef.value?.resetFields();
-}
-
-async function handleSubmit() {
-  await formRef.value?.validate();
-  loading.value = true;
+async function handleStatusToggle(row: MemberItem, val: boolean): Promise<void> {
+  const next = val ? 1 : 0;
+  statusLoadingId.value = row.id;
   try {
-    if (formData.id) {
-      await MemberAPI.update(formData.id, formData);
-      ElMessage.success("修改成功");
-    } else {
-      await MemberAPI.create(formData);
-      ElMessage.success("新增成功");
-    }
-    closeDialog();
-    fetchList();
+    await MemberAPI.updateStatus(row.id, next);
+    row.status = next;
+    ElMessage.success(next === 1 ? "已启用" : "已禁用");
   } finally {
-    loading.value = false;
+    statusLoadingId.value = null;
   }
 }
 
-function handleDelete(id?: number) {
-  const ids = id ? [id] : (selectedIds.value as number[]);
+function handleCreateClick(): void {
+  editingMember.value = null;
+  editVisible.value = true;
+}
+
+function handleEditClick(row: MemberItem): void {
+  editingMember.value = row;
+  editVisible.value = true;
+}
+
+function handleDelete(id?: number): void {
+  const ids = id ? [id] : checkedIds.value.map(Number);
   if (!ids.length) {
     ElMessage.warning("请勾选删除项");
     return;
@@ -372,20 +334,37 @@ function handleDelete(id?: number) {
     confirmButtonText: "确定",
     cancelButtonText: "取消",
     type: "warning",
-  }).then(async () => {
-    loading.value = true;
-    try {
-      await MemberAPI.deleteByIds(ids);
-      ElMessage.success("删除成功");
-      fetchList();
-    } finally {
-      loading.value = false;
-    }
-  });
+  }).then(
+    () => {
+      loading.value = true;
+      const request = ids.length === 1 ? MemberAPI.deleteById(ids[0]) : MemberAPI.deleteByIds(ids);
+      request
+        .then(() => {
+          ElMessage.success("删除成功");
+          handleQuery();
+        })
+        .finally(() => {
+          loading.value = false;
+        });
+    },
+    () => ElMessage.info("已取消删除")
+  );
 }
 
 onMounted(() => {
   fetchLevelOptions();
-  fetchList();
+  handleQuery();
 });
 </script>
+
+<style lang="scss" scoped>
+.member-avatar {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  object-fit: cover;
+  vertical-align: middle;
+  background: #fff;
+  border: 1.5px solid var(--ai-border, #e8e2d6);
+}
+</style>
