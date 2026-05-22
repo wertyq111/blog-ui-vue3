@@ -1,137 +1,143 @@
+<!-- 工作平台 -->
 <template>
-  <div class="develop-page admin-workspace-page">
-    <el-card shadow="never" class="develop-shell admin-workspace-shell">
-      <section class="develop-hero">
-        <div class="develop-hero__copy">
-          <div class="develop-hero__eyebrow">Develop Workspace</div>
-          <div class="develop-hero__title">工作平台</div>
-          <div class="develop-hero__desc">维护项目来源、启用状态和展示顺序，为工作日常与工作文档提供统一的平台基座。</div>
-        </div>
-      </section>
+  <div class="page-card">
+    <div class="page-head">
+      <div class="page-eyebrow">DEVELOP WORKSPACE</div>
+      <h1 class="page-title">工作平台</h1>
+      <p class="page-desc">维护项目来源、启用状态与展示顺序，为工作日常与文档提供统一平台基座。</p>
+    </div>
 
-      <section class="develop-panel develop-panel--filter">
-        <el-form ref="queryFormRef" :model="queryParams" :inline="true" class="develop-form">
-          <el-form-item label="平台名称" prop="name">
-            <el-input
-              v-model="queryParams.name"
-              placeholder="请输入平台名称"
-              clearable
-              @keyup.enter="handleQuery"
-            />
-          </el-form-item>
-          <el-form-item label="状态" prop="status">
-            <el-select v-model="queryParams.status" placeholder="全部" clearable style="width: 150px">
-              <el-option label="启用" :value="1" />
-              <el-option label="禁用" :value="0" />
-            </el-select>
-          </el-form-item>
-          <el-form-item class="search-buttons">
-            <el-button type="primary" icon="search" @click="handleQuery">搜索</el-button>
-            <el-button icon="refresh" @click="handleResetQuery">重置</el-button>
-          </el-form-item>
-        </el-form>
-      </section>
-
-      <section class="develop-table-shell">
-        <div class="develop-table-shell__header">
-          <div>
-            <div class="develop-table-shell__title">平台排序列表</div>
-            <div class="develop-table-shell__desc">拖拽左侧手柄即可调整顺序，排序结果将自动保存。</div>
-          </div>
-          <div class="develop-table-shell__actions">
-            <el-button type="success" icon="plus" @click="handleCreateClick">新增平台</el-button>
-          </div>
-        </div>
-
-        <el-table
-          ref="tableRef"
-          v-loading="loading"
-          :data="dataList"
-          border
-          stripe
-          row-key="id"
-          class="develop-table"
-        >
-          <el-table-column width="50" align="center">
-            <template #default>
-              <el-icon class="drag-handle" style="cursor: move"><Rank /></el-icon>
-            </template>
-          </el-table-column>
-          <el-table-column label="平台名称" prop="name" min-width="200" />
-          <el-table-column label="排序" prop="sort" width="100" align="center" />
-          <el-table-column label="状态" width="100" align="center">
-            <template #default="{ row }">
-              <el-tag :type="row.status === 1 ? 'success' : 'info'">
-                {{ row.status === 1 ? "启用" : "禁用" }}
-              </el-tag>
-            </template>
-          </el-table-column>
-          <el-table-column label="创建时间" prop="createTime" width="180" align="center" />
-          <el-table-column label="更新时间" prop="updateTime" width="180" align="center" />
-          <el-table-column label="操作" fixed="right" width="160" align="center">
-            <template #default="{ row }">
-              <el-button type="primary" icon="edit" link size="small" @click="handleEditClick(row)">
-                编辑
-              </el-button>
-              <el-button type="danger" icon="delete" link size="small" @click="handleDelete(row.id)">
-                删除
-              </el-button>
-            </template>
-          </el-table-column>
-        </el-table>
-
-        <pagination
-          v-if="total > 0"
-          v-model:total="total"
-          v-model:page="queryParams.pageNum"
-          v-model:limit="queryParams.pageSize"
-          @pagination="fetchList"
+    <div class="filter-bar">
+      <div class="filter-field">
+        <label class="filter-label">平台名称：</label>
+        <Input
+          v-model="queryParams.name"
+          class="filter-input"
+          placeholder="请输入平台名称"
+          allow-clear
+          @keyup.enter="handleQuery"
         />
-      </section>
-    </el-card>
+      </div>
+      <div class="filter-field">
+        <label class="filter-label">状态：</label>
+        <Select
+          v-model="statusModel"
+          class="filter-select"
+          placeholder="全部"
+          :options="statusOptions"
+        />
+      </div>
+      <Button type="primary" size="small" @click="handleQuery">
+        <SystemIco name="search" :size="13" />
+        查询
+      </Button>
+      <Button type="default" size="small" @click="handleResetQuery">重置</Button>
+    </div>
 
-    <!-- 新增/编辑弹窗 -->
-    <el-dialog
-      v-model="dialogState.visible"
-      :title="dialogState.title"
-      width="500px"
-      class="develop-dialog"
-      @close="closeDialog"
-    >
-      <el-form ref="formRef" :model="formData" :rules="rules" label-width="100px" class="develop-dialog-form">
-        <el-form-item label="平台名称" prop="name">
-          <el-input v-model="formData.name" placeholder="请输入平台名称" maxlength="50" />
-        </el-form-item>
-        <el-form-item label="状态" prop="status">
-          <el-switch v-model="formData.status" :active-value="1" :inactive-value="0" />
-        </el-form-item>
-        <el-form-item label="排序" prop="sort">
-          <el-input-number v-model="formData.sort" :min="0" />
-        </el-form-item>
-      </el-form>
-      <template #footer>
-        <div class="develop-dialog-footer">
-          <el-button type="primary" @click="handleSubmit">确 定</el-button>
-          <el-button @click="closeDialog">取 消</el-button>
+    <div class="list-card">
+      <div class="list-head">
+        <div>
+          <div class="list-title">平台排序列表</div>
+          <div class="list-sub">拖拽左侧手柄即可调整顺序，排序结果将自动保存。</div>
         </div>
-      </template>
-    </el-dialog>
+      </div>
+
+      <div class="toolbar">
+        <Button type="primary" size="small" @click="handleCreateClick">
+          <SystemIco name="plus" :size="13" />
+          添加
+        </Button>
+        <div class="toolbar-spacer" />
+        <div class="tool-group">
+          <Button class="btn-icon" type="default" size="small" title="刷新" @click="fetchList">
+            <SystemIco name="refresh" :size="14" />
+          </Button>
+        </div>
+      </div>
+
+      <div v-loading="loading" class="tbl-wrap">
+        <table class="tbl">
+          <thead>
+            <tr>
+              <th style="width: 56px">排序</th>
+              <th>平台名称</th>
+              <th style="width: 90px">序号</th>
+              <th style="width: 110px">状态</th>
+              <th style="width: 170px">创建时间</th>
+              <th style="width: 170px">更新时间</th>
+              <th style="width: 150px">操作</th>
+            </tr>
+          </thead>
+          <tbody ref="tbodyRef">
+            <tr v-for="row in dataList" :key="row.id">
+              <td>
+                <span class="drag-handle" title="拖拽排序">
+                  <svg viewBox="0 0 16 16" width="16" height="16" fill="currentColor">
+                    <circle cx="5" cy="3" r="1.4" />
+                    <circle cx="11" cy="3" r="1.4" />
+                    <circle cx="5" cy="8" r="1.4" />
+                    <circle cx="11" cy="8" r="1.4" />
+                    <circle cx="5" cy="13" r="1.4" />
+                    <circle cx="11" cy="13" r="1.4" />
+                  </svg>
+                </span>
+              </td>
+              <td>{{ row.name }}</td>
+              <td class="cell-num">{{ row.sort }}</td>
+              <td>
+                <Switch
+                  :model-value="row.status === 1"
+                  size="small"
+                  :loading="statusLoadingId === row.id"
+                  @update:model-value="(val: boolean) => handleStatusToggle(row, val)"
+                />
+              </td>
+              <td class="cell-mono">{{ row.createTime }}</td>
+              <td class="cell-mono">{{ row.updateTime }}</td>
+              <td>
+                <span class="tbl-actions">
+                  <span class="action-link act-edit" @click="handleEditClick(row)">
+                    <SystemIco name="edit" :size="12" />
+                    修改
+                  </span>
+                  <span class="action-link act-del" @click="handleDelete(row.id)">
+                    <SystemIco name="trash" :size="12" />
+                    删除
+                  </span>
+                </span>
+              </td>
+            </tr>
+            <tr v-if="!loading && dataList.length === 0" class="empty-row">
+              <td colspan="7">暂无数据</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <pagination
+        v-if="total > 0"
+        v-model:total="total"
+        v-model:page="queryParams.pageNum"
+        v-model:limit="queryParams.pageSize"
+        @pagination="fetchList"
+      />
+    </div>
+
+    <WorkPlatformEdit v-model:visible="editVisible" :data="editingRow" @done="handleQuery" />
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, onMounted, nextTick } from "vue";
-import type { FormInstance, FormRules } from "element-plus";
-import WorkPlatformAPI from "@/api/develop/work-platform";
-import type { WorkPlatformQueryParams, WorkPlatformItem, WorkPlatformForm } from "@/types/api/work-platform";
-import { Rank } from "@element-plus/icons-vue";
+import { computed, nextTick, onMounted, reactive, ref } from "vue";
+import { ElMessage, ElMessageBox } from "element-plus";
+import { Button, Input, Select, Switch } from "animal-island-vue";
 import { useDraggable } from "vue-draggable-plus";
+import WorkPlatformAPI from "@/api/develop/work-platform";
+import type { WorkPlatformItem, WorkPlatformQueryParams } from "@/types/api/work-platform";
+import WorkPlatformEdit from "./work-platform-edit.vue";
+import SystemIco from "@/components/AdminPage/SystemIco.vue";
 
-defineOptions({ name: "WorkPlatform" });
-
-const queryFormRef = ref<FormInstance>();
-const formRef = ref<FormInstance>();
-const tableRef = ref();
+defineOptions({ name: "WorkPlatform", inheritAttrs: false });
 
 const queryParams = reactive<WorkPlatformQueryParams>({
   pageNum: 1,
@@ -140,142 +146,129 @@ const queryParams = reactive<WorkPlatformQueryParams>({
   status: undefined,
 });
 
+const statusOptions = [
+  { key: "", label: "全部" },
+  { key: "1", label: "启用" },
+  { key: "0", label: "禁用" },
+];
+
+const statusModel = computed<string>({
+  get: () => (queryParams.status == null ? "" : String(queryParams.status)),
+  set: (value) => {
+    queryParams.status = value === "" ? undefined : Number(value);
+  },
+});
+
 const loading = ref(false);
 const total = ref(0);
 const dataList = ref<WorkPlatformItem[]>([]);
+const editVisible = ref(false);
+const editingRow = ref<WorkPlatformItem | null>(null);
+const statusLoadingId = ref<number | null>(null);
+const tbodyRef = ref<HTMLElement | null>(null);
 
-const dialogState = reactive({
-  visible: false,
-  title: "",
-});
-
-const initialFormData: WorkPlatformForm = {
-  name: "",
-  status: 1,
-  sort: 0,
-};
-
-const formData = reactive<WorkPlatformForm>({ ...initialFormData });
-
-const rules: FormRules = {
-  name: [{ required: true, message: "请输入平台名称", trigger: "blur" }],
-};
-
-async function fetchList() {
+async function fetchList(): Promise<void> {
   loading.value = true;
   try {
     const data = await WorkPlatformAPI.getPage(queryParams);
     dataList.value = data.list;
-    total.value = data.total;
-    nextTick(() => {
-      initDraggable();
-    });
+    total.value = data.total ?? 0;
   } finally {
     loading.value = false;
   }
 }
 
-function initDraggable() {
-  const el = tableRef.value?.$el.querySelector(".el-table__body-wrapper tbody");
-  if (!el) return;
-  useDraggable(el, dataList, {
-    handle: ".drag-handle",
-    onEnd: async (evt) => {
-      const { oldIndex, newIndex } = evt;
-      if (oldIndex === newIndex) return;
-      
-      const list = dataList.value.map((item, index) => ({
-        id: item.id,
-        sort: index,
-      }));
-      
-      loading.value = true;
-      try {
-        await WorkPlatformAPI.reorder(list);
-        ElMessage.success("排序已保存");
-        fetchList();
-      } catch (error) {
-        console.error("Reorder failed", error);
-        fetchList();
-      } finally {
-        loading.value = false;
-      }
-    },
-  });
+async function handleReorder(): Promise<void> {
+  const list = dataList.value.map((item, index) => ({ id: item.id, sort: index }));
+  loading.value = true;
+  try {
+    await WorkPlatformAPI.reorder(list);
+    ElMessage.success("排序已保存");
+  } finally {
+    fetchList();
+  }
 }
 
-function handleQuery() {
+function handleQuery(): void {
   queryParams.pageNum = 1;
   fetchList();
 }
 
-function handleResetQuery() {
-  queryFormRef.value?.resetFields();
+function handleResetQuery(): void {
+  queryParams.name = "";
+  queryParams.status = undefined;
   handleQuery();
 }
 
-function handleCreateClick() {
-  dialogState.title = "新增工作平台";
-  Object.assign(formData, initialFormData);
-  dialogState.visible = true;
+function handleCreateClick(): void {
+  editingRow.value = null;
+  editVisible.value = true;
 }
 
-function handleEditClick(row: WorkPlatformItem) {
-  dialogState.title = "编辑工作平台";
-  Object.assign(formData, {
-    id: row.id,
-    name: row.name,
-    status: row.status,
-    sort: row.sort,
-  });
-  dialogState.visible = true;
+function handleEditClick(row: WorkPlatformItem): void {
+  editingRow.value = row;
+  editVisible.value = true;
 }
 
-function closeDialog() {
-  dialogState.visible = false;
-  formRef.value?.resetFields();
-}
-
-async function handleSubmit() {
-  await formRef.value?.validate();
-  loading.value = true;
+async function handleStatusToggle(row: WorkPlatformItem, val: boolean): Promise<void> {
+  const next = val ? 1 : 0;
+  statusLoadingId.value = row.id;
   try {
-    if (formData.id) {
-      await WorkPlatformAPI.update(formData.id, formData);
-      ElMessage.success("修改成功");
-    } else {
-      await WorkPlatformAPI.create(formData);
-      ElMessage.success("新增成功");
-    }
-    closeDialog();
-    fetchList();
+    await WorkPlatformAPI.update(row.id, { name: row.name, status: next, sort: row.sort });
+    row.status = next;
+    ElMessage.success(val ? "已启用" : "已禁用");
   } finally {
-    loading.value = false;
+    statusLoadingId.value = null;
   }
 }
 
-async function handleDelete(id: number) {
-  try {
-    await ElMessageBox.confirm("确认删除该平台吗？这将导致关联的日常记录显示异常。", "警告", {
-      confirmButtonText: "确定",
-      cancelButtonText: "取消",
-      type: "warning",
+function handleDelete(id: number): void {
+  ElMessageBox.confirm("确认删除该平台吗？这将导致关联的日常记录显示异常。", "警告", {
+    confirmButtonText: "确定",
+    cancelButtonText: "取消",
+    type: "warning",
+  }).then(
+    () => {
+      loading.value = true;
+      WorkPlatformAPI.deleteById(id)
+        .then(() => {
+          ElMessage.success("删除成功");
+          fetchList();
+        })
+        .finally(() => {
+          loading.value = false;
+        });
+    },
+    () => ElMessage.info("已取消删除")
+  );
+}
+
+onMounted(async () => {
+  handleQuery();
+  await nextTick();
+  if (tbodyRef.value) {
+    useDraggable(tbodyRef, dataList, {
+      handle: ".drag-handle",
+      animation: 150,
+      onEnd: handleReorder,
     });
-  } catch {
-    return;
   }
-
-  loading.value = true;
-  try {
-    await WorkPlatformAPI.deleteById(id);
-    ElMessage.success("删除成功");
-    fetchList();
-  } finally {
-    loading.value = false;
-  }
-}
-
-onMounted(() => {
-  fetchList();
 });
 </script>
+
+<style lang="scss" scoped>
+.drag-handle {
+  display: inline-grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  cursor: move;
+  color: var(--ai-text-3, #c4b89e);
+  border-radius: 8px;
+
+  &:hover {
+    color: var(--ai-primary, #19c8b9);
+    background: rgba(25, 200, 185, 0.1);
+  }
+}
+</style>

@@ -1,339 +1,230 @@
+<!-- 工作文档 -->
 <template>
-  <div class="develop-page develop-page--doc admin-workspace-page work-doc-page">
-    <el-card shadow="never" class="develop-shell admin-workspace-shell">
-      <section class="develop-hero">
-        <div class="develop-hero__copy">
-          <div class="develop-hero__eyebrow">Develop Workspace</div>
-          <div class="develop-hero__title">工作文档</div>
-          <div class="develop-hero__desc">分类管理工作相关文档，支持 Markdown 编辑、预览和快捷引用。拖拽左侧分类可调整层级和顺序。</div>
+  <div class="page-card">
+    <div class="page-head">
+      <div class="page-eyebrow">DEVELOP WORKSPACE</div>
+      <h1 class="page-title">工作文档</h1>
+      <p class="page-desc">分类管理工作文档，支持 Markdown 编辑、预览与拖拽调整分类层级。</p>
+    </div>
+
+    <div class="wd-layout">
+      <!-- 左侧分类树 -->
+      <aside class="wd-sidebar">
+        <div class="wd-tree-head">
+          <div class="wd-tree-title">分类目录</div>
+          <Button
+            type="primary"
+            size="small"
+            class="btn-icon"
+            title="新增分类"
+            @click="handleCreateCategory"
+          >
+            <SystemIco name="plus" :size="14" />
+          </Button>
+        </div>
+        <div class="wd-tree-tips">拖到节点上变为子目录，拖到节点前后调整同级顺序。</div>
+
+        <AnimalTree
+          :nodes="categoryTree"
+          :selected-id="queryParams.categoryId ?? null"
+          @select="handleCategorySelect"
+          @reorder="handleCategoryReorder"
+        >
+          <template #actions="{ node }">
+            <span class="wd-node-act act-edit" title="编辑" @click="handleEditCategory(node)">
+              <SystemIco name="edit" :size="12" />
+            </span>
+            <span class="wd-node-act act-del" title="删除" @click="handleDeleteCategory(node.id)">
+              <SystemIco name="trash" :size="12" />
+            </span>
+          </template>
+        </AnimalTree>
+
+        <div
+          class="wd-show-all"
+          :class="{ 'is-active': queryParams.categoryId == null }"
+          @click="handleShowAll"
+        >
+          显示全部
+        </div>
+      </aside>
+
+      <!-- 右侧文档列表 -->
+      <section class="wd-main">
+        <div class="filter-bar">
+          <div class="filter-field">
+            <label class="filter-label">关键字：</label>
+            <Input
+              v-model="queryParams.keyword"
+              class="filter-input"
+              placeholder="标题/内容"
+              allow-clear
+              @keyup.enter="handleQuery"
+            />
+          </div>
+          <div class="filter-field">
+            <label class="filter-label">状态：</label>
+            <Select
+              v-model="statusModel"
+              class="filter-select"
+              placeholder="全部"
+              :options="statusOptions"
+            />
+          </div>
+          <div class="filter-field">
+            <label class="filter-label">模板：</label>
+            <Select
+              v-model="templateModel"
+              class="filter-select"
+              placeholder="全部"
+              :options="templateFilterOptions"
+            />
+          </div>
+          <Button type="primary" size="small" @click="handleQuery">
+            <SystemIco name="search" :size="13" />
+            查询
+          </Button>
+          <Button type="default" size="small" @click="handleResetQuery">重置</Button>
+        </div>
+
+        <div class="list-card">
+          <div class="list-head">
+            <div>
+              <div class="list-title">文档管理</div>
+              <div class="list-sub">点击标题预览文档，点击链接复制 Markdown 引用。</div>
+            </div>
+          </div>
+
+          <div class="toolbar">
+            <Button type="primary" size="small" @click="handleCreateClick">
+              <SystemIco name="plus" :size="13" />
+              添加
+            </Button>
+            <div class="toolbar-spacer" />
+            <div class="tool-group">
+              <Button class="btn-icon" type="default" size="small" title="刷新" @click="fetchList">
+                <SystemIco name="refresh" :size="14" />
+              </Button>
+            </div>
+          </div>
+
+          <div v-loading="loading" class="tbl-wrap">
+            <table class="tbl">
+              <thead>
+                <tr>
+                  <th>标题</th>
+                  <th style="width: 120px">分类</th>
+                  <th style="width: 180px">标签</th>
+                  <th style="width: 90px">优先级</th>
+                  <th style="width: 90px">状态</th>
+                  <th style="width: 170px">更新时间</th>
+                  <th style="width: 200px">操作</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="row in dataList" :key="row.id">
+                  <td>
+                    <AnimalTag v-if="row.isPin === 1" type="danger" dot>置顶</AnimalTag>
+                    <a class="action-link act-edit doc-title" @click="handlePreview(row)">
+                      {{ row.title }}
+                    </a>
+                  </td>
+                  <td>{{ row.category?.name || "-" }}</td>
+                  <td>
+                    <span v-if="row.tags?.length" class="doc-tags">
+                      <AnimalTag v-for="tag in row.tags" :key="tag" type="info">
+                        {{ tag }}
+                      </AnimalTag>
+                    </span>
+                    <span v-else>-</span>
+                  </td>
+                  <td>
+                    <AnimalTag :type="priorityType(row.priority)">{{ row.priority }}</AnimalTag>
+                  </td>
+                  <td>
+                    <AnimalTag
+                      :type="row.status === 1 ? 'success' : 'info'"
+                      :dot="row.status === 1"
+                    >
+                      {{ row.status === 1 ? "启用" : "停用" }}
+                    </AnimalTag>
+                  </td>
+                  <td class="cell-mono">{{ row.updateTime }}</td>
+                  <td>
+                    <span class="tbl-actions">
+                      <span class="action-link act-edit" @click="handleEditClick(row)">
+                        <SystemIco name="edit" :size="12" />
+                        修改
+                      </span>
+                      <span class="action-link act-assign" @click="copyMarkdownLink(row)">
+                        <SystemIco name="refresh" :size="12" />
+                        链接
+                      </span>
+                      <span class="action-link act-del" @click="handleDelete(row.id)">
+                        <SystemIco name="trash" :size="12" />
+                        删除
+                      </span>
+                    </span>
+                  </td>
+                </tr>
+                <tr v-if="!loading && dataList.length === 0" class="empty-row">
+                  <td colspan="7">暂无数据</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <pagination
+            v-if="total > 0"
+            v-model:total="total"
+            v-model:page="queryParams.pageNum"
+            v-model:limit="queryParams.pageSize"
+            @pagination="fetchList"
+          />
         </div>
       </section>
+    </div>
 
-      <div class="develop-doc-layout">
-        <!-- 左侧分类树 -->
-        <section class="develop-panel develop-panel--sidebar">
-          <div class="doc-tree-toolbar">
-            <div class="doc-tree-toolbar__title">分类目录</div>
-            <div class="doc-tree-toolbar__tips">拖到节点上可变成子目录，拖到节点前后可调整同级顺序。</div>
-            <el-button type="primary" icon="plus" circle size="small" class="mt-2" @click="handleCreateCategory" />
-          </div>
+    <WorkDocCategoryEdit
+      v-model:visible="categoryVisible"
+      :data="editingCategory"
+      :default-parent-id="queryParams.categoryId"
+      :category-options="categoryOptions"
+      @done="fetchCategories"
+    />
+    <WorkDocEdit
+      v-model:visible="docVisible"
+      :data="editingDoc"
+      :default-category-id="queryParams.categoryId"
+      :category-options="categoryOptions"
+      :source-options="sourceOptions"
+      @done="fetchList"
+    />
 
-          <div class="doc-tree-group">
-            <!-- 根节点放置区 -->
-            <div
-              class="doc-tree-root-drop"
-              :class="{ 'is-active': rootDragOver }"
-              @dragover.prevent="rootDragOver = true"
-              @dragleave="rootDragOver = false"
-              @drop="handleRootDrop"
-            >
-              拖拽到此处设为根分类
-            </div>
-
-            <el-tree
-              ref="treeRef"
-              :data="categoryTree"
-              :props="{ children: 'children', label: 'name' }"
-              node-key="id"
-              highlight-current
-              default-expand-all
-              draggable
-              :allow-drop="allowDrop"
-              @node-click="handleCategoryClick"
-              @node-drop="handleCategoryDrop"
-            >
-              <template #default="{ node, data }">
-                <div class="doc-tree-node">
-                  <div class="doc-tree-node__main">
-                    <el-icon class="doc-tree-node__folder">
-                      <Folder v-if="data.children?.length" />
-                      <Document v-else />
-                    </el-icon>
-                    <span class="doc-tree-node__label">{{ node.label }}</span>
-                  </div>
-                  <div class="doc-tree-node__meta">
-                    <span v-if="data.children && data.children.length" class="doc-tree-node__count">{{ data.children.length }}项</span>
-                    <span class="doc-tree-node__actions">
-                      <el-icon class="text-blue-500 cursor-pointer" @click.stop="handleEditCategory(data)">
-                        <Edit />
-                      </el-icon>
-                      <el-icon class="text-danger cursor-pointer" @click.stop="handleDeleteCategory(data.id)">
-                        <Delete />
-                      </el-icon>
-                    </span>
-                  </div>
-                </div>
-              </template>
-            </el-tree>
-            <div class="doc-tree-show-all" @click="handleCategoryClick({ id: undefined })">
-              显示全部
-            </div>
-          </div>
-        </section>
-
-        <!-- 右侧文档列表 -->
-        <section class="develop-panel develop-panel--workspace">
-          <div class="doc-panel__header">
-            <div class="doc-panel__heading">
-              <div class="doc-panel__dot" />
-              <div class="doc-panel__title">文档列表</div>
-            </div>
-            <div class="doc-panel__desc">共 {{ total }} 篇文档</div>
-          </div>
-
-          <el-form ref="queryFormRef" :model="queryParams" :inline="true" class="develop-form">
-            <el-form-item label="关键字" prop="keyword">
-              <el-input
-                v-model="queryParams.keyword"
-                placeholder="标题/内容"
-                clearable
-                @keyup.enter="handleQuery"
-              />
-            </el-form-item>
-            <el-form-item label="状态" prop="status">
-              <el-select v-model="queryParams.status" placeholder="全部" clearable style="width: 120px">
-                <el-option label="启用" :value="1" />
-                <el-option label="停用" :value="0" />
-              </el-select>
-            </el-form-item>
-            <el-form-item label="模板" prop="templateType">
-              <el-select
-                v-model="queryParams.templateType"
-                placeholder="全部"
-                clearable
-                style="width: 150px"
-              >
-                <el-option label="自定义" value="custom" />
-                <el-option label="故障排查" value="troubleshooting" />
-                <el-option label="方案设计" value="design" />
-                <el-option label="知识点" value="knowledge" />
-              </el-select>
-            </el-form-item>
-            <el-form-item class="search-buttons">
-              <el-button type="primary" icon="search" @click="handleQuery">搜索</el-button>
-              <el-button icon="refresh" @click="handleResetQuery">重置</el-button>
-            </el-form-item>
-          </el-form>
-
-          <div class="develop-table-shell">
-            <div class="develop-table-shell__header">
-              <div>
-                <div class="develop-table-shell__title">文档管理</div>
-                <div class="develop-table-shell__desc">点击标题预览文档，点击链接复制 Markdown 引用。</div>
-              </div>
-              <div class="develop-table-shell__actions">
-                <el-button type="success" icon="plus" @click="handleCreateClick">新增文档</el-button>
-              </div>
-            </div>
-
-            <el-table v-loading="loading" :data="dataList" border stripe>
-          <el-table-column label="标题" min-width="260">
-            <template #default="{ row }">
-              <el-tag v-if="row.isPin === 1" size="small" type="danger" class="mr-1">置顶</el-tag>
-              <el-link type="primary" class="font-medium" @click="handlePreview(row)">{{ row.title }}</el-link>
-            </template>
-          </el-table-column>
-          <el-table-column label="分类" min-width="120">
-            <template #default="{ row }">{{ row.category?.name || "-" }}</template>
-          </el-table-column>
-          <el-table-column label="标签" min-width="160">
-            <template #default="{ row }">
-              <el-space v-if="row.tags?.length" wrap>
-                <el-tag v-for="tag in row.tags" :key="tag" size="small" type="info">{{ tag }}</el-tag>
-              </el-space>
-              <span v-else>-</span>
-            </template>
-          </el-table-column>
-          <el-table-column label="优先级" prop="priority" width="90" align="center">
-            <template #default="{ row }">
-              <el-tag :type="row.priority >= 8 ? 'danger' : row.priority >= 5 ? 'warning' : 'info'">
-                {{ row.priority }}
-              </el-tag>
-            </template>
-          </el-table-column>
-          <el-table-column label="状态" width="90" align="center">
-            <template #default="{ row }">
-              <el-tag :type="row.status === 1 ? 'success' : 'info'">
-                {{ row.status === 1 ? "启用" : "停用" }}
-              </el-tag>
-            </template>
-          </el-table-column>
-          <el-table-column label="更新时间" prop="updateTime" width="180" align="center" />
-          <el-table-column label="操作" fixed="right" width="200" align="center">
-            <template #default="{ row }">
-              <el-button type="primary" icon="edit" link size="small" @click="handleEditClick(row)">
-                编辑
-              </el-button>
-              <el-button type="success" icon="share" link size="small" @click="copyMarkdownLink(row)">
-                链接
-              </el-button>
-              <el-button type="danger" icon="delete" link size="small" @click="handleDelete(row.id)">
-                删除
-              </el-button>
-            </template>
-          </el-table-column>
-        </el-table>
-
-        <pagination
-          v-if="total > 0"
-          v-model:total="total"
-          v-model:page="queryParams.pageNum"
-          v-model:limit="queryParams.pageSize"
-          @pagination="fetchList"
-        />
-          </div>
-        </section>
-      </div>
-
-    <!-- 分类编辑弹窗 -->
-    <el-dialog
-      v-model="categoryDialog.visible"
-      :title="categoryDialog.title"
-      width="500px"
-      class="develop-dialog"
-      @close="closeCategoryDialog"
-    >
-      <el-form
-        ref="categoryFormRef"
-        :model="categoryFormData"
-        :rules="categoryRules"
-        label-width="100px"
-        class="develop-dialog-form"
-      >
-        <el-form-item label="分类名称" prop="name">
-          <el-input v-model="categoryFormData.name" placeholder="请输入分类名称" />
-        </el-form-item>
-        <el-form-item label="父分类" prop="parentId">
-          <el-select v-model="categoryFormData.parentId" placeholder="无" clearable style="width: 100%">
-            <el-option v-for="item in flattenedCategories" :key="item.id" :label="item.name" :value="item.id" />
-          </el-select>
-        </el-form-item>
-        <el-form-item label="图标" prop="icon">
-          <el-input v-model="categoryFormData.icon" placeholder="请输入图标名称" />
-        </el-form-item>
-        <el-form-item label="描述" prop="description">
-          <el-input v-model="categoryFormData.description" placeholder="请输入描述" />
-        </el-form-item>
-        <el-form-item label="排序" prop="sort">
-          <el-input-number v-model="categoryFormData.sort" :min="0" />
-        </el-form-item>
-        <el-form-item label="状态" prop="status">
-          <el-switch v-model="categoryFormData.status" :active-value="1" :inactive-value="0" />
-        </el-form-item>
-      </el-form>
-      <template #footer>
-        <div class="dialog-footer">
-          <el-button type="primary" @click="handleCategorySubmit">确 定</el-button>
-          <el-button @click="closeCategoryDialog">取 消</el-button>
-        </div>
-      </template>
+    <el-dialog v-model="previewVisible" :title="previewTitle" width="80%" fullscreen>
+      <AnimalMarkdown :model-value="previewContent" preview-only height="calc(100vh - 140px)" />
     </el-dialog>
-
-    <!-- 文档编辑弹窗 -->
-    <el-dialog
-      v-model="dialogState.visible"
-      :title="dialogState.title"
-      width="1000px"
-      class="develop-dialog"
-      @close="closeDialog"
-    >
-      <el-form ref="formRef" :model="formData" :rules="rules" label-width="100px" class="develop-dialog-form">
-        <el-row :gutter="20">
-          <el-col :span="16">
-            <el-form-item label="标题" prop="title">
-              <el-input v-model="formData.title" placeholder="请输入标题" />
-            </el-form-item>
-          </el-col>
-          <el-col :span="8">
-            <el-form-item label="分类" prop="categoryId">
-              <el-select v-model="formData.categoryId" placeholder="请选择分类" style="width: 100%">
-                <el-option v-for="item in flattenedCategories" :key="item.id" :label="item.name" :value="item.id" />
-              </el-select>
-            </el-form-item>
-          </el-col>
-        </el-row>
-        <el-row :gutter="20">
-          <el-col :span="8">
-            <el-form-item label="模板类型" prop="templateType">
-              <el-select v-model="formData.templateType" style="width: 100%">
-                <el-option label="自定义" value="custom" />
-                <el-option label="故障排查" value="troubleshooting" />
-                <el-option label="方案设计" value="design" />
-                <el-option label="知识点" value="knowledge" />
-              </el-select>
-            </el-form-item>
-          </el-col>
-          <el-col :span="8">
-            <el-form-item label="状态" prop="status">
-              <el-select v-model="formData.status" style="width: 100%">
-                <el-option label="启用" :value="1" />
-                <el-option label="停用" :value="0" />
-              </el-select>
-            </el-form-item>
-          </el-col>
-          <el-col :span="8">
-            <el-form-item label="优先级" prop="priority">
-              <el-input-number v-model="formData.priority" :min="0" :max="10" style="width: 100%" />
-            </el-form-item>
-          </el-col>
-        </el-row>
-        <el-row :gutter="20">
-          <el-col :span="12">
-            <el-form-item label="标签" prop="tagString">
-              <el-input v-model="formData.tagString" placeholder="英文逗号分隔" />
-            </el-form-item>
-          </el-col>
-          <el-col :span="8">
-            <el-form-item label="项目来源" prop="source">
-              <el-select v-model="formData.source" filterable clearable style="width: 100%">
-                <el-option v-for="item in platforms" :key="item.id" :label="item.name" :value="item.name" />
-              </el-select>
-            </el-form-item>
-          </el-col>
-          <el-col :span="4">
-            <el-form-item label="置顶" prop="isPin">
-              <el-switch v-model="formData.isPin" :active-value="1" :inactive-value="0" />
-            </el-form-item>
-          </el-col>
-        </el-row>
-        <el-form-item label="内容" prop="content">
-          <MdEditor v-model="formData.content" height="500px" />
-        </el-form-item>
-      </el-form>
-      <template #footer>
-        <div class="dialog-footer">
-          <el-button type="primary" @click="handleSubmit">确 定</el-button>
-          <el-button @click="closeDialog">取 消</el-button>
-        </div>
-      </template>
-    </el-dialog>
-
-    <!-- 文档预览弹窗 -->
-    <el-dialog v-model="previewState.visible" :title="previewState.title" width="80%" fullscreen>
-      <MdEditor :model-value="previewState.content" preview-only height="calc(100vh - 120px)" />
-    </el-dialog>
-    </el-card>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, computed, onMounted } from "vue";
-import type { FormInstance, FormRules } from "element-plus";
-import { Edit, Delete, Folder, Document } from "@element-plus/icons-vue";
+import { computed, onMounted, reactive, ref } from "vue";
+import { ElMessage, ElMessageBox } from "element-plus";
+import { Button, Input, Select } from "animal-island-vue";
+import AnimalTree from "@/components/AnimalTree/index.vue";
+import AnimalTag from "@/components/AnimalTag/index.vue";
+import AnimalMarkdown from "@/components/AnimalMarkdown/index.vue";
+import SystemIco from "@/components/AdminPage/SystemIco.vue";
 import WorkDocAPI from "@/api/develop/work-doc";
 import WorkDocCategoryAPI from "@/api/develop/work-doc-category";
 import WorkPlatformAPI from "@/api/develop/work-platform";
-import type { WorkDocQueryParams, WorkDocItem, WorkDocForm } from "@/types/api/work-doc";
-import type { WorkDocCategoryItem, WorkDocCategoryForm } from "@/types/api/work-doc-category";
+import type { WorkDocItem, WorkDocQueryParams } from "@/types/api/work-doc";
+import type { WorkDocCategoryItem } from "@/types/api/work-doc-category";
 import type { WorkPlatformItem } from "@/types/api/work-platform";
-import MdEditor from "@/components/MdEditor/index.vue";
+import WorkDocCategoryEdit from "./work-doc-category-edit.vue";
+import WorkDocEdit from "./work-doc-edit.vue";
 
-defineOptions({ name: "WorkDoc" });
-
-const queryFormRef = ref<FormInstance>();
-const formRef = ref<FormInstance>();
-const categoryFormRef = ref<FormInstance>();
-const treeRef = ref();
+defineOptions({ name: "WorkDoc", inheritAttrs: false });
 
 const queryParams = reactive<WorkDocQueryParams>({
   pageNum: 1,
@@ -350,496 +241,299 @@ const dataList = ref<WorkDocItem[]>([]);
 const categoryTree = ref<WorkDocCategoryItem[]>([]);
 const platforms = ref<WorkPlatformItem[]>([]);
 
-const rootDragOver = ref(false);
+const categoryVisible = ref(false);
+const editingCategory = ref<WorkDocCategoryItem | null>(null);
+const docVisible = ref(false);
+const editingDoc = ref<WorkDocItem | null>(null);
+const previewVisible = ref(false);
+const previewTitle = ref("");
+const previewContent = ref("");
 
-const dialogState = reactive({
-  visible: false,
-  title: "",
+const statusOptions = [
+  { key: "", label: "全部" },
+  { key: "1", label: "启用" },
+  { key: "0", label: "停用" },
+];
+
+const templateFilterOptions = [
+  { key: "", label: "全部" },
+  { key: "custom", label: "自定义" },
+  { key: "troubleshooting", label: "故障排查" },
+  { key: "design", label: "方案设计" },
+  { key: "knowledge", label: "知识点" },
+];
+
+const statusModel = computed<string>({
+  get: () => (queryParams.status == null ? "" : String(queryParams.status)),
+  set: (value) => {
+    queryParams.status = value === "" ? undefined : Number(value);
+  },
 });
 
-const categoryDialog = reactive({
-  visible: false,
-  title: "",
+const templateModel = computed<string>({
+  get: () => queryParams.templateType ?? "",
+  set: (value) => {
+    queryParams.templateType = value === "" ? undefined : value;
+  },
 });
 
-const previewState = reactive({
-  visible: false,
-  title: "",
-  content: "",
-});
-
-const initialFormData = {
-  id: undefined as number | undefined,
-  categoryId: undefined as unknown as number,
-  title: "",
-  content: "",
-  templateType: "custom",
-  tagString: "",
-  status: 1,
-  priority: 0,
-  source: "",
-  isPin: 0,
-};
-
-const formData = reactive({ ...initialFormData });
-
-const initialCategoryData: WorkDocCategoryForm = {
-  name: "",
-  parentId: undefined,
-  icon: "",
-  description: "",
-  sort: 0,
-  status: 1,
-};
-
-const categoryFormData = reactive<WorkDocCategoryForm>({ ...initialCategoryData });
-
-const flattenedCategories = computed(() => {
-  const result: any[] = [];
-  const traverse = (list: WorkDocCategoryItem[]) => {
-    list.forEach(item => {
-      result.push({ id: item.id, name: item.name });
-      if (item.children?.length) {
-        traverse(item.children);
-      }
+const categoryOptions = computed(() => {
+  const out: Array<{ key: string; label: string }> = [];
+  const walk = (list: WorkDocCategoryItem[], prefix: string) => {
+    list.forEach((n) => {
+      out.push({ key: String(n.id), label: prefix + n.name });
+      if (n.children?.length) walk(n.children, prefix + "　");
     });
   };
-  traverse(categoryTree.value);
-  return result;
+  walk(categoryTree.value, "");
+  return out;
 });
 
-const rules: FormRules = {
-  title: [{ required: true, message: "请输入标题", trigger: "blur" }],
-  categoryId: [{ required: true, message: "请选择分类", trigger: "change" }],
-  content: [{ required: true, message: "请输入内容", trigger: "blur" }],
-};
+const sourceOptions = computed(() => platforms.value.map((p) => ({ key: p.name, label: p.name })));
 
-const categoryRules: FormRules = {
-  name: [{ required: true, message: "请输入分类名称", trigger: "blur" }],
-};
+function priorityType(priority: number): "danger" | "warning" | "info" {
+  if (priority >= 8) return "danger";
+  if (priority >= 5) return "warning";
+  return "info";
+}
 
-/** 将扁平分类列表构建为树形结构 */
 function listToTree(list: WorkDocCategoryItem[]): WorkDocCategoryItem[] {
   const map = new Map<number, WorkDocCategoryItem>();
   const roots: WorkDocCategoryItem[] = [];
-  for (const item of list) {
-    map.set(item.id, { ...item, children: [] });
-  }
-  for (const item of list) {
+  list.forEach((item) => map.set(item.id, { ...item, children: [] }));
+  list.forEach((item) => {
     const node = map.get(item.id)!;
     const pid = item.parentId || 0;
-    if (pid === 0 || !map.has(pid)) {
-      roots.push(node);
-    } else {
-      map.get(pid)!.children!.push(node);
-    }
-  }
+    if (pid === 0 || !map.has(pid)) roots.push(node);
+    else map.get(pid)!.children!.push(node);
+  });
   return roots;
 }
 
-async function fetchCategories() {
+async function fetchCategories(): Promise<void> {
   const list = await WorkDocCategoryAPI.getList();
   categoryTree.value = listToTree(list);
 }
 
-async function fetchPlatforms() {
+async function fetchPlatforms(): Promise<void> {
   platforms.value = await WorkPlatformAPI.getList(1);
 }
 
-async function fetchList() {
+async function fetchList(): Promise<void> {
   loading.value = true;
   try {
     const data = await WorkDocAPI.getPage(queryParams);
     dataList.value = data.list;
-    total.value = data.total;
+    total.value = data.total ?? 0;
   } finally {
     loading.value = false;
   }
 }
 
-function handleQuery() {
+function handleQuery(): void {
   queryParams.pageNum = 1;
   fetchList();
 }
 
-function handleResetQuery() {
-  queryFormRef.value?.resetFields();
+function handleResetQuery(): void {
+  queryParams.keyword = "";
+  queryParams.status = undefined;
+  queryParams.templateType = undefined;
   handleQuery();
 }
 
-function handleCategoryClick(data: any) {
-  queryParams.categoryId = data.id;
+function handleCategorySelect(node: WorkDocCategoryItem): void {
+  queryParams.categoryId = node.id;
   handleQuery();
 }
 
-function allowDrop(draggingNode: any, dropNode: any, type: string) {
-  return true;
+function handleShowAll(): void {
+  queryParams.categoryId = undefined;
+  handleQuery();
 }
 
-function flattenTree(nodes: any[], parentId: number | null = null): any[] {
-  const result: any[] = [];
-  nodes.forEach((node, index) => {
-    result.push({ id: node.id, parentId, sort: index });
-    if (node.children?.length) {
-      result.push(...flattenTree(node.children, node.id));
-    }
-  });
-  return result;
-}
-
-async function handleCategoryDrop() {
-  const flatList = flattenTree(categoryTree.value);
+async function handleCategoryReorder(
+  list: Array<{ id: number | string; parentId: number | string | null; sort: number }>
+): Promise<void> {
   loading.value = true;
   try {
-    await WorkDocCategoryAPI.reorder(flatList);
-    ElMessage.success('排序已保存');
-    fetchCategories();
+    await WorkDocCategoryAPI.reorder(
+      list.map((it) => ({
+        id: Number(it.id),
+        parentId: it.parentId == null ? undefined : Number(it.parentId),
+        sort: it.sort,
+      }))
+    );
+    ElMessage.success("排序已保存");
   } finally {
-    loading.value = false;
+    fetchCategories();
   }
 }
 
-async function handleRootDrop() {
-  rootDragOver.value = false;
-  // logic handled by whole tree reorder in handleCategoryDrop
+/* 文档 */
+function handleCreateClick(): void {
+  editingDoc.value = null;
+  docVisible.value = true;
 }
 
-function handlePreview(row: WorkDocItem) {
-  previewState.title = row.title;
-  previewState.content = row.content;
-  previewState.visible = true;
+function handleEditClick(row: WorkDocItem): void {
+  editingDoc.value = row;
+  docVisible.value = true;
 }
 
-function copyMarkdownLink(row: WorkDocItem) {
+function handlePreview(row: WorkDocItem): void {
+  previewTitle.value = row.title;
+  previewContent.value = row.content;
+  previewVisible.value = true;
+}
+
+function copyMarkdownLink(row: WorkDocItem): void {
   const link = `[${row.title}](/develop/work-doc?id=${row.id})`;
-  navigator.clipboard.writeText(link).then(() => {
-    ElMessage.success('Markdown 链接已复制');
-  });
+  navigator.clipboard.writeText(link).then(() => ElMessage.success("Markdown 链接已复制"));
 }
 
-// 文档 CRUD
-function handleCreateClick() {
-  dialogState.title = "新增工作文档";
-  Object.assign(formData, initialFormData, { 
-    categoryId: queryParams.categoryId || undefined,
-    tagString: "" 
-  });
-  dialogState.visible = true;
+function handleDelete(id: number): void {
+  ElMessageBox.confirm("确认删除该文档吗？", "警告", {
+    confirmButtonText: "确定",
+    cancelButtonText: "取消",
+    type: "warning",
+  }).then(
+    () => {
+      loading.value = true;
+      WorkDocAPI.deleteById(id)
+        .then(() => {
+          ElMessage.success("删除成功");
+          fetchList();
+        })
+        .finally(() => {
+          loading.value = false;
+        });
+    },
+    () => ElMessage.info("已取消删除")
+  );
 }
 
-async function handleEditClick(row: WorkDocItem) {
-  dialogState.title = "编辑工作文档";
-  loading.value = true;
-  try {
-    const info = await WorkDocAPI.getInfo(row.id);
-    Object.assign(formData, {
-      id: info.id,
-      categoryId: info.categoryId,
-      title: info.title,
-      content: info.content,
-      templateType: info.templateType || "custom",
-      tagString: info.tags?.join(",") || "",
-      status: info.status ?? 1,
-      priority: info.priority ?? 0,
-      source: info.source || "",
-      isPin: info.isPin ?? 0,
-    });
-    dialogState.visible = true;
-  } finally {
-    loading.value = false;
-  }
+/* 分类 */
+function handleCreateCategory(): void {
+  editingCategory.value = null;
+  categoryVisible.value = true;
 }
 
-function closeDialog() {
-  dialogState.visible = false;
-  formRef.value?.resetFields();
+function handleEditCategory(node: WorkDocCategoryItem): void {
+  editingCategory.value = node;
+  categoryVisible.value = true;
 }
 
-async function handleSubmit() {
-  await formRef.value?.validate();
-  loading.value = true;
-  
-  const tags = formData.tagString ? formData.tagString.split(",").map(t => t.trim()).filter(t => t) : [];
-  const { tagString, ...submitData } = formData;
-  (submitData as any).tags = tags;
-
-  try {
-    if (submitData.id) {
-      await WorkDocAPI.update(submitData.id, submitData as any);
-      ElMessage.success("修改成功");
-    } else {
-      await WorkDocAPI.create(submitData as any);
-      ElMessage.success("新增成功");
-    }
-    closeDialog();
-    fetchList();
-  } finally {
-    loading.value = false;
-  }
-}
-
-async function handleDelete(id: number) {
-  try {
-    await ElMessageBox.confirm("确认删除该文档吗？", "警告", {
-      confirmButtonText: "确定",
-      cancelButtonText: "取消",
-      type: "warning",
-    });
-  } catch {
-    return;
-  }
-  loading.value = true;
-  try {
-    await WorkDocAPI.deleteById(id);
-    ElMessage.success("删除成功");
-    fetchList();
-  } finally {
-    loading.value = false;
-  }
-}
-
-// 分类 CRUD
-function handleCreateCategory() {
-  categoryDialog.title = "新增分类";
-  Object.assign(categoryFormData, initialCategoryData, { parentId: queryParams.categoryId });
-  categoryDialog.visible = true;
-}
-
-function handleEditCategory(data: WorkDocCategoryItem) {
-  categoryDialog.title = "编辑分类";
-  Object.assign(categoryFormData, {
-    id: data.id,
-    name: data.name,
-    parentId: data.parentId || undefined,
-    icon: data.icon,
-    description: data.description,
-    sort: data.sort,
-    status: data.status,
-  });
-  categoryDialog.visible = true;
-}
-
-function closeCategoryDialog() {
-  categoryDialog.visible = false;
-  categoryFormRef.value?.resetFields();
-}
-
-async function handleCategorySubmit() {
-  await categoryFormRef.value?.validate();
-  loading.value = true;
-  try {
-    if (categoryFormData.id) {
-      await WorkDocCategoryAPI.update(categoryFormData.id, categoryFormData);
-      ElMessage.success("修改成功");
-    } else {
-      await WorkDocCategoryAPI.create(categoryFormData);
-      ElMessage.success("新增成功");
-    }
-    closeCategoryDialog();
-    fetchCategories();
-  } finally {
-    loading.value = false;
-  }
-}
-
-async function handleDeleteCategory(id: number) {
-  try {
-    await ElMessageBox.confirm("确认删除该分类吗？如果分类下有文档或子分类将无法删除。", "警告", {
-      confirmButtonText: "确定",
-      cancelButtonText: "取消",
-      type: "warning",
-    });
-  } catch {
-    return;
-  }
-  loading.value = true;
-  try {
-    await WorkDocCategoryAPI.deleteById(id);
-    ElMessage.success("删除成功");
-    fetchCategories();
-  } finally {
-    loading.value = false;
-  }
+function handleDeleteCategory(id: number): void {
+  ElMessageBox.confirm("确认删除该分类吗？分类下有文档或子分类时无法删除。", "警告", {
+    confirmButtonText: "确定",
+    cancelButtonText: "取消",
+    type: "warning",
+  }).then(
+    () => {
+      WorkDocCategoryAPI.deleteById(id).then(() => {
+        ElMessage.success("删除成功");
+        fetchCategories();
+      });
+    },
+    () => ElMessage.info("已取消删除")
+  );
 }
 
 onMounted(async () => {
   await fetchCategories();
   await fetchPlatforms();
-  fetchList();
+  handleQuery();
 });
 </script>
 
-<style scoped>
-.develop-doc-layout {
+<style lang="scss" scoped>
+.wd-layout {
   display: flex;
   gap: 18px;
-  min-height: calc(100vh - 280px);
+  align-items: flex-start;
 }
 
-.develop-panel--sidebar {
+.wd-sidebar {
   width: 280px;
   flex-shrink: 0;
-  padding: 16px;
+  padding: 14px;
+  border-radius: 20px;
+  border: 2px solid var(--ai-border, #e8e2d6);
+  background: rgba(255, 255, 255, 0.5);
 }
 
-.develop-panel--workspace {
-  flex: 1;
-  min-width: 0;
-  padding: 18px 18px 10px;
-}
-
-/* 树工具栏 */
-.doc-tree-toolbar {
-  position: sticky;
-  top: 0;
-  z-index: 1;
-  padding-bottom: 12px;
-  margin-bottom: 8px;
-  border-bottom: 1px solid var(--el-border-color-lighter);
-  backdrop-filter: blur(8px);
-}
-
-.doc-tree-toolbar__title {
-  font-size: 16px;
-  font-weight: 700;
-  color: var(--el-text-color-primary);
-}
-
-.doc-tree-toolbar__tips {
-  margin-top: 4px;
-  font-size: 12px;
-  color: var(--el-text-color-secondary);
-  line-height: 1.5;
-}
-
-/* 树容器 */
-.doc-tree-group {
-  height: calc(100vh - 380px);
-  overflow: auto;
-  border-radius: 12px;
-  border: 1px solid var(--el-border-color-lighter);
-  padding: 8px;
-}
-
-/* 根拖放区 */
-.doc-tree-root-drop {
-  margin-bottom: 8px;
-  padding: 8px;
-  border: 2px dashed var(--el-border-color);
-  border-radius: 8px;
-  text-align: center;
-  font-size: 12px;
-  color: var(--el-text-color-placeholder);
-  transition: all 0.2s;
-}
-
-.doc-tree-root-drop.is-active {
-  border-color: var(--el-color-primary);
-  background: var(--el-color-primary-light-9);
-  color: var(--el-color-primary);
-}
-
-/* 树节点 */
-.doc-tree-node {
-  flex: 1;
-  min-width: 0;
+.wd-tree-head {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 12px;
-  padding-right: 4px;
 }
 
-.doc-tree-node__main {
-  display: flex;
-  align-items: center;
-  gap: 6px;
+.wd-tree-title {
+  font-size: 15px;
+  font-weight: 800;
+  color: var(--ai-text, #794f27);
+}
+
+.wd-tree-tips {
+  margin: 6px 0 12px;
+  font-size: 11px;
+  color: var(--ai-text-2, #9f927d);
+  line-height: 1.5;
+}
+
+.wd-node-act {
+  display: inline-grid;
+  place-items: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 6px;
+  cursor: pointer;
+
+  &.act-edit {
+    color: var(--ai-info, #5b9eee);
+  }
+  &.act-del {
+    color: var(--ai-red, #fc736d);
+  }
+  &:hover {
+    background: rgba(0, 0, 0, 0.05);
+  }
+}
+
+.wd-show-all {
+  margin-top: 10px;
+  padding: 8px;
+  text-align: center;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--ai-text-2, #9f927d);
+  border-radius: 10px;
+  cursor: pointer;
+
+  &:hover,
+  &.is-active {
+    background: rgba(25, 200, 185, 0.12);
+    color: var(--ai-primary-active, #11a89b);
+  }
+}
+
+.wd-main {
+  flex: 1;
   min-width: 0;
 }
 
-.doc-tree-node__folder {
-  color: #d7a542;
-  font-size: 16px;
-  flex-shrink: 0;
-}
-
-.doc-tree-node__label {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.doc-tree-node__meta {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  flex-shrink: 0;
-}
-
-.doc-tree-node__count {
-  font-size: 11px;
-  color: var(--el-text-color-secondary);
-}
-
-.doc-tree-node__actions {
-  display: none;
-  align-items: center;
-  gap: 4px;
-}
-
-.el-tree-node__content:hover .doc-tree-node__actions {
-  display: flex;
-}
-
-.doc-tree-show-all {
-  margin-top: 12px;
-  text-align: center;
-  font-size: 13px;
-  color: var(--el-text-color-secondary);
-  cursor: pointer;
-  transition: color 0.2s;
-}
-
-.doc-tree-show-all:hover {
-  color: var(--el-color-primary);
-}
-
-/* 右侧面板头部 */
-.doc-panel__header {
+.wd-main .filter-bar {
   margin-bottom: 14px;
 }
 
-.doc-panel__heading {
-  display: flex;
-  align-items: center;
-  gap: 8px;
+.doc-title {
+  font-weight: 600;
 }
 
-.doc-panel__dot {
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: var(--el-color-primary);
-}
-
-.doc-panel__title {
-  font-size: 18px;
-  font-weight: 700;
-  color: var(--el-text-color-primary);
-}
-
-.doc-panel__desc {
-  margin-top: 4px;
-  margin-left: 14px;
-  font-size: 13px;
-  color: var(--el-text-color-secondary);
-}
-
-/* develop-table-shell inside workspace */
-.develop-panel--workspace .develop-table-shell {
-  padding: 0;
-  border: none;
-  background: transparent;
-  box-shadow: none;
+.doc-tags {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 4px;
 }
 </style>
