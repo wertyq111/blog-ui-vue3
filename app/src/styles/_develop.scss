@@ -118,7 +118,9 @@
 }
 
 .develop-dialog.el-dialog {
-  overflow: hidden;
+  // 用 visible 而非 hidden：动森下拉(多选/选择)面板是行内绝对定位，
+  // 弹窗内容较矮时面板会溢出弹窗，hidden 会把它裁掉
+  overflow: visible;
   border-radius: var(--cyber-panel-radius);
   border: 1px solid var(--cyber-border-strong);
   background: var(--cyber-panel-shell-strong);

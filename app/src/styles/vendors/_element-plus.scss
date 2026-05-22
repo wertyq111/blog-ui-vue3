@@ -242,3 +242,22 @@
 .el-tabs__item.is-active {
   color: #c4917c;
 }
+
+/* 上传：动森风文件列表与拖拽区（AnimalUpload 默认用插槽按钮，无需额外皮肤；这里覆盖列表/拖拽态） */
+.el-upload-dragger {
+  border: 2px dashed var(--ai-border, #e8e2d6) !important;
+  border-radius: 16px;
+  background: rgba(247, 251, 243, 0.6);
+
+  &:hover {
+    border-color: var(--ai-primary, #19c8b9) !important;
+  }
+}
+
+.el-upload-list__item {
+  border-radius: 12px;
+
+  &:hover {
+    background: rgba(25, 200, 185, 0.08);
+  }
+}
