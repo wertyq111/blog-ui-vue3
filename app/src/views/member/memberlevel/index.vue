@@ -1,129 +1,166 @@
 <!-- 会员等级管理 -->
 <template>
-  <div class="develop-page admin-workspace-page">
-    <el-card shadow="never" class="develop-shell admin-workspace-shell">
-      <!-- Hero 区域 -->
-      <div class="develop-hero">
-        <div class="develop-hero__copy">
-          <div class="develop-hero__eyebrow">MEMBER LEVEL</div>
-          <h1 class="develop-hero__title">会员等级</h1>
-          <p class="develop-hero__desc">配置会员等级体系与权益</p>
-        </div>
-      </div>
+  <div class="page-card">
+    <div class="page-head">
+      <div class="page-eyebrow">MEMBER LEVEL</div>
+      <h1 class="page-title">会员等级</h1>
+      <p class="page-desc">配置会员等级体系与排序，定义会员成长权益结构。</p>
+    </div>
 
-      <!-- 搜索面板 -->
-      <div class="develop-panel">
-        <el-form ref="queryFormRef" :model="queryParams" :inline="true" class="develop-form">
-          <el-form-item label="等级名称" prop="name">
-            <el-input
-              v-model="queryParams.name"
-              placeholder="请输入等级名称"
-              clearable
-              @keyup.enter="handleQuery"
-            />
-          </el-form-item>
-          <el-form-item class="search-buttons">
-            <el-button type="primary" icon="search" @click="handleQuery">搜索</el-button>
-            <el-button icon="refresh" @click="handleResetQuery">重置</el-button>
-          </el-form-item>
-        </el-form>
-      </div>
-
-      <!-- 表格区域 -->
-      <div class="develop-table-shell">
-        <div class="develop-table-shell__header">
-          <div>
-            <div class="develop-table-shell__title">等级定义列表</div>
-            <div class="develop-table-shell__desc">设置会员成长体系，定义不同等级的排序。</div>
-          </div>
-          <div class="develop-table-shell__actions">
-            <el-button type="success" icon="plus" @click="handleCreateClick">新增等级</el-button>
-            <el-button
-              type="danger"
-              icon="delete"
-              :disabled="!hasSelection"
-              @click="handleDelete()"
-            >
-              批量删除
-            </el-button>
-          </div>
-        </div>
-
-        <el-table
-          v-loading="loading"
-          :data="dataList"
-          border
-          stripe
-          highlight-current-row
-          class="develop-table"
-          @selection-change="handleSelectionChange"
-        >
-          <el-table-column type="selection" width="50" align="center" />
-          <el-table-column label="ID" prop="id" width="80" align="center" />
-          <el-table-column label="等级名称" prop="name" align="center" />
-          <el-table-column label="排序" prop="sort" width="100" align="center" />
-          <el-table-column label="创建时间" prop="createTime" align="center" width="180" />
-          <el-table-column label="操作" fixed="right" width="150" align="center">
-            <template #default="scope">
-              <el-button type="primary" icon="edit" link size="small" @click="handleEditClick(scope.row)">
-                编辑
-              </el-button>
-              <el-button type="danger" icon="delete" link size="small" @click="handleDelete(scope.row.id)">
-                删除
-              </el-button>
-            </template>
-          </el-table-column>
-        </el-table>
-
-        <pagination
-          v-if="total > 0"
-          v-model:total="total"
-          v-model:page="queryParams.pageNum"
-          v-model:limit="queryParams.pageSize"
-          @pagination="fetchList"
+    <div class="filter-bar">
+      <div class="filter-field">
+        <label class="filter-label">等级名称：</label>
+        <Input
+          v-model="queryParams.name"
+          class="filter-input"
+          placeholder="请输入等级名称"
+          allow-clear
+          @keyup.enter="handleQuery"
         />
       </div>
-    </el-card>
+      <Button type="primary" size="small" @click="handleQuery">
+        <SystemIco name="search" :size="13" />
+        查询
+      </Button>
+      <Button type="default" size="small" @click="handleResetQuery">重置</Button>
+    </div>
 
-    <!-- 表单弹窗 -->
-    <el-dialog
-      v-model="dialogState.visible"
-      :title="dialogState.title"
-      width="500px"
-      class="develop-dialog"
-      @close="closeDialog"
-    >
-      <el-form ref="formRef" :model="formData" :rules="rules" label-width="100px" class="develop-dialog-form">
-        <el-form-item label="等级名称" prop="name">
-          <el-input v-model="formData.name" placeholder="请输入等级名称" />
-        </el-form-item>
-        <el-form-item label="排序" prop="sort">
-          <el-input-number v-model="formData.sort" :min="0" controls-position="right" />
-        </el-form-item>
-      </el-form>
-      <template #footer>
-        <div class="develop-dialog-footer">
-          <el-button type="primary" @click="handleSubmit">确 定</el-button>
-          <el-button @click="closeDialog">取 消</el-button>
+    <div class="list-card">
+      <div class="list-head">
+        <div>
+          <div class="list-title">等级定义列表</div>
+          <div class="list-sub">维护会员等级名称与展示排序。</div>
         </div>
-      </template>
-    </el-dialog>
+      </div>
+
+      <div class="toolbar">
+        <Button
+          v-hasPerm="'sys:memberlevel:add'"
+          type="primary"
+          size="small"
+          @click="handleCreateClick"
+        >
+          <SystemIco name="plus" :size="13" />
+          添加
+        </Button>
+        <Button
+          v-hasPerm="'sys:memberlevel:delete'"
+          type="default"
+          size="small"
+          danger
+          :disabled="!hasSelection"
+          @click="handleDelete()"
+        >
+          <SystemIco name="trash" :size="13" />
+          删除
+        </Button>
+        <div class="toolbar-spacer" />
+        <div class="tool-group">
+          <Button class="btn-icon" type="default" size="small" title="刷新" @click="fetchList">
+            <SystemIco name="refresh" :size="14" />
+          </Button>
+          <Button class="btn-icon" type="default" size="small" title="密度">
+            <SystemIco name="density" :size="14" />
+          </Button>
+          <Button class="btn-icon" type="default" size="small" title="列设置">
+            <SystemIco name="settings" :size="14" />
+          </Button>
+          <Button class="btn-icon" type="default" size="small" title="全屏">
+            <SystemIco name="full" :size="14" />
+          </Button>
+        </div>
+      </div>
+
+      <div v-loading="loading" class="tbl-wrap">
+        <table class="tbl">
+          <thead>
+            <tr>
+              <th style="width: 44px">
+                <span class="cbx" :class="{ 'is-checked': allChecked }" @click="toggleAll">
+                  <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2.4">
+                    <path d="M2.5 6.5l2.5 2.5 5-6" />
+                  </svg>
+                </span>
+              </th>
+              <th style="width: 70px">ID</th>
+              <th>等级名称</th>
+              <th style="width: 120px">排序号</th>
+              <th>创建时间</th>
+              <th style="width: 150px">操作</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="row in levelList" :key="row.id">
+              <td>
+                <span
+                  class="cbx"
+                  :class="{ 'is-checked': isChecked(row.id) }"
+                  @click="toggleRow(row.id)"
+                >
+                  <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2.4">
+                    <path d="M2.5 6.5l2.5 2.5 5-6" />
+                  </svg>
+                </span>
+              </td>
+              <td class="cell-num">{{ row.id }}</td>
+              <td>{{ row.name }}</td>
+              <td class="cell-num">{{ row.sort }}</td>
+              <td class="cell-mono">{{ row.createTime }}</td>
+              <td>
+                <span class="tbl-actions">
+                  <span
+                    v-hasPerm="'sys:memberlevel:edit'"
+                    class="action-link act-edit"
+                    @click="handleEditClick(row)"
+                  >
+                    <SystemIco name="edit" :size="12" />
+                    修改
+                  </span>
+                  <span
+                    v-hasPerm="'sys:memberlevel:delete'"
+                    class="action-link act-del"
+                    @click="handleDelete(row.id)"
+                  >
+                    <SystemIco name="trash" :size="12" />
+                    删除
+                  </span>
+                </span>
+              </td>
+            </tr>
+            <tr v-if="!loading && levelList.length === 0" class="empty-row">
+              <td colspan="6">暂无数据</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <pagination
+        v-if="total > 0"
+        v-model:total="total"
+        v-model:page="queryParams.pageNum"
+        v-model:limit="queryParams.pageSize"
+        @pagination="fetchList"
+      />
+    </div>
+
+    <MemberLevelEdit v-model:visible="editVisible" :data="editingLevel" @done="handleQuery" />
   </div>
 </template>
 
 <script setup lang="ts">
 import { onMounted, reactive, ref } from "vue";
-import { ElMessage, ElMessageBox, type FormInstance, type FormRules } from "element-plus";
+import { ElMessage, ElMessageBox } from "element-plus";
+import { Button, Input } from "animal-island-vue";
 import MemberLevelAPI from "@/api/member/member-level";
-import type { MemberLevelItem, MemberLevelQueryParams, MemberLevelForm } from "@/types/api";
-import { useTableSelection } from "@/composables";
+import type { MemberLevelItem, MemberLevelQueryParams } from "@/types/api";
+import MemberLevelEdit from "./memberlevel-edit.vue";
+import SystemIco from "@/components/AdminPage/SystemIco.vue";
+import { useTableSelection } from "@/composables/useTableSelection";
 
 defineOptions({
   name: "MemberLevel",
+  inheritAttrs: false,
 });
-
-const queryFormRef = ref<FormInstance>();
-const formRef = ref<FormInstance>();
 
 const queryParams = reactive<MemberLevelQueryParams>({
   pageNum: 1,
@@ -131,112 +168,77 @@ const queryParams = reactive<MemberLevelQueryParams>({
   name: "",
 });
 
-const loading = ref(false);
+const levelList = ref<MemberLevelItem[]>([]);
 const total = ref(0);
-const dataList = ref<MemberLevelItem[]>([]);
+const loading = ref(false);
+const editVisible = ref(false);
+const editingLevel = ref<MemberLevelItem | null>(null);
 
-const { selectedIds, hasSelection, handleSelectionChange } = useTableSelection<MemberLevelItem>();
+const { checkedIds, allChecked, hasSelection, isChecked, toggleRow, toggleAll, clearSelection } =
+  useTableSelection(levelList, (row) => row.id);
 
-const dialogState = reactive({
-  visible: false,
-  title: "",
-});
-
-const initialFormData: MemberLevelForm = {
-  name: "",
-  sort: 0,
-};
-
-const formData = reactive<MemberLevelForm>({ ...initialFormData });
-
-const rules: FormRules = {
-  name: [{ required: true, message: "请输入等级名称", trigger: "blur" }],
-};
-
-async function fetchList() {
+async function fetchList(): Promise<void> {
   loading.value = true;
   try {
     const data = await MemberLevelAPI.getPage(queryParams);
-    dataList.value = data.list;
-    total.value = data.total;
+    levelList.value = data.list;
+    total.value = data.total ?? 0;
+    clearSelection();
   } finally {
     loading.value = false;
   }
 }
 
-function handleQuery() {
+function handleQuery(): void {
   queryParams.pageNum = 1;
   fetchList();
 }
 
-function handleResetQuery() {
-  queryFormRef.value?.resetFields();
+function handleResetQuery(): void {
+  queryParams.name = "";
   handleQuery();
 }
 
-function handleCreateClick() {
-  dialogState.title = "新增会员等级";
-  Object.assign(formData, initialFormData);
-  dialogState.visible = true;
+function handleCreateClick(): void {
+  editingLevel.value = null;
+  editVisible.value = true;
 }
 
-function handleEditClick(row: MemberLevelItem) {
-  dialogState.title = "编辑会员等级";
-  Object.assign(formData, {
-    id: row.id,
-    name: row.name,
-    sort: row.sort,
-  });
-  dialogState.visible = true;
+function handleEditClick(row: MemberLevelItem): void {
+  editingLevel.value = row;
+  editVisible.value = true;
 }
 
-function closeDialog() {
-  dialogState.visible = false;
-  formRef.value?.resetFields();
-}
-
-async function handleSubmit() {
-  await formRef.value?.validate();
-  loading.value = true;
-  try {
-    if (formData.id) {
-      await MemberLevelAPI.update(formData.id, formData);
-      ElMessage.success("修改成功");
-    } else {
-      await MemberLevelAPI.create(formData);
-      ElMessage.success("新增成功");
-    }
-    closeDialog();
-    fetchList();
-  } finally {
-    loading.value = false;
-  }
-}
-
-function handleDelete(id?: number) {
-  const ids = id ? [id] : (selectedIds.value as number[]);
+function handleDelete(id?: number): void {
+  const ids = id ? [id] : checkedIds.value.map(Number);
   if (!ids.length) {
     ElMessage.warning("请勾选删除项");
     return;
   }
 
-  ElMessageBox.confirm("确认删除选中的项吗？", "警告", {
+  ElMessageBox.confirm("确认删除选中的会员等级吗？", "警告", {
     confirmButtonText: "确定",
     cancelButtonText: "取消",
     type: "warning",
-  }).then(async () => {
-    loading.value = true;
-    try {
-      await MemberLevelAPI.deleteByIds(ids);
-      ElMessage.success("删除成功");
-      fetchList();
-    } finally {
-      loading.value = false;
-    }
-  });
+  }).then(
+    () => {
+      loading.value = true;
+      const request =
+        ids.length === 1 ? MemberLevelAPI.deleteById(ids[0]) : MemberLevelAPI.deleteByIds(ids);
+      request
+        .then(() => {
+          ElMessage.success("删除成功");
+          handleQuery();
+        })
+        .finally(() => {
+          loading.value = false;
+        });
+    },
+    () => ElMessage.info("已取消删除")
+  );
 }
 
 onMounted(() => {
-  fetchList();
+  handleQuery();
 });
 </script>

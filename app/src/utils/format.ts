@@ -84,3 +84,17 @@ export function formatCurrency(amount: number, decimals: number = 2): string {
   const formatted = amount.toFixed(decimals).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
   return "¥" + formatted;
 }
+
+/**
+ * 格式化后端时间字符串
+ * @param value ISO 或普通时间字符串
+ * @returns YYYY-MM-DD HH:mm:ss；空值返回 "-"
+ */
+export function formatDateTime(value?: string): string {
+  if (!value) return "-";
+
+  return value
+    .replace("T", " ")
+    .replace(/\.\d+Z$/, "")
+    .slice(0, 19);
+}

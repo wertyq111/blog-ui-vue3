@@ -51,7 +51,10 @@
     <div class="hero-row">
       <div class="hero-text">
         <span class="hero-eyebrow">DEVELOP WORKSPACE</span>
-        <h1 class="hero-title">{{ greeting }}，<em>{{ nickname }}</em></h1>
+        <div class="hero-greet-row">
+          <h1 class="hero-title">{{ greeting }}，<em>{{ nickname }}</em></h1>
+          <img class="hero-avatar" :src="avatarSrc" :alt="nickname" />
+        </div>
         <p class="hero-sub">{{ todayText }}</p>
         <div v-if="weatherText" class="hero-weather">
           <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -87,11 +90,15 @@
 <script setup lang="ts">
 import { computed, ref, onMounted } from "vue";
 import { useUserStore } from "@/store/modules/user";
+import { resolveAvatar } from "@/utils/avatar";
 import WeatherScene from "./WeatherScene.vue";
 import WeatherAPI from "@/api/weather";
 
 const userStore = useUserStore();
 const nickname = computed(() => userStore.userInfo.nickname || userStore.userInfo.username || "");
+const avatarSrc = computed(() =>
+  resolveAvatar(userStore.userInfo.avatar, userStore.userInfo.gender)
+);
 
 const greeting = computed(() => {
   const h = new Date().getHours();
@@ -336,6 +343,23 @@ onMounted(() => {
     border-radius: 50%;
     background: var(--cyber-primary, #19c8b9);
   }
+}
+
+.hero-greet-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.hero-avatar {
+  width: 200px;
+  height: 200px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
+  //background: #fff;
+  //border: 2px solid #fff;
+  //box-shadow: 0 3px 0 0 #bdaea0;
 }
 
 .hero-title {

@@ -60,6 +60,15 @@ const MenuAPI = {
     });
   },
 
+  /** 切换菜单显示状态(hide: 0显示 1隐藏)，复用编辑接口的部分更新 */
+  updateHide(id: number, hide: number) {
+    return request({
+      url: `${MENU_BASE_URL}/${id}`,
+      method: "post",
+      data: { hide },
+    });
+  },
+
   /** 删除菜单 */
   deleteById(id: number) {
     return request({

@@ -70,6 +70,15 @@ const RoleAPI = {
     });
   },
 
+  /** 修改角色状态(1:正常;0:禁用) */
+  updateStatus(id: string, status: number) {
+    return request({
+      url: `${ROLE_BASE_URL}/status/${id}`,
+      method: "post",
+      data: { status },
+    });
+  },
+
   /** 删除单个角色 */
   deleteById(id: string) {
     return request({

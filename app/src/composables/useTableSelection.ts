@@ -1,4 +1,6 @@
-import { computed, ref } from "vue";
+import { computed, ref, type Ref } from "vue";
+
+type RowId = string | number | undefined | null;
 
 /**
  * 表格行选择 Composable
@@ -12,18 +14,32 @@ import { computed, ref } from "vue";
  * const { selectedIds, handleSelectionChange, clearSelection } = useTableSelection<UserVO>();
  * ```
  */
-export function useTableSelection<T extends { id: string | number }>() {
+export function useTableSelection<T extends { id?: string | number }>(
+  rows?: Ref<T[] | undefined>,
+  getId?: (row: T) => RowId
+) {
   /**
    * 选中的数据项ID列表
    */
-  const selectedIds = ref<(string | number)[]>([]);
+  const selectedIds = ref<string[]>([]);
+  const checkedIds = selectedIds;
+
+  const rowIds = computed(() =>
+    (rows?.value ?? [])
+      .map((row) => (getId ? getId(row) : row.id))
+      .filter((id): id is string | number => id !== undefined && id !== null)
+      .map((id) => String(id))
+  );
 
   /**
    * 表格选中项变化处理
    * @param selection 选中的行数据列表
    */
   function handleSelectionChange(selection: T[]): void {
-    selectedIds.value = selection.map((item) => item.id);
+    selectedIds.value = selection
+      .map((item) => item.id)
+      .filter((id): id is string | number => id !== undefined && id !== null)
+      .map((id) => String(id));
   }
 
   /**
@@ -38,8 +54,24 @@ export function useTableSelection<T extends { id: string | number }>() {
    * @param id 要检查的ID
    * @returns 是否被选中
    */
-  function isSelected(id: string | number): boolean {
-    return selectedIds.value.includes(id);
+  function isSelected(id: RowId): boolean {
+    return id !== undefined && id !== null && selectedIds.value.includes(String(id));
+  }
+
+  function isChecked(id: RowId): boolean {
+    return isSelected(id);
+  }
+
+  function toggleRow(id: RowId): void {
+    if (id === undefined || id === null) return;
+    const key = String(id);
+    const index = selectedIds.value.indexOf(key);
+    if (index >= 0) selectedIds.value.splice(index, 1);
+    else selectedIds.value.push(key);
+  }
+
+  function toggleAll(): void {
+    selectedIds.value = allChecked.value ? [] : [...rowIds.value];
   }
 
   /**
@@ -52,12 +84,21 @@ export function useTableSelection<T extends { id: string | number }>() {
    */
   const hasSelection = computed(() => selectedIds.value.length > 0);
 
+  const allChecked = computed(
+    () => rowIds.value.length > 0 && rowIds.value.every((id) => selectedIds.value.includes(id))
+  );
+
   return {
     selectedIds,
+    checkedIds,
     selectedCount,
     hasSelection,
+    allChecked,
     handleSelectionChange,
     clearSelection,
     isSelected,
+    isChecked,
+    toggleRow,
+    toggleAll,
   };
 }

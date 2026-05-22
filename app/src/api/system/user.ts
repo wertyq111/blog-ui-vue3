@@ -87,6 +87,20 @@ const UserAPI = {
   },
 
   /**
+   * 修改用户状态
+   *
+   * @param id 用户ID
+   * @param status 状态(1:正常;0:禁用)
+   */
+  updateStatus(id: string, status: number) {
+    return request({
+      url: `${USER_BASE_URL}/status/${id}`,
+      method: "post",
+      data: { status },
+    });
+  },
+
+  /**
    * 重置用户密码
    *
    * @param id 用户ID

@@ -72,7 +72,7 @@
             <path d="M35 5c0 10-5 20-13 28-5 5-12 7-22 7 0-10 2-17 7-22 8-8 18-13 28-13z" stroke="#a3ad28" stroke-width="1.5" stroke-linejoin="round"/>
           </svg>
           <div class="hero-avatar">
-            <img :src="islanderSvg" :alt="nickname" />
+            <img :src="avatarSrc" :alt="nickname" />
           </div>
           <div class="hero-name">🌿 {{ nickname }} · 岛主</div>
         </div>
@@ -207,11 +207,17 @@ import { useUserStore } from "@/store";
 import DashboardStatsAPI from "@/api/develop/dashboard-stats";
 import type { DashboardMetrics } from "@/types/api/dashboard-stats";
 import islanderSvg from "@/assets/home/islander.svg";
+import { resolveAvatar } from "@/utils/avatar";
 
 const userStore = useUserStore();
 
 const isLoggedIn = computed(() => userStore.isLoggedIn());
 const nickname = computed(() => userStore.userInfo?.nickname || "岛主");
+const avatarSrc = computed(() =>
+  isLoggedIn.value
+    ? resolveAvatar(userStore.userInfo?.avatar, userStore.userInfo?.gender)
+    : islanderSvg
+);
 const brandName = computed(() =>
   isLoggedIn.value ? `${nickname.value}的小岛` : "博客小岛"
 );
