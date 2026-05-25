@@ -185,11 +185,11 @@ async function openDialog(): Promise<void> {
 
       if (contentObj && typeof contentObj === "object" && contentObj.platforms) {
         contentObj.platforms.forEach((p: any) => {
-          if (p.platform_id) {
-            selectedPlatformIds.value.push(p.platform_id);
-            platformContentMap[p.platform_id] = p.content;
-          } else if (p.platform_name) {
-            formData.customPlatformName = p.platform_name;
+          if (p.platformId) {
+            selectedPlatformIds.value.push(p.platformId);
+            platformContentMap[p.platformId] = p.content;
+          } else if (p.platformName) {
+            formData.customPlatformName = p.platformName;
             customPlatformContent.value = p.content;
           }
         });

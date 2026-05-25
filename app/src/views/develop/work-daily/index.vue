@@ -85,7 +85,7 @@
                 <div v-if="isPlatformContent(row.content)" class="daily-summary">
                   <el-popover
                     v-for="p in row.content.platforms"
-                    :key="p.platform_id"
+                    :key="p.platformId"
                     trigger="hover"
                     :width="520"
                     placement="top"

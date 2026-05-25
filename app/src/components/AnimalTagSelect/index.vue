@@ -275,18 +275,21 @@ onClickOutside(wrapperRef, (event) => {
   gap: 8px;
   min-height: 40px;
   padding: 5px 12px;
-  background: #fff;
-  border: 2px solid #e8dcc8;
+  background: #fdfbf7;
+  border: 1.5px solid #e8e2d6;
   border-radius: 14px;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.88),
+    0 2px 6px rgba(121, 79, 39, 0.03);
   cursor: text;
   transition: all 0.2s;
 }
 .ats__trigger:hover {
-  border-color: #d4c4a8;
+  border-color: #f0d49a;
   background: #fffdf7;
 }
 .ats--open .ats__trigger {
-  border-color: #19c8b9;
+  border-color: #f0d49a;
   background: #fffdf7;
 }
 .ats--disabled .ats__trigger {
@@ -309,9 +312,9 @@ onClickOutside(wrapperRef, (event) => {
   align-items: center;
   gap: 4px;
   padding: 2px 6px 2px 10px;
-  background: #f7f0e6;
-  color: #794f27;
-  border: 1.5px solid #e8dcc8;
+  background: #d8ecc6;
+  color: #4a8a36;
+  border: 1px solid rgba(111, 186, 44, 0.22);
   border-radius: 999px;
   font-size: 12px;
   font-weight: 700;
@@ -334,7 +337,7 @@ onClickOutside(wrapperRef, (event) => {
 }
 .ats__tag-x:hover {
   opacity: 1;
-  background: rgba(121, 79, 39, 0.12);
+  background: rgba(111, 186, 44, 0.16);
 }
 
 /* 极简无边框输入框 */
@@ -370,79 +373,82 @@ onClickOutside(wrapperRef, (event) => {
 }
 .ats__arrow--open {
   transform: rotate(180deg);
-  color: #19c8b9;
+  color: #fca130;
 }
 
-/* 下拉菜单面板 */
+/* 下拉菜单面板（对齐 AnimalMultiSelect 动森风） */
 .ats__dropdown {
   position: fixed;
   z-index: 2600;
-  padding: 10px 0;
+  padding: 8px 10px;
   overflow-x: hidden;
   overflow-y: auto;
-  background: #ffeea0;
-  border-radius: 22px;
-  box-shadow: 0 10px 26px rgba(110, 80, 40, 0.18);
+  background: #fdfbf7;
+  border: 2px solid #e8e2d6;
+  border-radius: 20px;
+  box-shadow: 0 4px 16px rgba(121, 79, 39, 0.08);
   box-sizing: border-box;
 }
 
 .ats__option {
   position: relative;
   display: flex;
+  gap: 10px;
   align-items: center;
   justify-content: space-between;
-  gap: 10px;
-  padding: 9px 18px;
-  font-size: 14px;
-  font-weight: 500;
-  color: #725d42;
-  cursor: pointer;
+  min-height: 34px;
+  padding: 4px 10px;
+  margin: 2px 0;
+  font-size: 13px;
+  font-weight: 700;
+  color: #794f27;
   white-space: nowrap;
+  cursor: pointer;
+  border-radius: 999px;
   transition:
     background 0.15s,
+    color 0.15s,
+    padding-left 0.2s,
     font-weight 0.15s;
 }
-.ats__option:hover {
-  font-weight: 700;
-  background: rgba(255, 255, 255, 0.4);
+.ats__option:not(.ats__option--selected):hover {
+  padding-left: 28px;
+  color: #f59b26;
+  background: rgba(252, 161, 48, 0.08);
 }
-.ats__option:hover::before {
-  content: "";
+.ats__option:not(.ats__option--selected):hover::before {
   position: absolute;
-  left: -12px;
   top: 50%;
-  transform: translateY(-50%);
-  width: 35px;
-  height: 35px;
-  background: url("../../assets/images/select-cursor.svg") center / contain no-repeat;
-  animation: ats-cursor-in 0.5s ease-out forwards;
+  left: 6px;
+  width: 18px;
+  height: 18px;
   pointer-events: none;
-  z-index: 1;
+  content: "";
+  background: url("../../assets/images/select-cursor.svg") center / contain no-repeat;
+  animation: ats-cursor-in 0.3s ease-out forwards;
 }
 
 .ats__option--selected {
-  font-weight: 700;
-  color: #11a89b;
+  color: #4a8a36;
+  background: rgba(124, 186, 112, 0.12);
 }
 
 .ats__option--create {
-  color: #19c8b9;
-  border-top: 1.5px dashed rgba(114, 93, 66, 0.15);
-  margin-top: 4px;
-  padding-top: 12px;
+  margin-top: 6px;
+  color: #4a8a36;
 }
 
 .ats__check {
   display: flex;
-  align-items: center;
-  color: #19c8b9;
   flex-shrink: 0;
+  align-items: center;
+  color: #6fba2c;
 }
 
 .ats__empty {
-  padding: 12px 18px;
+  padding: 10px 18px;
   font-size: 13px;
-  color: #a09080;
+  color: #9f927d;
   text-align: center;
 }
 
@@ -462,11 +468,11 @@ onClickOutside(wrapperRef, (event) => {
 @keyframes ats-cursor-in {
   0% {
     opacity: 0;
-    transform: translateY(-50%) translateX(-20px) rotate(-15deg);
+    transform: translateY(-50%) translateX(-14px) rotate(-15deg);
   }
   60% {
     opacity: 1;
-    transform: translateY(-50%) translateX(5px) rotate(5deg);
+    transform: translateY(-50%) translateX(4px) rotate(5deg);
   }
   100% {
     opacity: 1;
