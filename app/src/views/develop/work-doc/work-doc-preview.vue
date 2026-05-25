@@ -52,7 +52,11 @@
     </template>
 
     <!-- 主体内容 -->
-    <div v-loading="loading" class="doc-preview-shell-container">
+    <div
+      v-loading="loading"
+      class="doc-preview-shell-container"
+      :class="{ 'is-fullscreen': fullscreen }"
+    >
       <div class="doc-preview-shell">
         <div class="doc-preview-hero">
           <div class="doc-preview-hero__eyebrow">Work Doc</div>
@@ -84,7 +88,7 @@
 <script setup lang="ts">
 import { computed, ref, watch } from "vue";
 import { ElMessage } from "element-plus";
-import { Button, Modal } from "animal-island-vue";
+import { Button } from "animal-island-vue";
 import AnimalTag from "@/components/AnimalTag/index.vue";
 import AnimalMarkdown from "@/components/AnimalMarkdown/index.vue";
 import WorkDocAPI from "@/api/develop/work-doc";
@@ -127,10 +131,6 @@ function toggleFullscreen(): void {
 
 function closePreview(): void {
   emit("update:visible", false);
-}
-
-function handleVisibleChange(value: boolean): void {
-  emit("update:visible", value);
 }
 
 async function copyMarkdownLink(): Promise<void> {
@@ -326,109 +326,91 @@ watch(
   padding: 24px;
   min-height: 350px;
 }
-
-/* 动森风格 Modal 深度穿透定制 (只穿透不改变 teleport 外的 padding 限制) */
-:deep(.doc-preview-modal) {
-  .animal-modal {
-    .animal-modal__header {
-      padding-bottom: 20px;
-      border-bottom: 2px dashed var(--ai-border, #e8e2d6);
-      margin-bottom: 16px;
-      flex-shrink: 0;
-
-      /* 隐藏原生的 close 按钮，因为我们自定义了漂亮的关闭按钮 */
-      .animal-modal__close {
-        display: none;
-      }
-    }
-
-    .animal-modal__content {
-      font-size: 14px !important;
-      font-weight: normal !important;
-      color: var(--ai-text, #794f27) !important;
-      padding-bottom: 0 !important;
-
-      /* 动森风格浅黄极细滚动条 */
-      &::-webkit-scrollbar {
-        width: 8px;
-        height: 8px;
-      }
-      &::-webkit-scrollbar-track {
-        background: #f7f5ee;
-        border-radius: 10px;
-      }
-      &::-webkit-scrollbar-thumb {
-        background: #e6dfcb;
-        border-radius: 10px;
-        &:hover {
-          background: #c8bd9f;
-        }
-      }
-    }
-  }
-}
 </style>
 
 <style lang="scss">
-/* 全局样式覆盖 Teleported 弹窗，解决 scoped Teleport 无法渗透的问题，完美应用自定义 padding */
-.doc-preview-modal {
-  .animal-modal {
-    max-width: 90vw !important;
-    max-height: 90vh !important;
-    width: 90vw !important;
-    height: 90vh !important;
-    display: flex !important;
-    flex-direction: column !important;
-    overflow: hidden !important;
+/*
+ * 动森 Modal 根节点是 <Teleport to="body">，外部传入的 class（.doc-preview-modal）
+ * 会被 Vue 当作 fallthrough 属性丢弃，无法落到任何 DOM 元素上；同时库默认
+ * .animal-modal__body 的 padding(48px 48px 32px) 是 scoped 选择器。
+ * 因此改用 :has() 通过弹窗内唯一内容标记 .doc-preview-shell-container 反选到本弹窗，
+ * 既能精准命中又不影响其它动森弹窗。
+ */
+.animal-modal:has(.doc-preview-shell-container) {
+  max-width: 90vw !important;
+  max-height: 90vh !important;
+  width: 90vw !important;
+  height: 90vh !important;
 
-    .animal-modal__body {
-      padding: 66px 154px 52px 155px !important; /* 精确覆盖用户自定义的 padding */
-      height: 100% !important;
-      display: flex !important;
-      flex-direction: column !important;
-      overflow: hidden !important;
-    }
+  .animal-modal__body {
+    padding: 66px 154px 52px 155px !important;
+    /* 去掉动森 blob 异形裁剪，避免标题/四角内容被弯角切掉；改用普通圆角 */
+    clip-path: none !important;
+    border-radius: 32px !important;
+  }
 
-    .animal-modal__content {
-      flex: 1 !important;
-      overflow-y: auto !important;
-    }
+  .animal-modal__header {
+    padding-bottom: 20px;
+    border-bottom: 2px dashed var(--ai-border, #e8e2d6);
+    margin-bottom: 16px;
+    flex-shrink: 0;
 
-    .admin-animal-modal__content {
-      max-height: none !important; /* 彻底移除 55vh 限制，由外部容器统一弹性展示 */
-      overflow-y: visible !important; /* 滚动交回最外层统一处理 */
-      padding-right: 0 !important;
-      font-size: 14px !important;
-      font-weight: normal !important;
-      color: var(--ai-text, #794f27) !important;
-      padding-bottom: 0 !important;
+    /* 隐藏原生 close，使用自定义关闭按钮 */
+    .animal-modal__close {
+      display: none;
     }
   }
 
-  /* 全屏状态下自适应缩减 padding，防止大面积白边影响体验 */
-  &.is-fullscreen {
-    .animal-modal {
-      max-width: 100vw !important;
-      max-height: 100vh !important;
-      width: 100vw !important;
-      height: 100vh !important;
-      margin: 0 !important;
-      top: 0 !important;
-      left: 0 !important;
-      border-radius: 0 !important;
+  .animal-modal__content {
+    flex: 1 !important;
+    overflow-y: auto !important;
+    font-size: 14px !important;
+    font-weight: normal !important;
+    color: var(--ai-text, #794f27) !important;
+    padding-bottom: 0 !important;
 
-      .animal-modal__body {
-        padding: 32px 48px !important;
-        border-radius: 0 !important;
-        clip-path: none !important;
-      }
-
-      .animal-modal__content {
-        .doc-preview-body {
-          min-height: calc(100vh - 280px) !important;
-        }
+    /* 动森风格浅黄极细滚动条 */
+    &::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+    &::-webkit-scrollbar-track {
+      background: #f7f5ee;
+      border-radius: 10px;
+    }
+    &::-webkit-scrollbar-thumb {
+      background: #e6dfcb;
+      border-radius: 10px;
+      &:hover {
+        background: #c8bd9f;
       }
     }
+  }
+
+  .admin-animal-modal__content {
+    max-height: none !important; /* 移除 55vh 限制，由外层弹性展示 */
+    overflow-y: visible !important;
+    padding-right: 0 !important;
+  }
+}
+
+/* 全屏态：通过内容容器上的 is-fullscreen 标记反选 */
+.animal-modal:has(.doc-preview-shell-container.is-fullscreen) {
+  max-width: 100vw !important;
+  max-height: 100vh !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  margin: 0 !important;
+  border-radius: 0 !important;
+
+  .animal-modal__body {
+    padding: 32px 48px !important;
+    border-radius: 0 !important;
+    clip-path: none !important;
+  }
+
+  .animal-modal__content .doc-preview-body {
+    min-height: calc(100vh - 280px) !important;
   }
 }
 </style>
