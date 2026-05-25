@@ -254,8 +254,11 @@
 import { ref, reactive, computed, onMounted, onUnmounted } from "vue";
 import { useRouter } from "vue-router";
 import { useUserStore } from "@/store/modules/user";
+import { usePublicPageScroll } from "@/composables";
 
 defineOptions({ name: "Page404" });
+
+usePublicPageScroll();
 
 const router = useRouter();
 const userStore = useUserStore();

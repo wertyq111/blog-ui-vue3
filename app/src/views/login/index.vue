@@ -144,6 +144,9 @@
 <script setup lang="ts">
 import { ref, defineAsyncComponent } from "vue";
 import CharacterScene from "./components/CharacterScene.vue";
+import { usePublicPageScroll } from "@/composables";
+
+usePublicPageScroll();
 
 type LayoutMap = "login" | "register" | "resetPwd";
 

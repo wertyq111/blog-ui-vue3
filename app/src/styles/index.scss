@@ -29,6 +29,15 @@ html {
   height: 100%;
 }
 
+// 公开整页路由（首页/登录/404）依赖文档滚动，解除 index.html reset 对 html/body/#app 的 overflow:hidden 锁定
+html.public-page-scroll,
+html.public-page-scroll body,
+html.public-page-scroll #app {
+  height: auto;
+  min-height: 100%;
+  overflow: visible;
+}
+
 *,
 *::before,
 *::after {

@@ -366,8 +366,11 @@ import DashboardStatsAPI from "@/api/develop/dashboard-stats";
 import type { DashboardMetrics } from "@/types/api/dashboard-stats";
 import islanderSvg from "@/assets/home/islander.svg";
 import { resolveAvatar } from "@/utils/avatar";
+import { usePublicPageScroll } from "@/composables";
 
 defineOptions({ name: "HomePage" });
+
+usePublicPageScroll();
 
 const router = useRouter();
 const userStore = useUserStore();
