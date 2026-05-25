@@ -106,10 +106,10 @@
               <td>
                 <Switch
                   v-hasPerm="'sys:menu:edit'"
-                  :model-value="row.hide === 0"
+                  :model-value="row.status === 1"
                   size="small"
                   :loading="statusLoadingId === row.id"
-                  @update:model-value="(val: boolean) => handleHideToggle(row, val)"
+                  @update:model-value="(val: boolean) => handleStatusToggle(row, val)"
                 />
               </td>
               <td>
@@ -254,12 +254,12 @@ function handleResetQuery(): void {
   fetchData();
 }
 
-async function handleHideToggle(row: FlatRow, val: boolean): Promise<void> {
-  const nextHide = val ? 0 : 1;
+async function handleStatusToggle(row: FlatRow, val: boolean): Promise<void> {
+  const nextStatus = val ? 1 : 2;
   statusLoadingId.value = row.id ?? null;
   try {
-    await MenuAPI.updateHide(row.id!, nextHide);
-    ElMessage.success(val ? "已显示" : "已隐藏");
+    await MenuAPI.updateStatus(row.id!, nextStatus);
+    ElMessage.success(val ? "已激活" : "已禁用");
     fetchData();
   } finally {
     statusLoadingId.value = null;

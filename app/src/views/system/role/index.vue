@@ -76,7 +76,6 @@
                 </span>
               </th>
               <th style="width: 60px">ID</th>
-              <th style="width: 90px">操作</th>
               <th>角色名称</th>
               <th>角色标识</th>
               <th style="width: 130px">
@@ -102,12 +101,6 @@
                 </span>
               </td>
               <td class="cell-num">{{ row.id }}</td>
-              <td>
-                <span class="action-link act-edit" @click="handleEditClick(row)">
-                  <SystemIco name="edit" :size="12" />
-                  修改
-                </span>
-              </td>
               <td>{{ row.name }}</td>
               <td class="cell-mono">{{ row.code }}</td>
               <td>

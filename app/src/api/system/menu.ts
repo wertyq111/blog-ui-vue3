@@ -69,6 +69,15 @@ const MenuAPI = {
     });
   },
 
+  /** 切换菜单激活状态(status: 1 正常, 2 禁用)，复用编辑接口的部分更新 */
+  updateStatus(id: number, status: number) {
+    return request({
+      url: `${MENU_BASE_URL}/${id}`,
+      method: "post",
+      data: { status },
+    });
+  },
+
   /** 删除菜单 */
   deleteById(id: number) {
     return request({
