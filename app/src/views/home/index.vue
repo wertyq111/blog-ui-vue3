@@ -50,15 +50,15 @@
         <span class="brand-text">{{ brandName }}</span>
       </div>
       <div class="nav-links">
-        <a class="nav-link nav-link-active" href="#hero">
+        <a class="nav-link nav-link-active" href="javascript:void(0)" @click="scrollToSection('hero')">
           <span class="nav-link-finger"></span>
           <span class="nav-link-text">概览</span>
         </a>
-        <a class="nav-link" href="#modules">
+        <a class="nav-link" href="javascript:void(0)" @click="scrollToSection('modules')">
           <span class="nav-link-finger"></span>
           <span class="nav-link-text">模块</span>
         </a>
-        <a class="nav-link" href="#about">
+        <a class="nav-link" href="javascript:void(0)" @click="scrollToSection('about')">
           <span class="nav-link-finger"></span>
           <span class="nav-link-text">关于</span>
         </a>
@@ -494,6 +494,24 @@ const handleModuleClick = (key: string) => {
   }
 };
 
+const scrollToSection = (id: string) => {
+  const el = document.getElementById(id);
+  if (el) {
+    el.scrollIntoView({ behavior: "smooth", block: "start" });
+    
+    // 更新导航栏上的高亮激活状态
+    const links = document.querySelectorAll(".nav-link");
+    links.forEach(link => link.classList.remove("nav-link-active"));
+    
+    const activeLink = Array.from(links).find(link => 
+      link.querySelector(".nav-link-text")?.textContent === (id === "hero" ? "概览" : id === "modules" ? "模块" : "关于")
+    );
+    if (activeLink) {
+      activeLink.classList.add("nav-link-active");
+    }
+  }
+};
+
 const modules = [
   { key: "daily", color: "pink", tag: "DAILY", title: "工作日常", sub: "日报 · 周报 · 月报", icon: "M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z" },
   { key: "docs", color: "yellow", tag: "DOCS", title: "开发文档", sub: "项目资料沉淀", icon: "M4 19.5A2.5 2.5 0 016.5 17H20M4 19.5A2.5 2.5 0 016.5 17H20M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z" },
@@ -514,8 +532,6 @@ const modules = [
 .home-page {
   position: relative;
   width: 100%;
-  min-height: 100vh;
-  overflow-x: hidden;
   font-family: var(--el-font-family);
   user-select: none;
   transition: background 1.5s ease-in-out;
@@ -704,6 +720,18 @@ const modules = [
   100% { transform: translateX(-100vw); }
 }
 
+// 天空微动效（云朵漂移 + 水上飞机拉横幅）
+.ac404__sky {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 250px;
+  pointer-events: none;
+  z-index: 1;
+  overflow: hidden; // 阻断横掠小飞机造成宽度扩展溢出
+}
+
 // 飘落花叶粒子层
 .falling-particles {
   position: absolute;
@@ -804,6 +832,7 @@ const modules = [
   font-weight: 900;
   font-size: 18px;
   color: #794f27;
+  cursor: pointer;
 }
 
 .brand-mark {
@@ -1303,6 +1332,20 @@ const modules = [
   font-weight: 900;
   color: #794f27;
   letter-spacing: -0.02em;
+  
+  // 对各颜色包格做细腻的拟色适配 (使用 & 连字符修正 SCSS 同级类匹配)
+  &--pink { .pocket-slot-ico-wrap { background: #ffe6eb; } }
+  &--yellow { .pocket-slot-ico-wrap { background: #fff8d6; } }
+  &--blue { .pocket-slot-ico-wrap { background: #e8f0ff; } }
+  &--teal { .pocket-slot-ico-wrap { background: #e3faf2; } }
+  &--orange { .pocket-slot-ico-wrap { background: #ffebd6; } }
+  &--purple { .pocket-slot-ico-wrap { background: #f6ebff; } }
+  &--green { .pocket-slot-ico-wrap { background: #ebffe6; } }
+  &--peach { .pocket-slot-ico-wrap { background: #ffebd6; } }
+  &--lime { .pocket-slot-ico-wrap { background: #fdffe6; } }
+  &--red { .pocket-slot-ico-wrap { background: #ffe6e6; } }
+  &--brown { .pocket-slot-ico-wrap { background: #fdfaf0; } }
+  &--mint { .pocket-slot-ico-wrap { background: #e3faf2; } }
 }
 
 .section-sub { color: #9f927d; font-size: 14px; font-weight: 700; max-width: 480px; }
