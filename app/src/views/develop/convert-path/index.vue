@@ -157,8 +157,9 @@
 </template>
 
 <script setup lang="ts">
+import { confirm, message } from "@/utils/feedback";
 import { onMounted, reactive, ref } from "vue";
-import { ElMessage, ElMessageBox } from "element-plus";
+
 import { Button, Input } from "animal-island-vue";
 import ServerPathAPI from "@/api/develop/server-path";
 import type { ServerPathItem, ServerPathQueryParams } from "@/types/api/server-path";
@@ -220,11 +221,11 @@ function handleEditClick(row: ServerPathItem): void {
 function handleDelete(id?: number): void {
   const ids = id ? [id] : checkedIds.value.map(Number);
   if (!ids.length) {
-    ElMessage.warning("请勾选删除项");
+    message.warning("请勾选删除项");
     return;
   }
 
-  ElMessageBox.confirm("确认删除选中的路径映射吗？", "警告", {
+  confirm("确认删除选中的路径映射吗？", "警告", {
     confirmButtonText: "确定",
     cancelButtonText: "取消",
     type: "warning",
@@ -235,14 +236,14 @@ function handleDelete(id?: number): void {
         ids.length === 1 ? ServerPathAPI.deleteById(ids[0]) : ServerPathAPI.batchDelete(ids);
       request
         .then(() => {
-          ElMessage.success("删除成功");
+          message.success("删除成功");
           handleQuery();
         })
         .finally(() => {
           loading.value = false;
         });
     },
-    () => ElMessage.info("已取消删除")
+    () => message.info("已取消删除")
   );
 }
 

@@ -73,8 +73,9 @@
 </template>
 
 <script setup lang="ts">
+import { message } from "@/utils/feedback";
 import { ref, watch, onMounted, computed } from "vue";
-import { ElMessage } from "element-plus";
+
 import DashboardStatsAPI from "@/api/develop/dashboard-stats";
 import type { DashboardOverviewData } from "@/types/api/dashboard-stats";
 
@@ -111,7 +112,7 @@ async function fetchDashboard() {
     data.value = await DashboardStatsAPI.getStats(currentView.value, currentRange.value);
     fetchTime.value = new Date();
   } catch {
-    ElMessage.error("统计数据加载失败");
+    message.error("统计数据加载失败");
   } finally {
     loading.value = false;
   }

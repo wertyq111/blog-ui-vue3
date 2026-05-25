@@ -1,0 +1,33 @@
+/**
+ * 动森风格加载遮罩全局样式（v-loading 指令 / loadingService 使用，遮罩为原生 DOM 故需全局样式）
+ */
+.animal-loading-mask {
+  position: absolute;
+  inset: 0;
+  z-index: 2000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(253, 251, 247, 0.7);
+  backdrop-filter: blur(1px);
+  border-radius: inherit;
+}
+
+.animal-loading-mask--lock {
+  position: fixed;
+  z-index: 3000;
+}
+
+.animal-loading-inner {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  align-items: center;
+}
+
+.animal-loading-text {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 700;
+  color: #794f27;
+}

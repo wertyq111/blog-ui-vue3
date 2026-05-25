@@ -234,8 +234,9 @@
 </template>
 
 <script setup lang="ts">
+import { confirm, message } from "@/utils/feedback";
+import { loadingService } from "@/directives/loading";
 import { computed, onMounted, reactive, ref } from "vue";
-import { ElLoading, ElMessage, ElMessageBox } from "element-plus";
 import { Button, Input, Select } from "animal-island-vue";
 import AnimalDatePicker from "@/components/AnimalDatePicker/index.vue";
 import AnimalTableSelect from "@/components/AnimalTableSelect/index.vue";
@@ -397,14 +398,14 @@ function handleEditClick(row: TodoItem): void {
 }
 
 async function handleQuickStatus(row: TodoItem, status: number): Promise<void> {
-  const loadingInstance = ElLoading.service({ lock: true });
+  const loadingInstance = loadingService({ lock: true });
   try {
     await TodoAPI.updateStatus(row.id, status);
     row.status = status;
-    ElMessage.success("状态已更新");
+    message.success("状态已更新");
     fetchStatistics();
   } catch (e: any) {
-    ElMessage.error(e.message || "状态更新失败");
+    message.error(e.message || "状态更新失败");
   } finally {
     loadingInstance.close();
   }
@@ -413,9 +414,9 @@ async function handleQuickStatus(row: TodoItem, status: number): Promise<void> {
 async function handleQuickField(
   row: TodoItem,
   payload: Partial<TodoForm>,
-  message: string
+  successText: string
 ): Promise<void> {
-  const loadingInstance = ElLoading.service({ lock: true });
+  const loadingInstance = loadingService({ lock: true });
   try {
     await TodoAPI.update(row.id, payload);
     if ("due_date" in payload) {
@@ -431,10 +432,10 @@ async function handleQuickField(
     if ("priority" in payload) {
       row.priority = payload.priority!;
     }
-    ElMessage.success(message);
+    message.success(successText);
     fetchStatistics();
   } catch (e: any) {
-    ElMessage.error(e.message || "更新失败");
+    message.error(e.message || "更新失败");
   } finally {
     loadingInstance.close();
   }
@@ -445,7 +446,7 @@ async function deleteTodos(ids: string): Promise<void> {
   for (const id of arr) {
     await TodoAPI.deleteById(Number(id));
   }
-  ElMessage.success("删除成功");
+  message.success("删除成功");
   handleQuery();
   fetchStatistics();
 }
@@ -453,11 +454,11 @@ async function deleteTodos(ids: string): Promise<void> {
 function handleDelete(id?: number): void {
   const todoIds = id ? String(id) : checkedIds.value.join(",");
   if (!todoIds) {
-    ElMessage.warning("请勾选删除项");
+    message.warning("请勾选删除项");
     return;
   }
 
-  ElMessageBox.confirm("确认删除选中的待办事项吗？", "警告", {
+  confirm("确认删除选中的待办事项吗？", "警告", {
     confirmButtonText: "确定",
     cancelButtonText: "取消",
     type: "warning",

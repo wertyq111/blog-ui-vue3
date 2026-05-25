@@ -128,8 +128,9 @@
 </template>
 
 <script setup lang="ts">
+import { confirm, message } from "@/utils/feedback";
 import { computed, nextTick, onMounted, reactive, ref } from "vue";
-import { ElMessage, ElMessageBox } from "element-plus";
+
 import { Button, Input, Select, Switch } from "animal-island-vue";
 import { useDraggable } from "vue-draggable-plus";
 import WorkPlatformAPI from "@/api/develop/work-platform";
@@ -183,7 +184,7 @@ async function handleReorder(): Promise<void> {
   loading.value = true;
   try {
     await WorkPlatformAPI.reorder(list);
-    ElMessage.success("排序已保存");
+    message.success("排序已保存");
   } finally {
     fetchList();
   }
@@ -216,14 +217,14 @@ async function handleStatusToggle(row: WorkPlatformItem, val: boolean): Promise<
   try {
     await WorkPlatformAPI.update(row.id, { name: row.name, status: next, sort: row.sort });
     row.status = next;
-    ElMessage.success(val ? "已启用" : "已禁用");
+    message.success(val ? "已启用" : "已禁用");
   } finally {
     statusLoadingId.value = null;
   }
 }
 
 function handleDelete(id: number): void {
-  ElMessageBox.confirm("确认删除该平台吗？这将导致关联的日常记录显示异常。", "警告", {
+  confirm("确认删除该平台吗？这将导致关联的日常记录显示异常。", "警告", {
     confirmButtonText: "确定",
     cancelButtonText: "取消",
     type: "warning",
@@ -232,14 +233,14 @@ function handleDelete(id: number): void {
       loading.value = true;
       WorkPlatformAPI.deleteById(id)
         .then(() => {
-          ElMessage.success("删除成功");
+          message.success("删除成功");
           fetchList();
         })
         .finally(() => {
           loading.value = false;
         });
     },
-    () => ElMessage.info("已取消删除")
+    () => message.info("已取消删除")
   );
 }
 

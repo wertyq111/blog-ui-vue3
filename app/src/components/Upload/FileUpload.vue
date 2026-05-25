@@ -45,13 +45,8 @@
   </div>
 </template>
 <script lang="ts" setup>
-import {
-  UploadRawFile,
-  UploadUserFile,
-  UploadFile,
-  UploadFiles,
-  UploadRequestOptions,
-} from "element-plus";
+import { message } from "@/utils/feedback";
+import { UploadRawFile, UploadUserFile, UploadFile, UploadFiles, UploadRequestOptions } from "element-plus";
 
 import FileAPI from "@/api/file";
 import type { FileInfo } from "@/types/api";
@@ -147,7 +142,7 @@ watch(
 function handleBeforeUpload(file: UploadRawFile) {
   // 限制文件大小
   if (file.size > props.maxFileSize * 1024 * 1024) {
-    ElMessage.warning("上传文件不能大于" + props.maxFileSize + "M");
+    message.warning("上传文件不能大于" + props.maxFileSize + "M");
     return false;
   }
   return true;
@@ -187,14 +182,14 @@ function handleUpload(options: UploadRequestOptions) {
  * 上传文件超出限制
  */
 function handleExceed() {
-  ElMessage.warning("最多只能上传 " + props.limit + " 个文件");
+  message.warning("最多只能上传 " + props.limit + " 个文件");
 }
 
 /**
  * 上传成功
  */
 const handleSuccess = (response: any, uploadFile: UploadFile, files: UploadFiles) => {
-  ElMessage.success("上传成功");
+  message.success("上传成功");
   // 只有当状态为 success 或者 fail，代表文件上传全部完成了，失败也算完成
   if (
     files.every((file: UploadFile) => {
@@ -228,7 +223,7 @@ const handleSuccess = (response: any, uploadFile: UploadFile, files: UploadFiles
  */
 const handleError = (_error: any) => {
   console.error(_error);
-  ElMessage.error("上传失败");
+  message.error("上传失败");
 };
 
 /**

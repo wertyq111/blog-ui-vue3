@@ -32,6 +32,7 @@
 </template>
 
 <script setup lang="ts">
+import { message } from "@/utils/feedback";
 import { UploadRawFile, UploadRequestOptions } from "element-plus";
 import FileAPI from "@/api/file";
 import type { FileInfo } from "@/types/api";
@@ -110,13 +111,13 @@ function handleBeforeUpload(file: UploadRawFile) {
   });
 
   if (!isValidType) {
-    ElMessage.warning("上传文件的格式不正确，仅支持 " + props.accept);
+    message.warning("上传文件的格式不正确，仅支持 " + props.accept);
     return false;
   }
 
   // 限制文件大小
   if (file.size > props.maxFileSize * 1024 * 1024) {
-    ElMessage.warning("上传图片不能大于" + props.maxFileSize + "M");
+    message.warning("上传图片不能大于" + props.maxFileSize + "M");
     return false;
   }
   return true;
@@ -168,7 +169,7 @@ function handleDelete() {
  * @param fileInfo 上传成功后的文件信息
  */
 const onSuccess = (fileInfo: FileInfo) => {
-  ElMessage.success("上传成功");
+  message.success("上传成功");
   modelValue.value = fileInfo.url;
 };
 
@@ -177,7 +178,7 @@ const onSuccess = (fileInfo: FileInfo) => {
  */
 const onError = (error: any) => {
   console.log("onError");
-  ElMessage.error("上传失败: " + error.message);
+  message.error("上传失败: " + error.message);
 };
 </script>
 

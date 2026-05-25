@@ -26,8 +26,9 @@
 </template>
 
 <script setup lang="ts">
+import { message } from "@/utils/feedback";
 import { ref, watch } from "vue";
-import { ElMessage } from "element-plus";
+
 import { Button } from "animal-island-vue";
 import AdminAnimalModal from "@/components/AdminPage/AdminAnimalModal.vue";
 import InitModelAPI from "@/api/develop/init-model";
@@ -64,14 +65,14 @@ async function handleConvert(): Promise<void> {
     .map((p) => p.trim())
     .filter(Boolean);
   if (!columns.length) {
-    ElMessage.warning("请输入列 definition");
+    message.warning("请输入列 definition");
     return;
   }
   loading.value = true;
   try {
     const res = await InitModelAPI.convert(props.modelId, columns);
     result.value = Array.isArray(res) ? res.join("\n") : String(res);
-    ElMessage.success("生成完成");
+    message.success("生成完成");
   } finally {
     loading.value = false;
   }

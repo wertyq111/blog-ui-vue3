@@ -138,6 +138,7 @@
 </template>
 
 <script setup lang="ts">
+import { message } from "@/utils/feedback";
 import { DocumentCopy, RefreshLeft, Check } from "@element-plus/icons-vue";
 
 const { t } = useI18n();
@@ -222,12 +223,12 @@ const handleCopySettings = async () => {
     await navigator.clipboard.writeText(configCode);
 
     // 显示成功消息
-    ElMessage.success({
+    message.success({
       message: t("settings.copySuccess"),
       duration: 3000,
     });
   } catch {
-    ElMessage.error("复制配置失败");
+    message.error("复制配置失败");
   } finally {
     copyLoading.value = false;
   }
@@ -245,9 +246,9 @@ const handleResetSettings = async () => {
     // 同步更新本地状态"
     sidebarColor.value = settingsStore.sidebarColorScheme;
 
-    ElMessage.success(t("settings.resetSuccess"));
+    message.success(t("settings.resetSuccess"));
   } catch {
-    ElMessage.error("重置配置失败");
+    message.error("重置配置失败");
   } finally {
     resetLoading.value = false;
   }

@@ -199,8 +199,9 @@
 </template>
 
 <script setup lang="ts">
+import { confirm, message } from "@/utils/feedback";
 import { computed, onMounted, reactive, ref } from "vue";
-import { ElMessage, ElMessageBox } from "element-plus";
+
 import { Button, Input, Select, Switch } from "animal-island-vue";
 import MemberAPI from "@/api/member/member";
 import MemberLevelAPI from "@/api/member/member-level";
@@ -307,7 +308,7 @@ async function handleStatusToggle(row: MemberItem, val: boolean): Promise<void> 
   try {
     await MemberAPI.updateStatus(row.id, next);
     row.status = next;
-    ElMessage.success(next === 1 ? "已启用" : "已禁用");
+    message.success(next === 1 ? "已启用" : "已禁用");
   } finally {
     statusLoadingId.value = null;
   }
@@ -326,11 +327,11 @@ function handleEditClick(row: MemberItem): void {
 function handleDelete(id?: number): void {
   const ids = id ? [id] : checkedIds.value.map(Number);
   if (!ids.length) {
-    ElMessage.warning("请勾选删除项");
+    message.warning("请勾选删除项");
     return;
   }
 
-  ElMessageBox.confirm("确认删除选中的会员吗？", "警告", {
+  confirm("确认删除选中的会员吗？", "警告", {
     confirmButtonText: "确定",
     cancelButtonText: "取消",
     type: "warning",
@@ -340,14 +341,14 @@ function handleDelete(id?: number): void {
       const request = ids.length === 1 ? MemberAPI.deleteById(ids[0]) : MemberAPI.deleteByIds(ids);
       request
         .then(() => {
-          ElMessage.success("删除成功");
+          message.success("删除成功");
           handleQuery();
         })
         .finally(() => {
           loading.value = false;
         });
     },
-    () => ElMessage.info("已取消删除")
+    () => message.info("已取消删除")
   );
 }
 

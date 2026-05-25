@@ -316,17 +316,10 @@
 </template>
 
 <script setup lang="ts">
+import { confirm, message } from "@/utils/feedback";
 import { hasPerm } from "@/utils/auth";
 import { useDateFormat, useThrottleFn } from "@vueuse/core";
-import {
-  genFileId,
-  type FormInstance,
-  type FormRules,
-  type UploadInstance,
-  type UploadRawFile,
-  type UploadUserFile,
-  type TableInstance,
-} from "element-plus";
+import { genFileId, type FormInstance, type FormRules, type UploadInstance, type UploadRawFile, type UploadUserFile, type TableInstance } from "element-plus";
 import { Button } from "animal-island-vue";
 import ExcelJS from "exceljs";
 import { reactive, ref, computed } from "vue";
@@ -497,11 +490,11 @@ function handleRefresh(isRestart = false) {
 function handleDelete(id?: number | string) {
   const ids = [id || removeIds.value].join(",");
   if (!ids) {
-    ElMessage.warning("请勾选删除项");
+    message.warning("请勾选删除项");
     return;
   }
 
-  ElMessageBox.confirm("确认删除?", "警告", {
+  confirm("确认删除?", "警告", {
     confirmButtonText: "确定",
     cancelButtonText: "取消",
     type: "warning",
@@ -510,7 +503,7 @@ function handleDelete(id?: number | string) {
       if (props.contentConfig.deleteAction) {
         props.contentConfig.deleteAction(ids).then(
           () => {
-            ElMessage.success("删除成功");
+            message.success("删除成功");
             removeIds.value = [];
             // 清空选中项
             tableRef.value?.clearSelection();
@@ -521,7 +514,7 @@ function handleDelete(id?: number | string) {
           }
         );
       } else {
-        ElMessage.error("未配置deleteAction");
+        message.error("未配置deleteAction");
       }
     },
     () => {
@@ -602,7 +595,7 @@ function handleExports() {
         );
       });
     } else {
-      ElMessage.error("未配置exportsAction");
+      message.error("未配置exportsAction");
     }
   } else {
     worksheet.addRows(
@@ -656,7 +649,7 @@ function handleDownloadTemplate() {
       saveXlsx(fileData, fileName);
     });
   } else {
-    ElMessage.error("未配置importTemplate");
+    message.error("未配置importTemplate");
   }
 }
 // 导入确认
@@ -683,11 +676,11 @@ function handleCloseImportModal() {
 function handleImport() {
   const importAction = props.contentConfig.importAction;
   if (importAction === undefined) {
-    ElMessage.error("未配置importAction");
+    message.error("未配置importAction");
     return;
   }
   importAction(importFormData.files[0].raw as File).then(() => {
-    ElMessage.success("导入数据成功");
+    message.success("导入数据成功");
     handleCloseImportModal();
     handleRefresh(true);
   });
@@ -696,7 +689,7 @@ function handleImport() {
 function handleImports() {
   const importsAction = props.contentConfig.importsAction;
   if (importsAction === undefined) {
-    ElMessage.error("未配置importsAction");
+    message.error("未配置importsAction");
     return;
   }
   // 获取选择的文件
@@ -737,11 +730,11 @@ function handleImports() {
             }
           }
           if (data.length === 0) {
-            ElMessage.error("未解析到数据");
+            message.error("未解析到数据");
             return;
           }
           importsAction(data).then(() => {
-            ElMessage.success("导入数据成功");
+            message.success("导入数据成功");
             handleCloseImportModal();
             handleRefresh(true);
           });
@@ -749,7 +742,7 @@ function handleImports() {
         (error) => console.log(error)
       );
     } else {
-      ElMessage.error("读取文件失败");
+      message.error("读取文件失败");
     }
   };
 }
@@ -811,7 +804,7 @@ function handleModify(field: string, value: boolean | string | number, row: Reco
       value,
     });
   } else {
-    ElMessage.error("未配置modifyAction");
+    message.error("未配置modifyAction");
   }
 }
 
@@ -894,7 +887,7 @@ function exportPageData(formData: IObject = {}) {
       saveXlsx(fileData, fileName);
     });
   } else {
-    ElMessage.error("未配置exportAction");
+    message.error("未配置exportAction");
   }
 }
 

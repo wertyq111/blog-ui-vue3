@@ -121,8 +121,9 @@
 </template>
 
 <script setup lang="ts">
+import { message } from "@/utils/feedback";
 import { computed, nextTick, ref, watch } from "vue";
-import { ElMessage, type FormInstance, type FormRules } from "element-plus";
+import { type FormInstance, type FormRules } from "element-plus";
 import AdminAnimalModal from "@/components/AdminPage/AdminAnimalModal.vue";
 import { Button, Input, Select, Switch } from "animal-island-vue";
 import AnimalTreeSelect from "@/components/AnimalTreeSelect/index.vue";
@@ -306,7 +307,7 @@ function handleSubmit(): void {
 
     const menuId = formData.value.id;
     if (menuId && formData.value.pid === menuId) {
-      ElMessage.error("父级菜单不能为当前菜单");
+      message.error("父级菜单不能为当前菜单");
       return;
     }
 
@@ -321,7 +322,7 @@ function handleSubmit(): void {
     const action = menuId ? MenuAPI.update(menuId, payload) : MenuAPI.create(payload);
     action
       .then(() => {
-        ElMessage.success(menuId ? "修改成功" : "新增成功");
+        message.success(menuId ? "修改成功" : "新增成功");
         emit("done");
         closeDialog();
       })

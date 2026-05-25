@@ -118,8 +118,9 @@
 </template>
 
 <script setup lang="ts">
+import { message } from "@/utils/feedback";
 import { computed, onMounted, ref } from "vue";
-import { ElMessage } from "element-plus";
+
 import { useRouter } from "vue-router";
 import WorkDocAPI from "@/api/develop/work-doc";
 import WorkPlatformAPI from "@/api/develop/work-platform";
@@ -189,7 +190,7 @@ async function fetchQuickAccess() {
     pathItems.value = pathPage.list.slice(0, 3);
     modelItems.value = modelPage.list.slice(0, 3);
   } catch {
-    ElMessage.error("快捷入口加载失败");
+    message.error("快捷入口加载失败");
   } finally {
     loading.value = false;
   }

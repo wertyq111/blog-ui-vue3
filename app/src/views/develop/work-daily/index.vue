@@ -156,8 +156,9 @@
 </template>
 
 <script setup lang="ts">
+import { confirm, message } from "@/utils/feedback";
 import { computed, onMounted, reactive, ref } from "vue";
-import { ElMessage, ElMessageBox } from "element-plus";
+
 import { Button, Input, Select } from "animal-island-vue";
 import AnimalDatePicker from "@/components/AnimalDatePicker/index.vue";
 import AnimalMarkdown from "@/components/AnimalMarkdown/index.vue";
@@ -248,7 +249,7 @@ function handleEditClick(row: WorkDailyItem): void {
 }
 
 function handleDelete(id: number): void {
-  ElMessageBox.confirm("确认删除该记录吗？", "警告", {
+  confirm("确认删除该记录吗？", "警告", {
     confirmButtonText: "确定",
     cancelButtonText: "取消",
     type: "warning",
@@ -257,14 +258,14 @@ function handleDelete(id: number): void {
       loading.value = true;
       WorkDailyAPI.deleteById(id)
         .then(() => {
-          ElMessage.success("删除成功");
+          message.success("删除成功");
           fetchList();
         })
         .finally(() => {
           loading.value = false;
         });
     },
-    () => ElMessage.info("已取消删除")
+    () => message.info("已取消删除")
   );
 }
 

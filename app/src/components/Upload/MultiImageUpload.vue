@@ -39,6 +39,7 @@
   />
 </template>
 <script setup lang="ts">
+import { message } from "@/utils/feedback";
 import { UploadRawFile, UploadRequestOptions, UploadUserFile } from "element-plus";
 import FileAPI from "@/api/file";
 import type { FileInfo } from "@/types/api";
@@ -129,13 +130,13 @@ function handleBeforeUpload(file: UploadRawFile) {
   });
 
   if (!isValidType) {
-    ElMessage.warning("上传文件的格式不正确，仅支持 " + props.accept);
+    message.warning("上传文件的格式不正确，仅支持 " + props.accept);
     return false;
   }
 
   // 限制文件大小
   if (file.size > props.maxFileSize * 1024 * 1024) {
-    ElMessage.warning("上传图片不能大于" + props.maxFileSize + "M");
+    message.warning("上传图片不能大于" + props.maxFileSize + "M");
     return false;
   }
   return true;
@@ -171,14 +172,14 @@ function handleUpload(options: UploadRequestOptions) {
  * 上传文件超出限制
  */
 function handleExceed() {
-  ElMessage.warning("最多只能上传 " + props.limit + " 张图片");
+  message.warning("最多只能上传 " + props.limit + " 张图片");
 }
 
 /**
  * 上传成功回调
  */
 const handleSuccess = (fileInfo: FileInfo, uploadFile: UploadUserFile) => {
-  ElMessage.success("上传成功");
+  message.success("上传成功");
   const index = fileList.value.findIndex((file) => file.uid === uploadFile.uid);
   if (index !== -1) {
     fileList.value[index].url = fileInfo.url;
@@ -192,7 +193,7 @@ const handleSuccess = (fileInfo: FileInfo, uploadFile: UploadUserFile) => {
  */
 const handleError = (error: any) => {
   console.log("handleError");
-  ElMessage.error("上传失败: " + error.message);
+  message.error("上传失败: " + error.message);
 };
 
 /**

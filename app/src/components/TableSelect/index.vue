@@ -142,6 +142,7 @@
 </template>
 
 <script lang="ts" setup>
+import { message } from "@/utils/feedback";
 import { ref, reactive, computed } from "vue";
 import { useResizeObserver } from "@vueuse/core";
 import type { FormInstance, PopoverProps, TableInstance } from "element-plus";
@@ -318,7 +319,7 @@ function handleShow() {
 // 确定
 function handleConfirm() {
   if (selectedItems.value.length === 0) {
-    ElMessage.error("请选择数据");
+    message.error("请选择数据");
     return;
   }
   popoverVisible.value = false;

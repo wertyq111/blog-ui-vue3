@@ -1,3 +1,4 @@
+import { notify } from "@/utils/feedback";
 import { Storage } from "./storage";
 import { STORAGE_KEYS, ROLE_ROOT } from "@/constants";
 import { useUserStoreHook } from "@/store/modules/user";
@@ -67,7 +68,7 @@ export function hasPerm(value: string | string[], type: "button" | "role" = "but
  * 重定向到登录页面
  */
 export async function redirectToLogin(message: string = "请重新登录"): Promise<void> {
-  ElNotification({
+  notify({
     title: "提示",
     message,
     type: "warning",

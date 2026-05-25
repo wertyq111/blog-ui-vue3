@@ -157,8 +157,9 @@
 </template>
 
 <script setup lang="ts">
+import { confirm, message } from "@/utils/feedback";
 import { onMounted, reactive, ref } from "vue";
-import { ElMessage, ElMessageBox } from "element-plus";
+
 import { Button, Input, Switch } from "animal-island-vue";
 import RoleAPI from "@/api/system/role";
 import type { RoleItem, RoleQueryParams } from "@/types/api";
@@ -222,7 +223,7 @@ async function handleStatusToggle(row: RoleItem, val: boolean): Promise<void> {
   try {
     await RoleAPI.updateStatus(row.id, next);
     row.status = next;
-    ElMessage.success(val ? "已启用" : "已禁用");
+    message.success(val ? "已启用" : "已禁用");
   } finally {
     statusLoadingId.value = null;
   }
@@ -246,11 +247,11 @@ function handleAssignPermClick(row: RoleItem): void {
 function handleDelete(roleId?: string): void {
   const roleIds = roleId ? [roleId] : checkedIds.value;
   if (!roleIds.length) {
-    ElMessage.warning("请勾选删除项");
+    message.warning("请勾选删除项");
     return;
   }
 
-  ElMessageBox.confirm("确认删除已选中的数据项?", "警告", {
+  confirm("确认删除已选中的数据项?", "警告", {
     confirmButtonText: "确定",
     cancelButtonText: "取消",
     type: "warning",
@@ -263,7 +264,7 @@ function handleDelete(roleId?: string): void {
           : RoleAPI.batchDelete(roleIds.map(Number));
       request
         .then(() => {
-          ElMessage.success("删除成功");
+          message.success("删除成功");
           handleResetQuery();
         })
         .finally(() => {
@@ -271,7 +272,7 @@ function handleDelete(roleId?: string): void {
         });
     },
     () => {
-      ElMessage.info("已取消删除");
+      message.info("已取消删除");
     }
   );
 }

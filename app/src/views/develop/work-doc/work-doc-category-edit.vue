@@ -52,9 +52,10 @@
 </template>
 
 <script setup lang="ts">
+import { message } from "@/utils/feedback";
 import { computed, nextTick, reactive, ref, watch } from "vue";
 import { useDebounceFn } from "@vueuse/core";
-import { ElMessage, type FormInstance, type FormRules } from "element-plus";
+import { type FormInstance, type FormRules } from "element-plus";
 import AdminAnimalModal from "@/components/AdminPage/AdminAnimalModal.vue";
 import { Button, Input, Select } from "animal-island-vue";
 import WorkDocCategoryAPI from "@/api/develop/work-doc-category";
@@ -163,10 +164,10 @@ const handleSubmit = useDebounceFn(async () => {
   try {
     if (formData.id) {
       await WorkDocCategoryAPI.update(formData.id, formData);
-      ElMessage.success("修改成功");
+      message.success("修改成功");
     } else {
       await WorkDocCategoryAPI.create(formData);
-      ElMessage.success("新增成功");
+      message.success("新增成功");
     }
     emit("done");
     closeDialog();

@@ -24,6 +24,7 @@
   </div>
 </template>
 <script setup lang="ts">
+import { message } from "@/utils/feedback";
 import { useI18n } from "vue-i18n";
 import type { FormInstance } from "element-plus";
 
@@ -52,6 +53,6 @@ const formRef = ref<FormInstance>();
 
 const submit = async () => {
   await formRef.value?.validate();
-  ElMessage.warning("开发中 ...");
+  message.warning("开发中 ...");
 };
 </script>

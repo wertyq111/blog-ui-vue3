@@ -82,9 +82,10 @@
 </template>
 
 <script setup lang="ts">
+import { message } from "@/utils/feedback";
 import { computed, nextTick, reactive, ref, watch } from "vue";
 import { useDebounceFn } from "@vueuse/core";
-import { ElMessage, type FormInstance, type FormRules } from "element-plus";
+import { type FormInstance, type FormRules } from "element-plus";
 import AdminAnimalModal from "@/components/AdminPage/AdminAnimalModal.vue";
 import { Button, Input, Select, Switch } from "animal-island-vue";
 import MemberAPI from "@/api/member/member";
@@ -228,10 +229,10 @@ const handleSubmit = useDebounceFn(async () => {
   try {
     if (formData.id) {
       await MemberAPI.update(formData.id, formData);
-      ElMessage.success("修改会员成功");
+      message.success("修改会员成功");
     } else {
       await MemberAPI.create(formData);
-      ElMessage.success("新增会员成功");
+      message.success("新增会员成功");
     }
     emit("done");
     closeDialog();

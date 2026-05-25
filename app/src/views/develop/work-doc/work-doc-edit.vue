@@ -85,9 +85,10 @@
 </template>
 
 <script setup lang="ts">
+import { message } from "@/utils/feedback";
 import { computed, nextTick, reactive, ref, watch } from "vue";
 import { useDebounceFn } from "@vueuse/core";
-import { ElMessage, type FormInstance, type FormRules } from "element-plus";
+import { type FormInstance, type FormRules } from "element-plus";
 import AdminAnimalModal from "@/components/AdminPage/AdminAnimalModal.vue";
 import { Button, Input, Select, Switch } from "animal-island-vue";
 import AnimalMarkdown from "@/components/AnimalMarkdown/index.vue";
@@ -259,10 +260,10 @@ const handleSubmit = useDebounceFn(async () => {
   try {
     if (payload.id) {
       await WorkDocAPI.update(payload.id, payload);
-      ElMessage.success("修改成功");
+      message.success("修改成功");
     } else {
       await WorkDocAPI.create(payload);
-      ElMessage.success("新增成功");
+      message.success("新增成功");
     }
     emit("done");
     closeDialog();

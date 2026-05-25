@@ -67,8 +67,9 @@
 </template>
 
 <script setup lang="ts">
+import { message } from "@/utils/feedback";
 import { computed, onMounted, reactive, ref } from "vue";
-import { ElMessage, type UploadFile } from "element-plus";
+import { type UploadFile } from "element-plus";
 import { Button, Select } from "animal-island-vue";
 import AnimalDatePicker from "@/components/AnimalDatePicker/index.vue";
 import AnimalUpload from "@/components/AnimalUpload/index.vue";
@@ -112,15 +113,15 @@ async function fetchModels(): Promise<void> {
 
 async function handleExport(): Promise<void> {
   if (config.type === "month" && !config.month) {
-    ElMessage.warning("请选择月份");
+    message.warning("请选择月份");
     return;
   }
   if (config.type === "week" && (!config.weekRange || config.weekRange.length < 2)) {
-    ElMessage.warning("请选择周范围");
+    message.warning("请选择周范围");
     return;
   }
   if (config.type === "year" && !config.year) {
-    ElMessage.warning("请选择年份");
+    message.warning("请选择年份");
     return;
   }
 
@@ -145,9 +146,9 @@ async function handleExport(): Promise<void> {
     a.download = name;
     a.click();
     URL.revokeObjectURL(url);
-    ElMessage.success("导出成功");
+    message.success("导出成功");
   } catch {
-    ElMessage.error("导出失败");
+    message.error("导出失败");
   } finally {
     exporting.value = false;
   }
@@ -158,10 +159,10 @@ async function handleImport(file: UploadFile): Promise<void> {
   if (!raw) return;
   try {
     await WorkDailyAPI.importMarkdown(raw, config.importYear);
-    ElMessage.success("导入成功");
+    message.success("导入成功");
     emit("imported");
   } catch {
-    ElMessage.error("导入失败");
+    message.error("导入失败");
   }
 }
 

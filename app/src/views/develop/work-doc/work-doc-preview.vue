@@ -86,8 +86,9 @@
 </template>
 
 <script setup lang="ts">
+import { message } from "@/utils/feedback";
 import { computed, ref, watch } from "vue";
-import { ElMessage } from "element-plus";
+
 import { Button } from "animal-island-vue";
 import AnimalTag from "@/components/AnimalTag/index.vue";
 import AnimalMarkdown from "@/components/AnimalMarkdown/index.vue";
@@ -135,7 +136,7 @@ function closePreview(): void {
 
 async function copyMarkdownLink(): Promise<void> {
   if (!previewDoc.value || !previewDoc.value.id) {
-    ElMessage.error("文档未保存");
+    message.error("文档未保存");
     return;
   }
   const link = `[${previewDoc.value.title}](/develop/work-doc?id=${previewDoc.value.id})`;
@@ -144,9 +145,9 @@ async function copyMarkdownLink(): Promise<void> {
   if (navigator.clipboard && window.isSecureContext) {
     try {
       await navigator.clipboard.writeText(link);
-      ElMessage.success("Markdown 链接已复制");
+      message.success("Markdown 链接已复制");
     } catch {
-      ElMessage.error("复制失败");
+      message.error("复制失败");
     }
   } else {
     const textArea = document.createElement("textarea");
@@ -161,12 +162,12 @@ async function copyMarkdownLink(): Promise<void> {
     try {
       const success = document.execCommand("copy");
       if (success) {
-        ElMessage.success("Markdown 链接已复制");
+        message.success("Markdown 链接已复制");
       } else {
-        ElMessage.error("复制失败");
+        message.error("复制失败");
       }
     } catch {
-      ElMessage.error("复制失败");
+      message.error("复制失败");
     }
     document.body.removeChild(textArea);
   }
@@ -182,7 +183,7 @@ watch(
         const info = await WorkDocAPI.getInfo(props.data.id);
         previewDoc.value = info;
       } catch (e: any) {
-        ElMessage.error(e.message || "获取文档详情失败");
+        message.error(e.message || "获取文档详情失败");
       } finally {
         loading.value = false;
       }

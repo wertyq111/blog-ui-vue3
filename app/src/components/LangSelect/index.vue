@@ -17,6 +17,7 @@
 </template>
 
 <script setup lang="ts">
+import { message } from "@/utils/feedback";
 import { useAppStore } from "@/store/modules/app";
 import { LanguageEnum } from "@/enums/settings";
 
@@ -44,6 +45,6 @@ function handleLanguageChange(lang: string) {
   locale.value = lang;
   appStore.changeLanguage(lang);
 
-  ElMessage.success(t("langSelect.message.success"));
+  message.success(t("langSelect.message.success"));
 }
 </script>

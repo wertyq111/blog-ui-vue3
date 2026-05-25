@@ -48,8 +48,9 @@
 </template>
 
 <script setup lang="ts">
+import { message } from "@/utils/feedback";
 import { computed, nextTick, reactive, ref, watch } from "vue";
-import { ElMessage, type FormInstance, type FormRules } from "element-plus";
+import { type FormInstance, type FormRules } from "element-plus";
 import AdminAnimalModal from "@/components/AdminPage/AdminAnimalModal.vue";
 import { Button, Input, Switch } from "animal-island-vue";
 import AnimalTextarea from "@/components/AnimalTextarea/index.vue";
@@ -144,10 +145,10 @@ async function handleSubmit(): Promise<void> {
   try {
     if (formData.id) {
       await RoleAPI.update(formData.id, formData);
-      ElMessage.success("修改成功");
+      message.success("修改成功");
     } else {
       await RoleAPI.create(formData);
-      ElMessage.success("新增成功");
+      message.success("新增成功");
     }
     emit("done");
     closeDialog();

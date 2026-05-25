@@ -72,9 +72,10 @@
 </template>
 
 <script setup lang="ts">
+import { message } from "@/utils/feedback";
 import { computed, nextTick, reactive, ref, watch } from "vue";
 import { useDebounceFn } from "@vueuse/core";
-import { ElMessage, type FormInstance, type FormRules } from "element-plus";
+import { type FormInstance, type FormRules } from "element-plus";
 import AdminAnimalModal from "@/components/AdminPage/AdminAnimalModal.vue";
 import { Button, Input, Switch } from "animal-island-vue";
 import AnimalMultiSelect from "@/components/AnimalMultiSelect/index.vue";
@@ -204,10 +205,10 @@ const handleSubmit = useDebounceFn(async () => {
       const payload: UserForm = { ...formData };
       if (!payload.password) delete payload.password;
       await UserAPI.update(formData.id, payload);
-      ElMessage.success("修改用户成功");
+      message.success("修改用户成功");
     } else {
       await UserAPI.create(formData);
-      ElMessage.success("新增用户成功");
+      message.success("新增用户成功");
     }
     emit("done");
     closeDialog();

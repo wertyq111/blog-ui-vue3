@@ -112,9 +112,10 @@
 </template>
 
 <script setup lang="ts">
+import { message } from "@/utils/feedback";
 import { computed, nextTick, reactive, ref, watch } from "vue";
 import { useDebounceFn } from "@vueuse/core";
-import { ElMessage, type FormInstance, type FormRules } from "element-plus";
+import { type FormInstance, type FormRules } from "element-plus";
 import AdminAnimalModal from "@/components/AdminPage/AdminAnimalModal.vue";
 import { Button, Input, Select } from "animal-island-vue";
 import AnimalDatePicker from "@/components/AnimalDatePicker/index.vue";
@@ -273,10 +274,10 @@ const handleSubmit = useDebounceFn(async () => {
 
     if (formData.id) {
       await TodoAPI.update(formData.id, formData);
-      ElMessage.success("修改待办成功");
+      message.success("修改待办成功");
     } else {
       await TodoAPI.create(formData);
-      ElMessage.success("新增待办成功");
+      message.success("新增待办成功");
     }
     emit("done");
     closeDialog();

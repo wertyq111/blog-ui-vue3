@@ -63,6 +63,7 @@
 </template>
 
 <script setup lang="ts">
+import { confirm, message } from "@/utils/feedback";
 import { useI18n } from "vue-i18n";
 import { useRoute, useRouter } from "vue-router";
 import { defaults } from "@/settings";
@@ -117,11 +118,11 @@ const avatarFallback = computed(() => {
 function handleTenantChange(tenantId: number) {
   tenantStore.switchTenant(tenantId).then(
     () => {
-      ElMessage.success("切换租户成功");
+      message.success("切换租户成功");
       window.location.href = "/";
     },
     (error: any) => {
-      ElMessage.error(error.message || "切换租户失败");
+      message.error(error.message || "切换租户失败");
     }
   );
 }
@@ -144,7 +145,7 @@ const navbarActionsClass = computed(() => {
  * 退出登录
  */
 function logout() {
-  ElMessageBox.confirm("确定注销并退出系统吗？", "提示", {
+  confirm("确定注销并退出系统吗？", "提示", {
     confirmButtonText: "确定",
     cancelButtonText: "取消",
     type: "warning",

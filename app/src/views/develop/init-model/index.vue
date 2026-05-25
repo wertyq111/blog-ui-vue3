@@ -165,8 +165,9 @@
 </template>
 
 <script setup lang="ts">
+import { confirm, message } from "@/utils/feedback";
 import { onMounted, reactive, ref } from "vue";
-import { ElMessage, ElMessageBox } from "element-plus";
+
 import { Button, Input } from "animal-island-vue";
 import InitModelAPI from "@/api/develop/init-model";
 import type { InitModelItem, InitModelQueryParams } from "@/types/api/init-model";
@@ -236,11 +237,11 @@ function handleConvertClick(row: InitModelItem): void {
 function handleDelete(id?: number): void {
   const ids = id ? [id] : checkedIds.value.map(Number);
   if (!ids.length) {
-    ElMessage.warning("请勾选删除项");
+    message.warning("请勾选删除项");
     return;
   }
 
-  ElMessageBox.confirm("确认删除选中的模板吗？", "警告", {
+  confirm("确认删除选中的模板吗？", "警告", {
     confirmButtonText: "确定",
     cancelButtonText: "取消",
     type: "warning",
@@ -251,14 +252,14 @@ function handleDelete(id?: number): void {
         ids.length === 1 ? InitModelAPI.deleteById(ids[0]) : InitModelAPI.batchDelete(ids);
       request
         .then(() => {
-          ElMessage.success("删除成功");
+          message.success("删除成功");
           handleQuery();
         })
         .finally(() => {
           loading.value = false;
         });
     },
-    () => ElMessage.info("已取消删除")
+    () => message.info("已取消删除")
   );
 }
 

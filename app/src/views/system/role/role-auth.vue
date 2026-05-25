@@ -66,8 +66,9 @@
 </template>
 
 <script setup lang="ts">
+import { message } from "@/utils/feedback";
 import { nextTick, ref, watch } from "vue";
-import { ElMessage } from "element-plus";
+
 import { Button, Input, Switch } from "animal-island-vue";
 import AdminAnimalModal from "@/components/AdminPage/AdminAnimalModal.vue";
 import RoleAPI from "@/api/system/role";
@@ -154,7 +155,7 @@ async function handleSubmit(): Promise<void> {
   loading.value = true;
   try {
     await RoleAPI.savePermissions(roleId, checkedMenuIds);
-    ElMessage.success("分配权限成功");
+    message.success("分配权限成功");
     emit("done");
     closeDrawer();
   } finally {

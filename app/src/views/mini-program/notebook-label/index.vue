@@ -140,6 +140,7 @@
 </template>
 
 <script setup lang="ts">
+import { confirm, message } from "@/utils/feedback";
 import type { FormInstance, FormRules } from "element-plus";
 import { Button } from "animal-island-vue";
 import AdminAnimalModal from "@/components/AdminPage/AdminAnimalModal.vue";
@@ -240,10 +241,10 @@ async function handleSubmit() {
   try {
     if (formData.id) {
       await LabelAPI.update(formData.id, formData);
-      ElMessage.success("修改成功");
+      message.success("修改成功");
     } else {
       await LabelAPI.create(formData);
-      ElMessage.success("新增成功");
+      message.success("新增成功");
     }
     closeDialog();
     fetchList();
@@ -260,11 +261,11 @@ function normalizeIds(id?: number) {
 async function handleDelete(id?: number) {
   const ids = normalizeIds(id);
   if (!ids.length) {
-    ElMessage.warning("请勾选删除项");
+    message.warning("请勾选删除项");
     return;
   }
   try {
-    await ElMessageBox.confirm("确认删除选中的项吗？", "警告", {
+    await confirm("确认删除选中的项吗？", "警告", {
       confirmButtonText: "确定",
       cancelButtonText: "取消",
       type: "warning",
@@ -276,7 +277,7 @@ async function handleDelete(id?: number) {
   loading.value = true;
   try {
     await Promise.all(ids.map((item) => LabelAPI.deleteById(item)));
-    ElMessage.success("删除成功");
+    message.success("删除成功");
     fetchList();
   } finally {
     loading.value = false;

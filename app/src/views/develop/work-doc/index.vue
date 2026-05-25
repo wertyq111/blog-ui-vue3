@@ -209,8 +209,9 @@
 </template>
 
 <script setup lang="ts">
+import { confirm, message } from "@/utils/feedback";
 import { computed, onMounted, reactive, ref } from "vue";
-import { ElMessage, ElMessageBox } from "element-plus";
+
 import { Button, Input, Select } from "animal-island-vue";
 import AnimalTree from "@/components/AnimalTree/index.vue";
 import AnimalTag from "@/components/AnimalTag/index.vue";
@@ -365,7 +366,7 @@ async function handleCategoryReorder(
         sort: it.sort,
       }))
     );
-    ElMessage.success("排序已保存");
+    message.success("排序已保存");
   } finally {
     fetchCategories();
   }
@@ -389,11 +390,11 @@ function handlePreview(row: WorkDocItem): void {
 
 function copyMarkdownLink(row: WorkDocItem): void {
   const link = `[${row.title}](/develop/work-doc?id=${row.id})`;
-  navigator.clipboard.writeText(link).then(() => ElMessage.success("Markdown 链接已复制"));
+  navigator.clipboard.writeText(link).then(() => message.success("Markdown 链接已复制"));
 }
 
 function handleDelete(id: number): void {
-  ElMessageBox.confirm("确认删除该文档吗？", "警告", {
+  confirm("确认删除该文档吗？", "警告", {
     confirmButtonText: "确定",
     cancelButtonText: "取消",
     type: "warning",
@@ -402,14 +403,14 @@ function handleDelete(id: number): void {
       loading.value = true;
       WorkDocAPI.deleteById(id)
         .then(() => {
-          ElMessage.success("删除成功");
+          message.success("删除成功");
           fetchList();
         })
         .finally(() => {
           loading.value = false;
         });
     },
-    () => ElMessage.info("已取消删除")
+    () => message.info("已取消删除")
   );
 }
 
@@ -425,18 +426,18 @@ function handleEditCategory(node: WorkDocCategoryItem): void {
 }
 
 function handleDeleteCategory(id: number): void {
-  ElMessageBox.confirm("确认删除该分类吗？分类下有文档或子分类时无法删除。", "警告", {
+  confirm("确认删除该分类吗？分类下有文档或子分类时无法删除。", "警告", {
     confirmButtonText: "确定",
     cancelButtonText: "取消",
     type: "warning",
   }).then(
     () => {
       WorkDocCategoryAPI.deleteById(id).then(() => {
-        ElMessage.success("删除成功");
+        message.success("删除成功");
         fetchCategories();
       });
     },
-    () => ElMessage.info("已取消删除")
+    () => message.info("已取消删除")
   );
 }
 

@@ -8,6 +8,7 @@
 </template>
 
 <script setup lang="ts">
+import { message } from "@/utils/feedback";
 defineOptions({
   name: "CopyButton",
   inheritAttrs: false,
@@ -29,10 +30,10 @@ function handleClipboard() {
     // 使用 Clipboard API
     navigator.clipboard.writeText(props.text).then(
       () => {
-        ElMessage.success("Copy successfully");
+        message.success("Copy successfully");
       },
       () => {
-        ElMessage.warning("Copy failed");
+        message.warning("Copy failed");
       }
     );
   } else {
@@ -47,9 +48,9 @@ function handleClipboard() {
       const successful = document.execCommand("copy");
 
       if (successful) {
-        ElMessage.success("Copy successfully!");
+        message.success("Copy successfully!");
       } else {
-        ElMessage.warning("Copy failed!");
+        message.warning("Copy failed!");
       }
     } finally {
       document.body.removeChild(input);

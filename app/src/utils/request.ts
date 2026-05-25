@@ -1,3 +1,4 @@
+import { message } from "@/utils/feedback";
 import axios, { type InternalAxiosRequestConfig, type AxiosResponse } from "axios";
 import qs from "qs";
 import { ApiCodeEnum } from "@/enums/api";
@@ -60,7 +61,7 @@ http.interceptors.response.use(
       return Promise.reject(new Error(msg || "未授权"));
     }
 
-    ElMessage.error(msg || "系统出错");
+    message.error(msg || "系统出错");
     return Promise.reject(new Error(msg || "系统出错"));
   },
 
@@ -68,7 +69,7 @@ http.interceptors.response.use(
     const { response } = error;
 
     if (!response) {
-      ElMessage.error("网络连接失败");
+      message.error("网络连接失败");
       return Promise.reject(error);
     }
 
@@ -79,7 +80,7 @@ http.interceptors.response.use(
     }
 
     const msg = response.data?.msg || response.data?.message || "请求失败";
-    ElMessage.error(msg);
+    message.error(msg);
     return Promise.reject(new Error(msg));
   }
 );

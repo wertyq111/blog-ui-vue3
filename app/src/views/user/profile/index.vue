@@ -266,6 +266,7 @@
 </template>
 
 <script setup lang="ts">
+import { message } from "@/utils/feedback";
 import { ref, reactive, computed, onMounted } from "vue";
 import UserAPI from "@/api/system/user";
 import FileAPI from "@/api/file";
@@ -457,11 +458,11 @@ async function handleSubmit() {
       intro: form.intro,
     };
     await UserAPI.updateProfile(payload);
-    ElMessage.success("保存成功");
+    message.success("保存成功");
     userStore.userInfo.nickname = form.nickname;
     lastLoaded = { ...form };
   } catch (e: any) {
-    ElMessage.error(e?.message || "保存失败");
+    message.error(e?.message || "保存失败");
   } finally {
     saving.value = false;
   }
@@ -489,9 +490,9 @@ async function handleAvatarChange(event: Event) {
     form.avatar = data.url;
     lastLoaded.avatar = data.url;
     userStore.userInfo.avatar = data.url;
-    ElMessage.success("头像更新成功");
+    message.success("头像更新成功");
   } catch (e: any) {
-    ElMessage.error(e?.message || "头像上传失败");
+    message.error(e?.message || "头像上传失败");
   } finally {
     loading.value = false;
     target.value = "";

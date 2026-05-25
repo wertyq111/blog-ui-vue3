@@ -78,9 +78,10 @@
 </template>
 
 <script setup lang="ts">
+import { message } from "@/utils/feedback";
 import { computed, reactive, ref, watch } from "vue";
 import { useDebounceFn } from "@vueuse/core";
-import { ElMessage, type FormInstance, type FormRules } from "element-plus";
+import { type FormInstance, type FormRules } from "element-plus";
 import { Button, Input } from "animal-island-vue";
 import AdminAnimalModal from "@/components/AdminPage/AdminAnimalModal.vue";
 import AnimalMultiSelect from "@/components/AnimalMultiSelect/index.vue";
@@ -217,7 +218,7 @@ const handleSubmit = useDebounceFn(async () => {
 
   if (!valid) return;
   if (!selectedPlatformIds.value.length && !formData.customPlatformName) {
-    ElMessage.warning("请选择或填写至少一个平台");
+    message.warning("请选择或填写至少一个平台");
     return;
   }
 
@@ -233,7 +234,7 @@ const handleSubmit = useDebounceFn(async () => {
             tagList.value.push(newTag);
           }
         } catch (e: any) {
-          ElMessage.error(`创建标签 "${tag}" 失败: ${e.message}`);
+          message.error(`创建标签 "${tag}" 失败: ${e.message}`);
         }
       } else {
         finalTagIds.push(tag);
@@ -263,10 +264,10 @@ const handleSubmit = useDebounceFn(async () => {
 
     if (payload.id) {
       await WorkDailyAPI.update(payload.id, payload);
-      ElMessage.success("修改成功");
+      message.success("修改成功");
     } else {
       await WorkDailyAPI.create(payload);
-      ElMessage.success("新增成功");
+      message.success("新增成功");
     }
     emit("done");
     closeDialog();

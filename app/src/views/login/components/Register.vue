@@ -99,6 +99,7 @@
   </div>
 </template>
 <script setup lang="ts">
+import { message } from "@/utils/feedback";
 import type { FormInstance } from "element-plus";
 import { Lock } from "@element-plus/icons-vue";
 import { useI18n } from "vue-i18n";
@@ -203,6 +204,6 @@ function checkCapsLock(event: KeyboardEvent) {
 
 const submit = async () => {
   await formRef.value?.validate();
-  ElMessage.warning("开发中 ...");
+  message.warning("开发中 ...");
 };
 </script>

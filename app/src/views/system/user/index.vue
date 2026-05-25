@@ -177,8 +177,9 @@
 </template>
 
 <script setup lang="ts">
+import { confirm, message } from "@/utils/feedback";
 import { computed, onMounted, reactive, ref } from "vue";
-import { ElMessage, ElMessageBox } from "element-plus";
+
 import { Button, Input, Select, Switch } from "animal-island-vue";
 import UserAPI from "@/api/system/user";
 import { useUserStore } from "@/store";
@@ -264,7 +265,7 @@ function handleResetQuery(): void {
 
 async function resetPassword(userId: string): Promise<void> {
   await UserAPI.resetPassword(userId);
-  ElMessage.success("密码重置成功，新密码为 123456");
+  message.success("密码重置成功，新密码为 123456");
 }
 
 async function deleteUsers(userIds: string): Promise<void> {
@@ -272,7 +273,7 @@ async function deleteUsers(userIds: string): Promise<void> {
   for (const id of ids) {
     await UserAPI.deleteById(id);
   }
-  ElMessage.success("删除成功");
+  message.success("删除成功");
   handleQuery();
 }
 
@@ -282,7 +283,7 @@ async function handleStatusToggle(row: UserItem, val: boolean): Promise<void> {
   try {
     await UserAPI.updateStatus(row.id, next);
     row.status = next;
-    ElMessage.success(val ? "已启用" : "已禁用");
+    message.success(val ? "已启用" : "已禁用");
   } finally {
     statusLoadingId.value = null;
   }
@@ -299,7 +300,7 @@ function handleEditClick(id: string): void {
 }
 
 function handleResetPassword(row: UserItem): void {
-  ElMessageBox.confirm(`确认重置用户【${row.username}】的密码吗？`, "警告", {
+  confirm(`确认重置用户【${row.username}】的密码吗？`, "警告", {
     confirmButtonText: "确定",
     cancelButtonText: "取消",
     type: "warning",
@@ -312,7 +313,7 @@ function handleResetPassword(row: UserItem): void {
 function handleDelete(id?: string): void {
   const userIds = id ?? checkedIds.value.join(",");
   if (!userIds) {
-    ElMessage.warning("请勾选删除项");
+    message.warning("请勾选删除项");
     return;
   }
 
@@ -322,12 +323,12 @@ function handleDelete(id?: string): void {
       ? id === currentUserId
       : checkedIds.value.some((selectedId) => selectedId === currentUserId);
     if (containsCurrentUser) {
-      ElMessage.error("不能删除当前登录用户");
+      message.error("不能删除当前登录用户");
       return;
     }
   }
 
-  ElMessageBox.confirm("确认删除选中的用户吗？", "警告", {
+  confirm("确认删除选中的用户吗？", "警告", {
     confirmButtonText: "确定",
     cancelButtonText: "取消",
     type: "warning",

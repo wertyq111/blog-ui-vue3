@@ -25,9 +25,10 @@
 </template>
 
 <script setup lang="ts">
+import { message } from "@/utils/feedback";
 import { onMounted, ref } from "vue";
 import { useClipboard, useDebounceFn } from "@vueuse/core";
-import { ElMessage } from "element-plus";
+
 import { Button } from "animal-island-vue";
 import ServerPathAPI from "@/api/develop/server-path";
 import type { ServerPathItem } from "@/types/api/server-path";
@@ -79,9 +80,9 @@ async function copyResult(): Promise<void> {
   if (!output.value) return;
   try {
     await copy(output.value);
-    ElMessage.success("已复制到剪贴板");
+    message.success("已复制到剪贴板");
   } catch {
-    ElMessage.error("复制失败");
+    message.error("复制失败");
   }
 }
 
@@ -94,7 +95,7 @@ onMounted(async () => {
   try {
     allPaths.value = await ServerPathAPI.getAll();
   } catch {
-    ElMessage.error("加载项目配置失败");
+    message.error("加载项目配置失败");
   }
 });
 </script>

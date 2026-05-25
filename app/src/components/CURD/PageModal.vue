@@ -134,6 +134,7 @@
 </template>
 
 <script setup lang="ts">
+import { message } from "@/utils/feedback";
 import { useThrottleFn } from "@vueuse/core";
 import cloneDeep from "lodash-es/cloneDeep";
 import type { FormInstance, FormRules } from "element-plus";
@@ -220,9 +221,9 @@ const handleSubmit = useThrottleFn(() => {
     }
     props.modalConfig.formAction(formData).then(() => {
       if (props.modalConfig.component === "drawer") {
-        ElMessage.success(`${props.modalConfig.drawer?.title}成功`);
+        message.success(`${props.modalConfig.drawer?.title}成功`);
       } else {
-        ElMessage.success(`${props.modalConfig.dialog?.title}成功`);
+        message.success(`${props.modalConfig.dialog?.title}成功`);
       }
       emit("submitClick");
       handleClose();

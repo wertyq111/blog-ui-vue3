@@ -22,6 +22,7 @@
 </template>
 
 <script setup lang="ts">
+import { message } from "@/utils/feedback";
 import { ComponentSize } from "@/enums/settings";
 import { useAppStore } from "@/store/modules/app";
 
@@ -37,7 +38,7 @@ const sizeOptions = computed(() => {
 const appStore = useAppStore();
 function handleSizeChange(size: string) {
   appStore.changeSize(size);
-  ElMessage.success(t("sizeSelect.message.success"));
+  message.success(t("sizeSelect.message.success"));
 }
 </script>
 
