@@ -7,6 +7,9 @@
       :maxlength="maxlength"
       :placeholder="placeholder"
       :disabled="disabled"
+      :readonly="readonly"
+      :spellcheck="spellcheck"
+      :style="{ resize: resize }"
       @input="onInput"
     />
     <span v-if="maxlength" class="ata__count">{{ (model ?? "").length }}/{{ maxlength }}</span>
@@ -20,11 +23,17 @@ withDefaults(
     maxlength?: number;
     placeholder?: string;
     disabled?: boolean;
+    readonly?: boolean;
+    resize?: "none" | "vertical" | "horizontal" | "both";
+    spellcheck?: boolean;
   }>(),
   {
     rows: 3,
     placeholder: "请输入",
     disabled: false,
+    readonly: false,
+    resize: "vertical",
+    spellcheck: false,
   }
 );
 
@@ -39,8 +48,15 @@ function onInput(e: Event): void {
 .ata {
   position: relative;
   width: 100%;
-  font-family: Nunito, "Noto Sans SC", "Zen Maru Gothic", -apple-system, "PingFang SC",
-    "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+  font-family:
+    Nunito,
+    "Noto Sans SC",
+    "Zen Maru Gothic",
+    -apple-system,
+    "PingFang SC",
+    "Hiragino Sans GB",
+    "Microsoft YaHei",
+    sans-serif;
 }
 
 .ata__inner {
@@ -57,7 +73,10 @@ function onInput(e: Event): void {
   border-radius: 14px;
   outline: 0;
   resize: vertical;
-  transition: border-color 0.2s, background 0.2s, box-shadow 0.2s;
+  transition:
+    border-color 0.2s,
+    background 0.2s,
+    box-shadow 0.2s;
 }
 .ata__inner::placeholder {
   color: #a09080;
