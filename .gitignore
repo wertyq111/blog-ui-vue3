@@ -7,3 +7,7 @@ app/node_modules/
 app/dist/
 app/coverage/
 design/
+
+# CodeGraph (local code index, do not commit)
+.cgcignore
+.codegraph/
