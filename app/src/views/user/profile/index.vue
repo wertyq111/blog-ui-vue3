@@ -183,79 +183,83 @@
           </div>
         </div>
 
-        <Tabs v-model="active" :items="tabItems" class="profile-tabs" />
+        <Tabs v-model="active" :items="tabItems" class="profile-tabs">
+          <!-- 基本信息 -->
+          <template #info>
+            <form class="profile-form" @submit.prevent>
+              <div class="field">
+                <label>
+                  <span class="req">*</span>
+                  姓名
+                </label>
+                <Input v-model="form.realname" placeholder="请输入姓名" allow-clear />
+                <span v-if="errors.realname" class="field__err">{{ errors.realname }}</span>
+              </div>
+              <div class="field">
+                <label>
+                  <span class="req">*</span>
+                  昵称
+                </label>
+                <Input v-model="form.nickname" placeholder="请输入昵称" allow-clear />
+                <span v-if="errors.nickname" class="field__err">{{ errors.nickname }}</span>
+              </div>
+              <div class="field">
+                <label>
+                  <span class="req">*</span>
+                  性别
+                </label>
+                <Select v-model="genderModel" :options="genderOptions" placeholder="请选择性别" />
+              </div>
+              <div class="field">
+                <label>联系方式</label>
+                <Input v-model="form.mobile" placeholder="请输入联系方式" allow-clear />
+              </div>
+              <div class="field field--span2">
+                <label>
+                  <span class="req">*</span>
+                  邮箱
+                </label>
+                <Input v-model="form.email" placeholder="请输入邮箱" allow-clear />
+                <span v-if="errors.email" class="field__err">{{ errors.email }}</span>
+              </div>
+              <div class="field field--span2">
+                <label>详细地址</label>
+                <Input
+                  v-model="form.address"
+                  placeholder="请输入详细地址（如：浙江省杭州市西湖区...）"
+                  allow-clear
+                />
+              </div>
+              <div class="field field--span2">
+                <label>个人简介</label>
+                <AnimalTextarea
+                  v-model="form.intro"
+                  :rows="4"
+                  :maxlength="200"
+                  placeholder="一句话描述自己 / 兴趣 / 当前在做的事..."
+                />
+              </div>
+              <div class="actions">
+                <Button type="primary" :loading="saving" @click="handleSubmit">保存更改</Button>
+                <Button @click="handleReset">重置</Button>
+              </div>
+            </form>
+          </template>
 
-        <!-- 基本信息 -->
-        <form v-show="active === 'info'" class="profile-form" @submit.prevent>
-          <div class="field">
-            <label>
-              <span class="req">*</span>
-              姓名
-            </label>
-            <Input v-model="form.realname" placeholder="请输入姓名" allow-clear />
-            <span v-if="errors.realname" class="field__err">{{ errors.realname }}</span>
-          </div>
-          <div class="field">
-            <label>
-              <span class="req">*</span>
-              昵称
-            </label>
-            <Input v-model="form.nickname" placeholder="请输入昵称" allow-clear />
-            <span v-if="errors.nickname" class="field__err">{{ errors.nickname }}</span>
-          </div>
-          <div class="field">
-            <label>
-              <span class="req">*</span>
-              性别
-            </label>
-            <Select v-model="genderModel" :options="genderOptions" placeholder="请选择性别" />
-          </div>
-          <div class="field">
-            <label>联系方式</label>
-            <Input v-model="form.mobile" placeholder="请输入联系方式" allow-clear />
-          </div>
-          <div class="field field--span2">
-            <label>
-              <span class="req">*</span>
-              邮箱
-            </label>
-            <Input v-model="form.email" placeholder="请输入邮箱" allow-clear />
-            <span v-if="errors.email" class="field__err">{{ errors.email }}</span>
-          </div>
-          <div class="field field--span2">
-            <label>详细地址</label>
-            <Input
-              v-model="form.address"
-              placeholder="请输入详细地址（如：浙江省杭州市西湖区...）"
-              allow-clear
-            />
-          </div>
-          <div class="field field--span2">
-            <label>个人简介</label>
-            <AnimalTextarea
-              v-model="form.intro"
-              :rows="4"
-              :maxlength="200"
-              placeholder="一句话描述自己 / 兴趣 / 当前在做的事..."
-            />
-          </div>
-          <div class="actions">
-            <Button type="primary" :loading="saving" @click="handleSubmit">保存更改</Button>
-            <Button @click="handleReset">重置</Button>
-          </div>
-        </form>
-
-        <!-- 账号绑定 -->
-        <div v-show="active === 'account'" class="account-list">
-          <div v-for="item in accountBindings" :key="item.key" class="account-item">
-            <div class="account-item__icon" v-html="item.icon"></div>
-            <div class="account-item__content">
-              <strong>{{ item.title }}</strong>
-              <p>{{ item.desc }}</p>
+          <!-- 账号绑定 -->
+          <template #account>
+            <div class="account-list">
+              <div v-for="item in accountBindings" :key="item.key" class="account-item">
+                <div class="account-item__icon" v-html="item.icon"></div>
+                <div class="account-item__content">
+                  <strong>{{ item.title }}</strong>
+                  <p>{{ item.desc }}</p>
+                </div>
+                <a class="account-item__action">{{ item.action }}</a>
+              </div>
             </div>
-            <a class="account-item__action">{{ item.action }}</a>
-          </div>
-        </div>
+          </template>
+        </Tabs>
       </section>
     </div>
   </div>
