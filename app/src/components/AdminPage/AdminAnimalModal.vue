@@ -1,15 +1,19 @@
 <template>
   <Modal
     :open="visible"
-    :title="title"
     :width="width"
     :mask-closable="maskClosable"
     :show-footer="showFooter"
     :typewriter="typewriter"
+    :class="$attrs.class"
     @update:open="handleOpenChange"
     @close="handleClose"
     @ok="handleConfirm"
   >
+    <template #title>
+      <slot name="title">{{ title }}</slot>
+    </template>
+
     <div class="admin-animal-modal__content" :class="contentClass">
       <slot />
     </div>

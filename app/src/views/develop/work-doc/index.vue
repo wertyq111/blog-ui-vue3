@@ -201,9 +201,10 @@
       @done="fetchList"
     />
 
-    <el-dialog v-model="previewVisible" :title="previewTitle" width="80%" fullscreen>
-      <AnimalMarkdown :model-value="previewContent" preview-only height="calc(100vh - 140px)" />
-    </el-dialog>
+    <WorkDocPreview
+      v-model:visible="previewVisible"
+      :data="previewDoc"
+    />
   </div>
 </template>
 
@@ -223,6 +224,7 @@ import type { WorkDocCategoryItem } from "@/types/api/work-doc-category";
 import type { WorkPlatformItem } from "@/types/api/work-platform";
 import WorkDocCategoryEdit from "./work-doc-category-edit.vue";
 import WorkDocEdit from "./work-doc-edit.vue";
+import WorkDocPreview from "./work-doc-preview.vue";
 
 defineOptions({ name: "WorkDoc", inheritAttrs: false });
 
@@ -246,8 +248,7 @@ const editingCategory = ref<WorkDocCategoryItem | null>(null);
 const docVisible = ref(false);
 const editingDoc = ref<WorkDocItem | null>(null);
 const previewVisible = ref(false);
-const previewTitle = ref("");
-const previewContent = ref("");
+const previewDoc = ref<WorkDocItem | null>(null);
 
 const statusOptions = [
   { key: "", label: "全部" },
@@ -382,8 +383,7 @@ function handleEditClick(row: WorkDocItem): void {
 }
 
 function handlePreview(row: WorkDocItem): void {
-  previewTitle.value = row.title;
-  previewContent.value = row.content;
+  previewDoc.value = row;
   previewVisible.value = true;
 }
 
