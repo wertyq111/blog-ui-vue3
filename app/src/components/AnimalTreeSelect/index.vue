@@ -214,129 +214,147 @@ onClickOutside(wrapperRef, (event) => {
 
 .ats__trigger {
   display: flex;
+  gap: 8px;
   align-items: center;
   justify-content: space-between;
-  gap: 8px;
   min-height: 40px;
   padding: 5px 12px;
-  background: #fff;
-  border: 2px solid #e8dcc8;
-  border-radius: 14px;
   cursor: pointer;
+  background: #fdfbf7;
+  border: 1.5px solid #e8e2d6;
+  border-radius: 14px;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.88),
+    0 2px 6px rgba(121, 79, 39, 0.03);
   transition: all 0.2s;
 }
 .ats__trigger:hover {
-  border-color: #d4c4a8;
   background: #fffdf7;
+  border-color: #f0d49a;
 }
 .ats--open .ats__trigger {
-  border-color: #19c8b9;
   background: #fffdf7;
+  border-color: #f0d49a;
 }
 .ats--disabled .ats__trigger {
-  opacity: 0.5;
   cursor: not-allowed;
   background: #f5f5f0;
+  opacity: 0.5;
 }
 
 .ats__value {
   flex: 1;
-  font-size: 14px;
-  color: #725d42;
-  font-weight: 600;
+  font-size: 13px;
+  font-weight: 700;
+  color: #794f27;
 }
 .ats__placeholder {
   flex: 1;
-  font-size: 14px;
-  color: #a09080;
-  font-weight: 400;
+  font-size: 13px;
+  font-weight: 600;
+  color: #9f927d;
 }
 .ats__arrow {
   display: flex;
-  align-items: center;
   flex-shrink: 0;
+  align-items: center;
   color: #a09080;
   transition:
     transform 0.2s,
     color 0.2s;
 }
 .ats__arrow--open {
+  color: #fca130;
   transform: rotate(180deg);
-  color: #19c8b9;
 }
 
 .ats__dropdown {
   position: fixed;
   z-index: 2600;
-  padding: 10px 0;
-  overflow-x: visible;
+  padding: 8px 10px;
+  overflow-x: hidden;
   overflow-y: auto;
-  background: #ffeea0;
-  border-radius: 22px;
-  box-shadow: 0 10px 26px rgba(110, 80, 40, 0.18);
+  background: #fdfbf7;
+  border: 2px solid #e8e2d6;
+  border-radius: 20px;
+  box-shadow: 0 4px 16px rgba(121, 79, 39, 0.08);
 }
 .ats__option {
   position: relative;
   display: flex;
-  align-items: center;
   gap: 4px;
-  padding: 8px 14px;
-  font-size: 14px;
-  font-weight: 500;
-  color: #725d42;
-}
-.ats__option:hover {
+  align-items: center;
+  min-height: 34px;
+  padding-top: 4px !important;
+  padding-right: 10px !important;
+  padding-bottom: 4px !important;
+  margin: 2px 0;
+  font-size: 13px;
   font-weight: 700;
-  background: rgba(255, 255, 255, 0.4);
-}
-.ats__option:hover::before {
-  content: "";
-  position: absolute;
-  left: -12px;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 35px;
-  height: 35px;
-  background: url("../../assets/images/select-cursor.svg") center / contain no-repeat;
-  animation: ats-cursor-in 0.5s ease-out forwards;
-  pointer-events: none;
-  z-index: 1;
+  color: #794f27;
 }
 .ats__option--selected {
-  font-weight: 700;
   color: #11a89b;
 }
 .ats__caret {
   display: inline-flex;
+  flex-shrink: 0;
   align-items: center;
   justify-content: center;
   width: 16px;
   height: 16px;
-  flex-shrink: 0;
-  border: 0;
-  background: transparent;
+  padding: 0;
   color: #a09080;
   cursor: pointer;
-  padding: 0;
+  background: transparent;
+  border: 0;
   transition: transform 0.18s;
 }
 .ats__caret.open {
+  color: #fca130;
   transform: rotate(90deg);
 }
 .ats__caret-spacer {
   display: inline-block;
-  width: 16px;
   flex-shrink: 0;
+  width: 16px;
 }
 .ats__option-label {
   flex: 1;
-  cursor: pointer;
+  min-height: 28px;
+  padding: 5px 12px;
   white-space: nowrap;
+  cursor: pointer;
+  border-radius: 999px;
+  transition:
+    background 0.15s,
+    color 0.15s,
+    padding-left 0.2s;
+}
+.ats__option:not(.ats__option--selected):hover .ats__option-label {
+  padding-left: 28px;
+  color: #f59b26;
+  background: rgba(252, 161, 48, 0.08);
+}
+.ats__option:not(.ats__option--selected):hover::before {
+  position: absolute;
+  top: 50%;
+  left: 6px;
+  width: 18px;
+  height: 18px;
+  pointer-events: none;
+  content: "";
+  background: url("../../assets/images/select-cursor.svg") center / contain no-repeat;
+  animation: ats-cursor-in 0.3s ease-out forwards;
+}
+.ats__option--selected .ats__option-label {
+  color: #4a8a36;
+  background: rgba(124, 186, 112, 0.12);
 }
 .ats__empty {
   padding: 10px 18px;
   font-size: 13px;
-  color: #a09080;
+  color: #9f927d;
   text-align: center;
 }
 
@@ -355,12 +373,14 @@ onClickOutside(wrapperRef, (event) => {
 @keyframes ats-cursor-in {
   0% {
     opacity: 0;
-    transform: translateY(-50%) translateX(-20px) rotate(-15deg);
+    transform: translateY(-50%) translateX(-14px) rotate(-15deg);
   }
+
   60% {
     opacity: 1;
-    transform: translateY(-50%) translateX(5px) rotate(5deg);
+    transform: translateY(-50%) translateX(4px) rotate(5deg);
   }
+
   100% {
     opacity: 1;
     transform: translateY(-50%) translateX(0) rotate(0);
