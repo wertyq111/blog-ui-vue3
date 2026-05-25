@@ -1,282 +1,1187 @@
 <template>
-  <div class="develop-page admin-workspace-page profile-page">
-    <el-card shadow="never" class="develop-shell admin-workspace-shell">
-      <!-- Hero: 个人中心 -->
-      <section class="develop-hero">
-        <div class="develop-hero__copy">
-          <div class="develop-hero__eyebrow">PROFILE</div>
-          <h1 class="develop-hero__title">个人中心</h1>
-          <p class="develop-hero__desc">管理你的个人基础信息、头像和账户安全设置。</p>
+  <div v-loading="loading" class="page-card profile-page">
+    <div class="page-head">
+      <div class="page-eyebrow">PROFILE</div>
+      <h1 class="page-title">个人资料</h1>
+      <p class="page-desc">管理基础身份信息、头像素材与账号绑定状态。</p>
+    </div>
+
+    <div class="profile-grid">
+      <!-- 左：数字身份档案 -->
+      <section class="profile-hero">
+        <div class="hero__decor hero__decor--mint"></div>
+        <div class="hero__decor hero__decor--lime"></div>
+        <div class="hero__orbit hero__orbit--1"></div>
+        <div class="hero__orbit hero__orbit--2"></div>
+
+        <div class="eyebrow">
+          <span class="eyebrow__dot"></span>
+          数字身份档案
+        </div>
+        <div class="hero__head">
+          <h2>{{ displayName }}</h2>
+          <p>{{ heroSubtitle }}</p>
+        </div>
+
+        <div class="stage" :class="{ 'has-video': !videoError }">
+          <span class="stage__corner tl"></span>
+          <span class="stage__corner tr"></span>
+          <span class="stage__corner bl"></span>
+          <span class="stage__corner br"></span>
+
+          <video
+            v-show="!videoError"
+            class="stage__video"
+            :src="personaVideo"
+            autoplay
+            muted
+            loop
+            playsinline
+            preload="auto"
+            @error="handleVideoError"
+          ></video>
+
+          <!-- chibi 占位（视频失败兜底） -->
+          <template v-if="videoError">
+            <div class="stage__floor"></div>
+            <div class="persona">
+              <div class="persona__head"></div>
+              <div class="persona__body">
+                <div class="persona__legs">
+                  <span></span>
+                  <span></span>
+                </div>
+              </div>
+            </div>
+            <span class="stage__caption">// persona offline · fallback view</span>
+          </template>
+
+          <div class="hud hud--tl">
+            <div class="hud__ico">
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.9"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <circle cx="12" cy="8" r="4" />
+                <path d="M4 21a8 8 0 0 1 16 0" />
+              </svg>
+            </div>
+            <div class="hud__txt">
+              <span class="hud__lbl">{{ heroMeta[0].label }}</span>
+              <span class="hud__val">{{ heroMeta[0].value }}</span>
+            </div>
+          </div>
+          <div class="hud hud--tr">
+            <div class="hud__ico">
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.9"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path d="M4 21V5l8-2v18M12 9h8v12M4 21h16" />
+              </svg>
+            </div>
+            <div class="hud__txt">
+              <span class="hud__lbl">{{ heroMeta[1].label }}</span>
+              <span class="hud__val">{{ heroMeta[1].value }}</span>
+            </div>
+          </div>
+          <div class="hud hud--bl">
+            <div class="hud__ico">
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.9"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path d="M12 21s7-7.5 7-13a7 7 0 1 0-14 0c0 5.5 7 13 7 13z" />
+                <circle cx="12" cy="8" r="2.4" />
+              </svg>
+            </div>
+            <div class="hud__txt">
+              <span class="hud__lbl">{{ heroMeta[2].label }}</span>
+              <span class="hud__val">{{ heroMeta[2].value }}</span>
+            </div>
+          </div>
+          <div class="hud hud--br">
+            <div class="hud__ico">
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.9"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path d="M2 12l10-5 10 5-10 5z" />
+                <path d="M6 14v4c0 1 3 3 6 3s6-2 6-3v-4" />
+              </svg>
+            </div>
+            <div class="hud__txt">
+              <span class="hud__lbl">{{ heroMeta[3].label }}</span>
+              <span class="hud__val">{{ heroMeta[3].value }}</span>
+            </div>
+          </div>
+
+          <div class="dock">
+            <span class="dock__label">SKILLS</span>
+            <span class="dock__divider"></span>
+            <div class="dock__chips">
+              <span
+                v-for="(c, i) in skillChips"
+                :key="c"
+                class="dock__chip"
+                :class="{ 'dock__chip--accent': i === 0 }"
+              >
+                {{ c }}
+              </span>
+            </div>
+          </div>
         </div>
       </section>
 
-      <el-row :gutter="18">
-        <!-- 左侧个人信息卡片 -->
-        <el-col :xs="24" :sm="24" :md="8" :lg="8">
-          <section class="develop-panel user-profile-panel text-center">
-            <div class="avatar-wrapper mb-4">
-              <el-avatar :size="120" :src="userProfile.avatar" class="profile-avatar" />
-              <el-button
-                type="primary"
-                size="small"
-                circle
-                icon="Camera"
-                class="avatar-upload-btn"
-                @click="triggerFileUpload"
-              />
-              <input
-                ref="fileInput"
-                type="file"
-                style="display: none"
-                accept="image/*"
-                @change="handleFileChange"
-              />
+      <!-- 右：资料编辑 -->
+      <section class="profile-panel">
+        <div class="panel__head">
+          <div class="panel__lead">
+            <span class="kicker">PROFILE EDITOR</span>
+            <h3>个人资料</h3>
+            <p>管理基础身份信息、头像素材与账号绑定状态。</p>
+          </div>
+          <div class="avatar-upload">
+            <div class="avatar-upload__label">头像上传</div>
+            <div class="avatar-upload__drop" title="上传头像" @click="triggerUpload">
+              <img v-if="form.avatar" :src="form.avatar" alt="avatar" />
+              <svg
+                v-else
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+              >
+                <line x1="12" y1="5" x2="12" y2="19" />
+                <line x1="5" y1="12" x2="19" y2="12" />
+              </svg>
             </div>
-            <div class="user-info-brief mb-5">
-              <h2 class="user-nickname">{{ userProfile.member?.nickname || userProfile.nickname || "未设置昵称" }}</h2>
-              <div class="user-roles">
-                <el-tag v-for="role in userProfile.roles" :key="role" size="small" effect="plain" class="mr-1 rounded-pill">
-                  {{ role }}
-                </el-tag>
-                <el-tag v-if="!userProfile.roles?.length" size="small" effect="plain" class="rounded-pill">普通用户</el-tag>
-              </div>
-            </div>
-            
-            <el-divider border-style="dashed" />
-            
-            <el-descriptions :column="1" size="small" class="profile-details">
-              <el-descriptions-item label="用户名">
-                <el-icon class="mr-1"><User /></el-icon>
-                {{ userProfile.username }}
-              </el-descriptions-item>
-              <el-descriptions-item label="手机号">
-                <el-icon class="mr-1"><Iphone /></el-icon>
-                {{ userProfile.phone || '-' }}
-              </el-descriptions-item>
-              <el-descriptions-item label="邮箱">
-                <el-icon class="mr-1"><Message /></el-icon>
-                {{ userProfile.email || '-' }}
-              </el-descriptions-item>
-              <el-descriptions-item label="加入时间">
-                <el-icon class="mr-1"><Timer /></el-icon>
-                {{ userProfile.createTime }}
-              </el-descriptions-item>
-            </el-descriptions>
-          </section>
-        </el-col>
+            <input
+              ref="fileInput"
+              type="file"
+              accept="image/*"
+              style="display: none"
+              @change="handleAvatarChange"
+            />
+          </div>
+        </div>
 
-        <!-- 右侧编辑区 -->
-        <el-col :xs="24" :sm="24" :md="16" :lg="16">
-          <section class="develop-panel profile-edit-panel">
-            <div class="panel-header mb-5">
-              <div class="panel-title">基本信息</div>
-              <div class="panel-desc text-xs text-gray-400 mt-1">完善个人资料有助于提升账户识别度。</div>
+        <Tabs v-model="active" :items="tabItems" class="profile-tabs" />
+
+        <!-- 基本信息 -->
+        <form v-show="active === 'info'" class="profile-form" @submit.prevent>
+          <div class="field">
+            <label>
+              <span class="req">*</span>
+              姓名
+            </label>
+            <Input v-model="form.realname" placeholder="请输入姓名" allow-clear />
+            <span v-if="errors.realname" class="field__err">{{ errors.realname }}</span>
+          </div>
+          <div class="field">
+            <label>
+              <span class="req">*</span>
+              昵称
+            </label>
+            <Input v-model="form.nickname" placeholder="请输入昵称" allow-clear />
+            <span v-if="errors.nickname" class="field__err">{{ errors.nickname }}</span>
+          </div>
+          <div class="field">
+            <label>
+              <span class="req">*</span>
+              性别
+            </label>
+            <Select v-model="genderModel" :options="genderOptions" placeholder="请选择性别" />
+          </div>
+          <div class="field">
+            <label>联系方式</label>
+            <Input v-model="form.mobile" placeholder="请输入联系方式" allow-clear />
+          </div>
+          <div class="field field--span2">
+            <label>
+              <span class="req">*</span>
+              邮箱
+            </label>
+            <Input v-model="form.email" placeholder="请输入邮箱" allow-clear />
+            <span v-if="errors.email" class="field__err">{{ errors.email }}</span>
+          </div>
+          <div class="field field--span2">
+            <label>详细地址</label>
+            <Input
+              v-model="form.address"
+              placeholder="请输入详细地址（如：浙江省杭州市西湖区...）"
+              allow-clear
+            />
+          </div>
+          <div class="field field--span2">
+            <label>个人简介</label>
+            <AnimalTextarea
+              v-model="form.intro"
+              :rows="4"
+              :maxlength="200"
+              placeholder="一句话描述自己 / 兴趣 / 当前在做的事..."
+            />
+          </div>
+          <div class="actions">
+            <Button type="primary" :loading="saving" @click="handleSubmit">保存更改</Button>
+            <Button @click="handleReset">重置</Button>
+          </div>
+        </form>
+
+        <!-- 账号绑定 -->
+        <div v-show="active === 'account'" class="account-list">
+          <div v-for="item in accountBindings" :key="item.key" class="account-item">
+            <div class="account-item__icon" v-html="item.icon"></div>
+            <div class="account-item__content">
+              <strong>{{ item.title }}</strong>
+              <p>{{ item.desc }}</p>
             </div>
-            
-            <el-form
-              ref="formRef"
-              :model="formData"
-              :rules="rules"
-              label-width="100px"
-              v-loading="loading"
-              class="develop-form"
-            >
-              <el-form-item label="用户昵称" prop="nickname">
-                <el-input v-model="formData.nickname" placeholder="请输入昵称" maxlength="50" />
-              </el-form-item>
-              <el-form-item label="手机号" prop="phone">
-                <el-input v-model="formData.phone" placeholder="请输入手机号" />
-              </el-form-item>
-              <el-form-item label="电子邮箱" prop="email">
-                <el-input v-model="formData.email" placeholder="请输入电子邮箱" />
-              </el-form-item>
-              <el-form-item label="性别" prop="gender">
-                <el-radio-group v-model="formData.gender">
-                  <el-radio :label="1">男</el-radio>
-                  <el-radio :label="2">女</el-radio>
-                  <el-radio :label="0">未知</el-radio>
-                </el-radio-group>
-              </el-form-item>
-              <el-form-item label="联系地址" prop="address">
-                <el-input v-model="formData.address" placeholder="请输入地址" />
-              </el-form-item>
-              <el-form-item label="个人简介" prop="intro">
-                <el-input
-                  v-model="formData.intro"
-                  type="textarea"
-                  :rows="4"
-                  placeholder="请输入个人简介"
-                  maxlength="200"
-                  show-word-limit
-                />
-              </el-form-item>
-              <el-form-item class="mt-8">
-                <el-button type="primary" @click="handleSubmit">保存资料修改</el-button>
-              </el-form-item>
-            </el-form>
-          </section>
-        </el-col>
-      </el-row>
-    </el-card>
+            <a class="account-item__action">{{ item.action }}</a>
+          </div>
+        </div>
+      </section>
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, onMounted } from "vue";
-import type { FormInstance, FormRules } from "element-plus";
+import { ref, reactive, computed, onMounted } from "vue";
 import UserAPI from "@/api/system/user";
 import FileAPI from "@/api/file";
 import { useUserStore } from "@/store/modules/user";
-import { Camera, User, Iphone, Message, Timer } from "@element-plus/icons-vue";
+import AnimalTextarea from "@/components/AnimalTextarea/index.vue";
+import type { UserProfileForm } from "@/types/api";
 
 defineOptions({ name: "Profile" });
 
 const userStore = useUserStore();
 const loading = ref(false);
-const userProfile = ref<any>({});
+const saving = ref(false);
+const active = ref<string>("info");
 const fileInput = ref<HTMLInputElement | null>(null);
-const formRef = ref<FormInstance>();
+const videoError = ref(false);
 
-const formData = reactive({
+interface ProfileForm {
+  realname: string;
+  nickname: string;
+  gender: number;
+  mobile: string;
+  email: string;
+  address: string;
+  intro: string;
+  avatar: string;
+}
+
+const createDefaultForm = (): ProfileForm => ({
+  realname: "",
   nickname: "",
-  phone: "",
+  gender: 1,
+  mobile: "",
   email: "",
-  gender: 0,
   address: "",
   intro: "",
+  avatar: "",
 });
 
-const rules: FormRules = {
-  nickname: [{ required: true, message: "昵称不能为空", trigger: "blur" }],
-  email: [{ type: "email", message: "邮箱格式不正确", trigger: "blur" }],
-};
+const form = reactive<ProfileForm>(createDefaultForm());
+let lastLoaded: ProfileForm = createDefaultForm();
+
+const errors = reactive<{ realname: string; nickname: string; email: string }>({
+  realname: "",
+  nickname: "",
+  email: "",
+});
+
+const tabItems = [
+  { key: "info", label: "基本信息" },
+  { key: "account", label: "账号绑定" },
+];
+
+const genderOptions = [
+  { key: "1", label: "男" },
+  { key: "2", label: "女" },
+  { key: "3", label: "保密" },
+];
+const genderModel = computed<string>({
+  get: () => String(form.gender ?? 1),
+  set: (v) => {
+    form.gender = Number(v) || 1;
+  },
+});
+
+const personaVideo = computed(() => {
+  if (Number(form.gender) === 1) return "/persona/male.mp4";
+  if (Number(form.gender) === 2) return "/persona/female.mp4";
+  return "/persona/private.mp4";
+});
+
+const displayName = computed(() => form.nickname || form.realname || form.email || "数字分身档案");
+const heroSubtitle = computed(() => {
+  const map: Record<number, string> = {
+    1: "男性数字形象在线，轻交互模式已启用。",
+    2: "女性数字形象在线，轻交互模式已启用。",
+    3: "保密模式已启用，当前展示默认数字形象。",
+  };
+  return map[Number(form.gender)] || map[1];
+});
+
+const heroMeta = computed(() => [
+  { label: "角色定位", value: "资深架构师" },
+  { label: "组织信息", value: "浙江网盛生意宝股份有限公司" },
+  { label: "所在地区", value: form.address || "中国 · 浙江省 · 杭州市" },
+  { label: "技术栈", value: "Laravel · Vue · MySQL · AntDesign" },
+]);
+
+const skillChips = [
+  "Digital Persona",
+  "Laravel",
+  "Vue 3",
+  "MySQL",
+  "Element Plus",
+  "AntDesign",
+  "Mint Glow",
+];
+
+const ICON_PHONE =
+  '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="7" y="2" width="10" height="20" rx="2.5"/><line x1="11" y1="18" x2="13" y2="18"/></svg>';
+const ICON_MAIL =
+  '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/></svg>';
+const ICON_KEY =
+  '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="15" r="4"/><path d="M11 12l8-8 2 2-2 2 2 2-2 2-2-2-2 2"/></svg>';
+const ICON_LINK =
+  '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 13a5 5 0 0 0 7 0l2-2a5 5 0 0 0-7-7l-1 1"/><path d="M15 11a5 5 0 0 0-7 0l-2 2a5 5 0 0 0 7 7l1-1"/></svg>';
+
+const accountBindings = [
+  {
+    key: "phone",
+    title: "密保手机",
+    desc: "已绑定手机：180****2354",
+    action: "去修改",
+    icon: ICON_PHONE,
+  },
+  {
+    key: "email",
+    title: "密保邮箱",
+    desc: "已绑定邮箱：vwms@netsun.com",
+    action: "去修改",
+    icon: ICON_MAIL,
+  },
+  { key: "question", title: "密保问题", desc: "未设置密保问题", action: "去设置", icon: ICON_KEY },
+  { key: "qq", title: "绑定 QQ", desc: "当前未绑定 QQ 账号", action: "去绑定", icon: ICON_LINK },
+  {
+    key: "wechat",
+    title: "绑定微信",
+    desc: "当前未绑定微信账号",
+    action: "去绑定",
+    icon: ICON_LINK,
+  },
+  {
+    key: "alipay",
+    title: "绑定支付宝",
+    desc: "当前未绑定支付宝账号",
+    action: "去绑定",
+    icon: ICON_LINK,
+  },
+];
+
+function handleVideoError() {
+  videoError.value = true;
+}
 
 async function loadProfile() {
   loading.value = true;
   try {
-    const data = await UserAPI.getProfile();
-    userProfile.value = data;
-    
-    // 填充表单
-    formData.nickname = data.member?.nickname || data.nickname || "";
-    formData.phone = data.phone || "";
-    formData.email = data.email || "";
-    formData.gender = data.member?.gender ?? 0;
-    formData.address = data.member?.address || "";
-    formData.intro = data.member?.intro || "";
+    const data: any = await UserAPI.getProfile();
+    const member = data.member || {};
+    Object.assign(form, {
+      realname: member.realname || "",
+      nickname: member.nickname || data.nickname || "",
+      gender: Number(member.gender || 1),
+      mobile: data.phone || "",
+      email: data.email || "",
+      address: member.address || "",
+      intro: member.intro || "",
+      avatar: member.avatar || data.avatar || "",
+    });
+    lastLoaded = { ...form };
   } finally {
     loading.value = false;
   }
 }
 
-function triggerFileUpload() {
-  fileInput.value?.click();
-}
-
-async function handleFileChange(event: Event) {
-  const target = event.target as HTMLInputElement;
-  const file = target.files ? target.files[0] : null;
-  if (file) {
-    loading.value = true;
-    try {
-      const data = await FileAPI.uploadFile(file);
-      await UserAPI.updateProfile({ avatar: data.url });
-      ElMessage.success("头像更新成功");
-      // 更新本地状态
-      userProfile.value.avatar = data.url;
-      userStore.userInfo.avatar = data.url;
-    } catch (error) {
-      console.error("Avatar upload failed", error);
-    } finally {
-      loading.value = false;
-    }
+function validate(): boolean {
+  errors.realname = form.realname.trim() ? "" : "请输入姓名";
+  errors.nickname = form.nickname.trim() ? "" : "请输入昵称";
+  if (!form.email.trim()) {
+    errors.email = "请输入邮箱";
+  } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email.trim())) {
+    errors.email = "邮箱格式不正确";
+  } else {
+    errors.email = "";
   }
+  return !errors.realname && !errors.nickname && !errors.email;
 }
 
 async function handleSubmit() {
-  await formRef.value?.validate();
-  loading.value = true;
+  if (!validate()) return;
+  saving.value = true;
   try {
-    await UserAPI.updateProfile(formData);
-    ElMessage.success("个人资料保存成功");
-    // 更新 store
-    userStore.userInfo.nickname = formData.nickname;
-    await loadProfile();
-  } catch (error) {
-    console.error("Failed to update profile", error);
+    const payload: UserProfileForm = {
+      realname: form.realname,
+      nickname: form.nickname,
+      gender: form.gender,
+      mobile: form.mobile,
+      email: form.email,
+      address: form.address,
+      intro: form.intro,
+    };
+    await UserAPI.updateProfile(payload);
+    ElMessage.success("保存成功");
+    userStore.userInfo.nickname = form.nickname;
+    lastLoaded = { ...form };
+  } catch (e: any) {
+    ElMessage.error(e?.message || "保存失败");
   } finally {
-    loading.value = false;
+    saving.value = false;
   }
 }
 
-onMounted(() => {
-  loadProfile();
-});
+function handleReset() {
+  Object.assign(form, lastLoaded);
+  errors.realname = "";
+  errors.nickname = "";
+  errors.email = "";
+}
+
+function triggerUpload() {
+  fileInput.value?.click();
+}
+
+async function handleAvatarChange(event: Event) {
+  const target = event.target as HTMLInputElement;
+  const file = target.files?.[0];
+  if (!file) return;
+  loading.value = true;
+  try {
+    const data = await FileAPI.uploadFile(file);
+    await UserAPI.updateProfile({ avatar: data.url });
+    form.avatar = data.url;
+    lastLoaded.avatar = data.url;
+    userStore.userInfo.avatar = data.url;
+    ElMessage.success("头像更新成功");
+  } catch (e: any) {
+    ElMessage.error(e?.message || "头像上传失败");
+  } finally {
+    loading.value = false;
+    target.value = "";
+  }
+}
+
+onMounted(loadProfile);
 </script>
 
 <style lang="scss" scoped>
-.user-profile-panel {
-  padding: 32px 24px !important;
+.profile-page {
+  --mint: #20c9b2;
+  --mint-deep: #11a89b;
+  --mint-glow: #d6ff72;
+  --teal-ink: #17322d;
+  --teal-mute: #648079;
+  --teal-line: rgba(33, 95, 83, 0.1);
+  --shell-bg: rgba(255, 255, 255, 0.85);
+  --shell-line: rgba(255, 255, 255, 0.65);
+  --shell-shadow: 0 30px 90px rgba(25, 58, 50, 0.1);
+  --radius-xl: 28px;
+  --radius-lg: 22px;
+  --radius-md: 16px;
 }
 
-.avatar-wrapper {
+/* two-column grid */
+.profile-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 9fr) minmax(0, 15fr);
+  gap: 22px;
+  padding: 4px 0 8px;
+}
+
+/* shared card base */
+.profile-hero,
+.profile-panel {
   position: relative;
-  display: inline-block;
-  
-  .profile-avatar {
-    border: 4px solid color-mix(in srgb, var(--cyber-panel-strong) 92%, transparent);
-    box-shadow: 0 10px 30px color-mix(in srgb, var(--cyber-primary) 18%, transparent);
-  }
-  
-  .avatar-upload-btn {
-    position: absolute;
-    bottom: 4px;
-    right: 4px;
-    border: 2px solid color-mix(in srgb, var(--cyber-panel-strong) 92%, transparent);
-    box-shadow: 0 4px 10px color-mix(in srgb, var(--cyber-primary) 12%, transparent);
-    
-    &:hover {
-      transform: scale(1.1);
-    }
-  }
+  border: 1px solid var(--shell-line);
+  border-radius: var(--radius-xl);
+  background: var(--shell-bg);
+  backdrop-filter: blur(16px);
+  box-shadow: var(--shell-shadow);
+  overflow: hidden;
 }
 
-.user-nickname {
-  font-size: 22px;
+/* ─── LEFT — persona hero ─── */
+.profile-hero {
+  padding: 28px 28px 24px;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.86), rgba(243, 250, 246, 0.94)),
+    linear-gradient(135deg, rgba(255, 255, 255, 0.82), rgba(230, 255, 244, 0.55));
+}
+.hero__decor {
+  position: absolute;
+  pointer-events: none;
+  filter: blur(10px);
+  opacity: 0.9;
+}
+.hero__decor--mint {
+  top: 80px;
+  right: -40px;
+  width: 220px;
+  height: 220px;
+  background: radial-gradient(circle, rgba(32, 201, 178, 0.3), transparent 70%);
+}
+.hero__decor--lime {
+  bottom: 60px;
+  left: -30px;
+  width: 200px;
+  height: 200px;
+  background: radial-gradient(circle, rgba(214, 255, 114, 0.22), transparent 72%);
+}
+.hero__orbit {
+  position: absolute;
+  border: 1px solid rgba(129, 219, 201, 0.3);
+  border-radius: 999px;
+  pointer-events: none;
+}
+.hero__orbit--1 {
+  top: 142px;
+  left: 50%;
+  width: 280px;
+  height: 280px;
+  transform: translateX(-50%);
+}
+.hero__orbit--2 {
+  top: 192px;
+  left: 50%;
+  width: 340px;
+  height: 180px;
+  transform: translateX(-50%) rotate(-12deg);
+}
+
+.eyebrow {
+  position: relative;
+  z-index: 1;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 14px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.72);
+  color: #188a77;
+  font-size: 11px;
   font-weight: 700;
-  color: var(--cyber-text);
-  margin-bottom: 8px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+.eyebrow__dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--mint);
+  box-shadow: 0 0 0 6px rgba(32, 201, 178, 0.14);
+  animation: profile-pulse 2s ease-in-out infinite;
+}
+@keyframes profile-pulse {
+  0%,
+  100% {
+    box-shadow: 0 0 0 6px rgba(32, 201, 178, 0.14);
+  }
+  50% {
+    box-shadow: 0 0 0 10px rgba(32, 201, 178, 0.06);
+  }
 }
 
-.user-roles {
+.hero__head {
+  position: relative;
+  z-index: 1;
+  margin-top: 20px;
+}
+.hero__head h2 {
+  margin: 0;
+  font-size: 34px;
+  line-height: 1.08;
+  color: var(--teal-ink);
+  font-weight: 800;
+  letter-spacing: 0.5px;
+}
+.hero__head p {
+  margin: 12px 0 0;
+  max-width: 340px;
+  color: var(--teal-mute);
+  font-size: 13.5px;
+  line-height: 1.7;
+}
+
+/* persona stage */
+.stage {
+  position: relative;
+  margin-top: 18px;
+  aspect-ratio: 9 / 16;
+  min-height: 560px;
+  border-radius: var(--radius-xl);
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 50% 22%, rgba(255, 255, 255, 0.92), transparent 42%),
+    linear-gradient(180deg, rgba(241, 250, 246, 0.92), rgba(227, 246, 238, 0.74));
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.78);
+  isolation: isolate;
+}
+.stage::after {
+  content: "";
+  position: absolute;
+  inset: 14px;
+  border-radius: var(--radius-lg);
+  border: 1px solid rgba(255, 255, 255, 0.55);
+  pointer-events: none;
+}
+.stage__video {
+  position: absolute;
+  left: 14px;
+  right: 14px;
+  top: 14px;
+  bottom: 14px;
+  width: auto;
+  height: auto;
+  border-radius: var(--radius-lg);
+  object-fit: cover;
+  z-index: 3;
+}
+
+/* chibi fallback */
+.stage__floor {
+  position: absolute;
+  left: 50%;
+  bottom: 120px;
+  transform: translateX(-50%);
+  width: 240px;
+  height: 26px;
+  border-radius: 50%;
+  background: radial-gradient(ellipse at center, rgba(23, 50, 45, 0.22), transparent 70%);
+  filter: blur(2px);
+}
+.persona {
+  position: absolute;
+  left: 50%;
+  bottom: 124px;
+  transform: translateX(-50%);
   display: flex;
-  justify-content: center;
-  gap: 6px;
+  flex-direction: column;
+  align-items: center;
+  animation: persona-breath 4.2s ease-in-out infinite;
 }
-
-.profile-details {
-  :deep(.el-descriptions__label) {
-    color: var(--cyber-text-muted);
-    font-weight: 500;
+@keyframes persona-breath {
+  0%,
+  100% {
+    transform: translateX(-50%) translateY(0) scale(1);
   }
-  :deep(.el-descriptions__content) {
-    color: var(--cyber-text);
-    font-weight: 600;
+  50% {
+    transform: translateX(-50%) translateY(-6px) scale(1.012);
   }
 }
-
-.profile-edit-panel {
-  padding: 28px 32px !important;
+.persona__head {
+  position: relative;
+  z-index: 2;
+  width: 130px;
+  height: 140px;
+  margin-bottom: -22px;
+  border-radius: 56% 56% 50% 50% / 60% 60% 44% 44%;
+  background:
+    radial-gradient(circle at 35% 30%, rgba(255, 255, 255, 0.55), transparent 50%),
+    linear-gradient(160deg, #ffd9b8 0%, #ffba7e 100%);
+  box-shadow:
+    inset -8px -10px 18px rgba(186, 116, 60, 0.3),
+    inset 6px 8px 14px rgba(255, 255, 255, 0.5),
+    0 8px 22px rgba(186, 116, 60, 0.18);
+}
+.persona__head::before,
+.persona__head::after {
+  content: "";
+  position: absolute;
+  top: 60px;
+  width: 10px;
+  height: 14px;
+  border-radius: 50%;
+  background: #2b1810;
+  animation: persona-blink 5s ease-in-out infinite;
+}
+.persona__head::before {
+  left: 36px;
+}
+.persona__head::after {
+  right: 36px;
+}
+@keyframes persona-blink {
+  0%,
+  92%,
+  100% {
+    transform: scaleY(1);
+  }
+  94%,
+  98% {
+    transform: scaleY(0.1);
+  }
+}
+.persona__body {
+  position: relative;
+  z-index: 1;
+  width: 170px;
+  height: 160px;
+  border-radius: 50px 50px 18px 18px / 36px 36px 18px 18px;
+  background:
+    radial-gradient(circle at 30% 20%, rgba(255, 255, 255, 0.7), transparent 60%),
+    linear-gradient(170deg, #f0f5ee 0%, #c6d3c2 100%);
+  box-shadow:
+    inset -8px -10px 20px rgba(80, 110, 80, 0.22),
+    inset 6px 8px 14px rgba(255, 255, 255, 0.7),
+    0 12px 28px rgba(40, 80, 60, 0.18);
+}
+.persona__body::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 26px;
+  transform: translateX(-50%);
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--mint), var(--mint-deep));
+  box-shadow:
+    0 2px 6px rgba(17, 168, 155, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.4);
+}
+.persona__legs {
+  position: absolute;
+  bottom: -38px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 14px;
+}
+.persona__legs span {
+  display: block;
+  width: 32px;
+  height: 50px;
+  border-radius: 14px 14px 10px 10px / 10px 10px 8px 8px;
+  background: linear-gradient(180deg, #f4ece1 0%, #ddd0bf 100%);
+  box-shadow:
+    inset -2px -4px 8px rgba(120, 90, 60, 0.25),
+    0 6px 12px rgba(80, 50, 30, 0.15);
 }
 
-.panel-title {
-  font-size: 18px;
+/* corners + caption */
+.stage__corner {
+  position: absolute;
+  width: 18px;
+  height: 18px;
+  border: 2px solid rgba(32, 201, 178, 0.55);
+  z-index: 4;
+}
+.stage__corner.tl {
+  top: 22px;
+  left: 22px;
+  border-right: 0;
+  border-bottom: 0;
+  border-top-left-radius: 6px;
+}
+.stage__corner.tr {
+  top: 22px;
+  right: 22px;
+  border-left: 0;
+  border-bottom: 0;
+  border-top-right-radius: 6px;
+}
+.stage__corner.bl {
+  bottom: 22px;
+  left: 22px;
+  border-right: 0;
+  border-top: 0;
+  border-bottom-left-radius: 6px;
+}
+.stage__corner.br {
+  bottom: 22px;
+  right: 22px;
+  border-left: 0;
+  border-top: 0;
+  border-bottom-right-radius: 6px;
+}
+.stage__caption {
+  position: absolute;
+  bottom: 96px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-family: "JetBrains Mono", monospace;
+  font-size: 10.5px;
+  color: rgba(23, 50, 45, 0.42);
+  letter-spacing: 0.08em;
+  white-space: nowrap;
+  z-index: 4;
+}
+
+/* HUD floating labels */
+.hud {
+  position: absolute;
+  z-index: 5;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 10px 14px 10px 12px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.42);
+  border: 1px solid rgba(255, 255, 255, 0.55);
+  box-shadow:
+    0 10px 24px rgba(23, 50, 45, 0.06),
+    inset 0 1px 0 rgba(255, 255, 255, 0.55);
+  backdrop-filter: blur(14px) saturate(140%);
+  animation: hud-float 6s ease-in-out infinite;
+}
+.hud--tl {
+  top: 70px;
+  left: 22px;
+  animation-delay: -0.6s;
+}
+.hud--tr {
+  top: 130px;
+  right: 22px;
+  animation-delay: -2.4s;
+}
+.hud--bl {
+  bottom: 180px;
+  left: 22px;
+  animation-delay: -1.8s;
+}
+.hud--br {
+  bottom: 120px;
+  right: 22px;
+  animation-delay: -3.2s;
+}
+@keyframes hud-float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-4px);
+  }
+}
+.hud__ico {
+  width: 30px;
+  height: 30px;
+  border-radius: 9px;
+  background: linear-gradient(135deg, rgba(32, 201, 178, 0.3), rgba(214, 255, 114, 0.42));
+  display: grid;
+  place-items: center;
+  color: var(--mint-deep);
+  flex-shrink: 0;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.6);
+}
+.hud__ico svg {
+  width: 16px;
+  height: 16px;
+}
+.hud__txt {
+  line-height: 1.35;
+}
+.hud__lbl {
+  display: block;
+  font-size: 10px;
   font-weight: 700;
-  color: var(--cyber-text);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #8aa39c;
+}
+.hud__val {
+  display: block;
+  margin-top: 3px;
+  font-size: 12.5px;
+  font-weight: 700;
+  color: var(--teal-ink);
+  max-width: 150px;
 }
 
-.rounded-pill {
-  border-radius: 999px !important;
+/* skill dock */
+.dock {
+  position: absolute;
+  left: 22px;
+  right: 22px;
+  bottom: 22px;
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 14px;
+  background: rgba(23, 50, 45, 0.45);
+  border-radius: 16px;
+  backdrop-filter: blur(14px) saturate(140%);
+  box-shadow:
+    0 12px 26px rgba(23, 50, 45, 0.12),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  overflow: hidden;
+}
+.dock__label {
+  flex-shrink: 0;
+  font-family: "JetBrains Mono", monospace;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #d6ff72;
+}
+.dock__divider {
+  width: 1px;
+  height: 22px;
+  background: rgba(214, 255, 114, 0.18);
+  flex-shrink: 0;
+}
+.dock__chips {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 8px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  flex: 1;
+  min-width: 0;
+}
+.dock__chips::-webkit-scrollbar {
+  display: none;
+}
+.dock__chip {
+  flex-shrink: 0;
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  color: #e6f7f0;
+  font-size: 11.5px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+.dock__chip--accent {
+  background: linear-gradient(135deg, rgba(214, 255, 114, 0.95), rgba(196, 240, 136, 0.95));
+  color: #1a3508;
+  border-color: transparent;
 }
 
+/* ─── RIGHT — editor panel ─── */
+.profile-panel {
+  padding: 28px 32px 18px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.9), rgba(244, 250, 247, 0.92));
+}
+.panel__head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 20px;
+  margin-bottom: 14px;
+}
+.panel__lead {
+  flex: 1;
+  min-width: 0;
+}
+.kicker {
+  display: inline-block;
+  margin-bottom: 10px;
+  color: #20a892;
+  font-size: 11.5px;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+.panel__head h3 {
+  margin: 0;
+  font-size: 30px;
+  color: var(--teal-ink);
+  font-weight: 800;
+}
+.panel__head p {
+  margin: 10px 0 0;
+  color: #6d8881;
+  font-size: 13.5px;
+  line-height: 1.7;
+}
+.avatar-upload {
+  min-width: 150px;
+  padding: 14px;
+  border-radius: 22px;
+  background: rgba(255, 255, 255, 0.72);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.78);
+  text-align: center;
+}
+.avatar-upload__label {
+  font-size: 11.5px;
+  font-weight: 700;
+  color: #6f8681;
+  letter-spacing: 0.04em;
+  margin-bottom: 10px;
+}
+.avatar-upload__drop {
+  width: 110px;
+  height: 110px;
+  margin: 0 auto;
+  border-radius: 20px;
+  background: rgba(237, 246, 242, 0.92);
+  border: 1px dashed rgba(32, 201, 178, 0.3);
+  display: grid;
+  place-items: center;
+  color: rgba(32, 201, 178, 0.7);
+  cursor: pointer;
+  overflow: hidden;
+  transition: background 0.18s;
+}
+.avatar-upload__drop:hover {
+  background: rgba(214, 255, 114, 0.32);
+}
+.avatar-upload__drop svg {
+  width: 28px;
+  height: 28px;
+}
+.avatar-upload__drop img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 20px;
+}
+
+.profile-tabs {
+  margin-top: 14px;
+}
+
+/* form */
+.profile-form {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px 24px;
+  padding-top: 22px;
+}
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.field--span2 {
+  grid-column: span 2;
+}
+.field label {
+  font-size: 13px;
+  font-weight: 700;
+  color: #5c746e;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+.field label .req {
+  color: #ef4444;
+}
+.field__err {
+  color: #ef4444;
+  font-size: 12px;
+}
+
+.actions {
+  grid-column: span 2;
+  margin-top: 6px;
+  display: flex;
+  gap: 12px;
+}
+
+/* account bindings */
+.account-list {
+  display: grid;
+  gap: 14px;
+  padding: 22px 0 18px;
+}
+.account-item {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 18px;
+  border-radius: 22px;
+  background: rgba(255, 255, 255, 0.72);
+  border: 1px solid rgba(255, 255, 255, 0.6);
+}
+.account-item__icon {
+  display: grid;
+  place-items: center;
+  width: 46px;
+  height: 46px;
+  border-radius: 16px;
+  background: linear-gradient(135deg, #20c9b2, #8cefd4);
+  color: #fff;
+  flex-shrink: 0;
+}
+.account-item__icon :deep(svg) {
+  width: 22px;
+  height: 22px;
+}
+.account-item__content {
+  flex: 1;
+  min-width: 0;
+}
+.account-item__content strong {
+  color: var(--teal-ink);
+  font-size: 15px;
+}
+.account-item__content p {
+  margin: 6px 0 0;
+  color: #708884;
+  font-size: 13px;
+}
+.account-item__action {
+  color: var(--mint-deep);
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+/* responsive */
+@media (max-width: 992px) {
+  .profile-grid {
+    grid-template-columns: 1fr;
+  }
+  .stage {
+    min-height: 440px;
+  }
+}
+@media (max-width: 768px) {
+  .profile-hero,
+  .profile-panel {
+    padding: 20px;
+  }
+  .panel__head {
+    flex-direction: column;
+  }
+  .avatar-upload {
+    width: 100%;
+  }
+  .profile-form {
+    grid-template-columns: 1fr;
+  }
+  .field--span2 {
+    grid-column: span 1;
+  }
+}
 </style>
