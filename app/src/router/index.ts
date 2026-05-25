@@ -77,7 +77,7 @@ export const constantRoutes: RouteRecordRaw[] = [
       {
         path: "/profile",
         name: "Profile",
-        component: () => import("@/views/profile/index.vue"),
+        component: () => import("@/views/user/profile/index.vue"),
         meta: { title: "个人中心", icon: "user", hidden: true },
       },
     ],
