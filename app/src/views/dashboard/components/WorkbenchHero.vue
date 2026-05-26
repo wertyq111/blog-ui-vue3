@@ -17,34 +17,56 @@
 
     <!-- Leaf decorations -->
     <svg class="hero-leaf-1" viewBox="0 0 80 80">
-      <path d="M5 75c0-30 25-65 70-65 0 45-35 70-70 65z" fill="#7cba70" stroke="#4a8a36" stroke-width="2"/>
-      <path d="M5 75q35-25 70-65" stroke="#4a8a36" stroke-width="1.5" fill="none"/>
+      <path
+        d="M5 75c0-30 25-65 70-65 0 45-35 70-70 65z"
+        fill="#7cba70"
+        stroke="#4a8a36"
+        stroke-width="2"
+      />
+      <path d="M5 75q35-25 70-65" stroke="#4a8a36" stroke-width="1.5" fill="none" />
     </svg>
     <svg class="hero-leaf-2" viewBox="0 0 80 80">
-      <path d="M75 5c0 30-25 65-70 65 0-45 35-70 70-65z" fill="#d1da49" stroke="#a3ad28" stroke-width="2"/>
+      <path
+        d="M75 5c0 30-25 65-70 65 0-45 35-70 70-65z"
+        fill="#d1da49"
+        stroke="#a3ad28"
+        stroke-width="2"
+      />
     </svg>
 
     <!-- Character mascot -->
     <svg class="hero-char" viewBox="0 0 120 140">
-      <ellipse cx="60" cy="105" rx="46" ry="32" fill="#5a3a18" opacity="0.1"/>
-      <path d="M22 80 Q22 30 60 30 Q98 30 98 80 L98 130 L22 130 Z" fill="url(#heroBodyGrad)" stroke="#d5a830" stroke-width="2"/>
+      <ellipse cx="60" cy="105" rx="46" ry="32" fill="#5a3a18" opacity="0.1" />
+      <path
+        d="M22 80 Q22 30 60 30 Q98 30 98 80 L98 130 L22 130 Z"
+        fill="url(#heroBodyGrad)"
+        stroke="#d5a830"
+        stroke-width="2"
+      />
       <defs>
         <linearGradient id="heroBodyGrad" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0" stop-color="#ffe48a"/><stop offset="1" stop-color="#f7cd67"/>
+          <stop offset="0" stop-color="#ffe48a" />
+          <stop offset="1" stop-color="#f7cd67" />
         </linearGradient>
       </defs>
-      <circle cx="60" cy="22" r="8" fill="#f8a6b2" stroke="#d6788a" stroke-width="1.5"/>
-      <circle cx="60" cy="22" r="3" fill="#fff2ba"/>
-      <circle cx="44" cy="62" r="6" fill="#fff"/>
-      <circle cx="76" cy="62" r="6" fill="#fff"/>
-      <circle cx="46" cy="64" r="3" fill="#25292f"/>
-      <circle cx="78" cy="64" r="3" fill="#25292f"/>
-      <circle cx="47" cy="63" r="1" fill="#fff"/>
-      <circle cx="79" cy="63" r="1" fill="#fff"/>
-      <ellipse cx="36" cy="78" rx="6" ry="3" fill="#f8a6b2" opacity="0.7"/>
-      <ellipse cx="84" cy="78" rx="6" ry="3" fill="#f8a6b2" opacity="0.7"/>
-      <path d="M52 84 Q60 90 68 84" stroke="#5a3a18" stroke-width="2.5" fill="none" stroke-linecap="round"/>
-      <circle cx="106" cy="78" r="8" fill="#f7cd67" stroke="#d5a830" stroke-width="2"/>
+      <circle cx="60" cy="22" r="8" fill="#f8a6b2" stroke="#d6788a" stroke-width="1.5" />
+      <circle cx="60" cy="22" r="3" fill="#fff2ba" />
+      <circle cx="44" cy="62" r="6" fill="#fff" />
+      <circle cx="76" cy="62" r="6" fill="#fff" />
+      <circle cx="46" cy="64" r="3" fill="#25292f" />
+      <circle cx="78" cy="64" r="3" fill="#25292f" />
+      <circle cx="47" cy="63" r="1" fill="#fff" />
+      <circle cx="79" cy="63" r="1" fill="#fff" />
+      <ellipse cx="36" cy="78" rx="6" ry="3" fill="#f8a6b2" opacity="0.7" />
+      <ellipse cx="84" cy="78" rx="6" ry="3" fill="#f8a6b2" opacity="0.7" />
+      <path
+        d="M52 84 Q60 90 68 84"
+        stroke="#5a3a18"
+        stroke-width="2.5"
+        fill="none"
+        stroke-linecap="round"
+      />
+      <circle cx="106" cy="78" r="8" fill="#f7cd67" stroke="#d5a830" stroke-width="2" />
     </svg>
 
     <!-- Content row -->
@@ -52,12 +74,24 @@
       <div class="hero-text">
         <span class="hero-eyebrow">DEVELOP WORKSPACE</span>
         <div class="hero-greet-row">
-          <h1 class="hero-title">{{ greeting }}，<em>{{ nickname }}</em></h1>
+          <h1 class="hero-title">
+            {{ greeting }}，
+            <em>{{ nickname }}</em>
+          </h1>
           <img class="hero-avatar" :src="avatarSrc" :alt="nickname" />
         </div>
         <p class="hero-sub">{{ todayText }}</p>
         <div v-if="weatherText" class="hero-weather">
-          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <svg
+            viewBox="0 0 24 24"
+            width="14"
+            height="14"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
             <path d="M7 18a4 4 0 010-8 6 6 0 0111-2 4 4 0 011 8H7z" />
           </svg>
           {{ weatherText }}
@@ -65,20 +99,49 @@
       </div>
       <div class="hero-actions">
         <button class="btn-ai btn-ai-primary" @click="$router.push('/develop/work-daily')">
-          <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M4 16L15 5l3 3-11 11H4v-3z"/>
+          <svg
+            viewBox="0 0 24 24"
+            width="15"
+            height="15"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path d="M4 16L15 5l3 3-11 11H4v-3z" />
           </svg>
           写日志
         </button>
         <button class="btn-ai" @click="$router.push('/develop/work-doc')">
-          <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <rect x="5" y="4" width="14" height="16" rx="2"/><path d="M9 8h6M9 12h6M9 16h4"/>
+          <svg
+            viewBox="0 0 24 24"
+            width="15"
+            height="15"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <rect x="5" y="4" width="14" height="16" rx="2" />
+            <path d="M9 8h6M9 12h6M9 16h4" />
           </svg>
           新建文档
         </button>
         <button class="btn-ai" @click="$router.push('/develop/server-path')">
-          <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M3 10.5L10 4l7 6.5"/><path d="M5 9.5V16h10V9.5"/>
+          <svg
+            viewBox="0 0 24 24"
+            width="15"
+            height="15"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path d="M3 10.5L10 4l7 6.5" />
+            <path d="M5 9.5V16h10V9.5" />
           </svg>
           路径转换
         </button>
@@ -116,6 +179,8 @@ const todayText = computed(() => {
 
 const currentWeather = ref("partlyCloudy");
 const weatherText = ref("");
+const weatherCity = ref("杭州市");
+const DEFAULT_WEATHER_CITY_CODE = "330100";
 
 const WEATHER_PRESETS = [
   { key: "sunny", label: "晴朗", emoji: "☀️" },
@@ -135,26 +200,26 @@ const WEATHER_PRESETS = [
 type WeatherMode = (typeof WEATHER_PRESETS)[number]["key"];
 
 const WEATHER_MAP: Record<string, string> = {
-  "晴": "sunny",
-  "多云": "partlyCloudy",
-  "阴": "cloudy",
-  "小雨": "rain",
-  "中雨": "rain",
-  "阵雨": "rain",
-  "大雨": "heavyRain",
-  "暴雨": "heavyRain",
-  "雷阵雨": "thunder",
-  "雷暴": "thunder",
-  "小雪": "snow",
-  "中雪": "snow",
-  "大雪": "snow",
-  "暴雪": "snow",
-  "雨夹雪": "snow",
-  "雾": "haze",
-  "霾": "haze",
-  "浮尘": "haze",
-  "扬沙": "haze",
-  "沙尘暴": "haze",
+  晴: "sunny",
+  多云: "partlyCloudy",
+  阴: "cloudy",
+  小雨: "rain",
+  中雨: "rain",
+  阵雨: "rain",
+  大雨: "heavyRain",
+  暴雨: "heavyRain",
+  雷阵雨: "thunder",
+  雷暴: "thunder",
+  小雪: "snow",
+  中雪: "snow",
+  大雪: "snow",
+  暴雪: "snow",
+  雨夹雪: "snow",
+  雾: "haze",
+  霾: "haze",
+  浮尘: "haze",
+  扬沙: "haze",
+  沙尘暴: "haze",
 };
 
 const WEATHER_LABEL: Record<string, string> = {
@@ -189,7 +254,7 @@ const WEATHER_ADVICE: Record<string, string> = {
 
 function selectWeather(mode: WeatherMode) {
   currentWeather.value = mode;
-  weatherText.value = buildWeatherText("北京", WEATHER_LABEL[mode] || mode, 24, mode);
+  weatherText.value = buildWeatherText(weatherCity.value, WEATHER_LABEL[mode] || mode, 24, mode);
 }
 
 function mapWeatherMode(raw: string, temp: number): string {
@@ -203,7 +268,13 @@ function mapWeatherMode(raw: string, temp: number): string {
   if (raw.includes("风")) return "wind";
 
   // 樱花季：3-5月 + 晴/多云 + 15~28°C
-  if (month >= 3 && month <= 5 && (base === "sunny" || base === "partlyCloudy") && temp >= 15 && temp <= 28) {
+  if (
+    month >= 3 &&
+    month <= 5 &&
+    (base === "sunny" || base === "partlyCloudy") &&
+    temp >= 15 &&
+    temp <= 28
+  ) {
     return "sakura";
   }
 
@@ -230,11 +301,12 @@ function getDefaultWeather(): string {
 
 async function fetchWeather() {
   try {
-    const data = await WeatherAPI.getWeather();
+    const data = await WeatherAPI.getWeather({ cityCode: DEFAULT_WEATHER_CITY_CODE });
     const temp = parseFloat(data.temperature) || 0;
     const mode = mapWeatherMode(data.weather, temp);
+    weatherCity.value = data.city || weatherCity.value;
     currentWeather.value = mode;
-    weatherText.value = buildWeatherText(data.city, data.weather, Math.round(temp), mode);
+    weatherText.value = buildWeatherText(weatherCity.value, data.weather, Math.round(temp), mode);
   } catch {
     currentWeather.value = getDefaultWeather();
   }
@@ -396,7 +468,9 @@ onMounted(() => {
   font-weight: 700;
   color: var(--cyber-text, #794f27);
 
-  svg { color: #f7cd67; }
+  svg {
+    color: #f7cd67;
+  }
 }
 
 .hero-actions {
@@ -425,7 +499,9 @@ onMounted(() => {
   cursor: pointer;
   line-height: 1;
   box-shadow: 0 4px 0 0 #bdaea0;
-  transition: transform 0.18s, box-shadow 0.18s;
+  transition:
+    transform 0.18s,
+    box-shadow 0.18s;
 
   &:hover {
     transform: translateY(-2px);
@@ -443,8 +519,12 @@ onMounted(() => {
   color: #fff;
   box-shadow: 0 4px 0 0 #11a89b;
 
-  &:hover { box-shadow: 0 6px 0 0 #11a89b; }
-  &:active { box-shadow: 0 1px 0 0 #11a89b; }
+  &:hover {
+    box-shadow: 0 6px 0 0 #11a89b;
+  }
+  &:active {
+    box-shadow: 0 1px 0 0 #11a89b;
+  }
 }
 
 // Leaf decorations
@@ -492,9 +572,15 @@ onMounted(() => {
     background: rgba(255, 255, 255, 0.15);
   }
 
-  .hero-title { color: #f8f4d8; }
-  .hero-sub { color: #f8f4d8; }
-  .hero-title em { color: #82d5bb; }
+  .hero-title {
+    color: #f8f4d8;
+  }
+  .hero-sub {
+    color: #f8f4d8;
+  }
+  .hero-title em {
+    color: #82d5bb;
+  }
   .hero-weather {
     background: rgba(255, 255, 255, 0.18);
     color: #f8f4d8;
@@ -503,8 +589,12 @@ onMounted(() => {
 }
 
 @media (max-width: 1100px) {
-  .hero-char { display: none; }
-  .hero-leaf-2 { right: 20px; }
+  .hero-char {
+    display: none;
+  }
+  .hero-leaf-2 {
+    right: 20px;
+  }
 }
 
 @media (max-width: 768px) {
@@ -512,8 +602,15 @@ onMounted(() => {
     padding: 20px;
     border-radius: 24px;
   }
-  .hero-row { flex-direction: column; align-items: flex-start; }
-  .hero-title { font-size: 24px; }
-  .hero-actions { width: 100%; }
+  .hero-row {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .hero-title {
+    font-size: 24px;
+  }
+  .hero-actions {
+    width: 100%;
+  }
 }
 </style>

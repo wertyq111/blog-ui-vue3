@@ -11,11 +11,18 @@ export interface WeatherData {
   reporttime: string;
 }
 
+export interface WeatherQuery {
+  cityCode?: string;
+}
+
 const WeatherAPI = {
-  getWeather() {
+  getWeather(query?: WeatherQuery) {
     return request<any, WeatherData>({
       url: "/weather",
       method: "get",
+      params: {
+        city_code: query?.cityCode,
+      },
       headers: { Authorization: "no-auth" },
     });
   },
