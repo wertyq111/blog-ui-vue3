@@ -50,7 +50,6 @@ import AnimalIcon from "@/components/AnimalIcon/index.vue";
 import VXETable from "vxe-table";
 import { InstallCodeMirror } from "codemirror-editor-vue3";
 import { configureVxeTable } from "@/plugins/vxe-table";
-import { setupAnimalGlobals } from "@/plugins/animal-globals";
 
 // ===== 路由守卫 =====
 import { setupPermissionGuard } from "@/router/guards/permission";
@@ -93,7 +92,6 @@ configureVxeTable();
 animalIslandComponents.forEach(([name, component]) => {
   app.component(name, component as Component);
 });
-setupAnimalGlobals(app);
 app.use(VXETable);
 app.use(InstallCodeMirror);
 
