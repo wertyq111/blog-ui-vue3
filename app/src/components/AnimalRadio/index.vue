@@ -7,7 +7,9 @@
     <span class="ard__dot">
       <span v-if="checked" class="ard__inner" />
     </span>
-    <span class="ard__label"><slot>{{ label }}</slot></span>
+    <span class="ard__label">
+      <slot>{{ label }}</slot>
+    </span>
   </label>
 </template>
 
@@ -28,9 +30,7 @@ const props = withDefaults(
 const model = defineModel<RadioValue>();
 const group = inject(ANIMAL_RADIO_GROUP_KEY, null);
 
-const checked = computed(() =>
-  group ? group.value === props.value : model.value === props.value
-);
+const checked = computed(() => (group ? group.value === props.value : model.value === props.value));
 const isDisabled = computed(() => props.disabled || (group?.disabled ?? false));
 
 function select(): void {

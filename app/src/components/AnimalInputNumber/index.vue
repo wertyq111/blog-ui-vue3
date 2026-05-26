@@ -1,8 +1,5 @@
 <template>
-  <div
-    class="ain"
-    :class="{ 'ain--disabled': disabled, 'ain--no-controls': !controls }"
-  >
+  <div class="ain" :class="{ 'ain--disabled': disabled, 'ain--no-controls': !controls }">
     <button
       v-if="controls"
       type="button"

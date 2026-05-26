@@ -8,10 +8,26 @@
 import type { App, Component } from "vue";
 import AnimalForm from "@/components/AnimalForm/index.vue";
 import AnimalFormItem from "@/components/AnimalFormItem/index.vue";
+import AnimalRadio from "@/components/AnimalRadio/index.vue";
+import AnimalRadioGroup from "@/components/AnimalRadioGroup/index.vue";
+import AnimalInputNumber from "@/components/AnimalInputNumber/index.vue";
+import AnimalRow from "@/components/AnimalRow/index.vue";
+import AnimalCol from "@/components/AnimalCol/index.vue";
+import AnimalTooltip from "@/components/AnimalTooltip/index.vue";
+import AnimalPopover from "@/components/AnimalPopover/index.vue";
+import AnimalImage from "@/components/AnimalImage/index.vue";
 
 const globalComponents: Record<string, Component> = {
   AnimalForm,
   AnimalFormItem,
+  AnimalRadio,
+  AnimalRadioGroup,
+  AnimalInputNumber,
+  AnimalRow,
+  AnimalCol,
+  AnimalTooltip,
+  AnimalPopover,
+  AnimalImage,
 };
 
 export function setupAnimalGlobals(app: App): void {

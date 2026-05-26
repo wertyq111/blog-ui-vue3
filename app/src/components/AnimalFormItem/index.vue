@@ -64,7 +64,7 @@ const labelStyle = computed(() => {
   const w =
     props.labelWidth != null && props.labelWidth !== ""
       ? normalizeWidth(props.labelWidth)
-      : form?.resolvedLabelWidth ?? "";
+      : (form?.resolvedLabelWidth ?? "");
   return w && w !== "" ? { width: w } : {};
 });
 
