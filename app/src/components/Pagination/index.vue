@@ -11,7 +11,7 @@
           v-model="pageSizeModel"
           :options="sizeOptions"
           class="animal-pagination__select"
-          style="width: 110px;"
+          style="width: 110px"
         />
       </div>
 
@@ -43,7 +43,7 @@
           :key="idx"
           :class="{
             active: page === currentPage,
-            disabled: page === '...'
+            disabled: page === '...',
           }"
           class="animal-pager-item"
           @click="page !== '...' && handlePageChange(Number(page))"
@@ -77,11 +77,11 @@
       <div class="animal-pagination__jumper">
         前往
         <input
-          type="text"
           v-model="jumperValue"
+          type="text"
+          class="animal-jumper-input"
           @keyup.enter="handleJumperSubmit"
           @blur="handleJumperSubmit"
-          class="animal-jumper-input"
         />
         页
       </div>
@@ -214,6 +214,8 @@ watch(
 );
 
 function handleSizeChange(val: number) {
+  if (!props.pageSizes.includes(val)) return;
+  pageSize.value = val;
   currentPage.value = 1;
   emit("pagination", { page: currentPage.value, limit: val });
 }
