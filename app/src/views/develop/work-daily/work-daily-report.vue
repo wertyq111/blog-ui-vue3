@@ -15,7 +15,7 @@
         placeholder="选择月份"
         value-format="YYYY-MM"
         class="report-field"
-        style="width: 160px !important;"
+        style="width: 160px !important"
       />
       <AnimalDatePicker
         v-else-if="config.type === 'week'"
@@ -23,7 +23,7 @@
         type="daterange"
         value-format="YYYY-MM-DD"
         class="report-field-wide"
-        style="width: 240px !important;"
+        style="width: 240px !important"
       />
       <AnimalDatePicker
         v-else
@@ -32,7 +32,7 @@
         placeholder="选择年份"
         value-format="YYYY"
         class="report-field"
-        style="width: 160px !important;"
+        style="width: 160px !important"
       />
 
       <Select
@@ -53,7 +53,7 @@
           placeholder="导入年份"
           value-format="YYYY"
           class="report-field-import"
-          style="width: 120px !important;"
+          style="width: 120px !important"
         />
         <AnimalUpload accept=".md" @change="handleImport">
           <Button type="default" size="small">
@@ -69,10 +69,9 @@
 <script setup lang="ts">
 import { message } from "@/utils/feedback";
 import { computed, onMounted, reactive, ref } from "vue";
-import { type UploadFile } from "element-plus";
 import { Button, Select } from "animal-island-vue";
 import AnimalDatePicker from "@/components/AnimalDatePicker/index.vue";
-import AnimalUpload from "@/components/AnimalUpload/index.vue";
+import AnimalUpload, { type AnimalUploadFile } from "@/components/AnimalUpload/index.vue";
 import SystemIco from "@/components/AdminPage/SystemIco.vue";
 import WorkDailyAPI from "@/api/develop/work-daily";
 
@@ -154,7 +153,7 @@ async function handleExport(): Promise<void> {
   }
 }
 
-async function handleImport(file: UploadFile): Promise<void> {
+async function handleImport(file: AnimalUploadFile): Promise<void> {
   const raw = file.raw;
   if (!raw) return;
   try {

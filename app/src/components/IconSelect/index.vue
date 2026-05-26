@@ -12,11 +12,7 @@
       </span>
       <span v-else class="ais__placeholder">点击选择图标</span>
 
-      <span
-        v-if="selectedIcon && !disabled"
-        class="ais__clear"
-        @click.stop="clearSelectedIcon"
-      >
+      <span v-if="selectedIcon && !disabled" class="ais__clear" @click.stop="clearSelectedIcon">
         ×
       </span>
       <span class="ais__arrow" :class="{ 'ais__arrow--open': open }">
@@ -45,9 +41,9 @@
             :class="{ 'is-active': selectedIcon === name }"
             @click="selectIcon(name)"
           >
-            <el-tooltip :content="name" placement="bottom" effect="light">
+            <AnimalTooltip :content="name" placement="bottom">
               <Icon :name="name" :size="28" />
-            </el-tooltip>
+            </AnimalTooltip>
           </li>
         </ul>
       </div>
@@ -58,6 +54,7 @@
 <script setup lang="ts">
 import { ref } from "vue";
 import { onClickOutside } from "@vueuse/core";
+import AnimalTooltip from "@/components/AnimalTooltip/index.vue";
 import Icon from "@/components/AnimalIcon/index.vue";
 import { ANIMAL_ICON_NAMES, resolveAnimalIcon } from "@/utils/menuAnimalIcon";
 
@@ -96,8 +93,15 @@ onClickOutside(wrapperRef, () => (open.value = false));
 <style scoped lang="scss">
 .ais {
   position: relative;
-  font-family: Nunito, "Noto Sans SC", "Zen Maru Gothic", -apple-system, "PingFang SC",
-    "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+  font-family:
+    Nunito,
+    "Noto Sans SC",
+    "Zen Maru Gothic",
+    -apple-system,
+    "PingFang SC",
+    "Hiragino Sans GB",
+    "Microsoft YaHei",
+    sans-serif;
   user-select: none;
 }
 
@@ -171,7 +175,9 @@ onClickOutside(wrapperRef, () => (open.value = false));
   align-items: center;
   flex-shrink: 0;
   color: #a09080;
-  transition: transform 0.2s, color 0.2s;
+  transition:
+    transform 0.2s,
+    color 0.2s;
 }
 .ais__arrow--open {
   transform: rotate(180deg);
@@ -220,7 +226,9 @@ onClickOutside(wrapperRef, () => (open.value = false));
 
 .ais-fade-enter-active,
 .ais-fade-leave-active {
-  transition: opacity 0.18s ease, transform 0.18s ease;
+  transition:
+    opacity 0.18s ease,
+    transform 0.18s ease;
 }
 .ais-fade-enter-from,
 .ais-fade-leave-to {
