@@ -59,7 +59,7 @@ import path from "path-browserify";
 import { RouteRecordRaw } from "vue-router";
 import { isExternal } from "@/utils";
 import { translateRouteTitle } from "@/lang/utils";
-import { Icon as AnimalIcon } from "animal-island-vue";
+import AnimalIcon from "@/components/AnimalIcon/index.vue";
 import { resolveAnimalIcon } from "@/utils/menuAnimalIcon";
 
 defineOptions({

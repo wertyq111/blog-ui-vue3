@@ -78,7 +78,7 @@ import { useAppStore, usePermissionStore, useSettingsStore } from "@/store";
 import { isExternal } from "@/utils/index";
 import { translateRouteTitle } from "@/lang/utils";
 import { SidebarColor } from "@/enums/settings";
-import { Icon as AnimalIcon } from "animal-island-vue";
+import AnimalIcon from "@/components/AnimalIcon/index.vue";
 import { resolveAnimalIcon } from "@/utils/menuAnimalIcon";
 import BaseLayout from "./BaseLayout.vue";
 import LayoutLogo from "./components/LayoutLogo.vue";

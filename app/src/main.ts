@@ -35,7 +35,6 @@ import {
   Cursor,
   Divider,
   Footer,
-  Icon,
   Input,
   Loading,
   Modal,
@@ -47,9 +46,11 @@ import {
   Time,
   Typewriter,
 } from "animal-island-vue";
+import AnimalIcon from "@/components/AnimalIcon/index.vue";
 import VXETable from "vxe-table";
 import { InstallCodeMirror } from "codemirror-editor-vue3";
 import { configureVxeTable } from "@/plugins/vxe-table";
+import { setupAnimalGlobals } from "@/plugins/animal-globals";
 
 // ===== 路由守卫 =====
 import { setupPermissionGuard } from "@/router/guards/permission";
@@ -65,7 +66,7 @@ const animalIslandComponents: Array<[string, Component]> = [
   ["Cursor", Cursor as Component],
   ["Divider", Divider as Component],
   ["Footer", Footer as Component],
-  ["Icon", Icon as Component],
+  ["Icon", AnimalIcon as Component],
   ["Input", Input as Component],
   ["Loading", Loading as Component],
   ["Modal", Modal as Component],
@@ -92,6 +93,7 @@ configureVxeTable();
 animalIslandComponents.forEach(([name, component]) => {
   app.component(name, component as Component);
 });
+setupAnimalGlobals(app);
 app.use(VXETable);
 app.use(InstallCodeMirror);
 

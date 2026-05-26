@@ -160,9 +160,11 @@
 </template>
 
 <script setup lang="ts">
+import { confirm, message } from "@/utils/feedback";
 import { computed, onMounted, reactive, ref } from "vue";
-import { ElMessage, ElMessageBox } from "element-plus";
-import { Button, Icon, Input, Switch } from "animal-island-vue";
+
+import { Button, Input, Switch } from "animal-island-vue";
+import Icon from "@/components/AnimalIcon/index.vue";
 import MenuAPI from "@/api/system/menu";
 import { resolveAnimalIcon } from "@/utils/menuAnimalIcon";
 import type { MenuItem, MenuQueryParams } from "@/types/api";
@@ -259,7 +261,7 @@ async function handleStatusToggle(row: FlatRow, val: boolean): Promise<void> {
   statusLoadingId.value = row.id ?? null;
   try {
     await MenuAPI.updateStatus(row.id!, nextStatus);
-    ElMessage.success(val ? "已激活" : "已禁用");
+    message.success(val ? "已激活" : "已禁用");
     fetchData();
   } finally {
     statusLoadingId.value = null;
@@ -274,11 +276,11 @@ function openDialog(parentId?: number, menuId?: number): void {
 
 function handleDelete(menuId?: number): void {
   if (!menuId) {
-    ElMessage.warning("请勾选删除项");
+    message.warning("请勾选删除项");
     return;
   }
 
-  ElMessageBox.confirm("确认删除已选中的数据项?", "警告", {
+  confirm("确认删除已选中的数据项?", "警告", {
     confirmButtonText: "确定",
     cancelButtonText: "取消",
     type: "warning",
@@ -287,7 +289,7 @@ function handleDelete(menuId?: number): void {
       loading.value = true;
       MenuAPI.deleteById(menuId)
         .then(() => {
-          ElMessage.success("删除成功");
+          message.success("删除成功");
           fetchData();
         })
         .finally(() => {
@@ -295,7 +297,7 @@ function handleDelete(menuId?: number): void {
         });
     },
     () => {
-      ElMessage.info("已取消删除");
+      message.info("已取消删除");
     }
   );
 }

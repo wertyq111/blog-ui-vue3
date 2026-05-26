@@ -1,45 +1,137 @@
-import type { IconName } from "animal-island-vue";
-
 /**
- * animal-island-vue 提供的全部图标名（10 个）
+ * 动森风格图标管理器
+ * 
+ * @description
+ * 包含完整登记的 42 个动森风格拼图卡片矢量图标。
+ * 支持根据原始菜单名称/路由路径/标题关键词进行高准确度模糊匹配。
  */
-export const ANIMAL_ICON_NAMES: IconName[] = [
-  "icon-miles",
-  "icon-camera",
-  "icon-chat",
-  "icon-critterpedia",
-  "icon-design",
+
+export const ANIMAL_ICON_NAMES: string[] = [
+  // --- 第一行 ---
+  "icon-fishrod",
+  "icon-net",
+  "icon-axe",
+  "icon-shovel",
+  "icon-watering",
+  "icon-slingshot",
+  "icon-ladder",
+  // --- 第二行 ---
+  "icon-leaf",
+  "icon-tshirt",
+  "icon-bellbag",
+  "icon-present",
+  "icon-coinbag",
   "icon-diy",
-  "icon-helicopter",
+  "icon-fruit",
+  // --- 第三行 ---
+  "icon-fish",
+  "icon-butterfly",
+  "icon-fossil",
+  "icon-painting",
+  "icon-tulip",
+  "icon-maple",
+  "icon-rock",
+  // --- 第四行 ---
+  "icon-passport",
+  "icon-mail",
   "icon-map",
-  "icon-shopping",
+  "icon-camera",
+  "icon-location",
+  "icon-key",
   "icon-variant",
+  // --- 第五行 ---
+  "icon-miles",
+  "icon-needle",
+  "icon-rabbit",
+  "icon-tent",
+  "icon-helicopter",
+  "icon-coffee",
+  "icon-kk",
+  // --- 第六行 ---
+  "icon-settings",
+  "icon-pot",
+  "icon-brush",
+  "icon-sprout",
+  "icon-hook",
+  "icon-net-bug",
+  "icon-chair",
 ];
 
 const ANIMAL_ICON_SET = new Set<string>(ANIMAL_ICON_NAMES);
 
 /**
- * 关键词 → 动森图标 的主题映射。
- * 命中规则：把菜单原图标名 / 路由路径 / 标题转小写后做子串匹配。
+ * 智能关键词 ➔ 动森拼图卡片图标的模糊匹配映射正则库。
  */
-const KEYWORD_RULES: Array<[RegExp, IconName]> = [
-  [/(user|member|people|person|group|account)/, "icon-chat"],
-  [/(role|permission|auth|lock|key|secure)/, "icon-miles"],
-  [/(menu|grid|nav|list|tree|structure)/, "icon-map"],
-  [/(setting|manage|operation|system|config|gear|tool|develop|code|terminal|init|convert)/, "icon-diy"],
-  [/(work|doc|platform|note|book|todo|daily)/, "icon-design"],
-  [/(photo|picture|image|camera|wallpaper|gallery|album)/, "icon-camera"],
-  [/(mini|mobile|phone|program|app|applet)/, "icon-variant"],
-  [/(shop|order|cart|goods|mall|store|pay)/, "icon-shopping"],
-  [/(dashboard|home|house|index|weather|travel|trip|fly)/, "icon-helicopter"],
-  [/(map|location|survey|position|place|region)/, "icon-map"],
-  [/(bug|fish|critter|animal|pet|nature|leaf)/, "icon-critterpedia"],
+const KEYWORD_RULES: Array<[RegExp, string]> = [
+  // 1. 系统核心 & 仪表盘 & 首页 ➔ icon-home / icon-helicopter (地图)
+  [/(dashboard|home|house|index|weather|travel|trip|fly)/, "icon-tent"],
+  
+  // 2. 文章管理 & 发布管理 & 核心业务 ➔ icon-leaf / icon-miles (斜叶)
+  [/(article|content|post|news|blog|publish|draft|write)/, "icon-leaf"],
+  [/(miles|score|grade|point)/, "icon-miles"],
+  
+  // 3. 财务管理 & 充值 & 钱包 & 订单 ➔ icon-bellbag / icon-coinbag (小袋)
+  [/(pay|order|wallet|money|finance|billing|cost)/, "icon-bellbag"],
+  [/(coin|cash|bag|deposit|debt|bank)/, "icon-coinbag"],
+  [/(stock|investment|shares|report|stat|chart|analysis|turnip)/, "icon-bellbag"], // 兼容原有大头菜
+
+  // 4. 用户 & 角色 & 社交 & 好友 ➔ icon-friends / icon-rabbit (猫头鹰傅达)
+  [/(role|permission|auth|lock|key|secure|axe)/, "icon-axe"], // 权限安全
+  [/(user|member|people|person|group|account|profile)/, "icon-passport"],
+  [/(friend|link|social|friends|union|partner)/, "icon-mail"], // 友情信件
+  [/(author|about|ai|assistant|helper|service|rabbit)/, "icon-rabbit"], // 傅达猫头鹰
+
+  // 5. 系统设置 & 参数配置 ➔ icon-settings / icon-chair / icon-ladder
+  [/(setting|manage|operation|system|config|gear|tool|develop|code|terminal|init|convert)/, "icon-settings"],
+  [/(theme|skin|wardrobe|visual|layout|style|chair)/, "icon-chair"], 
+  [/(ladder|step|up|level)/, "icon-ladder"],
+
+  // 6. 知识库 & 文档 & 归档 ➔ icon-painting / icon-fossil
+  [/(doc|wiki|knowledge|lib|book|manual|painting)/, "icon-painting"],
+  [/(history|backup|archive|log|timeline|fossil)/, "icon-fossil"], // 历史/化石头骨
+
+  // 7. 附件 & 画廊 & 相册 ➔ icon-camera
+  [/(photo|picture|image|camera|wallpaper|gallery|album|media|attachment|upload)/, "icon-camera"],
+
+  // 8. 定时任务 & 调度 ➔ icon-watering
+  [/(job|cron|time|schedule|watering|plant|crop)/, "icon-watering"],
+
+  // 9. 通知 & 每日广播 ➔ icon-slingshot
+  [/(notice|broadcast|announcement|publish-notice|slingshot)/, "icon-slingshot"],
+
+  // 10. 友情信件 & 反馈 ➔ icon-mail
+  [/(mail|email|feedback|letter|message-board)/, "icon-mail"],
+
+  // 11. 开发者常用工具/网络/清理 ➔ icon-shovel / icon-needle / icon-fish
+  [/(shovel|clean|cache|garbage|clear)/, "icon-shovel"],
+  [/(net|api|gateway|route-rule|filter)/, "icon-net"],
+  [/(fish|stream|data-flow|channel)/, "icon-fish"],
+  [/(needle|sew|thread|connect)/, "icon-needle"],
+
+  // 12. 星级/收藏/置顶 ➔ icon-key
+  [/(star|collect|recommend|top|best|key)/, "icon-key"],
+
+  // 13. 缺陷 & 异常管理 ➔ icon-net-bug
+  [/(bug|debug|error|exception)/, "icon-net-bug"],
+
+  // 14. 关于本站 ➔ icon-location / icon-map
+  [/(about|site|map|location|position|place|region)/, "icon-map"],
+  [/(compass|guide-map|explore|redirect)/, "icon-location"],
+
+  // 15. 音频播放器 ➔ icon-kk
+  [/(music|play|audio|video|media|kk|guitar)/, "icon-kk"],
+
+  // 16. 工艺制造 & 其它 ➔ icon-pot / icon-brush / icon-sprout / icon-hook
+  [/(pot|cook|kitchen)/, "icon-pot"],
+  [/(brush|draw|paint)/, "icon-brush"],
+  [/(sprout|grow|plant)/, "icon-sprout"],
+  [/(hook|link|joint)/, "icon-hook"],
 ];
 
 /**
- * 将任意字符串稳定散列到 10 个动森图标之一，保证“全部替换”时无图标也有兜底。
+ * 将任意字符串稳定散列到 42 个动森图标之一，保证哪怕无任何映射也绝不报错且平滑分配
  */
-function hashToAnimalIcon(seed: string): IconName {
+function hashToAnimalIcon(seed: string): string {
   let sum = 0;
   for (let i = 0; i < seed.length; i++) {
     sum = (sum + seed.charCodeAt(i)) % 1000;
@@ -48,18 +140,18 @@ function hashToAnimalIcon(seed: string): IconName {
 }
 
 /**
- * 把菜单图标解析为动森图标名。
- *
- * @param icon 菜单原始图标值（如 `el-icon-s-operation` / `user` / `icon-camera`）
- * @param seed 备用散列种子（建议传路由路径或标题），用于无主题命中时的稳定分配
- * @returns animal-island-vue 的 IconName
+ * 将菜单原值智能散列匹配为最新的 42 个动森卡通插画图标之一
+ * 
+ * @param icon 菜单原始图标名
+ * @param seed 辅助映射种子 (如标题、路径)
+ * @returns 动森图标名字符串
  */
-export function resolveAnimalIcon(icon?: string | null, seed?: string | null): IconName {
+export function resolveAnimalIcon(icon?: string | null, seed?: string | null): string {
   const raw = (icon ?? "").trim();
 
-  // 已经是动森图标，原样返回
+  // 已经是有效动森图标，直接返回
   if (ANIMAL_ICON_SET.has(raw)) {
-    return raw as IconName;
+    return raw;
   }
 
   const normalized = raw
@@ -74,5 +166,6 @@ export function resolveAnimalIcon(icon?: string | null, seed?: string | null): I
     }
   }
 
+  // 兜底散列
   return hashToAnimalIcon(haystack.trim() || "menu");
 }

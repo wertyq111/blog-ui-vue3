@@ -58,7 +58,7 @@
 <script setup lang="ts">
 import { ref } from "vue";
 import { onClickOutside } from "@vueuse/core";
-import { Icon } from "animal-island-vue";
+import Icon from "@/components/AnimalIcon/index.vue";
 import { ANIMAL_ICON_NAMES, resolveAnimalIcon } from "@/utils/menuAnimalIcon";
 
 withDefaults(
