@@ -42,4 +42,4 @@ yarn.lock
 # Local history
 .history
 
-app/.pnpm-store/
+.pnpm-store/
