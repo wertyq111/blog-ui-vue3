@@ -71,9 +71,9 @@
         <span class="clock-text">{{ formattedTime }}</span>
       </div>
 
-      <router-link v-if="!isLoggedIn" class="btn-ai btn-ai-sm" to="/login">
+      <router-link v-if="!isLoggedIn" class="btn-ai btn-ai-sm btn-ai-primary" to="/login">
         <span class="btn-ai-finger"></span>
-        <span class="btn-ai-text">登录候机厅</span>
+        <span class="btn-ai-text">办理登岛手续 ✈️</span>
       </router-link>
       <router-link v-else class="btn-ai btn-ai-sm btn-ai-primary" to="/dashboard">
         <span class="btn-ai-finger"></span>
@@ -81,8 +81,8 @@
       </router-link>
     </nav>
 
-    <!-- 主视觉 Hero -->
-    <section id="hero" class="hero">
+    <!-- 主视觉 Hero (已登录状态下展示个人小岛概览) -->
+    <section v-if="isLoggedIn" id="hero" class="hero">
       <div class="hero-grid">
         <div class="hero-text">
           <span class="hero-tag">
@@ -168,8 +168,84 @@
       </div>
     </section>
 
-    <!-- 岛民广播属性统计面板 -->
-    <div class="hero-stats">
+    <!-- 主视觉 Hero (未登录状态下展示前台移居办理柜台) -->
+    <section v-else id="hero" class="hero hero--unauth">
+      <div class="hero-grid">
+        <div class="hero-text">
+          <span class="hero-tag hero-tag--unauth">
+            <span class="hero-tag-dot"></span>
+            NOOK INC. · 移居小岛计划
+          </span>
+          <div class="hero-title-row">
+            <h1 class="hero-title">
+              博客<br/>小岛.
+            </h1>
+          </div>
+          <p class="hero-sub">
+            想要开启悠闲又充实的开发第二人生吗？<br />
+            这里是 <b>Nook Inc. 移居小岛计划柜台</b>，我们将协助你办理博客小岛的定居登记，收集每日灵感，开启趣味生活！
+          </p>
+          <div class="hero-actions">
+            <router-link class="btn-ai btn-ai-primary btn-ai-lg" to="/login">
+              <span class="btn-ai-finger"></span>
+              <svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" class="btn-arrow-ico"><path d="M3 10h14M11 4l6 6-6 6"/></svg>
+              <span class="btn-ai-text">填写移居申请卡 🎫</span>
+            </router-link>
+            <a class="btn-ai btn-ai-lg" href="javascript:void(0)" @click="scrollToSection('modules')">
+              <span class="btn-ai-finger"></span>
+              <span class="btn-ai-text">小岛生态指南 🔍</span>
+            </a>
+          </div>
+        </div>
+
+        <!-- 动森移居柜台前台接待处 (粒狸与豆狸经典对话插图) -->
+        <div class="hero-avatar-wrap hero-avatar-wrap--unauth">
+          <!-- 动森经典特产叶子 🍃 -->
+          <div class="deco-nook-leaf">
+            <svg viewBox="0 0 40 40" fill="#58a032">
+              <path d="M5 35c10 0 20-5 28-13 5-5 7-12 7-22-10 0-17 2-22 7-8 8-13 18-13 28z" stroke="#794f27" stroke-width="2.5" stroke-linejoin="round"/>
+              <path d="M5 35c8-8 16-14 26-20" stroke="#794f27" stroke-width="1.5" fill="none"/>
+            </svg>
+          </div>
+
+          <!-- 木纹柜台 Desk -->
+          <div class="nook-counter">
+            <div class="nook-counter-top"></div>
+            <div class="nook-counter-body">
+              <span class="nook-counter-sign">NOOK INC. 移居小岛前台</span>
+            </div>
+          </div>
+
+          <!-- 漂浮在空中的 Dodo Airlines 机票 🎫 -->
+          <div class="deco-dodo-ticket">
+            <div class="ticket-header">DODO AIRLINES</div>
+            <div class="ticket-body">
+              <span class="ticket-icon">✈️</span>
+              <span class="ticket-text">PASS</span>
+            </div>
+          </div>
+
+          <!-- 粒狸的缝线对话气泡 -->
+          <div class="nook-bubble nook-bubble--timmy">
+            <div class="nook-bubble-name">🌿 粒狸 (Timmy)</div>
+            <div class="nook-bubble-content">
+              “欢迎光临！今天是要办理博客小岛的移居定居登记对吧？”
+            </div>
+          </div>
+
+          <!-- 豆狸的小声复读缝线对话气泡 -->
+          <div class="nook-bubble nook-bubble--tommy">
+            <div class="nook-bubble-name">🌿 豆狸 (Tommy)</div>
+            <div class="nook-bubble-content">
+              “...对吧！”
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 岛民广播属性统计面板 (仅在已登录状态展示) -->
+    <div v-if="isLoggedIn" class="hero-stats">
       <div class="stat">
         <div class="stat-ico stat-ico-mint">
           <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19l4-12 3 9 3-6 2 5h4"/></svg>
@@ -208,110 +284,189 @@
       </div>
     </div>
 
-    <!-- 模块区：重构为动森经典的“玩家背包栏 Grid” -->
+    <!-- 模块区：已登录展示“玩家背包栏 Grid”，未登录展示“小岛生态推荐手册 Highlights” -->
     <section id="modules" class="section">
-      <div class="section-head">
-        <div>
-          <div class="section-eyebrow">MODULES · 岛屿口袋</div>
-          <h2 class="section-title">我的背包格子 (Pocket Slots)</h2>
-        </div>
-        <p class="section-sub">小岛里的常用入口，化为随身背包里的各种神奇道具，点击即可掏出使用。</p>
-      </div>
-      
-      <div class="modules-pocket">
-        <div v-for="mod in modules" :key="mod.key" class="pocket-slot" :class="'pocket-slot--' + mod.color" @click="handleModuleClick(mod.key)">
-          <!-- 背包格子的圆圈标记角标 -->
-          <span class="pocket-slot-tag">{{ mod.tag }}</span>
-          
-          <div class="pocket-slot-ico-wrap">
-            <div class="pocket-slot-ico">
-              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                <path :d="mod.icon" />
-              </svg>
-            </div>
+      <div v-if="isLoggedIn">
+        <div class="section-head">
+          <div>
+            <div class="section-eyebrow">MODULES · 岛屿口袋</div>
+            <h2 class="section-title">我的背包格子 (Pocket Slots)</h2>
           </div>
-          <div class="pocket-slot-title">{{ mod.title }}</div>
-          <div class="pocket-slot-sub">{{ mod.sub }}</div>
+          <p class="section-sub">小岛里的常用入口，化为随身背包里的各种神奇道具，点击即可掏出使用。</p>
+        </div>
+        
+        <div class="modules-pocket">
+          <div v-for="mod in modules" :key="mod.key" class="pocket-slot" :class="'pocket-slot--' + mod.color" @click="handleModuleClick(mod.key)">
+            <!-- 背包格子的圆圈标记角标 -->
+            <span class="pocket-slot-tag">{{ mod.tag }}</span>
+            
+            <div class="pocket-slot-ico-wrap">
+              <div class="pocket-slot-ico">
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                  <path :d="mod.icon" />
+                </svg>
+              </div>
+            </div>
+            <div class="pocket-slot-title">{{ mod.title }}</div>
+            <div class="pocket-slot-sub">{{ mod.sub }}</div>
+          </div>
+        </div>
+      </div>
+
+      <div v-else>
+        <div class="section-head">
+          <div>
+            <div class="section-eyebrow">HIGHLIGHTS · 岛屿生态手册</div>
+            <h2 class="section-title">小岛推荐指南 (Getaway Highlights)</h2>
+          </div>
+          <p class="section-sub">Nook 移居计划官方倾情推荐，为您全方位展示博客小岛的悠闲生活与核心建设生态。</p>
+        </div>
+        
+        <div class="modules-pocket">
+          <div v-for="mod in unauthModules" :key="mod.key" class="pocket-slot" :class="'pocket-slot--' + mod.color" @click="handleModuleClick(mod.key)">
+            <!-- 背包格子的圆圈标记角标 -->
+            <span class="pocket-slot-tag">{{ mod.tag }}</span>
+            
+            <div class="pocket-slot-ico-wrap">
+              <div class="pocket-slot-ico">
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                  <path :d="mod.icon" />
+                </svg>
+              </div>
+            </div>
+            <div class="pocket-slot-title">{{ mod.title }}</div>
+            <div class="pocket-slot-sub">{{ mod.sub }}</div>
+          </div>
         </div>
       </div>
     </section>
 
-    <!-- 关于我：重构为 1:1 精美复刻的“动森玩家岛民证 (Island Passport)” -->
+    <!-- 关于区：已登录展示“动森玩家岛民证 (Island Passport)”，未登录展示“大头针告示板 (Bulletin Board)” -->
     <section id="about" class="section">
-      <div class="section-head">
-        <div>
-          <div class="section-eyebrow">PASSPORT · 岛民证</div>
-          <h2 class="section-title">Nook 岛民登记审查</h2>
-        </div>
-        <p class="section-sub">符合 Nook Inc. 移居小岛标准的官方认证卡，记录岛主身份与成就。</p>
-      </div>
-
-      <div class="passport-container">
-        <div class="ac-passport">
-          <!-- 岛民证头部缝线装饰 -->
-          <div class="ac-passport__header">
-            <div class="ac-passport__title-group">
-              <h3>PASSPORT</h3>
-              <span>Nook Inc. 岛民护照登记卡</span>
-            </div>
-            <!-- Dodo 联运 Approved 防伪印章 -->
-            <div class="ac-passport__stamp-dodo">
-              <span>DODO APPR.</span>
-              <span class="sub">10.10.9.184</span>
-            </div>
+      <div v-if="isLoggedIn">
+        <div class="section-head">
+          <div>
+            <div class="section-eyebrow">PASSPORT · 岛民证</div>
+            <h2 class="section-title">Nook 岛民登记审查</h2>
           </div>
-          
-          <div class="ac-passport__card">
-            <!-- 左侧大头照照相机区域 -->
-            <div class="ac-passport__photo-area">
-              <div class="ac-passport__photo">
-                <img :src="avatarSrc" :alt="nickname" />
+          <p class="section-sub">符合 Nook Inc. 移居小岛标准的官方认证卡，记录岛主身份与成就。</p>
+        </div>
+
+        <div class="passport-container">
+          <div class="ac-passport">
+            <!-- 岛民证头部缝线装饰 -->
+            <div class="ac-passport__header">
+              <div class="ac-passport__title-group">
+                <h3>PASSPORT</h3>
+                <span>Nook Inc. 岛民护照登记卡</span>
               </div>
-              <div class="ac-passport__photo-stamp">PASSPORT PHOTO</div>
-              <!-- 印在照片上的小海鸥 Approved 浅色水印 -->
-              <div class="ac-passport__photo-watermark">🍃</div>
+              <!-- Dodo 联运 Approved 防伪印章 -->
+              <div class="ac-passport__stamp-dodo">
+                <span>DODO APPR.</span>
+                <span class="sub">10.10.9.184</span>
+              </div>
             </div>
             
-            <!-- 右侧玩家手绘属性明细面联 -->
-            <div class="ac-passport__details">
-              <div class="ac-passport__row">
-                <div class="ac-passport__item">
-                  <span class="label">PASSENGER NAME / 岛民姓名</span>
-                  <span class="value">🌿 {{ nickname }}</span>
+            <div class="ac-passport__card">
+              <!-- 左侧大头照照相机区域 -->
+              <div class="ac-passport__photo-area">
+                <div class="ac-passport__photo">
+                  <img :src="avatarSrc" :alt="nickname" />
                 </div>
-                <div class="ac-passport__item">
-                  <span class="label">NATIVE FRUIT / 特产水果</span>
-                  <span class="value fruit-color">{{ userFruit }}</span>
-                </div>
+                <div class="ac-passport__photo-stamp">PASSPORT PHOTO</div>
+                <!-- 印在照片上的小海鸥 Approved 浅色水印 -->
+                <div class="ac-passport__photo-watermark">🍃</div>
               </div>
               
-              <!-- 胶囊称号 (Title) -->
-              <div class="ac-passport__row">
-                <div class="ac-passport__item ac-passport__item--title">
-                  <span class="label">TITLE / 岛民称号</span>
-                  <div class="value-title-wrap">
-                    <span class="title-pill">{{ userTitle1 }}</span>
-                    <span class="title-pill">{{ userTitle2 }}</span>
+              <!-- 右侧玩家手绘属性明细面联 -->
+              <div class="ac-passport__details">
+                <div class="ac-passport__row">
+                  <div class="ac-passport__item">
+                    <span class="label">PASSENGER NAME / 岛民姓名</span>
+                    <span class="value">🌿 {{ nickname }}</span>
+                  </div>
+                  <div class="ac-passport__item">
+                    <span class="label">NATIVE FRUIT / 特产水果</span>
+                    <span class="value fruit-color">{{ userFruit }}</span>
+                  </div>
+                </div>
+                
+                <!-- 胶囊称号 (Title) -->
+                <div class="ac-passport__row">
+                  <div class="ac-passport__item ac-passport__item--title">
+                    <span class="label">TITLE / 岛民称号</span>
+                    <div class="value-title-wrap">
+                      <span class="title-pill">{{ userTitle1 }}</span>
+                      <span class="title-pill">{{ userTitle2 }}</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="ac-passport__row">
+                  <div class="ac-passport__item">
+                    <span class="label">ISLAND NAME / 注册岛名</span>
+                    <span class="value">{{ brandName }}</span>
+                  </div>
+                  <div class="ac-passport__item">
+                    <span class="label">FIRST DEPARTURE / 移居日期</span>
+                    <span class="value">2023-01-20</span>
+                  </div>
+                </div>
+
+                <div class="ac-passport__row">
+                  <div class="ac-passport__item">
+                    <span class="label">ISLAND COMMENT / 岛民寄语</span>
+                    <span class="value comment">“ 不催稿、不焦虑。写点东西、做点项目，让小岛今天比昨天再绿一点。 🌱 ”</span>
                   </div>
                 </div>
               </div>
+            </div>
+          </div>
+        </div>
+      </div>
 
-              <div class="ac-passport__row">
-                <div class="ac-passport__item">
-                  <span class="label">ISLAND NAME / 注册岛名</span>
-                  <span class="value">{{ brandName }}</span>
-                </div>
-                <div class="ac-passport__item">
-                  <span class="label">FIRST DEPARTURE / 移居日期</span>
-                  <span class="value">2023-01-20</span>
-                </div>
+      <div v-else>
+        <div class="section-head">
+          <div>
+            <div class="section-eyebrow">BULLETIN · 广场告示板</div>
+            <h2 class="section-title">岛屿公告与基础设施栏 (Bulletin Board)</h2>
+          </div>
+          <p class="section-sub">记录博客小岛建设进程的大头针告示板，贴着最新的技术公告与移居资讯。</p>
+        </div>
+
+        <div class="passport-container">
+          <!-- 大头针告示板 (Bulletin Board) 1:1 复刻 -->
+          <div class="bulletin-board">
+            <!-- 告示板大头针 -->
+            <div class="board-pin pin-left">📌</div>
+            <div class="board-pin pin-right">📌</div>
+            
+            <div class="board-header">
+              <span class="board-title">📢 博客小岛 · 今日快讯</span>
+              <!-- 顶部两只可爱的小鸟剪影 -->
+              <div class="board-birds">
+                <span class="board-bird">🐦</span>
+                <span class="board-bird">🐤</span>
               </div>
-
-              <div class="ac-passport__row">
-                <div class="ac-passport__item">
-                  <span class="label">ISLAND COMMENT / 岛民寄语</span>
-                  <span class="value comment">“ 不催稿、不焦虑。写点东西、做点项目，让小岛今天比昨天再绿一点。 🌱 ”</span>
+            </div>
+            
+            <div class="board-body">
+              <!-- 便签 1：技术基石 -->
+              <div class="board-sticky sticky-tech">
+                <div class="sticky-head">📋 岛屿基础设施公告</div>
+                <div class="sticky-content">
+                  本岛已完成技术现代化升级！前端搭载轻盈高效的 <strong>Vue 3.5 + Vite 8</strong> 拟物引擎，样式由 <strong>UnoCSS + Sass</strong> 随心调配；后端基于稳固的 <strong>Laravel 10 API</strong> 强力驱动，测试链则由 <strong>Pest PHP</strong> 严密守卫。🌱
                 </div>
+                <div class="sticky-foot">Nook 岛建委员会 · 宣</div>
+              </div>
+              
+              <!-- 便签 2：乘客招募 -->
+              <div class="board-sticky sticky-recruit">
+                <div class="sticky-head">✉️ 登岛民移居招募通知</div>
+                <div class="sticky-content">
+                  欢迎各位开发者、创作者移居博客小岛！在这里我们不催稿、不焦虑。完成登岛移居手续后，即可当场获得您的专属官方<strong>「岛民证 (Island Passport)」</strong>，并解锁专属的<strong>「随身背包口袋」</strong>！✨
+                </div>
+                <div class="sticky-foot">Dodo Airlines 客服部</div>
               </div>
             </div>
           </div>
@@ -339,13 +494,24 @@
           </svg>
         </div>
 
-        <h3 class="island-title">今天也是慢慢长大的一天 🌱</h3>
-        <p class="island-sub">在这里不焦虑。每天收集一些灵感，搭建好玩的功能。今天的小岛有没有比昨天更绿一点点呢？</p>
+        <h3 class="island-title">
+          <span v-if="isLoggedIn">今天也是慢慢长大的一天 🌱</span>
+          <span v-else>小岛的生活，从一张机票开始 ✈️</span>
+        </h3>
+        <p class="island-sub">
+          <span v-if="isLoggedIn">在这里不焦虑。每天收集一些灵感，搭建好玩的功能。今天的小岛有没有比昨天更绿一点点呢？</span>
+          <span v-else>这里是没有焦虑和催促的像素绿洲。每天整理你的随笔，沉淀开发心得。今天的小岛有没有比昨天更绿一点点呢？</span>
+        </p>
         <div class="island-actions">
-          <router-link class="btn-ai btn-ai-primary" to="/dashboard">
+          <router-link v-if="isLoggedIn" class="btn-ai btn-ai-primary" to="/dashboard">
             <span class="btn-ai-finger"></span>
             <svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" class="btn-arrow-ico"><path d="M3 10h14M11 4l6 6-6 6"/></svg>
             <span class="btn-ai-text">进入工作台</span>
+          </router-link>
+          <router-link v-else class="btn-ai btn-ai-primary" to="/login">
+            <span class="btn-ai-finger"></span>
+            <svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" class="btn-arrow-ico"><path d="M3 10h14M11 4l6 6-6 6"/></svg>
+            <span class="btn-ai-text">领取我的登岛机票 🎫</span>
           </router-link>
         </div>
       </div>
@@ -353,7 +519,8 @@
 
     <!-- 脚部 -->
     <footer class="foot">
-      <div class="foot-credit">© 2026 {{ nickname }} · 基于 animal-island-vue3 拟物引擎 · MIT License</div>
+      <div v-if="isLoggedIn" class="foot-credit">© 2026 {{ nickname }} · 基于 animal-island-vue3 拟物引擎 · MIT License</div>
+      <div v-else class="foot-credit">© 2026 Nook Inc. · 基于 animal-island-vue3 拟物引擎 · MIT License</div>
     </footer>
   </div>
 </template>
@@ -489,6 +656,10 @@ onUnmounted(() => {
 });
 
 const handleModuleClick = (key: string) => {
+  if (!isLoggedIn.value) {
+    router.push("/login");
+    return;
+  }
   // 点击背包物品进入对应的功能路由
   if (key === "me" || key === "user") {
     router.push("/profile");
@@ -514,6 +685,13 @@ const scrollToSection = (id: string) => {
     }
   }
 };
+
+const unauthModules = [
+  { key: "daily", color: "pink", tag: "DAILY · 日常", title: "工作日常", sub: "日报 · 周报 · 月报的打理", icon: "M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z" },
+  { key: "docs", color: "yellow", tag: "DOCS · 开发", title: "开发文档", sub: "小岛技术结晶与沉淀", icon: "M4 19.5A2.5 2.5 0 016.5 17H20M4 19.5A2.5 2.5 0 016.5 17H20M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z" },
+  { key: "docker", color: "blue", tag: "TRANSIT · 联运", title: "Dodo 联运", sub: "本地远端服务无缝对接", icon: "M22 12h-4l-3 9L9 3l-3 9H2" },
+  { key: "site", color: "green", tag: "BLUEPRINT · 蓝图", title: "建设蓝图", sub: "站点字典参数系统配置", icon: "M12 20h9M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z" },
+];
 
 const modules = [
   { key: "daily", color: "pink", tag: "DAILY", title: "工作日常", sub: "日报 · 周报 · 月报", icon: "M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z" },
@@ -1771,6 +1949,405 @@ const modules = [
   
   .ac-passport__stamp-dodo {
     align-self: flex-end;
+  }
+}
+
+// ============================================
+// 11. 未登录动森移居柜台前台视觉 (Unauth Counter)
+// ============================================
+.hero--unauth {
+  padding-bottom: 90px;
+}
+
+.hero-tag--unauth {
+  color: #58a032 !important;
+  border-color: #794f27 !important;
+}
+
+.hero-avatar-wrap--unauth {
+  height: 380px;
+  width: 100%;
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+}
+
+// 柜台木质底座
+.nook-counter {
+  width: 280px;
+  height: 120px;
+  position: relative;
+  z-index: 2;
+  margin-bottom: 10px;
+  display: flex;
+  flex-direction: column;
+}
+
+.nook-counter-top {
+  height: 14px;
+  background: #a98056;
+  border: 3.5px solid #794f27;
+  border-radius: 8px;
+  box-shadow: 0 4px 0 rgba(0, 0, 0, 0.08);
+}
+
+.nook-counter-body {
+  flex: 1;
+  background: #eed09d;
+  border: 3.5px solid #794f27;
+  border-top: none;
+  border-radius: 0 0 16px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 8px 16px rgba(121, 79, 39, 0.08);
+  position: relative;
+
+  &::after {
+    content: "";
+    position: absolute;
+    bottom: 8px;
+    left: 8px;
+    right: 8px;
+    top: 8px;
+    border: 2px dashed rgba(121, 79, 39, 0.15);
+    border-radius: 8px;
+    pointer-events: none;
+  }
+}
+
+.nook-counter-sign {
+  font-size: 13px;
+  font-weight: 900;
+  color: #794f27;
+  background: #fffef6;
+  border: 2px solid #794f27;
+  border-radius: 8px;
+  padding: 4px 10px;
+  box-shadow: 0 2.5px 0 0 #794f27;
+  letter-spacing: 1px;
+}
+
+// 动森小树叶 Nook 标志
+.deco-nook-leaf {
+  position: absolute;
+  top: 170px;
+  left: 60px;
+  width: 38px;
+  height: 38px;
+  z-index: 1;
+  transform: rotate(-15deg);
+  animation: ac-leaf-sway 4s ease-in-out infinite alternate;
+}
+
+@keyframes ac-leaf-sway {
+  0% { transform: rotate(-20deg) scale(0.95); }
+  100% { transform: rotate(-5deg) scale(1.05); }
+}
+
+// Dodo 机票 🎫
+.deco-dodo-ticket {
+  position: absolute;
+  top: 150px;
+  right: 60px;
+  width: 72px;
+  height: 100px;
+  background: #fffdf0;
+  border: 3px solid #794f27;
+  border-radius: 12px;
+  z-index: 1;
+  transform: rotate(18deg);
+  box-shadow: 0 6px 12px rgba(121, 79, 39, 0.06);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  animation: ac-ticket-bob 5s ease-in-out infinite;
+
+  .ticket-header {
+    background: #6a86d8;
+    color: #fff;
+    font-size: 8px;
+    font-weight: 900;
+    text-align: center;
+    padding: 3px 0;
+    border-bottom: 2.5px solid #794f27;
+  }
+
+  .ticket-body {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    position: relative;
+
+    &::before, &::after {
+      content: "";
+      position: absolute;
+      top: 50%;
+      width: 8px;
+      height: 8px;
+      background: #eaf6db; // 默认匹配天空时域的混合
+      border: 3px solid #794f27;
+      border-radius: 50%;
+    }
+    &::before { left: -7px; }
+    &::after { right: -7px; }
+  }
+
+  .ticket-icon { font-size: 18px; }
+  .ticket-text {
+    font-size: 9px;
+    font-weight: 900;
+    color: #794f27;
+    background: #f7cd67;
+    border: 1.5px solid #794f27;
+    border-radius: 4px;
+    padding: 1px 4px;
+  }
+}
+
+@keyframes ac-ticket-bob {
+  0%, 100% { transform: rotate(18deg) translateY(0); }
+  50% { transform: rotate(14deg) translateY(-10px); }
+}
+
+// Timmy & Tommy 对话泡泡
+.nook-bubble {
+  position: absolute;
+  background: #fffdf2;
+  border: 3px solid #794f27;
+  border-radius: 20px;
+  padding: 12px 16px;
+  box-shadow: 0 8px 0 rgba(121, 79, 39, 0.05), 0 12px 24px rgba(0,0,0,0.03);
+  display: flex;
+  flex-direction: column;
+  z-index: 3;
+  width: 250px;
+
+  &::after {
+    content: "";
+    position: absolute;
+    bottom: -13px;
+    left: 30px;
+    width: 0;
+    height: 0;
+    border-style: solid;
+    border-width: 10px 10px 0 10px;
+    border-color: #fffdf2 transparent transparent transparent;
+  }
+
+  &::before {
+    content: "";
+    position: absolute;
+    bottom: -17px;
+    left: 28px;
+    width: 0;
+    height: 0;
+    border-style: solid;
+    border-width: 12px 12px 0 12px;
+    border-color: #794f27 transparent transparent transparent;
+    z-index: -1;
+  }
+
+  .nook-bubble-name {
+    font-size: 10px;
+    font-weight: 900;
+    color: #11a89b;
+    margin-bottom: 4px;
+    letter-spacing: 0.5px;
+  }
+
+  .nook-bubble-content {
+    font-size: 12px;
+    font-weight: 800;
+    color: #794f27;
+    line-height: 1.5;
+  }
+
+  &--timmy {
+    top: 10px;
+    left: 20px;
+    animation: ac-bubble-float 4.5s ease-in-out infinite alternate;
+  }
+
+  &--tommy {
+    top: 90px;
+    right: 20px;
+    width: 140px;
+    padding: 8px 12px;
+    opacity: 0.85;
+    animation: ac-bubble-float-rev 5s ease-in-out infinite alternate;
+
+    &::after {
+      left: auto;
+      right: 30px;
+    }
+    &::before {
+      left: auto;
+      right: 28px;
+    }
+
+    .nook-bubble-name {
+      color: #9f927d;
+    }
+
+    .nook-bubble-content {
+      font-size: 11px;
+      font-style: italic;
+    }
+  }
+}
+
+@keyframes ac-bubble-float {
+  0% { transform: translateY(0) scale(1); }
+  100% { transform: translateY(-6px) scale(1.02); }
+}
+
+@keyframes ac-bubble-float-rev {
+  0% { transform: translateY(0) scale(1); }
+  100% { transform: translateY(5px) scale(0.98); }
+}
+
+// ============================================
+// 12. 大头针告示板 (Bulletin Board) 样式
+// ============================================
+.bulletin-board {
+  width: 100%;
+  max-width: 720px;
+  background: #e5cc9c; // 温暖的软木塞底色
+  border: 12px solid #946f48; // 木纹厚边框
+  border-radius: 24px;
+  padding: 24px;
+  box-shadow:
+    inset 0 0 20px rgba(78, 54, 30, 0.25),
+    0 16px 40px rgba(121, 79, 39, 0.12);
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.board-pin {
+  position: absolute;
+  top: -12px;
+  font-size: 20px;
+  z-index: 3;
+  filter: drop-shadow(0 4px 3px rgba(0,0,0,0.15));
+
+  &.pin-left { left: 40px; transform: rotate(-10deg); }
+  &.pin-right { right: 40px; transform: rotate(10deg); }
+}
+
+.board-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 3.5px dashed rgba(121, 79, 39, 0.15);
+  padding-bottom: 12px;
+
+  .board-title {
+    font-size: 18px;
+    font-weight: 900;
+    color: #794f27;
+    letter-spacing: 1px;
+  }
+}
+
+.board-birds {
+  display: flex;
+  gap: 12px;
+  margin-top: -14px;
+}
+
+.board-bird {
+  font-size: 20px;
+  animation: ac-bird-sing 0.8s ease infinite alternate;
+
+  &:last-child {
+    animation-delay: 0.4s;
+    transform: scaleX(-1);
+  }
+}
+
+@keyframes ac-bird-sing {
+  0% { transform: translateY(0) rotate(-4deg); }
+  100% { transform: translateY(-4px) rotate(4deg); }
+}
+
+.board-body {
+  display: grid;
+  grid-template-columns: 1.05fr 0.95fr;
+  gap: 20px;
+}
+
+// 告示板便签纸
+.board-sticky {
+  background: #fffdf0;
+  border: 2.5px solid #794f27;
+  border-radius: 12px;
+  padding: 16px;
+  box-shadow: 4px 6px 0 rgba(78, 54, 30, 0.12);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-height: 180px;
+
+  .sticky-head {
+    font-size: 13px;
+    font-weight: 900;
+    color: #794f27;
+    border-bottom: 1.5px dashed rgba(121, 79, 39, 0.15);
+    padding-bottom: 6px;
+  }
+
+  .sticky-content {
+    font-size: 12px;
+    font-weight: 800;
+    color: #794f27;
+    line-height: 1.6;
+    flex: 1;
+
+    strong {
+      color: #11a89b;
+      font-weight: 900;
+    }
+  }
+
+  .sticky-foot {
+    font-size: 10px;
+    font-weight: 800;
+    color: #bdaea0;
+    text-align: right;
+  }
+}
+
+.sticky-tech {
+  background: #fdfcee; // 浅黄
+  transform: rotate(-2.5deg);
+}
+
+.sticky-recruit {
+  background: #edfbee; // 浅绿
+  transform: rotate(2deg);
+
+  .sticky-content strong {
+    color: #6a86d8;
+  }
+}
+
+// 针对移动端的适配
+@media (max-width: 768px) {
+  .board-body {
+    grid-template-columns: 1fr;
+  }
+  .sticky-tech, .sticky-recruit {
+    transform: none;
+  }
+  .nook-bubble--tommy {
+    display: none;
   }
 }
 </style>
