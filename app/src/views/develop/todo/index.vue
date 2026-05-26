@@ -189,7 +189,11 @@
                   clearable
                   @change="
                     (value: any) =>
-                      handleQuickField(row, { platform_id: value || null }, '平台已更新')
+                      handleQuickField(
+                        row,
+                        { platform_id: value == null ? 0 : Number(value) },
+                        '平台已更新'
+                      )
                   "
                 />
               </td>
@@ -404,11 +408,24 @@ async function handleQuickStatus(row: TodoItem, status: number): Promise<void> {
     row.status = status;
     message.success("状态已更新");
     fetchStatistics();
-  } catch (e: any) {
-    message.error(e.message || "状态更新失败");
+  } catch {
+    // request 拦截器已统一弹出错误提示，避免同一次失败显示两条消息。
   } finally {
     loadingInstance.close();
   }
+}
+
+function buildQuickUpdatePayload(row: TodoItem, patch: Partial<TodoForm>): TodoForm {
+  return {
+    title: row.title,
+    content: row.content ?? "",
+    status: row.status,
+    priority: row.priority,
+    due_date: row.due_date ?? row.dueDate ?? null,
+    platform_id: rowPlatformId(row) ?? 0,
+    tags: row.tags ?? [],
+    ...patch,
+  };
 }
 
 async function handleQuickField(
@@ -418,27 +435,32 @@ async function handleQuickField(
 ): Promise<void> {
   const loadingInstance = loadingService({ lock: true });
   try {
-    await TodoAPI.update(row.id, payload);
+    const updatePayload = buildQuickUpdatePayload(row, payload);
+    await TodoAPI.update(row.id, updatePayload);
     if ("due_date" in payload) {
-      row.dueDate = payload.due_date;
-      row.due_date = payload.due_date;
+      row.dueDate = updatePayload.due_date ?? null;
+      row.due_date = updatePayload.due_date ?? null;
     }
     if ("platform_id" in payload) {
-      row.platformId = payload.platform_id;
-      row.platform_id = payload.platform_id;
-      const target = platforms.value.find((p) => p.id === payload.platform_id);
+      row.platformId = updatePayload.platform_id;
+      row.platform_id = updatePayload.platform_id;
+      const target = platforms.value.find((p) => p.id === updatePayload.platform_id);
       row.platform = target ? { id: target.id, name: target.name } : null;
     }
     if ("priority" in payload) {
-      row.priority = payload.priority!;
+      row.priority = updatePayload.priority;
     }
     message.success(successText);
     fetchStatistics();
-  } catch (e: any) {
-    message.error(e.message || "更新失败");
+  } catch {
+    // request 拦截器已统一弹出错误提示，避免同一次失败显示两条消息。
   } finally {
     loadingInstance.close();
   }
+}
+
+function handleQuickPriority(row: TodoItem, priority: number): Promise<void> {
+  return handleQuickField(row, { priority }, "优先级已更新");
 }
 
 async function deleteTodos(ids: string): Promise<void> {

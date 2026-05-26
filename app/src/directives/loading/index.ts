@@ -7,7 +7,6 @@
  * 遮罩内部复用 animal-island-vue 的 Loading 组件保证视觉一致。
  */
 import { createApp, h, type App, type Directive } from "vue";
-import { Loading } from "animal-island-vue";
 
 interface LoadingInstance {
   close: () => void;
@@ -22,9 +21,33 @@ function createOverlay(parent: HTMLElement, lock: boolean, text?: string): Loadi
 
   const app: App = createApp({
     render: () =>
-      h("div", { class: "animal-loading-inner" }, [
-        h(Loading, { active: true }),
-        text ? h("p", { class: "animal-loading-text" }, text) : null,
+      h("div", { class: "ac-loading-card" }, [
+        h("div", { class: "ac-loading-spinner" }, [
+          h(
+            "svg",
+            {
+              class: "ac-loading-leaf",
+              viewBox: "0 0 40 40",
+              style: "width: 100%; height: 100%;"
+            },
+            [
+              h("path", {
+                d: "M5 35c10 0 20-5 28-13 5-5 7-12 7-22-10 0-17 2-22 7-8 8-13 18-13 28z",
+                fill: "#8ac68a",
+                stroke: "#794f27",
+                "stroke-width": "2.5",
+                "stroke-linejoin": "round"
+              }),
+              h("path", {
+                d: "M5 35c8-8 16-14 26-20",
+                stroke: "#794f27",
+                "stroke-width": "1.5",
+                fill: "none"
+              })
+            ]
+          )
+        ]),
+        h("span", { class: "ac-loading-text" }, text || "努力加载中...")
       ]),
   });
   app.mount(mask);
