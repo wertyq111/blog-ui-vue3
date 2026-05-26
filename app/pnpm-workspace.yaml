@@ -1,0 +1,5 @@
+verifyDepsBeforeRun: false
+allowBuilds:
+  '@parcel/watcher': false
+  es5-ext: false
+  vue-demi: false
