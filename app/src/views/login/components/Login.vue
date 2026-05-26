@@ -77,7 +77,12 @@
             </template>
           </el-input>
           <div cursor-pointer h-50px w-170px flex-center @click="getCaptcha">
-            <el-icon v-if="codeLoading" class="is-loading" size="20"><Loading /></el-icon>
+            <div v-if="codeLoading" class="ac-captcha-loading">
+              <svg class="ac-captcha-loading-leaf" viewBox="0 0 40 40">
+                <path d="M5 35c10 0 20-5 28-13 5-5 7-12 7-22-10 0-17 2-22 7-8 8-13 18-13 28z" fill="#8ac68a" stroke="#794f27" stroke-width="2.5" stroke-linejoin="round"/>
+                <path d="M5 35c8-8 16-14 26-20" stroke="#794f27" stroke-width="1.5" fill="none"/>
+              </svg>
+            </div>
             <img
               v-else-if="captchaBase64"
               border-rd-25px
@@ -426,5 +431,35 @@ defineExpose({ loginFormData });
   .panel-title {
     font-size: 28px;
   }
+}
+
+/* 验证码动森风专属 Loading */
+.ac-captcha-loading {
+  width: 100%;
+  height: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #fffef6;
+  border: 2.5px dashed #e8e2d6;
+  border-radius: 25px;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.02);
+  transition: all 0.25s;
+
+  &:hover {
+    border-color: #19c8b9;
+  }
+}
+
+.ac-captcha-loading-leaf {
+  width: 24px;
+  height: 24px;
+  animation: ac-captcha-leaf-spin 1.2s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+
+@keyframes ac-captcha-leaf-spin {
+  0% { transform: rotate(0deg) scale(0.95); }
+  50% { transform: rotate(180deg) scale(1.15); }
+  100% { transform: rotate(360deg) scale(0.95); }
 }
 </style>
