@@ -2,6 +2,53 @@
   <div :class="['wb-hero', 'weather-mode-' + currentWeather]">
     <WeatherScene :weather="currentWeather" />
 
+    <!-- 顶部毛玻璃无缝跑马灯滚动胶囊 (3D HSL 质感) -->
+    <div class="hero-top-scroller">
+      <div class="hero-top-scroller__track">
+        <div class="hero-top-scroller__content">
+          <span class="scroller-date">{{ todayText }}</span>
+          <span class="scroller-divider">·</span>
+          <span class="scroller-weather">
+            <svg
+              viewBox="0 0 24 24"
+              width="13"
+              height="13"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2.5"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              class="scroller-weather-icon"
+            >
+              <path d="M7 18a4 4 0 010-8 6 6 0 0111-2 4 4 0 011 8H7z" />
+            </svg>
+            {{ weatherText || "正在连线岛屿气象台..." }}
+          </span>
+        </div>
+        <!-- 复制一份用于无缝循环衔接 -->
+        <div class="hero-top-scroller__content" aria-hidden="true">
+          <span class="scroller-date">{{ todayText }}</span>
+          <span class="scroller-divider">·</span>
+          <span class="scroller-weather">
+            <svg
+              viewBox="0 0 24 24"
+              width="13"
+              height="13"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2.5"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              class="scroller-weather-icon"
+            >
+              <path d="M7 18a4 4 0 010-8 6 6 0 0111-2 4 4 0 011 8H7z" />
+            </svg>
+            {{ weatherText || "正在连线岛屿气象台..." }}
+          </span>
+        </div>
+      </div>
+    </div>
+
     <div class="weather-picker" aria-label="切换天气动画">
       <button
         v-for="weather in WEATHER_PRESETS"
@@ -79,22 +126,6 @@
             <em>{{ nickname }}</em>
           </h1>
           <img class="hero-avatar" :src="avatarSrc" :alt="nickname" />
-        </div>
-        <p class="hero-sub">{{ todayText }}</p>
-        <div v-if="weatherText" class="hero-weather">
-          <svg
-            viewBox="0 0 24 24"
-            width="14"
-            height="14"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          >
-            <path d="M7 18a4 4 0 010-8 6 6 0 0111-2 4 4 0 011 8H7z" />
-          </svg>
-          {{ weatherText }}
         </div>
       </div>
       <div class="hero-actions">
@@ -447,30 +478,77 @@ onMounted(() => {
   }
 }
 
-.hero-sub {
-  font-size: 12px;
-  color: var(--cyber-text, #794f27);
-  font-weight: 500;
-  max-width: 760px;
-  line-height: 1.7;
-  margin: 0 0 14px;
-}
-
-.hero-weather {
-  display: inline-flex;
+.hero-top-scroller {
+  position: absolute;
+  top: 14px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 10;
+  display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 6px 14px 6px 10px;
-  background: rgba(255, 255, 255, 0.85);
-  border: 2px solid var(--cyber-border-strong, #e8e2d6);
-  border-radius: 999px;
+  padding: 5px 16px;
+  background: rgba(255, 255, 255, 0.72);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1.5px solid rgba(255, 255, 255, 0.6);
+  border-radius: 20px;
+  box-shadow: 
+    0 4px 15px rgba(121, 79, 39, 0.05),
+    inset 0 1px 0 rgba(255, 255, 255, 0.8);
   font-size: 11px;
   font-weight: 700;
   color: var(--cyber-text, #794f27);
+  max-width: min(420px, 80vw - 40px);
+  overflow: hidden;
+  white-space: nowrap;
+}
 
-  svg {
-    color: #f7cd67;
+.hero-top-scroller__track {
+  display: flex;
+  gap: 28px;
+  animation: heroTicker 22s linear infinite;
+  
+  &:hover {
+    animation-play-state: paused;
   }
+}
+
+.hero-top-scroller__content {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.scroller-date {
+  font-weight: 800;
+}
+
+.scroller-divider {
+  color: var(--cyber-text-2, #a39580);
+  opacity: 0.5;
+}
+
+.scroller-weather {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--cyber-text, #794f27);
+}
+
+.scroller-weather-icon {
+  color: #f7cd67;
+  animation: scroller-weather-float 2.5s ease-in-out infinite alternate;
+}
+
+@keyframes heroTicker {
+  0% { transform: translate3d(0, 0, 0); }
+  100% { transform: translate3d(calc(-50% - 14px), 0, 0); }
+}
+
+@keyframes scroller-weather-float {
+  0% { transform: translateY(0.5px); }
+  100% { transform: translateY(-1px); }
 }
 
 .hero-actions {
@@ -575,16 +653,22 @@ onMounted(() => {
   .hero-title {
     color: #f8f4d8;
   }
-  .hero-sub {
-    color: #f8f4d8;
-  }
   .hero-title em {
     color: #82d5bb;
   }
-  .hero-weather {
-    background: rgba(255, 255, 255, 0.18);
+  .hero-top-scroller {
+    background: rgba(25, 36, 60, 0.6);
+    border-color: rgba(255, 255, 255, 0.15);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
     color: #f8f4d8;
-    border-color: rgba(255, 255, 255, 0.25);
+    
+    .scroller-weather {
+      color: #f8f4d8;
+    }
+    .scroller-divider {
+      color: #829df0;
+      opacity: 0.6;
+    }
   }
 }
 
