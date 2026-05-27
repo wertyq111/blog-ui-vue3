@@ -1,6 +1,30 @@
 <!-- 工作日常：数据报表导出与 Markdown 导入 -->
 <template>
   <div class="report-panel">
+    <!-- 全局 SVG 渐变定义（用于多组件高效引用，无缝对齐） -->
+    <svg style="position: absolute; width: 0; height: 0; overflow: hidden;" aria-hidden="true">
+      <defs>
+        <!-- Codex 经典开发云蓝紫渐变（还原图一） -->
+        <linearGradient id="codexCloudGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stop-color="#8e85ff" />
+          <stop offset="100%" stop-color="#2545ff" />
+        </linearGradient>
+
+        <!-- Gemini Google 双子星经典极光渐变 -->
+        <linearGradient id="geminiGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stop-color="#a376eb" />
+          <stop offset="45%" stop-color="#4285f4" />
+          <stop offset="75%" stop-color="#24bca8" />
+          <stop offset="100%" stop-color="#34a853" />
+        </linearGradient>
+        <linearGradient id="geminiGradSmall" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stop-color="#ff8b7f" />
+          <stop offset="50%" stop-color="#fbbc05" />
+          <stop offset="100%" stop-color="#a376eb" />
+        </linearGradient>
+      </defs>
+    </svg>
+
     <div class="report-panel__head">
       <div class="report-panel__title">数据报表与导入</div>
       <div class="report-panel__desc">快速生成阶段性工作汇报，或从外部 Markdown 文件导入记录。</div>
@@ -42,7 +66,43 @@
           :class="{ 'is-open': modelMenuOpen }"
           @click="toggleModelMenu"
         >
-          <span>{{ selectedModelLabel }}</span>
+          <div class="report-model-select__trigger-content">
+            <div v-if="selectedAgentKey" class="agent-logo-wrapper mini" :class="selectedAgentKey">
+              <!-- OpenClaw 图二红色小怪兽吉祥物 (微缩版) -->
+              <svg v-if="selectedAgentKey === 'openclaw'" viewBox="0 0 32 32" class="svg-openclaw">
+                <g class="claw-robot-group">
+                  <path class="claw-antenna-l" d="M12.5 10 C12 8, 11 6.5, 9.5 7" stroke="#eb4141" stroke-width="1.3" stroke-linecap="round" fill="none" />
+                  <path class="claw-antenna-r" d="M19.5 10 C20 8, 21 6.5, 22.5 7" stroke="#eb4141" stroke-width="1.3" stroke-linecap="round" fill="none" />
+                  <rect class="claw-leg-l" x="13" y="23" width="2" height="3.5" rx="0.6" fill="#eb4141" />
+                  <rect class="claw-leg-r" x="17" y="23" width="2" height="3.5" rx="0.6" fill="#eb4141" />
+                  <circle class="claw-body" cx="16" cy="16.5" r="7.5" fill="#eb4141" />
+                  <path class="claw-hand-l" d="M8.5 14.5 C6.5 15.5, 6.5 18.5, 8.5 19.5 C9 19, 9.5 17.5, 9 15.5 Z" fill="#eb4141" />
+                  <path class="claw-hand-r" d="M23.5 14.5 C25.5 15.5, 25.5 18.5, 23.5 19.5 C23 19, 22.5 17.5, 23 15.5 Z" fill="#eb4141" />
+                  <circle class="claw-eye-l" cx="13" cy="14" r="1.3" fill="#00f3db" />
+                  <circle class="claw-eye-r" cx="19" cy="14" r="1.3" fill="#00f3db" />
+                  <circle class="claw-eye-glow-l" cx="12.6" cy="13.6" r="0.4" fill="#ffffff" />
+                  <circle class="claw-eye-glow-r" cx="18.6" cy="13.6" r="0.4" fill="#ffffff" />
+                </g>
+              </svg>
+              <!-- Codex 图一蓝紫命令云 (微缩版) -->
+              <svg v-else-if="selectedAgentKey === 'codex'" viewBox="0 0 32 32" class="svg-codex">
+                <rect x="2" y="2" width="28" height="28" rx="6.5" fill="#ffffff" stroke="rgba(121, 79, 39, 0.08)" stroke-width="0.5" />
+                <path class="codex-cloud" d="M16 6.5 C20 6.5, 23 9.5, 23 13.5 C25.5 13.5, 27.5 15.5, 27.5 18 C27.5 21, 25 23.5, 22 23.5 L10 23.5 C7 23.5, 4.5 21, 4.5 18 C4.5 15.5, 6.5 13.5, 9 13.5 C9 9.5, 12 6.5, 16 6.5 Z" fill="url(#codexCloudGrad)" />
+                <g class="char-wrapper-gt">
+                  <path class="char-gt" d="M10.5 12 L14.5 15 L10.5 18" stroke="#ffffff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" fill="none" />
+                </g>
+                <g class="char-wrapper-cursor">
+                  <line class="char-cursor" x1="16.5" y1="18" x2="21.5" y2="18" stroke="#ffffff" stroke-width="2.2" stroke-linecap="round" />
+                </g>
+              </svg>
+              <!-- Gemini 双四角星 (微缩版) -->
+              <svg v-else-if="selectedAgentKey === 'gemini'" viewBox="0 0 32 32" class="svg-gemini">
+                <path class="star-main" d="M14 4 C14 10, 10 14, 4 14 C10 14, 14 18, 14 24 C14 18, 18 14, 24 14 C18 14, 14 10, 14 4 Z" fill="url(#geminiGrad)" />
+                <path class="star-sub" d="M24 20 C24 23, 23 24, 20 24 C23 24, 24 25, 24 28 C24 25, 25 24, 28 24 C25 24, 24 23, 24 20 Z" fill="url(#geminiGradSmall)" />
+              </svg>
+            </div>
+            <span>{{ selectedModelLabel }}</span>
+          </div>
           <el-icon><ArrowDown /></el-icon>
         </button>
         <div v-if="modelMenuOpen" class="report-model-select__menu">
@@ -58,6 +118,40 @@
             @mouseenter="activeAgentKey = agent.key"
             @click="handleAgentClick(agent)"
           >
+            <div class="agent-logo-wrapper" :class="agent.key">
+              <!-- OpenClaw 图二红色小怪兽吉祥物 -->
+              <svg v-if="agent.key === 'openclaw'" viewBox="0 0 32 32" class="svg-openclaw">
+                <g class="claw-robot-group">
+                  <path class="claw-antenna-l" d="M12.5 10 C12 8, 11 6.5, 9.5 7" stroke="#eb4141" stroke-width="1.3" stroke-linecap="round" fill="none" />
+                  <path class="claw-antenna-r" d="M19.5 10 C20 8, 21 6.5, 22.5 7" stroke="#eb4141" stroke-width="1.3" stroke-linecap="round" fill="none" />
+                  <rect class="claw-leg-l" x="13" y="23" width="2" height="3.5" rx="0.6" fill="#eb4141" />
+                  <rect class="claw-leg-r" x="17" y="23" width="2" height="3.5" rx="0.6" fill="#eb4141" />
+                  <circle class="claw-body" cx="16" cy="16.5" r="7.5" fill="#eb4141" />
+                  <path class="claw-hand-l" d="M8.5 14.5 C6.5 15.5, 6.5 18.5, 8.5 19.5 C9 19, 9.5 17.5, 9 15.5 Z" fill="#eb4141" />
+                  <path class="claw-hand-r" d="M23.5 14.5 C25.5 15.5, 25.5 18.5, 23.5 19.5 C23 19, 22.5 17.5, 23 15.5 Z" fill="#eb4141" />
+                  <circle class="claw-eye-l" cx="13" cy="14" r="1.3" fill="#00f3db" />
+                  <circle class="claw-eye-r" cx="19" cy="14" r="1.3" fill="#00f3db" />
+                  <circle class="claw-eye-glow-l" cx="12.6" cy="13.6" r="0.4" fill="#ffffff" />
+                  <circle class="claw-eye-glow-r" cx="18.6" cy="13.6" r="0.4" fill="#ffffff" />
+                </g>
+              </svg>
+              <!-- Codex 图一蓝紫命令云 -->
+              <svg v-else-if="agent.key === 'codex'" viewBox="0 0 32 32" class="svg-codex">
+                <rect x="2" y="2" width="28" height="28" rx="6.5" fill="#ffffff" stroke="rgba(121, 79, 39, 0.08)" stroke-width="0.5" />
+                <path class="codex-cloud" d="M16 6.5 C20 6.5, 23 9.5, 23 13.5 C25.5 13.5, 27.5 15.5, 27.5 18 C27.5 21, 25 23.5, 22 23.5 L10 23.5 C7 23.5, 4.5 21, 4.5 18 C4.5 15.5, 6.5 13.5, 9 13.5 C9 9.5, 12 6.5, 16 6.5 Z" fill="url(#codexCloudGrad)" />
+                <g class="char-wrapper-gt">
+                  <path class="char-gt" d="M10.5 12 L14.5 15 L10.5 18" stroke="#ffffff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" fill="none" />
+                </g>
+                <g class="char-wrapper-cursor">
+                  <line class="char-cursor" x1="16.5" y1="18" x2="21.5" y2="18" stroke="#ffffff" stroke-width="2.2" stroke-linecap="round" />
+                </g>
+              </svg>
+              <!-- Gemini 双四角星 -->
+              <svg v-else-if="agent.key === 'gemini'" viewBox="0 0 32 32" class="svg-gemini">
+                <path class="star-main" d="M14 4 C14 10, 10 14, 4 14 C10 14, 14 18, 14 24 C14 18, 18 14, 24 14 C18 14, 14 10, 14 4 Z" fill="url(#geminiGrad)" />
+                <path class="star-sub" d="M24 20 C24 23, 23 24, 20 24 C23 24, 24 25, 24 28 C24 25, 25 24, 28 24 C25 24, 24 23, 24 20 Z" fill="url(#geminiGradSmall)" />
+              </svg>
+            </div>
             <span>{{ agent.label }}</span>
             <el-icon v-if="agent.models.length > 1"><ArrowRight /></el-icon>
             <el-icon v-else-if="isAgentSelected(agent)"><Check /></el-icon>
@@ -89,7 +183,7 @@
       </Button>
 
       <Button type="default" size="small" @click="openExportHistory">
-        查询进度
+        导出列表
       </Button>
 
       <div class="import-group">
@@ -112,7 +206,7 @@
     <AdminAnimalModal
       v-model:visible="historyVisible"
       title="报表生成记录"
-      :width="820"
+      width="70%"
       :show-footer="false"
       @close="handleHistoryClose"
     >
@@ -268,6 +362,12 @@ const selectedModelLabel = computed(() => {
   return agent.models.length === 1
     ? agent.label
     : `${agent.label} / ${formatModelLabel(config.model)}`;
+});
+
+const selectedAgentKey = computed(() => {
+  if (!config.model) return "";
+  const agent = modelAgents.value.find((item) => item.models.includes(config.model));
+  return agent ? agent.key : "";
 });
 
 const isExportActive = computed(() => {
@@ -725,13 +825,6 @@ onBeforeUnmount(() => {
       box-shadow 0.18s ease,
       border-color 0.18s ease;
 
-    span {
-      min-width: 0;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-    }
-
     .el-icon {
       flex: 0 0 auto;
       font-size: 13px;
@@ -752,6 +845,21 @@ onBeforeUnmount(() => {
       .el-icon {
         transform: rotate(180deg);
       }
+    }
+  }
+
+  &__trigger-content {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
+    flex: 1;
+
+    span {
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
     }
   }
 
@@ -787,7 +895,7 @@ onBeforeUnmount(() => {
     min-height: 36px;
     display: flex;
     align-items: center;
-    justify-content: space-between;
+    justify-content: flex-start;
     gap: 10px;
     padding: 8px 16px;
     border: 0;
@@ -807,6 +915,7 @@ onBeforeUnmount(() => {
     }
 
     .el-icon {
+      margin-left: auto;
       flex: 0 0 auto;
       font-size: 13px;
       color: var(--ai-text-2, #9f927d);
@@ -820,7 +929,7 @@ onBeforeUnmount(() => {
     &:not(.is-selected).is-active {
       background: rgba(25, 200, 185, 0.06);
       color: #11a89b;
-      padding-left: 28px;
+      padding-left: 36px;
 
       .el-icon {
         color: #11a89b;
@@ -838,6 +947,11 @@ onBeforeUnmount(() => {
         animation: animal-dropdown-cursor-in 0.3s ease-out forwards;
         pointer-events: none;
       }
+
+      .agent-logo-wrapper {
+        transform: scale(1.1);
+        box-shadow: 0 2px 6px rgba(121, 79, 39, 0.15);
+      }
     }
 
     /* 选中态：绿底深绿字，单层高亮，不出现手指 */
@@ -849,6 +963,302 @@ onBeforeUnmount(() => {
       .el-icon {
         color: #4a8a36;
       }
+    }
+  }
+}
+
+/* ==========================================================================
+   AI 代理 (Agent) SVG 动效 Logo 样式与微交互系统 (HSL High Aesthetics)
+   ========================================================================== */
+.agent-logo-wrapper {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  flex-shrink: 0;
+  border-radius: 7px;
+  background: rgba(255, 255, 255, 0.85);
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.04), 0 1px 2px rgba(121, 79, 39, 0.08);
+  padding: 2.5px;
+  box-sizing: border-box;
+  transition: all 0.25s cubic-bezier(0.25, 0.8, 0.25, 1);
+  border: 1px solid rgba(121, 79, 39, 0.06);
+
+  &.mini {
+    width: 20px;
+    height: 20px;
+    padding: 1.8px;
+    background: rgba(255, 255, 255, 0.95);
+  }
+
+  // 自适应外框底色
+  &.openclaw {
+    background: #fff4f5;
+    border-color: rgba(235, 65, 65, 0.15);
+  }
+  &.codex {
+    background: #fbf5eb;
+    border-color: rgba(142, 133, 255, 0.15);
+  }
+  &.gemini {
+    background: #f0f4fc;
+    border-color: rgba(66, 133, 244, 0.15);
+  }
+}
+
+.svg-openclaw,
+.svg-codex,
+.svg-gemini {
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  display: block;
+}
+
+/* ==========================================
+   1. OpenClaw (图二红色吉祥物) 灵动动效
+   ========================================== */
+.svg-openclaw {
+  filter: drop-shadow(0 0 2.5px rgba(235, 65, 65, 0.45));
+  transition: filter 0.3s ease;
+
+  // 1) 机器人整体呼吸慢速浮动
+  .claw-robot-group {
+    transform-origin: 16px 16.5px;
+    animation: openclawFloat 2.8s ease-in-out infinite;
+  }
+
+  // 2) 天线高频信号微抖动
+  .claw-antenna-l {
+    transform-origin: 12.5px 10px;
+    animation: antennaWiggleL 2s ease-in-out infinite alternate;
+  }
+  .claw-antenna-r {
+    transform-origin: 19.5px 10px;
+    animation: antennaWiggleR 2s ease-in-out infinite alternate;
+  }
+
+  // 3) 小胖手微幅常态摇摆，Hover 时大幅扇动
+  .claw-hand-l {
+    transform-origin: 9px 15.5px;
+    animation: handFloatL 3s ease-in-out infinite alternate;
+    transition: transform 0.25s cubic-bezier(0.25, 0.8, 0.25, 1.1);
+  }
+  .claw-hand-r {
+    transform-origin: 23px 15.5px;
+    animation: handFloatR 3s ease-in-out infinite alternate;
+    transition: transform 0.25s cubic-bezier(0.25, 0.8, 0.25, 1.1);
+  }
+
+  // 4) 周期性眨眼
+  .claw-eye-l, .claw-eye-r,
+  .claw-eye-glow-l, .claw-eye-glow-r {
+    transform-origin: 16px 14px;
+    animation: eyeBlink 4.5s ease-in-out infinite;
+  }
+}
+
+// 眨眼动画
+@keyframes eyeBlink {
+  0%, 96%, 100% { transform: scaleY(1); }
+  98% { transform: scaleY(0.08); }
+}
+
+// 天线微摆动
+@keyframes antennaWiggleL {
+  0% { transform: rotate(-3deg); }
+  100% { transform: rotate(5deg); }
+}
+@keyframes antennaWiggleR {
+  0% { transform: rotate(3deg); }
+  100% { transform: rotate(-5deg); }
+}
+
+// 常态双手漂浮
+@keyframes handFloatL {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(-6deg) translateY(-0.5px); }
+}
+@keyframes handFloatR {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(6deg) translateY(-0.5px); }
+}
+
+// 机器人呼吸浮动
+@keyframes openclawFloat {
+  0%, 100% { transform: translateY(0.5px); }
+  50% { transform: translateY(-1px); }
+}
+
+// 胖爪极速扇动 (加力交互)
+@keyframes handWaveL {
+  0%, 100% { transform: rotate(-5deg); }
+  50% { transform: rotate(20deg) scale(1.05); }
+}
+@keyframes handWaveR {
+  0%, 100% { transform: rotate(5deg); }
+  50% { transform: rotate(-20deg) scale(1.05); }
+}
+
+// Hover/Active 吉祥物高光激活动画
+.report-model-select__agent:hover,
+.report-model-select__agent.is-active,
+.report-model-select__trigger:hover {
+  .svg-openclaw {
+    filter: drop-shadow(0 0 4.5px rgba(235, 65, 65, 0.75));
+
+    .claw-robot-group {
+      animation: openclawFloat 1.5s ease-in-out infinite;
+    }
+    
+    // 双爪做快乐的招手/扇动
+    .claw-hand-l {
+      animation: handWaveL 0.4s ease-in-out infinite alternate;
+    }
+    .claw-hand-r {
+      animation: handWaveR 0.4s ease-in-out infinite alternate;
+    }
+
+    // 接收信号高频摇晃
+    .claw-antenna-l {
+      animation: antennaWiggleL 0.3s ease-in-out infinite alternate;
+    }
+    .claw-antenna-r {
+      animation: antennaWiggleR 0.3s ease-in-out infinite alternate;
+    }
+
+    // 极速眨眼聚焦
+    .claw-eye-l, .claw-eye-r,
+    .claw-eye-glow-l, .claw-eye-glow-r {
+      animation: eyeBlink 1.8s ease-in-out infinite;
+    }
+  }
+}
+
+/* ==========================================
+   2. Codex (图一蓝紫命令云) 螺旋滑入动效
+   ========================================== */
+.svg-codex {
+  .codex-cloud {
+    transform-origin: 16px 15px;
+    transition: transform 0.3s ease, filter 0.3s ease;
+  }
+  
+  .char-wrapper-gt {
+    transform-origin: 12.5px 14.5px;
+  }
+  
+  .char-wrapper-cursor {
+    transform-origin: 19px 17.5px;
+  }
+
+  .char-gt, .char-cursor {
+    transition: transform 0.25s cubic-bezier(0.25, 0.8, 0.25, 1);
+  }
+}
+
+// 转圈从外到内螺旋落入
+@keyframes codexSpinGt {
+  0% {
+    transform: translate(-16px, -16px) rotate(-270deg) scale(2.4);
+    opacity: 0;
+  }
+  75% {
+    transform: translate(1px, 1px) rotate(15deg) scale(0.95);
+    opacity: 0.8;
+  }
+  100% {
+    transform: translate(0, 0) rotate(0deg) scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes codexSpinCursor {
+  0% {
+    transform: translate(16px, 16px) rotate(-180deg) scale(2.2);
+    opacity: 0;
+  }
+  75% {
+    transform: translate(-1px, -1px) rotate(-15deg) scale(0.95);
+    opacity: 0.8;
+  }
+  100% {
+    transform: translate(0, 0) rotate(0deg) scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes cloudPulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(0.96); }
+}
+
+// Hover/Active 激活命令由外到内旋转滑入
+.report-model-select__agent:hover,
+.report-model-select__agent.is-active,
+.report-model-select__trigger:hover {
+  .svg-codex {
+    .codex-cloud {
+      animation: cloudPulse 1.2s ease-in-out infinite alternate;
+      filter: drop-shadow(0 2px 4px rgba(37, 69, 255, 0.25));
+    }
+    .char-gt {
+      animation: codexSpinGt 0.75s cubic-bezier(0.25, 0.8, 0.25, 1.1) forwards;
+    }
+    .char-cursor {
+      animation: codexSpinCursor 0.75s cubic-bezier(0.25, 0.8, 0.25, 1.1) 0.06s forwards;
+    }
+  }
+}
+
+/* ==========================================
+   3. Gemini (交叉极光星芒) 动效 (保持原有高颜值)
+   ========================================== */
+.svg-gemini {
+  .star-main {
+    transform-origin: 14px 14px;
+    animation: geminiStarBreath 2.8s ease-in-out infinite;
+    transition: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+  .star-sub {
+    transform-origin: 24px 24px;
+    animation: geminiStarBreathSub 2.8s ease-in-out infinite;
+    transition: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+}
+
+@keyframes geminiStarBreath {
+  0%, 100% { transform: scale(1); opacity: 0.95; }
+  50% { transform: scale(1.06); opacity: 1; }
+}
+
+@keyframes geminiStarBreathSub {
+  0%, 100% { transform: scale(1.12); opacity: 1; }
+  50% { transform: scale(0.88); opacity: 0.85; }
+}
+
+@keyframes geminiMainSpin {
+  0% { transform: rotate(0deg) scale(1.12); }
+  100% { transform: rotate(180deg) scale(1.12); }
+}
+
+@keyframes geminiSubSpin {
+  0% { transform: rotate(0deg) scale(1.15); }
+  100% { transform: rotate(-360deg) scale(1.15); }
+}
+
+.report-model-select__agent:hover,
+.report-model-select__agent.is-active,
+.report-model-select__trigger:hover {
+  .svg-gemini {
+    filter: drop-shadow(0 0 3px rgba(66, 133, 244, 0.35)) drop-shadow(0 0 6px rgba(163, 118, 235, 0.2));
+    
+    .star-main {
+      animation: geminiMainSpin 0.75s cubic-bezier(0.4, 0, 0.2, 1) infinite alternate;
+    }
+    .star-sub {
+      animation: geminiSubSpin 1.1s linear infinite;
     }
   }
 }
