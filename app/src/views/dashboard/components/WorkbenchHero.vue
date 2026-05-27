@@ -486,19 +486,11 @@ onMounted(() => {
   z-index: 10;
   display: flex;
   align-items: center;
-  padding: 5px 16px;
-  background: rgba(255, 255, 255, 0.72);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1.5px solid rgba(255, 255, 255, 0.6);
-  border-radius: 20px;
-  box-shadow: 
-    0 4px 15px rgba(121, 79, 39, 0.05),
-    inset 0 1px 0 rgba(255, 255, 255, 0.8);
-  font-size: 11px;
-  font-weight: 700;
+  padding: 5px 0;
+  font-size: 11.5px;
+  font-weight: 800;
   color: var(--cyber-text, #794f27);
-  max-width: min(420px, 80vw - 40px);
+  max-width: min(460px, 80vw - 40px);
   overflow: hidden;
   white-space: nowrap;
 }
@@ -657,9 +649,6 @@ onMounted(() => {
     color: #82d5bb;
   }
   .hero-top-scroller {
-    background: rgba(25, 36, 60, 0.6);
-    border-color: rgba(255, 255, 255, 0.15);
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
     color: #f8f4d8;
     
     .scroller-weather {
