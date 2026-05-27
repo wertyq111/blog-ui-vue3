@@ -4,6 +4,37 @@ import type { WorkDailyQueryParams, WorkDailyItem, WorkDailyForm } from "@/types
 
 const BASE_URL = "/work-daily";
 
+export interface WorkDailyReportExport {
+  id: number;
+  type: "month" | "week" | "year";
+  periodStart: string;
+  periodEnd: string;
+  model?: string;
+  status: "pending" | "running" | "completed" | "failed";
+  fileName: string;
+  errorMessage?: string;
+  createdAt: string | number | null;
+  startedAt: number | null;
+  finishedAt: number | null;
+}
+
+export interface WorkDailyReportExportCreateResult {
+  blocked: boolean;
+  export: WorkDailyReportExport;
+}
+
+export interface WorkDailyReportExportStatusResult {
+  active: boolean;
+  export: WorkDailyReportExport | null;
+}
+
+export interface WorkDailyReportExportListResult {
+  items: WorkDailyReportExport[];
+  total: number;
+  page: number;
+  pageSize: number;
+}
+
 const WorkDailyAPI = {
   /** 获取工作日常分页列表 */
   async getPage(params: WorkDailyQueryParams) {
@@ -75,32 +106,52 @@ const WorkDailyAPI = {
     });
   },
 
-  /** 月度报告 */
-  reportMonth(month: string, model?: string) {
-    return request({
-      url: `${BASE_URL}/report/month`,
-      method: "get",
-      params: { month, model },
-      responseType: "blob",
+  /** 创建报表导出任务 */
+  createReportExport(data: {
+    type: "month" | "week" | "year";
+    month?: string;
+    start_date?: string;
+    end_date?: string;
+    year?: string;
+    model?: string;
+  }) {
+    return request<any, WorkDailyReportExportCreateResult>({
+      url: `${BASE_URL}/report/export`,
+      method: "post",
+      data,
     });
   },
 
-  /** 周报告 */
-  reportWeek(startDate: string, endDate: string, model?: string) {
-    return request({
-      url: `${BASE_URL}/report/week`,
+  /** 获取当前报表导出任务 */
+  getCurrentReportExport() {
+    return request<any, WorkDailyReportExportStatusResult>({
+      url: `${BASE_URL}/report/export/current`,
       method: "get",
-      params: { start_date: startDate, end_date: endDate, model },
-      responseType: "blob",
     });
   },
 
-  /** 年度报告 */
-  reportYear(year: string, model?: string) {
-    return request({
-      url: `${BASE_URL}/report/year`,
+  /** 获取报表导出任务列表（当前用户） */
+  listReportExports(params: { page?: number; page_size?: number } = {}) {
+    return request<any, WorkDailyReportExportListResult>({
+      url: `${BASE_URL}/report/export/list`,
       method: "get",
-      params: { year, model },
+      params,
+    });
+  },
+
+  /** 获取报表导出任务详情 */
+  getReportExport(id: number) {
+    return request<any, WorkDailyReportExportStatusResult>({
+      url: `${BASE_URL}/report/export/${id}`,
+      method: "get",
+    });
+  },
+
+  /** 下载报表导出文件 */
+  downloadReportExport(id: number) {
+    return request({
+      url: `${BASE_URL}/report/export/${id}/download`,
+      method: "get",
       responseType: "blob",
     });
   },

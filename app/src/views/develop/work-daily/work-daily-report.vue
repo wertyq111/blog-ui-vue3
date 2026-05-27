@@ -78,8 +78,18 @@
         </div>
       </div>
 
-      <Button type="primary" size="small" :loading="exporting" @click="handleExport">
-        导出报表
+      <Button
+        type="primary"
+        size="small"
+        :loading="exportButtonLoading"
+        :disabled="isExportActive"
+        @click="handleExport"
+      >
+        {{ isExportActive ? "生成中" : "导出报表" }}
+      </Button>
+
+      <Button type="default" size="small" @click="openExportHistory">
+        查询进度
       </Button>
 
       <div class="import-group">
@@ -99,6 +109,73 @@
         </AnimalUpload>
       </div>
     </div>
+    <AdminAnimalModal
+      v-model:visible="historyVisible"
+      title="报表生成记录"
+      :width="820"
+      :show-footer="false"
+      @close="handleHistoryClose"
+    >
+      <div class="export-history">
+        <div class="export-history__toolbar">
+          <span class="export-history__hint">
+            仅显示当前用户最近的导出任务。生成中的记录每 5 秒自动刷新。
+          </span>
+          <Button type="default" size="small" :loading="historyLoading" @click="refreshHistory">
+            刷新
+          </Button>
+        </div>
+        <div v-if="historyLoading && !historyItems.length" class="export-history__empty">
+          加载中...
+        </div>
+        <div v-else-if="!historyItems.length" class="export-history__empty">
+          暂无生成记录
+        </div>
+        <table v-else class="export-history__table">
+          <thead>
+            <tr>
+              <th>创建时间</th>
+              <th>类型</th>
+              <th>区间</th>
+              <th>模型</th>
+              <th>状态</th>
+              <th>操作</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="item in historyItems" :key="item.id">
+              <td>{{ formatTimestamp(item.createdAt) }}</td>
+              <td>{{ formatExportType(item.type) }}</td>
+              <td>{{ formatExportPeriod(item) }}</td>
+              <td>{{ formatModelLabel(item.model || "") || "-" }}</td>
+              <td>
+                <span class="export-history__status" :class="`is-${item.status}`">
+                  {{ formatStatus(item.status) }}
+                </span>
+              </td>
+              <td>
+                <Button
+                  v-if="item.status === 'completed'"
+                  type="default"
+                  size="small"
+                  @click="handleDownloadItem(item)"
+                >
+                  下载
+                </Button>
+                <span
+                  v-else-if="item.status === 'failed'"
+                  class="export-history__error"
+                  :title="item.errorMessage || ''"
+                >
+                  {{ item.errorMessage || "失败（无详细信息）" }}
+                </span>
+                <span v-else class="export-history__pending">处理中...</span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </AdminAnimalModal>
   </div>
 </template>
 
@@ -108,18 +185,27 @@ import { computed, onBeforeUnmount, onMounted, reactive, ref } from "vue";
 import { type UploadFile } from "element-plus";
 import { ArrowDown, ArrowRight, Check } from "@element-plus/icons-vue";
 import { Button, Select } from "animal-island-vue";
+import { downloadFile } from "@/utils/download";
 import AnimalDatePicker from "@/components/AnimalDatePicker/index.vue";
 import AnimalUpload from "@/components/AnimalUpload/index.vue";
 import SystemIco from "@/components/AdminPage/SystemIco.vue";
-import WorkDailyAPI from "@/api/develop/work-daily";
+import AdminAnimalModal from "@/components/AdminPage/AdminAnimalModal.vue";
+import WorkDailyAPI, { type WorkDailyReportExport } from "@/api/develop/work-daily";
 
 const emit = defineEmits<{ imported: [] }>();
 
-const exporting = ref(false);
+const creatingExport = ref(false);
 const reportModels = ref<string[]>([]);
 const modelMenuOpen = ref(false);
 const activeAgentKey = ref("");
 const modelSelectRef = ref<HTMLElement>();
+const currentExport = ref<WorkDailyReportExport | null>(null);
+let exportPollTimer: number | undefined;
+
+const historyVisible = ref(false);
+const historyLoading = ref(false);
+const historyItems = ref<WorkDailyReportExport[]>([]);
+let historyRefreshTimer: number | undefined;
 
 const config = reactive({
   type: "month" as "month" | "week" | "year",
@@ -143,10 +229,16 @@ interface ModelAgent {
 }
 
 const modelAgents = computed<ModelAgent[]>(() => {
-  const openClawModels = reportModels.value.filter((model) => !isLocalCodexModel(model));
+  const openClawModels = reportModels.value.filter(
+    (model) => !isLocalCodexModel(model) && !isLocalGeminiModel(model),
+  );
   const codexModels = reportModels.value.filter(isLocalCodexModel);
   if (!codexModels.includes("local-codex/codex-cli")) {
     codexModels.push("local-codex/codex-cli");
+  }
+  const geminiModels = reportModels.value.filter(isLocalGeminiModel);
+  if (!geminiModels.includes("local-gemini/gemini-cli")) {
+    geminiModels.push("local-gemini/gemini-cli");
   }
   const agents: ModelAgent[] = [];
 
@@ -155,6 +247,9 @@ const modelAgents = computed<ModelAgent[]>(() => {
   }
   if (codexModels.length) {
     agents.push({ key: "codex", label: "Codex", models: codexModels });
+  }
+  if (geminiModels.length) {
+    agents.push({ key: "gemini", label: "Gemini", models: geminiModels });
   }
 
   return agents;
@@ -175,12 +270,23 @@ const selectedModelLabel = computed(() => {
     : `${agent.label} / ${formatModelLabel(config.model)}`;
 });
 
+const isExportActive = computed(() => {
+  return currentExport.value ? ["pending", "running"].includes(currentExport.value.status) : false;
+});
+
+const exportButtonLoading = computed(() => creatingExport.value || isExportActive.value);
+
 function isLocalCodexModel(model: string): boolean {
   return model.startsWith("local-codex/");
 }
 
+function isLocalGeminiModel(model: string): boolean {
+  return model.startsWith("local-gemini/");
+}
+
 function formatModelLabel(model: string): string {
   if (model === "local-codex/codex-cli") return "Codex CLI";
+  if (model === "local-gemini/gemini-cli") return "Gemini CLI";
   return model;
 }
 
@@ -239,33 +345,90 @@ async function handleExport(): Promise<void> {
     return;
   }
 
-  exporting.value = true;
+  creatingExport.value = true;
   try {
-    // API 以 blob 响应返回，但类型标注为 AxiosResponse，这里按运行时实际值处理
-    let blob: any;
-    let name: string;
+    const payload: {
+      type: "month" | "week" | "year";
+      month?: string;
+      start_date?: string;
+      end_date?: string;
+      year?: string;
+      model?: string;
+    } = {
+      type: config.type,
+      model: config.model,
+    };
     if (config.type === "month") {
-      blob = await WorkDailyAPI.reportMonth(config.month, config.model);
-      name = `工作月报_${config.month}.md`;
+      payload.month = config.month;
     } else if (config.type === "week") {
-      blob = await WorkDailyAPI.reportWeek(config.weekRange[0], config.weekRange[1], config.model);
-      name = `工作周报_${config.weekRange[0]}_${config.weekRange[1]}.md`;
+      payload.start_date = config.weekRange[0];
+      payload.end_date = config.weekRange[1];
     } else {
-      blob = await WorkDailyAPI.reportYear(config.year, config.model);
-      name = `工作年报_${config.year}.md`;
+      payload.year = config.year;
     }
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = name;
-    a.click();
-    URL.revokeObjectURL(url);
-    message.success("导出成功");
+
+    const result = await WorkDailyAPI.createReportExport(payload);
+    currentExport.value = result.export;
+    if (result.blocked) {
+      message.warning("已有报表正在生成");
+    } else {
+      message.success("导出任务已创建");
+    }
+    startExportPolling(result.export.id, true);
   } catch {
     message.error("导出失败");
   } finally {
-    exporting.value = false;
+    creatingExport.value = false;
   }
+}
+
+async function fetchCurrentExport(): Promise<void> {
+  const result = await WorkDailyAPI.getCurrentReportExport();
+  currentExport.value = result.export;
+  if (result.export && result.active) {
+    startExportPolling(result.export.id, false);
+  }
+}
+
+function startExportPolling(id: number, autoDownload: boolean): void {
+  stopExportPolling();
+  pollExport(id, autoDownload);
+  exportPollTimer = window.setInterval(() => {
+    pollExport(id, true);
+  }, 3000);
+}
+
+function stopExportPolling(): void {
+  if (exportPollTimer) {
+    window.clearInterval(exportPollTimer);
+    exportPollTimer = undefined;
+  }
+}
+
+async function pollExport(id: number, autoDownload: boolean): Promise<void> {
+  try {
+    const result = await WorkDailyAPI.getReportExport(id);
+    currentExport.value = result.export;
+    if (!result.export || result.active) return;
+
+    stopExportPolling();
+    if (result.export.status === "completed") {
+      if (autoDownload) {
+        await downloadExport(result.export);
+        message.success("导出成功");
+      }
+      return;
+    }
+
+    message.error(result.export.errorMessage || "导出失败");
+  } catch {
+    stopExportPolling();
+  }
+}
+
+async function downloadExport(exportItem: WorkDailyReportExport): Promise<void> {
+  const response = await WorkDailyAPI.downloadReportExport(exportItem.id);
+  downloadFile(response, exportItem.fileName);
 }
 
 async function handleImport(file: UploadFile): Promise<void> {
@@ -280,12 +443,97 @@ async function handleImport(file: UploadFile): Promise<void> {
   }
 }
 
+function openExportHistory(): void {
+  historyVisible.value = true;
+  refreshHistory();
+}
+
+function handleHistoryClose(): void {
+  stopHistoryAutoRefresh();
+}
+
+async function refreshHistory(): Promise<void> {
+  historyLoading.value = true;
+  try {
+    const result = await WorkDailyAPI.listReportExports({ page: 1, page_size: 20 });
+    historyItems.value = result.items || [];
+    const hasActive = historyItems.value.some(
+      (item) => item.status === "pending" || item.status === "running",
+    );
+    if (hasActive && historyVisible.value) {
+      startHistoryAutoRefresh();
+    } else {
+      stopHistoryAutoRefresh();
+    }
+  } catch {
+    message.error("加载记录失败");
+  } finally {
+    historyLoading.value = false;
+  }
+}
+
+function startHistoryAutoRefresh(): void {
+  if (historyRefreshTimer) return;
+  historyRefreshTimer = window.setInterval(() => {
+    if (!historyVisible.value) {
+      stopHistoryAutoRefresh();
+      return;
+    }
+    refreshHistory();
+  }, 5000);
+}
+
+function stopHistoryAutoRefresh(): void {
+  if (historyRefreshTimer) {
+    window.clearInterval(historyRefreshTimer);
+    historyRefreshTimer = undefined;
+  }
+}
+
+async function handleDownloadItem(item: WorkDailyReportExport): Promise<void> {
+  try {
+    await downloadExport(item);
+  } catch {
+    message.error("下载失败");
+  }
+}
+
+function formatExportType(type: string): string {
+  return ({ month: "月报", week: "周报", year: "年报" } as Record<string, string>)[type] || type;
+}
+
+function formatExportPeriod(item: WorkDailyReportExport): string {
+  if (item.type === "month") return (item.periodStart || "").slice(0, 7);
+  if (item.type === "year") return (item.periodStart || "").slice(0, 4);
+  return `${item.periodStart || ""} ~ ${item.periodEnd || ""}`;
+}
+
+function formatStatus(status: string): string {
+  return (
+    { pending: "排队中", running: "生成中", completed: "已完成", failed: "失败" } as Record<
+      string,
+      string
+    >
+  )[status] || status;
+}
+
+function formatTimestamp(value: number | string | null | undefined): string {
+  if (value === null || value === undefined || value === "" || value === 0) return "-";
+  const d = typeof value === "number" ? new Date(value * 1000) : new Date(value);
+  if (Number.isNaN(d.getTime())) return "-";
+  const pad = (n: number) => n.toString().padStart(2, "0");
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
+}
+
 onMounted(() => {
   fetchModels();
+  fetchCurrentExport().catch(() => undefined);
   document.addEventListener("click", handleModelOutsideClick);
 });
 
 onBeforeUnmount(() => {
+  stopExportPolling();
+  stopHistoryAutoRefresh();
   document.removeEventListener("click", handleModelOutsideClick);
 });
 </script>
@@ -331,6 +579,99 @@ onBeforeUnmount(() => {
   align-items: center;
   gap: 8px;
   flex-shrink: 0;
+}
+
+.export-history {
+  font-size: 13px;
+  color: var(--ai-text, #794f27);
+}
+
+.export-history__toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.export-history__hint {
+  font-size: 12px;
+  color: var(--ai-text-2, #9f927d);
+}
+
+.export-history__empty {
+  padding: 24px;
+  text-align: center;
+  color: var(--ai-text-2, #9f927d);
+}
+
+.export-history__table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+
+  th,
+  td {
+    padding: 8px 10px;
+    border-bottom: 1px dashed var(--ai-border, #e8e2d6);
+    text-align: left;
+    vertical-align: middle;
+  }
+
+  th {
+    font-weight: 800;
+    color: var(--ai-text-2, #9f927d);
+    background: rgba(255, 252, 239, 0.6);
+  }
+
+  tbody tr:hover {
+    background: rgba(25, 200, 185, 0.04);
+  }
+}
+
+.export-history__status {
+  display: inline-block;
+  padding: 2px 10px;
+  border-radius: 10px;
+  font-size: 12px;
+  font-weight: 700;
+  background: rgba(159, 146, 125, 0.18);
+  color: var(--ai-text-2, #9f927d);
+
+  &.is-pending {
+    background: rgba(255, 196, 87, 0.2);
+    color: #c5832a;
+  }
+
+  &.is-running {
+    background: rgba(25, 200, 185, 0.18);
+    color: #11a89b;
+  }
+
+  &.is-completed {
+    background: rgba(172, 236, 109, 0.32);
+    color: #6a8b30;
+  }
+
+  &.is-failed {
+    background: rgba(231, 96, 96, 0.18);
+    color: #c44141;
+  }
+}
+
+.export-history__error {
+  display: inline-block;
+  max-width: 280px;
+  font-size: 12px;
+  color: #c44141;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.export-history__pending {
+  font-size: 12px;
+  color: var(--ai-text-2, #9f927d);
 }
 </style>
 
