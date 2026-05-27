@@ -159,6 +159,7 @@
 <script setup lang="ts">
 import { confirm, message } from "@/utils/feedback";
 import { onMounted, reactive, ref } from "vue";
+import { useRoute, useRouter } from "vue-router";
 
 import { Button, Input } from "animal-island-vue";
 import ServerPathAPI from "@/api/develop/server-path";
@@ -247,7 +248,16 @@ function handleDelete(id?: number): void {
   );
 }
 
+const route = useRoute();
+const router = useRouter();
+
 onMounted(() => {
   handleQuery();
+  if (route.query.tool === "open") {
+    toolVisible.value = true;
+    const { tool, ...rest } = route.query;
+    void tool;
+    router.replace({ path: route.path, query: rest });
+  }
 });
 </script>

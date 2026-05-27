@@ -1,6 +1,6 @@
 {
   "route": {
-    "dashboard": "首页",
+    "dashboard": "工作台",
     "document": "项目文档"
   },
   "login": {
@@ -42,7 +42,7 @@
     "reg": "注 册"
   },
   "navbar": {
-    "dashboard": "首页",
+    "dashboard": "工作台",
     "logout": "退出登录",
     "document": "项目文档",
     "gitee": "项目地址",

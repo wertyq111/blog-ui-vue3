@@ -129,7 +129,10 @@
         </div>
       </div>
       <div class="hero-actions">
-        <button class="btn-ai btn-ai-primary" @click="$router.push('/develop/work-daily')">
+        <button
+          class="btn-ai btn-ai-primary"
+          @click="$router.push({ path: '/develop/work-daily', query: { action: 'add' } })"
+        >
           <svg
             viewBox="0 0 24 24"
             width="15"
@@ -142,9 +145,12 @@
           >
             <path d="M4 16L15 5l3 3-11 11H4v-3z" />
           </svg>
-          写日志
+          记录日常
         </button>
-        <button class="btn-ai" @click="$router.push('/develop/work-doc')">
+        <button
+          class="btn-ai"
+          @click="$router.push({ path: '/develop/work-doc', query: { action: 'add' } })"
+        >
           <svg
             viewBox="0 0 24 24"
             width="15"
@@ -160,7 +166,10 @@
           </svg>
           新建文档
         </button>
-        <button class="btn-ai" @click="$router.push('/develop/server-path')">
+        <button
+          class="btn-ai"
+          @click="$router.push({ path: '/develop/convert-path', query: { tool: 'open' } })"
+        >
           <svg
             viewBox="0 0 24 24"
             width="15"

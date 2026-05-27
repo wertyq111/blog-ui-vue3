@@ -158,6 +158,7 @@
 <script setup lang="ts">
 import { confirm, message } from "@/utils/feedback";
 import { computed, onMounted, reactive, ref } from "vue";
+import { useRoute, useRouter } from "vue-router";
 
 import { Button, Input, Select } from "animal-island-vue";
 import AnimalDatePicker from "@/components/AnimalDatePicker/index.vue";
@@ -269,9 +270,18 @@ function handleDelete(id: number): void {
   );
 }
 
+const route = useRoute();
+const router = useRouter();
+
 onMounted(async () => {
   await fetchPlatforms();
   handleQuery();
+  if (route.query.action === "add") {
+    handleCreateClick();
+    const { action, ...rest } = route.query;
+    void action;
+    router.replace({ path: route.path, query: rest });
+  }
 });
 </script>
 
