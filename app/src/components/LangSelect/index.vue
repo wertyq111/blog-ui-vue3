@@ -1,5 +1,5 @@
 <template>
-  <el-dropdown trigger="click" @command="handleLanguageChange">
+  <el-dropdown trigger="click" popper-class="animal-dropdown-popper" @command="handleLanguageChange">
     <div class="i-svg:language" :class="size" />
     <template #dropdown>
       <el-dropdown-menu>

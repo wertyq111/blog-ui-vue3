@@ -50,7 +50,6 @@ import {
   Loading,
   Modal,
   Phone,
-  Select,
   Switch,
   Table,
   Tabs,
@@ -58,6 +57,7 @@ import {
   Typewriter,
 } from "animal-island-vue";
 import AnimalIcon from "@/components/AnimalIcon/index.vue";
+import AnimalSelect from "@/components/AnimalSelect/index.vue";
 import VXETable from "vxe-table";
 import { InstallCodeMirror } from "codemirror-editor-vue3";
 import { configureVxeTable } from "@/plugins/vxe-table";
@@ -81,7 +81,8 @@ const animalIslandComponents: Array<[string, Component]> = [
   ["Loading", Loading as Component],
   ["Modal", Modal as Component],
   ["Phone", Phone as Component],
-  ["Select", Select as Component],
+  // 全局 Select 名指向自研动森 AnimalSelect（teleport 弹层，不被 modal 裁切）
+  ["Select", AnimalSelect as Component],
   ["Switch", Switch as Component],
   ["Table", Table as Component],
   ["Tabs", Tabs as Component],

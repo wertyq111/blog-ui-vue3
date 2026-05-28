@@ -30,7 +30,7 @@
       <div class="report-panel__desc">快速生成阶段性工作汇报，或从外部 Markdown 文件导入记录。</div>
     </div>
     <div class="report-panel__row">
-      <Select v-model="config.type" class="report-field" :options="typeOptions" />
+      <AnimalSelect v-model="config.type" class="report-field" :options="typeOptions" />
 
       <AnimalDatePicker
         v-if="config.type === 'month'"
@@ -277,7 +277,8 @@ import { message } from "@/utils/feedback";
 import { computed, onBeforeUnmount, onMounted, reactive, ref } from "vue";
 import { type UploadFile } from "element-plus";
 import { ArrowDown, ArrowRight, Check } from "@element-plus/icons-vue";
-import { Button, Select } from "animal-island-vue";
+import { Button } from "animal-island-vue";
+import AnimalSelect from "@/components/AnimalSelect/index.vue";
 import { downloadFile } from "@/utils/download";
 import AnimalDatePicker from "@/components/AnimalDatePicker/index.vue";
 import AnimalUpload from "@/components/AnimalUpload/index.vue";

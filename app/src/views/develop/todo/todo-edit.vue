@@ -33,7 +33,7 @@
           <el-row :gutter="15">
             <el-col :sm="8">
               <el-form-item label="状态" prop="status">
-                <Select
+                <AnimalSelect
                   v-model="statusModel"
                   :options="statusOptions"
                   placeholder="请选择状态"
@@ -43,7 +43,7 @@
             </el-col>
             <el-col :sm="8">
               <el-form-item label="优先级" prop="priority">
-                <Select
+                <AnimalSelect
                   v-model="priorityModel"
                   :options="priorityOptions"
                   placeholder="请选择优先级"
@@ -67,7 +67,7 @@
           <el-row :gutter="15">
             <el-col :sm="12">
               <el-form-item label="关联平台" prop="platform_id">
-                <Select
+                <AnimalSelect
                   v-model="platformModel"
                   :options="platformSelectOptions"
                   placeholder="请选择工作平台"
@@ -117,7 +117,8 @@ import { computed, nextTick, reactive, ref, watch } from "vue";
 import { useDebounceFn } from "@vueuse/core";
 import { type FormInstance, type FormRules } from "element-plus";
 import AdminAnimalModal from "@/components/AdminPage/AdminAnimalModal.vue";
-import { Button, Input, Select } from "animal-island-vue";
+import { Button, Input } from "animal-island-vue";
+import AnimalSelect from "@/components/AnimalSelect/index.vue";
 import AnimalDatePicker from "@/components/AnimalDatePicker/index.vue";
 import AnimalMarkdown from "@/components/AnimalMarkdown/index.vue";
 import TodoAPI from "@/api/develop/todo";

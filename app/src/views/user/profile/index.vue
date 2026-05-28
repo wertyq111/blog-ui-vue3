@@ -208,7 +208,7 @@
                   <span class="req">*</span>
                   性别
                 </label>
-                <Select v-model="genderModel" :options="genderOptions" placeholder="请选择性别" />
+                <AnimalSelect v-model="genderModel" :options="genderOptions" placeholder="请选择性别" />
               </div>
               <div class="field">
                 <label>联系方式</label>
@@ -272,6 +272,7 @@ import UserAPI from "@/api/system/user";
 import FileAPI from "@/api/file";
 import { useUserStore } from "@/store/modules/user";
 import AnimalTextarea from "@/components/AnimalTextarea/index.vue";
+import AnimalSelect from "@/components/AnimalSelect/index.vue";
 import type { UserProfileForm } from "@/types/api";
 
 defineOptions({ name: "Profile" });

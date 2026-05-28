@@ -20,7 +20,7 @@
       </div>
       <div class="filter-field">
         <label class="filter-label">性别：</label>
-        <Select
+        <AnimalSelect
           v-model="genderModel"
           class="filter-select"
           placeholder="请选择性别"
@@ -180,7 +180,8 @@
 import { confirm, message } from "@/utils/feedback";
 import { computed, onMounted, reactive, ref } from "vue";
 
-import { Button, Input, Select, Switch } from "animal-island-vue";
+import { Button, Input, Switch } from "animal-island-vue";
+import AnimalSelect from "@/components/AnimalSelect/index.vue";
 import UserAPI from "@/api/system/user";
 import { useUserStore } from "@/store";
 import { CommonStatus } from "@/enums";

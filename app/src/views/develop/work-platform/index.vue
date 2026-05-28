@@ -20,7 +20,7 @@
       </div>
       <div class="filter-field">
         <label class="filter-label">状态：</label>
-        <Select
+        <AnimalSelect
           v-model="statusModel"
           class="filter-select"
           placeholder="全部"
@@ -131,7 +131,8 @@
 import { confirm, message } from "@/utils/feedback";
 import { computed, nextTick, onMounted, reactive, ref } from "vue";
 
-import { Button, Input, Select, Switch } from "animal-island-vue";
+import { Button, Input, Switch } from "animal-island-vue";
+import AnimalSelect from "@/components/AnimalSelect/index.vue";
 import { useDraggable } from "vue-draggable-plus";
 import WorkPlatformAPI from "@/api/develop/work-platform";
 import type { WorkPlatformItem, WorkPlatformQueryParams } from "@/types/api/work-platform";

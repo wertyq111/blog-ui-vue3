@@ -21,10 +21,11 @@
         </el-col>
         <el-col :sm="8">
           <el-form-item label="分类" prop="categoryId">
-            <Select
+            <AnimalSelect
               v-model="categoryModel"
               placeholder="请选择分类"
               :options="categoryOptions ?? []"
+              filterable
             />
           </el-form-item>
         </el-col>
@@ -32,12 +33,12 @@
       <el-row :gutter="15">
         <el-col :sm="8">
           <el-form-item label="模板类型" prop="templateType">
-            <Select v-model="formData.templateType" :options="templateOptions" />
+            <AnimalSelect v-model="formData.templateType" :options="templateOptions" />
           </el-form-item>
         </el-col>
         <el-col :sm="8">
           <el-form-item label="项目来源" prop="source">
-            <Select
+            <AnimalSelect
               v-model="formData.source"
               placeholder="请选择来源"
               :options="sourceOptions ?? []"
@@ -90,7 +91,8 @@ import { computed, nextTick, reactive, ref, watch } from "vue";
 import { useDebounceFn } from "@vueuse/core";
 import { type FormInstance, type FormRules } from "element-plus";
 import AdminAnimalModal from "@/components/AdminPage/AdminAnimalModal.vue";
-import { Button, Input, Select, Switch } from "animal-island-vue";
+import { Button, Input, Switch } from "animal-island-vue";
+import AnimalSelect from "@/components/AnimalSelect/index.vue";
 import AnimalMarkdown from "@/components/AnimalMarkdown/index.vue";
 import WorkDocAPI from "@/api/develop/work-doc";
 import type { WorkDocForm, WorkDocItem } from "@/types/api/work-doc";

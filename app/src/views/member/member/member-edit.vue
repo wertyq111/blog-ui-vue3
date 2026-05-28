@@ -32,10 +32,10 @@
             />
           </el-form-item>
           <el-form-item label="性别" prop="gender">
-            <Select v-model="genderModel" placeholder="请选择性别" :options="genderOptions" />
+            <AnimalSelect v-model="genderModel" placeholder="请选择性别" :options="genderOptions" />
           </el-form-item>
           <el-form-item label="会员等级" prop="memberLevel">
-            <Select
+            <AnimalSelect
               v-model="levelModel"
               placeholder="请选择会员等级"
               :options="levelSelectOptions"
@@ -87,7 +87,8 @@ import { computed, nextTick, reactive, ref, watch } from "vue";
 import { useDebounceFn } from "@vueuse/core";
 import { type FormInstance, type FormRules } from "element-plus";
 import AdminAnimalModal from "@/components/AdminPage/AdminAnimalModal.vue";
-import { Button, Input, Select, Switch } from "animal-island-vue";
+import { Button, Input, Switch } from "animal-island-vue";
+import AnimalSelect from "@/components/AnimalSelect/index.vue";
 import MemberAPI from "@/api/member/member";
 import MemberLevelAPI from "@/api/member/member-level";
 import type { MemberForm, MemberItem } from "@/types/api";

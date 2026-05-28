@@ -29,10 +29,10 @@
         </el-col>
         <el-col :sm="12">
           <el-form-item label="菜单类型" prop="type">
-            <Select v-model="typeModel" :options="menuTypeOptions" placeholder="请选择菜单类型" />
+            <AnimalSelect v-model="typeModel" :options="menuTypeOptions" placeholder="请选择菜单类型" />
           </el-form-item>
           <el-form-item label="打开方式">
-            <Select
+            <AnimalSelect
               v-model="targetModel"
               :options="menuTargetOptions"
               placeholder="请选择打开方式"
@@ -125,7 +125,8 @@ import { message } from "@/utils/feedback";
 import { computed, nextTick, ref, watch } from "vue";
 import { type FormInstance, type FormRules } from "element-plus";
 import AdminAnimalModal from "@/components/AdminPage/AdminAnimalModal.vue";
-import { Button, Input, Select, Switch } from "animal-island-vue";
+import { Button, Input, Switch } from "animal-island-vue";
+import AnimalSelect from "@/components/AnimalSelect/index.vue";
 import AnimalTreeSelect from "@/components/AnimalTreeSelect/index.vue";
 import AnimalMultiSelect from "@/components/AnimalMultiSelect/index.vue";
 import AnimalTextarea from "@/components/AnimalTextarea/index.vue";

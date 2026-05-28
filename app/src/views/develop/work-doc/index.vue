@@ -64,7 +64,7 @@
           </div>
           <div class="filter-field">
             <label class="filter-label">状态：</label>
-            <Select
+            <AnimalSelect
               v-model="statusModel"
               class="filter-select"
               placeholder="全部"
@@ -73,7 +73,7 @@
           </div>
           <div class="filter-field">
             <label class="filter-label">模板：</label>
-            <Select
+            <AnimalSelect
               v-model="templateModel"
               class="filter-select"
               placeholder="全部"
@@ -213,7 +213,8 @@ import { confirm, message } from "@/utils/feedback";
 import { computed, onMounted, reactive, ref } from "vue";
 import { useRoute, useRouter } from "vue-router";
 
-import { Button, Input, Select } from "animal-island-vue";
+import { Button, Input } from "animal-island-vue";
+import AnimalSelect from "@/components/AnimalSelect/index.vue";
 import AnimalTree from "@/components/AnimalTree/index.vue";
 import AnimalTag from "@/components/AnimalTag/index.vue";
 import AnimalMarkdown from "@/components/AnimalMarkdown/index.vue";

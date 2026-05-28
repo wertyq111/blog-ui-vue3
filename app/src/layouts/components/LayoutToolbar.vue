@@ -25,7 +25,7 @@
 
     <!-- 用户菜单 -->
     <div class="navbar-actions__item">
-      <el-dropdown trigger="click">
+      <el-dropdown trigger="click" popper-class="animal-dropdown-popper">
         <div class="user-profile">
           <el-avatar :size="30" :src="avatarSrc" class="user-profile__avatar">
             {{ avatarFallback }}

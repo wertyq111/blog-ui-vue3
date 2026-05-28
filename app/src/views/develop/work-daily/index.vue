@@ -10,7 +10,7 @@
     <div class="filter-bar">
       <div class="filter-field">
         <label class="filter-label">平台：</label>
-        <Select
+        <AnimalSelect
           v-model="platformModel"
           class="filter-select"
           placeholder="全部"
@@ -166,7 +166,8 @@ import { confirm, message } from "@/utils/feedback";
 import { computed, onMounted, reactive, ref } from "vue";
 import { useRoute, useRouter } from "vue-router";
 
-import { Button, Input, Select } from "animal-island-vue";
+import { Button, Input } from "animal-island-vue";
+import AnimalSelect from "@/components/AnimalSelect/index.vue";
 import AnimalDatePicker from "@/components/AnimalDatePicker/index.vue";
 import AnimalMarkdown from "@/components/AnimalMarkdown/index.vue";
 import WorkDailyAPI from "@/api/develop/work-daily";

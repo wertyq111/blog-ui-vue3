@@ -170,10 +170,13 @@ async function openDialog(): Promise<void> {
     await loadRoleOptions();
     if (props.userId) {
       const data = await UserAPI.getFormData(props.userId);
+      // 后端 show() 返回的是 roles:[{id,name}] 关系数组，不含 roleIds；
+      // 优先用 roleIds，缺失时从 roles 关系派生
+      const roleIdsFromRoles = (data as any).roles?.map((r: any) => Number(r.id));
       Object.assign(formData, {
         ...data,
         password: "",
-        roleIds: data.roleIds ?? [],
+        roleIds: data.roleIds ?? roleIdsFromRoles ?? [],
       });
     }
     await nextTick();
@@ -201,13 +204,18 @@ const handleSubmit = useDebounceFn(async () => {
 
   loading.value = true;
   try {
+    // 后端 store/update 读的是 role_ids（snake_case），前端字段是 roleIds，需显式映射；
+    // 同时剔除回填时 spread 进来的关系对象（roles/member），避免脏字段提交
+    const payload: any = { ...formData, role_ids: formData.roleIds ?? [] };
+    delete payload.roles;
+    delete payload.member;
+
     if (formData.id) {
-      const payload: UserForm = { ...formData };
       if (!payload.password) delete payload.password;
       await UserAPI.update(formData.id, payload);
       message.success("修改用户成功");
     } else {
-      await UserAPI.create(formData);
+      await UserAPI.create(payload);
       message.success("新增用户成功");
     }
     emit("done");

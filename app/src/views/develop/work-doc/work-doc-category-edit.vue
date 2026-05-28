@@ -17,20 +17,14 @@
         <Input v-model="formData.name" placeholder="请输入分类名称" :maxlength="30" allow-clear />
       </el-form-item>
       <el-form-item label="父分类" prop="parentId">
-        <Select v-model="parentModel" placeholder="无（作为根分类）" :options="parentOptions" />
+        <AnimalSelect v-model="parentModel" placeholder="无（作为根分类）" :options="parentOptions" />
       </el-form-item>
-      <el-row :gutter="15">
-        <el-col :sm="12">
-          <el-form-item label="图标" prop="icon">
-            <Input v-model="formData.icon" placeholder="图标名称" allow-clear />
-          </el-form-item>
-        </el-col>
-        <el-col :sm="12">
-          <el-form-item label="排序" prop="sort">
-            <Input v-model="sortModel" type="number" placeholder="排序号" />
-          </el-form-item>
-        </el-col>
-      </el-row>
+      <el-form-item label="图标" prop="icon">
+        <IconSelect v-model="formData.icon" />
+      </el-form-item>
+      <el-form-item label="排序" prop="sort">
+        <Input v-model="sortModel" type="number" placeholder="排序号" />
+      </el-form-item>
       <el-form-item label="描述" prop="description">
         <Input v-model="formData.description" placeholder="请输入描述" allow-clear />
       </el-form-item>
@@ -57,7 +51,9 @@ import { computed, nextTick, reactive, ref, watch } from "vue";
 import { useDebounceFn } from "@vueuse/core";
 import { type FormInstance, type FormRules } from "element-plus";
 import AdminAnimalModal from "@/components/AdminPage/AdminAnimalModal.vue";
-import { Button, Input, Select } from "animal-island-vue";
+import { Button, Input } from "animal-island-vue";
+import AnimalSelect from "@/components/AnimalSelect/index.vue";
+import IconSelect from "@/components/IconSelect/index.vue";
 import WorkDocCategoryAPI from "@/api/develop/work-doc-category";
 import type { WorkDocCategoryForm, WorkDocCategoryItem } from "@/types/api/work-doc-category";
 
@@ -183,3 +179,4 @@ watch(
   }
 );
 </script>
+

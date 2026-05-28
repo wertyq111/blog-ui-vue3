@@ -7,7 +7,7 @@
 
       <!-- 2. sizes 每页几条选择器 -->
       <div class="animal-pagination__sizes">
-        <Select
+        <AnimalSelect
           v-model="pageSizeModel"
           :options="sizeOptions"
           class="animal-pagination__select"
@@ -92,7 +92,7 @@
 <script setup lang="ts">
 import { computed, ref, watch } from "vue";
 import type { PropType } from "vue";
-import { Select } from "animal-island-vue";
+import AnimalSelect from "@/components/AnimalSelect/index.vue";
 
 defineOptions({
   name: "Pagination",

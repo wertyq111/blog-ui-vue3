@@ -31,7 +31,7 @@
     <div class="filter-bar" style="z-index: 10">
       <div class="filter-field">
         <label class="filter-label">状态：</label>
-        <Select
+        <AnimalSelect
           v-model="statusModel"
           class="filter-select"
           placeholder="全部状态"
@@ -40,7 +40,7 @@
       </div>
       <div class="filter-field">
         <label class="filter-label">优先级：</label>
-        <Select
+        <AnimalSelect
           v-model="priorityModel"
           class="filter-select"
           placeholder="全部优先级"
@@ -241,7 +241,8 @@
 import { confirm, message } from "@/utils/feedback";
 import { loadingService } from "@/directives/loading";
 import { computed, onMounted, reactive, ref } from "vue";
-import { Button, Input, Select } from "animal-island-vue";
+import { Button, Input } from "animal-island-vue";
+import AnimalSelect from "@/components/AnimalSelect/index.vue";
 import AnimalDatePicker from "@/components/AnimalDatePicker/index.vue";
 import AnimalTableSelect from "@/components/AnimalTableSelect/index.vue";
 import AnimalTableDatePicker from "@/components/AnimalTableDatePicker/index.vue";
