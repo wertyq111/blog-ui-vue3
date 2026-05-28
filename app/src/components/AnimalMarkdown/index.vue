@@ -35,8 +35,11 @@ const DEFAULT_TOOLBARS = [
   "revoke",
   "next",
   "=",
+  // 用 pageFullscreen（页面内全屏，编辑器自身 position:fixed 铺满视口，无浏览器"按 esc"提示栏）。
+  // 不用浏览器原生 fullscreen，避免弹出 esc 提示条。
+  // 注意：fixed 全屏编辑器会被 animal-modal 祖先的 clip-path blob 裁切，
+  // 已在下方全局样式里用 :has(.md-editor-fullscreen) 中和祖先的 clip-path/overflow。
   "pageFullscreen",
-  "fullscreen",
   "preview",
   "catalog",
 ];
@@ -118,6 +121,22 @@ const previewAttrs = computed<Record<string, any>>(() => ({
   border-radius: 0;
   box-shadow: none;
   background: transparent !important;
+}
+</style>
+
+<style lang="scss">
+/*
+ * md-editor 页面全屏（.md-editor-fullscreen = position:fixed inset:0 z-index:10000）时，
+ * animal-modal 祖先的 blob clip-path 会把这个 fixed 编辑器裁成异形（露出一坨白 blob）。
+ * position:fixed 逃不出祖先 clip-path，故在编辑器进入全屏时，
+ * 用 :has() 反选并中和承载它的弹窗祖先的 clip-path / overflow，让全屏编辑器干净铺满视口。
+ */
+.animal-modal:has(.md-editor-fullscreen),
+.animal-modal__body:has(.md-editor-fullscreen),
+.animal-modal__content:has(.md-editor-fullscreen),
+.admin-animal-modal__content:has(.md-editor-fullscreen) {
+  clip-path: none !important;
+  overflow: visible !important;
 }
 </style>
 

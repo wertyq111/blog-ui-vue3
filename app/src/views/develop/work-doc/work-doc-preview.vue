@@ -34,7 +34,7 @@
         <div class="doc-preview-actions">
           <el-tooltip :content="fullscreen ? '退出全屏' : '全屏查看'" placement="top">
             <Button class="doc-icon-button" type="default" size="small" @click="toggleFullscreen">
-              <el-icon><FullScreen /></el-icon>
+              <div :class="'i-svg:' + (fullscreen ? 'fullscreen-exit' : 'fullscreen')" />
             </Button>
           </el-tooltip>
           <el-tooltip content="复制引用链接" placement="top">
@@ -257,6 +257,12 @@ watch(
 
   .el-icon {
     font-size: 16px;
+  }
+
+  /* 全屏切换用的 UnoCSS i-svg 图标（与导航栏同款），需显式尺寸 */
+  :deep([class^="i-svg:"]) {
+    width: 16px;
+    height: 16px;
   }
 
   &.animal-btn--primary {
