@@ -22,7 +22,8 @@ const AuthAPI = {
     return request({
       url: `/user/logout`,
       method: "delete",
-    });
+      __silent: true,
+    } as any);
   },
 
   /** 获取验证码接口 */

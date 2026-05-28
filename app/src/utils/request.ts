@@ -61,15 +61,21 @@ http.interceptors.response.use(
       return Promise.reject(new Error(msg || "未授权"));
     }
 
-    message.error(msg || "系统出错");
+    const isSilent = (response.config as any).__silent;
+    if (!isSilent) {
+      message.error(msg || "系统出错");
+    }
     return Promise.reject(new Error(msg || "系统出错"));
   },
 
   async (error) => {
     const { response } = error;
+    const isSilent = error.config?.__silent;
 
     if (!response) {
-      message.error("网络连接失败");
+      if (!isSilent) {
+        message.error("网络连接失败");
+      }
       return Promise.reject(error);
     }
 
@@ -80,7 +86,9 @@ http.interceptors.response.use(
     }
 
     const msg = response.data?.msg || response.data?.message || "请求失败";
-    message.error(msg);
+    if (!isSilent) {
+      message.error(msg);
+    }
     return Promise.reject(new Error(msg));
   }
 );

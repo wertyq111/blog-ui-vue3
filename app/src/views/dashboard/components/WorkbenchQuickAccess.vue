@@ -57,7 +57,9 @@
           <span>
             <span class="qa-item-title">{{ doc.title }}</span>
             <span class="qa-item-meta">
-              <span class="qa-pill qa-pill-mint">{{ doc.category?.name || doc.templateType || "文档" }}</span>
+              <span class="qa-pill qa-pill-mint">
+                {{ doc.category?.name || doc.templateType || "文档" }}
+              </span>
               <span>{{ countWords(doc.content).toLocaleString() }} 字</span>
             </span>
           </span>
@@ -78,7 +80,11 @@
       <div v-if="loading" class="quick-skeleton">
         <el-skeleton :rows="6" animated />
       </div>
-      <el-empty v-else-if="!pathItems.length && !modelItems.length" :image-size="48" description="暂无配置" />
+      <el-empty
+        v-else-if="!pathItems.length && !modelItems.length"
+        :image-size="48"
+        description="暂无配置"
+      />
       <div v-else class="qa-list">
         <button
           v-for="path in pathItems"
@@ -88,7 +94,9 @@
           @click="router.push('/develop/convert-path')"
         >
           <span>
-            <span class="qa-item-title">{{ path.name }} → {{ shortPath(path.target || path.url) }}</span>
+            <span class="qa-item-title">
+              {{ path.name }} → {{ shortPath(path.target || path.url) }}
+            </span>
             <span class="qa-item-meta">
               <span class="qa-pill qa-pill-yellow">{{ path.code || "路径" }}</span>
             </span>
@@ -147,12 +155,12 @@ const modelItems = ref<InitModelItem[]>([]);
 
 const platformSummary = computed(() => {
   const favorite = props.metrics?.favorite_platform?.name;
-  return `${platforms.value.length.toLocaleString()} 个绑定中${favorite ? ` · 主力${favorite}` : ""}`;
+  return `${(platforms.value?.length ?? 0).toLocaleString()} 个绑定中${favorite ? ` · 主力${favorite}` : ""}`;
 });
 
 const docsSummary = computed(() => {
-  const total = props.metrics?.total_docs.value ?? docsTotal.value;
-  const delta = props.metrics?.total_docs.delta_7d;
+  const total = props.metrics?.total_docs?.value ?? docsTotal.value;
+  const delta = props.metrics?.total_docs?.delta_7d;
   if (typeof delta !== "number") return `${total.toLocaleString()} 篇`;
   return `${total.toLocaleString()} 篇 · 本周 ${delta >= 0 ? "+" : ""}${delta.toLocaleString()}`;
 });
@@ -166,7 +174,11 @@ const platformCards = computed(() => {
     return {
       name: platform.name,
       icon: platform.name.slice(0, 1),
-      desc: isFavorite ? "主力 · 工作日报与项目沉淀" : dist ? `来源占比 ${dist.pct}%` : "已绑定平台来源",
+      desc: isFavorite
+        ? "主力 · 工作日报与项目沉淀"
+        : dist
+          ? `来源占比 ${dist.pct}%`
+          : "已绑定平台来源",
       count: dist ? formatWords(dist.words) : String(platform.sort ?? index + 1),
       isFavorite,
     };
@@ -184,11 +196,11 @@ async function fetchQuickAccess() {
       ServerPathAPI.getPage({ pageNum: 1, pageSize: 3 }),
       InitModelAPI.getPage({ pageNum: 1, pageSize: 3 }),
     ]);
-    platforms.value = platformList;
-    recentDocs.value = docPage.list.slice(0, 5);
-    docsTotal.value = docPage.total;
-    pathItems.value = pathPage.list.slice(0, 3);
-    modelItems.value = modelPage.list.slice(0, 3);
+    platforms.value = Array.isArray(platformList) ? platformList : [];
+    recentDocs.value = docPage?.list?.slice(0, 5) ?? [];
+    docsTotal.value = docPage?.total ?? 0;
+    pathItems.value = pathPage?.list?.slice(0, 3) ?? [];
+    modelItems.value = modelPage?.list?.slice(0, 3) ?? [];
   } catch {
     message.error("快捷入口加载失败");
   } finally {
@@ -285,7 +297,9 @@ function shortPath(value: string): string {
   border-radius: 6px;
   background: var(--ai-yellow, #f7cd67);
   color: #5a3a18;
-  box-shadow: 0 2px 0 0 #c89a3a, inset 0 0 0 1px rgba(255, 255, 255, 0.4);
+  box-shadow:
+    0 2px 0 0 #c89a3a,
+    inset 0 0 0 1px rgba(255, 255, 255, 0.4);
   transform: rotate(-3deg);
   font-size: 11px;
   font-weight: 800;
@@ -297,14 +311,18 @@ function shortPath(value: string): string {
   border-color: var(--ai-primary-active, #11a89b);
   background: var(--ai-primary-bg, #dff8f3);
   color: var(--ai-primary-active, #11a89b);
-  box-shadow: 0 2px 0 0 var(--ai-primary-active, #11a89b), inset 0 0 0 1px rgba(255, 255, 255, 0.4);
+  box-shadow:
+    0 2px 0 0 var(--ai-primary-active, #11a89b),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.4);
 }
 
 .card-tape-pink {
   border-color: #d6788a;
   background: #ffe0e6;
   color: #c05f76;
-  box-shadow: 0 2px 0 0 #d6788a, inset 0 0 0 1px rgba(255, 255, 255, 0.4);
+  box-shadow:
+    0 2px 0 0 #d6788a,
+    inset 0 0 0 1px rgba(255, 255, 255, 0.4);
 }
 
 .quick-skeleton {
@@ -324,7 +342,10 @@ function shortPath(value: string): string {
   border: 2px solid var(--ai-border, #e8e2d6);
   background: var(--ai-card, #f8f1d9);
   cursor: pointer;
-  transition: transform 0.18s, border-color 0.18s, box-shadow 0.18s;
+  transition:
+    transform 0.18s,
+    border-color 0.18s,
+    box-shadow 0.18s;
   text-align: left;
 }
 
