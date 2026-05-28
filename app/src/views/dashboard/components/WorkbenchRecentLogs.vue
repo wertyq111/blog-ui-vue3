@@ -44,6 +44,7 @@
 <script setup lang="ts">
 import { computed } from "vue";
 import type { DashboardKpiItem, DashboardRecentLog } from "@/types/api/dashboard-stats";
+import { extractTitle, extractDesc, countWords } from "@/utils/work-daily-display";
 
 const props = defineProps<{
   logs: DashboardRecentLog[];
@@ -69,41 +70,7 @@ function fmtDateY(dateStr: string): string {
   return dateStr.split("-")[0] || "";
 }
 
-function getRawText(content: any): string {
-  if (!content) return "";
-  if (typeof content === "object" && content.platforms) {
-    return content.platforms.map((p: any) => p.content ?? "").join("\n");
-  }
-  return String(content);
-}
-
-function extractTitle(content: any): string {
-  const raw = getRawText(content);
-  // Try to extract first markdown heading
-  const headingMatch = raw.match(/^#{1,4}\s+(.+)/m);
-  if (headingMatch) return headingMatch[1].replace(/\*\*/g, "").trim().slice(0, 60);
-  // Fallback: first non-empty line
-  const firstLine = raw.split("\n").find((l: string) => l.trim().length > 0);
-  return (firstLine || "").replace(/^#+\s*/, "").replace(/\*\*/g, "").trim().slice(0, 60) || "无标题";
-}
-
-function extractDesc(content: any): string {
-  const raw = getRawText(content);
-  // Skip headings, get the first paragraph-like text
-  const lines = raw.split("\n").filter((l: string) => {
-    const t = l.trim();
-    return t.length > 0 && !t.startsWith("#") && !t.startsWith("|") && !t.startsWith("---");
-  });
-  const text = lines.slice(0, 2).join(" ").replace(/\*\*/g, "").replace(/<[^>]+>/g, "").trim();
-  return text.slice(0, 120);
-}
-
-function countWords(content: any): number {
-  const raw = getRawText(content);
-  // Count Chinese characters + words
-  const clean = raw.replace(/<[^>]+>/g, "").replace(/\s+/g, "");
-  return clean.length;
-}
+// 内容提取工具函数已抽到 @/utils/work-daily-display
 </script>
 
 <style lang="scss" scoped>

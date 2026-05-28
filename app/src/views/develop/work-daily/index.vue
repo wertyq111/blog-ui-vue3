@@ -82,43 +82,39 @@
               <td class="cell-num">{{ row.id }}</td>
               <td class="cell-mono">{{ row.logDate }}</td>
               <td>
-                <div v-if="isPlatformContent(row.content)" class="daily-summary">
-                  <el-popover
-                    v-for="p in row.content.platforms"
-                    :key="p.platformId"
-                    trigger="hover"
-                    :width="520"
-                    placement="top"
-                  >
-                    <template #reference>
-                      <div class="daily-brief">
-                        <div class="daily-cell-markdown">
-                          <AnimalMarkdown :model-value="p.content || ''" preview-only height="auto" />
+                <div class="daily-summary">
+                  <template v-for="entry in toEntries(row)" :key="entry.key">
+                    <el-popover trigger="hover" :width="520" placement="top">
+                      <template #reference>
+                        <div
+                          class="log-row"
+                          @click="openPreview(row, entry)"
+                        >
+                          <div class="log-body">
+                            <div class="log-title">
+                              <span v-if="entry.platformName" class="log-platform">{{ entry.platformName }}</span>
+                              {{ extractTitle(entry.text) }}
+                            </div>
+                            <div class="log-desc">{{ extractDesc(entry.text) }}</div>
+                            <div class="log-meta">
+                              <span class="log-words">{{ countWords(entry.text).toLocaleString() }} 字</span>
+                              <span
+                                v-for="t in (row.tags || [])"
+                                :key="typeof t === 'string' ? t : t.id"
+                                class="log-tag"
+                              >#{{ typeof t === 'string' ? t : t.name }}</span>
+                            </div>
+                          </div>
+                          <button class="log-action" type="button" title="查看完整内容">
+                            <SystemIco name="eye" :size="14" />
+                          </button>
                         </div>
+                      </template>
+                      <div class="daily-preview">
+                        <AnimalMarkdown :model-value="entry.text" preview-only height="auto" />
                       </div>
-                    </template>
-                    <div class="daily-preview">
-                      <AnimalMarkdown :model-value="p.content || ''" preview-only height="auto" />
-                    </div>
-                  </el-popover>
-                </div>
-                <div v-else class="daily-summary">
-                  <el-popover
-                    trigger="hover"
-                    :width="520"
-                    placement="top"
-                  >
-                    <template #reference>
-                      <div class="daily-brief">
-                        <div class="daily-cell-markdown">
-                          <AnimalMarkdown :model-value="String(row.content)" preview-only height="auto" />
-                        </div>
-                      </div>
-                    </template>
-                    <div class="daily-preview">
-                      <AnimalMarkdown :model-value="String(row.content)" preview-only height="auto" />
-                    </div>
-                  </el-popover>
+                    </el-popover>
+                  </template>
                 </div>
               </td>
               <td class="cell-mono">{{ row.createTime }}</td>
@@ -152,6 +148,16 @@
     </div>
 
     <WorkDailyEdit v-model:visible="editVisible" :data="editingRow" @done="handleQuery" />
+
+    <AdminAnimalModal
+      v-model:visible="previewVisible"
+      :title="previewTitle"
+      :width="720"
+      :show-footer="false"
+      content-class="daily-preview-modal"
+    >
+      <AnimalMarkdown :model-value="previewContent" preview-only height="auto" />
+    </AdminAnimalModal>
   </div>
 </template>
 
@@ -170,6 +176,8 @@ import type { WorkPlatformItem } from "@/types/api/work-platform";
 import WorkDailyEdit from "./work-daily-edit.vue";
 import WorkDailyReport from "./work-daily-report.vue";
 import SystemIco from "@/components/AdminPage/SystemIco.vue";
+import AdminAnimalModal from "@/components/AdminPage/AdminAnimalModal.vue";
+import { extractTitle, extractDesc, countWords, getRawText } from "@/utils/work-daily-display";
 
 defineOptions({ name: "WorkDaily", inheritAttrs: false });
 
@@ -188,6 +196,49 @@ const platforms = ref<WorkPlatformItem[]>([]);
 const editVisible = ref(false);
 const editingRow = ref<WorkDailyItem | null>(null);
 
+// 内容预览弹窗
+const previewVisible = ref(false);
+const previewTitle = ref("");
+const previewContent = ref("");
+
+interface DailyEntry {
+  key: string;
+  platformId: number | null;
+  platformName: string;
+  text: string;
+}
+
+function toEntries(row: WorkDailyItem): DailyEntry[] {
+  if (isPlatformContent(row.content)) {
+    return row.content.platforms.map((p: any) => ({
+      key: `${row.id}-${p.platformId ?? p.platform_id ?? 0}`,
+      platformId: p.platformId ?? p.platform_id ?? null,
+      platformName: resolvePlatformName(p.platformId ?? p.platform_id),
+      text: p.content || "",
+    }));
+  }
+  return [
+    {
+      key: `${row.id}-raw`,
+      platformId: null,
+      platformName: "",
+      text: getRawText(row.content),
+    },
+  ];
+}
+
+function resolvePlatformName(id: number | undefined | null): string {
+  if (id == null || id === 0) return "";
+  return platforms.value.find((p) => p.id === id)?.name ?? "";
+}
+
+function openPreview(row: WorkDailyItem, entry: DailyEntry): void {
+  const parts = [row.logDate, entry.platformName].filter(Boolean);
+  previewTitle.value = parts.join(" · ") || "内容预览";
+  previewContent.value = entry.text;
+  previewVisible.value = true;
+}
+
 const platformOptions = computed(() => [
   { key: "", label: "全部" },
   ...platforms.value.map((p) => ({ key: String(p.id), label: p.name })),
@@ -202,12 +253,6 @@ const platformModel = computed<string>({
 
 function isPlatformContent(content: any): boolean {
   return content && typeof content === "object" && Array.isArray(content.platforms);
-}
-
-function stripHtml(html: string): string {
-  const tmp = document.createElement("div");
-  tmp.innerHTML = html;
-  return tmp.textContent || tmp.innerText || "";
 }
 
 async function fetchPlatforms(): Promise<void> {
@@ -289,40 +334,115 @@ onMounted(async () => {
 .daily-summary {
   display: flex;
   flex-direction: column;
-  gap: 4px;
 }
 
-.daily-brief {
-  font-size: 13px;
-  line-height: 1.6;
-  color: var(--ai-text-2, #9f927d);
+.log-row {
+  display: grid;
+  grid-template-columns: 1fr 32px;
+  gap: 12px;
+  padding: 10px 0;
+  border-top: 2px dashed var(--ai-border, #e8e2d6);
+  align-items: center;
   cursor: pointer;
+
+  &:first-child {
+    border-top: 0;
+    padding-top: 2px;
+  }
+
+  &:hover .log-action {
+    background: var(--ai-primary-bg, #dff8f3);
+    color: var(--ai-primary-active, #11a89b);
+  }
 }
 
-.daily-brief__platform {
+.log-title {
+  font-size: 14px;
+  font-weight: 800;
+  color: var(--ai-text, #794f27);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.log-platform {
+  font-size: 11px;
+  font-weight: 800;
   color: var(--ai-primary-active, #11a89b);
+  background: var(--ai-primary-bg, #dff8f3);
+  padding: 2px 8px;
+  border-radius: 999px;
+}
+
+.log-desc {
+  font-size: 12px;
+  color: var(--ai-text-2, #9f927d);
+  margin-top: 3px;
+  font-weight: 500;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  line-height: 1.55;
+}
+
+.log-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin-top: 6px;
+}
+
+.log-words {
+  font-size: 11px;
+  color: var(--ai-primary-active, #11a89b);
+  background: var(--ai-primary-bg, #dff8f3);
+  padding: 2px 9px;
+  border-radius: 999px;
+  font-weight: 800;
+}
+
+.log-tag {
+  font-size: 11px;
+  color: var(--ai-text-2, #9f927d);
   font-weight: 700;
 }
 
-.daily-cell-markdown {
-  max-height: 80px;
-  overflow: hidden;
-  position: relative;
+.log-action {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 0;
+  background: #fff;
+  cursor: pointer;
+  color: var(--ai-text, #794f27);
+  font-weight: 800;
+  display: grid;
+  place-items: center;
+  box-shadow: 0 3px 0 0 var(--ai-shadow-color, #bdaea0);
+  transition: background 0.18s, color 0.18s, transform 0.18s, box-shadow 0.18s;
 
-  &::after {
-    content: "";
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    height: 24px;
-    background: linear-gradient(to bottom, transparent, var(--ai-bg-card, #fcfaf2));
-    pointer-events: none;
+  &:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 0 0 var(--ai-shadow-color, #bdaea0);
+  }
+
+  &:active {
+    transform: translateY(2px);
+    box-shadow: 0 1px 0 0 var(--ai-shadow-color, #bdaea0);
   }
 }
 
 .daily-preview {
   max-height: 400px;
+  overflow-y: auto;
+}
+</style>
+
+<style lang="scss">
+.daily-preview-modal {
+  max-height: 70vh;
   overflow-y: auto;
 }
 </style>
