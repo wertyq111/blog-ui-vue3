@@ -5,49 +5,59 @@
     width="760px"
     @update:visible="handleVisibleChange"
   >
-    <div class="assign-toolbar">
-      <Input v-model="permKeywords" allow-clear class="assign-search" placeholder="菜单权限名称">
+    <!-- 第一行：搜索 + 已选计数 -->
+    <div class="perm-head">
+      <Input
+        v-model="permKeywords"
+        allow-clear
+        class="perm-search"
+        placeholder="搜索菜单权限名称"
+      >
         <template #prefix>
           <SystemIco name="search" :size="13" />
         </template>
       </Input>
+      <span class="perm-count">已选 {{ checkedCount }} 项</span>
+    </div>
 
-      <div class="assign-actions">
-        <Button type="primary" size="small" @click="togglePermTree">
+    <!-- 第二行：工具栏 -->
+    <div class="perm-toolbar">
+      <div class="perm-toolbar__group">
+        <Button type="default" size="small" @click="toggleExpand">
           <SystemIco name="chev" :size="12" />
           {{ isExpanded ? "收缩" : "展开" }}
         </Button>
+        <Button type="default" size="small" @click="treeRef?.selectAll()">全选</Button>
+        <Button type="default" size="small" @click="treeRef?.invertAll()">反选</Button>
+        <Button type="default" size="small" @click="treeRef?.clearAll()">清空</Button>
+      </div>
+
+      <div class="perm-toolbar__group">
         <label class="linked-switch">
           <span>父子联动</span>
           <Switch v-model="parentChildLinked" size="small" />
         </label>
-
         <el-tooltip placement="bottom">
           <template #content>
-            如果只需勾选菜单权限，不需要勾选子菜单或者按钮权限，请关闭父子联动
+            如果只需勾选菜单权限，不需要联动勾选子菜单/按钮权限，请关闭父子联动
           </template>
-          <el-icon class="ml-1 color-[--el-color-primary] inline-block cursor-pointer">
+          <el-icon class="perm-help">
             <QuestionFilled />
           </el-icon>
         </el-tooltip>
       </div>
     </div>
 
-    <el-tree
-      ref="permTreeRef"
-      v-loading="loading"
-      node-key="value"
-      show-checkbox
-      :data="menuPermOptions"
-      :filter-node-method="handlePermFilter"
-      :default-expand-all="true"
-      :check-strictly="!parentChildLinked"
-      class="mt-5"
-    >
-      <template #default="{ data }">
-        {{ data.label }}
-      </template>
-    </el-tree>
+    <!-- 权限树（动森卡片包裹） -->
+    <div v-loading="loading" class="perm-tree-card">
+      <AnimalPermTree
+        ref="treeRef"
+        v-model="checkedPerms"
+        :options="menuPermOptions"
+        :check-strictly="!parentChildLinked"
+        :filter-text="permKeywords"
+      />
+    </div>
 
     <template #footer>
       <div class="develop-dialog-footer">
@@ -67,10 +77,11 @@
 
 <script setup lang="ts">
 import { message } from "@/utils/feedback";
-import { nextTick, ref, watch } from "vue";
+import { computed, nextTick, ref, watch } from "vue";
 
 import { Button, Input, Switch } from "animal-island-vue";
 import AdminAnimalModal from "@/components/AdminPage/AdminAnimalModal.vue";
+import AnimalPermTree from "@/components/AnimalPermTree/index.vue";
 import RoleAPI from "@/api/system/role";
 import type { BackendPermissionItem, OptionItem, RoleItem } from "@/types/api";
 import SystemIco from "@/components/AdminPage/SystemIco.vue";
@@ -86,12 +97,15 @@ const emit = defineEmits<{
   done: [];
 }>();
 
-const permTreeRef = ref<any>();
+const treeRef = ref<InstanceType<typeof AnimalPermTree>>();
 const loading = ref(false);
 const menuPermOptions = ref<OptionItem[]>([]);
+const checkedPerms = ref<(string | number)[]>([]);
 const permKeywords = ref("");
 const isExpanded = ref(true);
 const parentChildLinked = ref(true);
+
+const checkedCount = computed(() => checkedPerms.value.length);
 
 async function openDrawer(): Promise<void> {
   const roleId = props.role?.id;
@@ -107,11 +121,8 @@ async function openDrawer(): Promise<void> {
         title: item.title,
       }))
     );
-
+    checkedPerms.value = permList.filter((item) => item.checked).map((item) => item.id);
     await nextTick();
-    permList
-      .filter((item) => item.checked)
-      .forEach((item) => permTreeRef.value?.setChecked(item.id, true, false));
   } finally {
     loading.value = false;
   }
@@ -120,6 +131,7 @@ async function openDrawer(): Promise<void> {
 function closeDrawer(): void {
   emit("update:visible", false);
   menuPermOptions.value = [];
+  checkedPerms.value = [];
   permKeywords.value = "";
   isExpanded.value = true;
   parentChildLinked.value = true;
@@ -129,28 +141,17 @@ function handleVisibleChange(value: boolean): void {
   if (!value) closeDrawer();
 }
 
-function togglePermTree(): void {
+function toggleExpand(): void {
   isExpanded.value = !isExpanded.value;
-  if (!permTreeRef.value) return;
-
-  Object.values(permTreeRef.value.store.nodesMap).forEach((node: any) => {
-    if (isExpanded.value) node.expand();
-    else node.collapse();
-  });
-}
-
-function handlePermFilter(value: string, data: { [key: string]: any }): boolean {
-  if (!value) return true;
-  return data.label.includes(value);
+  if (isExpanded.value) treeRef.value?.expandAll();
+  else treeRef.value?.collapseAll();
 }
 
 async function handleSubmit(): Promise<void> {
   const roleId = props.role?.id;
   if (!roleId) return;
 
-  const checkedMenuIds: number[] = permTreeRef
-    .value!.getCheckedNodes(false, true)
-    .map((node: any) => node.value);
+  const checkedMenuIds = (treeRef.value?.getCheckedKeys(true) ?? []).map((v) => Number(v));
 
   loading.value = true;
   try {
@@ -163,10 +164,6 @@ async function handleSubmit(): Promise<void> {
   }
 }
 
-watch(permKeywords, (value) => {
-  permTreeRef.value?.filter(value);
-});
-
 watch(
   () => props.visible,
   (visible) => {
@@ -174,3 +171,76 @@ watch(
   }
 );
 </script>
+
+<style scoped lang="scss">
+.perm-head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.perm-search {
+  flex: 1;
+}
+.perm-count {
+  flex-shrink: 0;
+  padding: 4px 12px;
+  font-size: 12px;
+  font-weight: 800;
+  color: var(--ai-primary-active, #11a89b);
+  background: var(--ai-primary-bg, #dff8f3);
+  border-radius: 999px;
+}
+
+.perm-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 12px;
+}
+.perm-toolbar__group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.linked-switch {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--ai-text-2, #9f927d);
+  cursor: pointer;
+}
+.perm-help {
+  color: var(--ai-primary, #19c8b9);
+  cursor: pointer;
+}
+
+.perm-tree-card {
+  max-height: 46vh;
+  margin-top: 14px;
+  padding: 10px 8px;
+  overflow-y: auto;
+  background: #fdfdf5;
+  border: 2px solid var(--ai-border, #e8e2d6);
+  border-radius: 18px;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.6);
+
+  &::-webkit-scrollbar {
+    width: 8px;
+  }
+  &::-webkit-scrollbar-track {
+    background: #f7f5ee;
+    border-radius: 10px;
+  }
+  &::-webkit-scrollbar-thumb {
+    background: #e6dfcb;
+    border-radius: 10px;
+    &:hover {
+      background: #c8bd9f;
+    }
+  }
+}
+</style>
