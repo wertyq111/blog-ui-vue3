@@ -41,14 +41,13 @@
         class="report-field"
         style="width: 160px !important"
       />
-      <AnimalDatePicker
-        v-else-if="config.type === 'week'"
-        v-model="config.weekRange"
-        type="daterange"
-        value-format="YYYY-MM-DD"
-        class="report-field-wide"
-        style="width: 240px !important"
-      />
+      <div v-else-if="config.type === 'week'" class="report-field-range-wrap">
+        <AnimalDatePicker
+          v-model="config.weekRange"
+          type="daterange"
+          value-format="YYYY-MM-DD"
+        />
+      </div>
       <AnimalDatePicker
         v-else
         v-model="config.year"
@@ -785,6 +784,20 @@ onBeforeUnmount(() => {
   .report-field-wide {
     width: 240px !important;
     flex-shrink: 0;
+  }
+
+  /*
+   * daterange 的 fallthrough class/style 落不到真正的 .el-range-editor 上
+   * （而 .el-date-editor.animal-date{width:100%} 又把它撑满整行），
+   * 所以用固定宽度 wrapper 兜住，让内部 editor 填满 240px wrapper。
+   */
+  .report-field-range-wrap {
+    width: 280px;
+    flex-shrink: 0;
+
+    .el-date-editor.animal-date.el-range-editor {
+      width: 100% !important;
+    }
   }
 
   .report-field-model {

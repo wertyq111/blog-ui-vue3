@@ -400,13 +400,30 @@
     &.start-date {
       .el-date-table-cell {
         background: linear-gradient(90deg, transparent 50%, rgba(124, 186, 112, 0.1) 50%) !important;
-        
+        position: relative;
+        overflow: visible;
+
         .el-date-table-cell__text {
           background-color: var(--ai-leaf) !important;
           color: #ffffff !important;
           border-radius: 50% !important;
           font-weight: 900 !important;
           box-shadow: 0 2px 6px rgba(124, 186, 112, 0.3) !important;
+        }
+
+        // 起点：右上角小树叶标记
+        &::after {
+          content: "";
+          position: absolute;
+          top: -2px;
+          right: 1px;
+          width: 13px;
+          height: 13px;
+          background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M4 20C4 11 11 4 20 4C20 13 13 20 4 20Z' fill='%237cba70' stroke='%234a8a36' stroke-width='1.8'/%3E%3Cpath d='M6 18C10 14 14 10 17 6' stroke='%234a8a36' stroke-width='1.4' fill='none' stroke-linecap='round'/%3E%3C/svg%3E")
+            no-repeat center / contain;
+          transform: rotate(-12deg);
+          pointer-events: none;
+          filter: drop-shadow(0 1px 1px rgba(74, 138, 54, 0.25));
         }
       }
     }
@@ -415,13 +432,29 @@
     &.end-date {
       .el-date-table-cell {
         background: linear-gradient(90deg, rgba(124, 186, 112, 0.1) 50%, transparent 50%) !important;
-        
+        position: relative;
+        overflow: visible;
+
         .el-date-table-cell__text {
           background-color: var(--ai-leaf) !important;
           color: #ffffff !important;
           border-radius: 50% !important;
           font-weight: 900 !important;
           box-shadow: 0 2px 6px rgba(124, 186, 112, 0.3) !important;
+        }
+
+        // 终点：右上角小樱花标记
+        &::after {
+          content: "";
+          position: absolute;
+          top: -3px;
+          right: 0;
+          width: 13px;
+          height: 13px;
+          background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cg fill='%23f8a6b2'%3E%3Cellipse cx='12' cy='6' rx='3' ry='5'/%3E%3Cellipse cx='12' cy='6' rx='3' ry='5' transform='rotate(72 12 12)'/%3E%3Cellipse cx='12' cy='6' rx='3' ry='5' transform='rotate(144 12 12)'/%3E%3Cellipse cx='12' cy='6' rx='3' ry='5' transform='rotate(216 12 12)'/%3E%3Cellipse cx='12' cy='6' rx='3' ry='5' transform='rotate(288 12 12)'/%3E%3C/g%3E%3Ccircle cx='12' cy='12' r='2.4' fill='%23ffd34d'/%3E%3C/svg%3E")
+            no-repeat center / contain;
+          pointer-events: none;
+          filter: drop-shadow(0 1px 1px rgba(214, 120, 138, 0.3));
         }
       }
     }
