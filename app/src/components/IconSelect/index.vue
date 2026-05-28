@@ -5,7 +5,7 @@
     :class="{ 'ais--disabled': disabled, 'ais--open': open }"
     :style="{ width }"
   >
-    <div class="ais__trigger" @click="toggleOpen">
+    <div ref="triggerRef" class="ais__trigger" @click="toggleOpen">
       <span v-if="selectedIcon" class="ais__value">
         <Icon :name="resolveAnimalIcon(selectedIcon)" :size="18" />
         <span class="ais__value-name">{{ selectedIcon }}</span>
@@ -35,29 +35,36 @@
       </span>
     </div>
 
-    <transition name="ais-fade">
-      <div v-if="open" class="ais__dropdown">
-        <ul class="ais__grid">
-          <li
-            v-for="name in ANIMAL_ICON_NAMES"
-            :key="name"
-            class="ais__item"
-            :class="{ 'is-active': selectedIcon === name }"
-            @click="selectIcon(name)"
-          >
-            <el-tooltip :content="name" placement="bottom" effect="light">
-              <Icon :name="name" :size="28" />
-            </el-tooltip>
-          </li>
-        </ul>
-      </div>
-    </transition>
+    <Teleport to="body">
+      <transition name="ais-fade">
+        <div
+          v-if="open"
+          ref="dropdownRef"
+          class="ais__dropdown"
+          :style="dropdownStyle"
+        >
+          <ul class="ais__grid">
+            <li
+              v-for="name in ANIMAL_ICON_NAMES"
+              :key="name"
+              class="ais__item"
+              :class="{ 'is-active': selectedIcon === name }"
+              @click="selectIcon(name)"
+            >
+              <el-tooltip :content="name" placement="bottom" effect="light">
+                <Icon :name="name" :size="28" />
+              </el-tooltip>
+            </li>
+          </ul>
+        </div>
+      </transition>
+    </Teleport>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref } from "vue";
-import { onClickOutside } from "@vueuse/core";
+import { computed, ref } from "vue";
+import { onClickOutside, useElementBounding } from "@vueuse/core";
 import Icon from "@/components/AnimalIcon/index.vue";
 import { ANIMAL_ICON_NAMES, resolveAnimalIcon } from "@/utils/menuAnimalIcon";
 
@@ -75,7 +82,19 @@ withDefaults(
 const selectedIcon = defineModel<string>("modelValue", { default: "" });
 
 const wrapperRef = ref<HTMLElement>();
+const triggerRef = ref<HTMLElement>();
+const dropdownRef = ref<HTMLElement>();
 const open = ref(false);
+
+const { top, left, width: triggerWidth, height: triggerHeight } = useElementBounding(triggerRef);
+
+const dropdownStyle = computed(() => ({
+  position: "fixed" as const,
+  left: `${left.value}px`,
+  width: `${triggerWidth.value}px`,
+  top: `${top.value + triggerHeight.value + 6}px`,
+  zIndex: 9999,
+}));
 
 function toggleOpen(): void {
   open.value = !open.value;
@@ -90,7 +109,11 @@ function clearSelectedIcon(): void {
   selectedIcon.value = "";
 }
 
-onClickOutside(wrapperRef, () => (open.value = false));
+onClickOutside(wrapperRef, (event) => {
+  // 同时排除点击 dropdown 本身（因为它被 teleport 到了 body）
+  if (dropdownRef.value?.contains(event.target as Node)) return;
+  open.value = false;
+});
 </script>
 
 <style scoped lang="scss">
@@ -177,13 +200,11 @@ onClickOutside(wrapperRef, () => (open.value = false));
   transform: rotate(180deg);
   color: #19c8b9;
 }
+</style>
 
+<style lang="scss">
+/* 全局样式：因为 Teleport 到 body，scoped 无法命中 */
 .ais__dropdown {
-  position: absolute;
-  top: calc(100% + 6px);
-  left: 0;
-  right: 0;
-  z-index: 100;
   padding: 12px;
   background: #ffeea0;
   border-radius: 22px;
@@ -196,6 +217,24 @@ onClickOutside(wrapperRef, () => (open.value = false));
   margin: 0;
   padding: 0;
   list-style: none;
+  max-height: 240px;
+  overflow-y: auto;
+
+  /* 动森风格浅黄极细滚动条 */
+  &::-webkit-scrollbar {
+    width: 6px;
+  }
+  &::-webkit-scrollbar-track {
+    background: rgba(255, 238, 160, 0.4);
+    border-radius: 10px;
+  }
+  &::-webkit-scrollbar-thumb {
+    background: #e6c84a;
+    border-radius: 10px;
+    &:hover {
+      background: #d4b030;
+    }
+  }
 }
 .ais__item {
   display: flex;
