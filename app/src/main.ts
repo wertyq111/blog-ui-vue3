@@ -8,6 +8,17 @@
 import { createApp, type Component } from "vue";
 import App from "./App.vue";
 
+// ===== 字体（@fontsource self-host，替代 Google Fonts CDN）=====
+import "@fontsource/nunito/800.css";
+import "@fontsource/nunito/900.css";
+import "@fontsource/noto-sans-sc/700.css";
+import "@fontsource/noto-sans-sc/900.css";
+import "@fontsource/m-plus-rounded-1c/500.css";
+import "@fontsource/m-plus-rounded-1c/700.css";
+import "@fontsource/m-plus-rounded-1c/800.css";
+import "@fontsource/m-plus-rounded-1c/900.css";
+import "@fontsource/mochiy-pop-one";
+
 // ===== 样式导入 =====
 import "element-plus/dist/index.css";
 import "vxe-table/lib/style.css";

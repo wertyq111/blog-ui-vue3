@@ -285,7 +285,7 @@
 /* 2. 动森高精度日期选择弹窗 - 双日历范围与单日期定制扩展 */
 .el-popper.el-picker__popper.animal-datepicker-popper {
   background: #fdfbf7 !important;
-  border: 2px solid #e8e2d6 !important;
+  border: 2px solid var(--ai-border) !important;
   border-radius: 20px !important;
   box-shadow: 0 8px 30px rgba(121, 79, 39, 0.08) !important;
   padding: 0 !important;
@@ -302,38 +302,38 @@
   // 头部样式
   .el-date-picker__header,
   .el-date-range-picker__header {
-    color: #794f27 !important;
+    color: var(--ai-text) !important;
     font-weight: 800 !important;
     font-size: 14px !important;
     margin-bottom: 8px !important;
 
     span, div {
-      color: #794f27 !important;
+      color: var(--ai-text) !important;
       font-weight: 800 !important;
     }
 
     button {
-      color: #9f927d !important;
+      color: var(--ai-text-2) !important;
       &:hover {
-        color: #19c8b9 !important;
+        color: var(--ai-primary) !important;
       }
     }
   }
 
   // 星期表头
   .el-date-table th {
-    color: #9f927d !important;
+    color: var(--ai-text-2) !important;
     font-weight: 700 !important;
     border-bottom: 1px solid rgba(232, 226, 214, 0.5) !important;
   }
 
   // 日期格子
   .el-date-table td {
-    color: #794f27 !important;
+    color: var(--ai-text) !important;
 
     &.next-month,
     &.prev-month {
-      color: #c4b89e !important;
+      color: var(--ai-text-3) !important;
       opacity: 0.6;
     }
 
@@ -360,23 +360,23 @@
     &:not(.is-disabled):hover {
       .el-date-table-cell__text {
         background-color: rgba(25, 200, 185, 0.08) !important;
-        color: #19c8b9 !important;
+        color: var(--ai-primary) !important;
       }
     }
 
     // 今天
     &.today {
       .el-date-table-cell__text {
-        color: #19c8b9 !important;
+        color: var(--ai-primary) !important;
         font-weight: 800 !important;
-        border: 1.5px solid #19c8b9 !important;
+        border: 1.5px solid var(--ai-primary) !important;
       }
     }
 
     // 选中（单日期）
     &.current {
       .el-date-table-cell__text {
-        background-color: #7cba70 !important;
+        background-color: var(--ai-leaf) !important;
         color: #ffffff !important;
         font-weight: 900 !important;
         box-shadow: 0 2px 6px rgba(124, 186, 112, 0.3) !important;
@@ -389,7 +389,7 @@
         background-color: rgba(124, 186, 112, 0.1) !important;
         
         .el-date-table-cell__text {
-          color: #794f27 !important;
+          color: var(--ai-text) !important;
           background-color: transparent !important;
           border-radius: 0 !important;
         }
@@ -402,7 +402,7 @@
         background: linear-gradient(90deg, transparent 50%, rgba(124, 186, 112, 0.1) 50%) !important;
         
         .el-date-table-cell__text {
-          background-color: #7cba70 !important;
+          background-color: var(--ai-leaf) !important;
           color: #ffffff !important;
           border-radius: 50% !important;
           font-weight: 900 !important;
@@ -417,7 +417,7 @@
         background: linear-gradient(90deg, rgba(124, 186, 112, 0.1) 50%, transparent 50%) !important;
         
         .el-date-table-cell__text {
-          background-color: #7cba70 !important;
+          background-color: var(--ai-leaf) !important;
           color: #ffffff !important;
           border-radius: 50% !important;
           font-weight: 900 !important;
@@ -461,7 +461,7 @@
 .el-date-editor.animal-date.el-range-editor {
   box-shadow: none !important;
   background-color: #f7f3df !important;
-  border: 2px solid #c4b89e !important;
+  border: 2px solid var(--ai-text-3) !important;
   border-radius: 50px !important;
   padding: 3px 16px !important;
   transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
@@ -473,7 +473,7 @@
 
   &.is-active,
   &:focus-within {
-    border-color: #19c8b9 !important;
+    border-color: var(--ai-primary) !important;
     background-color: #fff !important;
     box-shadow: 0 0 0 2px rgba(25, 200, 185, 0.15) !important;
   }
@@ -492,7 +492,7 @@
     font-size: 13px !important;
 
     &::placeholder {
-      color: #c4b89e !important;
+      color: var(--ai-text-3) !important;
       font-weight: 500 !important;
     }
   }
@@ -505,12 +505,12 @@
   }
 
   .el-range__close-icon {
-    color: #c4b89e !important;
+    color: var(--ai-text-3) !important;
     font-size: 14px !important;
     transition: color 0.15s !important;
 
     &:hover {
-      color: #fc736d !important;
+      color: var(--ai-red) !important;
     }
   }
 }
@@ -520,7 +520,7 @@
   
   .el-input__wrapper {
     background-color: #f7f3df !important;
-    border: 2px solid #c4b89e !important;
+    border: 2px solid var(--ai-text-3) !important;
     border-radius: 50px !important;
     padding: 1px 16px !important;
     box-shadow: none !important;
@@ -532,7 +532,7 @@
 
     &.is-focus,
     &:focus-within {
-      border-color: #19c8b9 !important;
+      border-color: var(--ai-primary) !important;
       background-color: #fff !important;
       box-shadow: 0 0 0 2px rgba(25, 200, 185, 0.15) !important;
     }
@@ -544,7 +544,7 @@
     font-size: 13px !important;
 
     &::placeholder {
-      color: #c4b89e !important;
+      color: var(--ai-text-3) !important;
       font-weight: 500 !important;
     }
   }
@@ -555,11 +555,11 @@
   }
 
   .el-input__suffix-inner {
-    color: #c4b89e !important;
+    color: var(--ai-text-3) !important;
     
     .el-input__clear {
       &:hover {
-        color: #fc736d !important;
+        color: var(--ai-red) !important;
       }
     }
   }
@@ -568,7 +568,7 @@
 /* 4. 动森高精度下拉选择弹窗专属样式 (覆盖状态、优先级、平台) */
 .el-popper.el-dropdown__popper.animal-dropdown-popper {
   background: #fdfbf7 !important;
-  border: 2px solid #e8e2d6 !important;
+  border: 2px solid var(--ai-border) !important;
   border-radius: 20px !important;
   box-shadow: 0 4px 16px rgba(121, 79, 39, 0.08) !important;
   padding: 6px 0 !important;
@@ -582,7 +582,7 @@
 
   .el-dropdown-menu__item {
     position: relative;
-    color: #794f27 !important;
+    color: var(--ai-text) !important;
     font-weight: 700 !important;
     font-size: 13px !important;
     padding: 8px 16px 8px 16px !important;
@@ -591,7 +591,7 @@
     &:not(.is-disabled):hover,
     &:focus {
       background: rgba(25, 200, 185, 0.06) !important;
-      color: #11a89b !important;
+      color: var(--ai-primary-active) !important;
       padding-left: 28px !important;
 
       &:before {
@@ -610,7 +610,7 @@
 
     &.is-active {
       background: rgba(124, 186, 112, 0.1) !important;
-      color: #4a8a36 !important;
+      color: var(--ai-leaf-d) !important;
       font-weight: 800 !important;
     }
   }
@@ -629,7 +629,7 @@
   min-height: 32px !important;
   padding: 4px 12px !important;
   background: #fdfbf7 !important;
-  border: 1.5px solid #e8e2d6 !important;
+  border: 1.5px solid var(--ai-border) !important;
   border-radius: 14px !important;
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.88),
@@ -648,12 +648,12 @@
 .animal-select__value {
   font-size: 13px !important;
   font-weight: 700 !important;
-  color: #794f27 !important;
+  color: var(--ai-text) !important;
 }
 
 .animal-select__value--placeholder {
   font-weight: 600 !important;
-  color: #9f927d !important;
+  color: var(--ai-text-2) !important;
 }
 
 .animal-select__dropdown {
@@ -662,7 +662,7 @@
   overflow-x: hidden !important;
   overflow-y: auto !important;
   background: #fdfbf7 !important;
-  border: 2px solid #e8e2d6 !important;
+  border: 2px solid var(--ai-border) !important;
   border-radius: 20px !important;
   box-shadow: 0 4px 16px rgba(121, 79, 39, 0.08) !important;
 }
@@ -675,7 +675,7 @@
   margin: 2px 0 !important;
   font-size: 13px !important;
   font-weight: 700 !important;
-  color: #794f27 !important;
+  color: var(--ai-text) !important;
   border-radius: 999px !important;
 
   &::before {
@@ -704,12 +704,12 @@
 }
 
 .animal-select__option--hovered.animal-select__option--active {
-  color: #4a8a36 !important;
+  color: var(--ai-leaf-d) !important;
   background: transparent !important;
 }
 
 .animal-select__option--active {
-  color: #4a8a36 !important;
+  color: var(--ai-leaf-d) !important;
   background: transparent !important;
 }
 
@@ -717,7 +717,7 @@
   inset: 50% 8px auto !important;
   height: 24px !important;
   margin: 0 !important;
-  background: #d8ecc6 !important;
+  background: var(--ai-leaf-l) !important;
   border: 1px solid rgba(111, 186, 44, 0.22) !important;
   border-radius: 999px !important;
   opacity: 0.75 !important;

@@ -122,7 +122,6 @@ export default defineConfig(({ mode, command }: ConfigEnv): UserConfig => {
         "echarts/components",
         "vue-i18n",
         "nprogress",
-        "sortablejs",
         "qs",
         "path-browserify",
         "@element-plus/icons-vue",

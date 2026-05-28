@@ -11,6 +11,18 @@ importers:
       '@element-plus/icons-vue':
         specifier: ^2.3.2
         version: 2.3.2(vue@3.5.32(typescript@5.9.3))
+      '@fontsource/m-plus-rounded-1c':
+        specifier: ^5.2.10
+        version: 5.2.10
+      '@fontsource/mochiy-pop-one':
+        specifier: ^5.2.8
+        version: 5.2.8
+      '@fontsource/noto-sans-sc':
+        specifier: ^5.2.9
+        version: 5.2.9
+      '@fontsource/nunito':
+        specifier: ^5.2.7
+        version: 5.2.7
       '@vueuse/core':
         specifier: ^14.2.1
         version: 14.2.1(vue@3.5.32(typescript@5.9.3))
@@ -65,9 +77,6 @@ importers:
       qs:
         specifier: ^6.15.0
         version: 6.15.0
-      sortablejs:
-        specifier: ^1.15.7
-        version: 1.15.7
       vue:
         specifier: ^3.5.30
         version: 3.5.32(typescript@5.9.3)
@@ -96,9 +105,6 @@ importers:
       '@iconify/utils':
         specifier: ^3.1.0
         version: 3.1.0
-      '@types/codemirror':
-        specifier: ^5.60.17
-        version: 5.60.17
       '@types/lodash-es':
         specifier: ^4.17.12
         version: 4.17.12
@@ -549,6 +555,12 @@ packages:
 
   '@floating-ui/utils@0.2.11':
     resolution: {integrity: sha512-RiB/yIh78pcIxl6lLMG0CgBXAZ2Y0eVHqMPYugu+9U0AeT6YBeiJpf7lbdJNIugFP5SIjwNRgo4DhR1Qxi26Gg==}
+
+  '@fontsource/m-plus-rounded-1c@5.2.10':
+    resolution: {integrity: sha512-PLrYoJHCBMApU8zioMT+Un6TLr6JTI7lBJWXo+t2ZNdpEn1XqZG3Y3XvNuIxdX1F3m0UqvtEbtBMHgAbTdefOw==}
+
+  '@fontsource/mochiy-pop-one@5.2.8':
+    resolution: {integrity: sha512-WNPX7iIlifcXKDd27o2+YeUkS2BwLIU3LupW3Sz7RLHxxl/mE3ucNuAJesJ+aL/BNLI62+J7w+e3RMoGNlzd8w==}
 
   '@fontsource/noto-sans-sc@5.2.9':
     resolution: {integrity: sha512-bTUIWGBgJDpwi5qAr+x0/lcgv80IHTB9vl6s2f6EymZEa7qYV99yNRBZuKFT+SYDKVunZrjCEhWtpxqmbXWl5Q==}
@@ -1063,9 +1075,6 @@ packages:
   '@tybys/wasm-util@0.10.1':
     resolution: {integrity: sha512-9tTaPJLSiejZKx+Bmog4uSubteqTvFrVrURwkmHixBo0G4seD0zUxp98E1DzUBJxLQ3NPwXrGKDiVjwx/DpPsg==}
 
-  '@types/codemirror@5.60.17':
-    resolution: {integrity: sha512-AZq2FIsUHVMlp7VSe2hTfl5w4pcUkoFkM3zVsRKsn1ca8CXRDYvnin04+HP2REkwsxemuHqvDofdlhUWNpbwfw==}
-
   '@types/esrecurse@4.3.1':
     resolution: {integrity: sha512-xJBAbDifo5hpffDBuHl0Y8ywswbiAp/Wi7Y/GtAgSlZyIABppyurxVueOPE8LUQOxdlgi6Zqce7uoEpqNTeiUw==}
 
@@ -1110,9 +1119,6 @@ packages:
 
   '@types/sortablejs@1.15.9':
     resolution: {integrity: sha512-7HP+rZGE2p886PKV9c9OJzLBI6BBJu1O7lJGYnPyG3fS4/duUCcngkNCjsLwIMV+WMqANe3tt4irrXHSIe68OQ==}
-
-  '@types/tern@0.23.9':
-    resolution: {integrity: sha512-ypzHFE/wBzh+BlH6rrBgS5I/Z7RD21pGhZ2rltb/+ZrVM1awdZwjx7hE5XfuYgHWk9uvV5HLZN3SloevCAp3Bw==}
 
   '@types/web-bluetooth@0.0.20':
     resolution: {integrity: sha512-g9gZnnXVq7gM7v3tJCWV/qw7w+KeOlSHAhgF9RytFyifW6AF61hdT2ucrYhPq9hLs5JIryeupHV3qGk95dH9ow==}
@@ -3419,9 +3425,6 @@ packages:
     resolution: {integrity: sha512-W2lHLLw2qR2Vv0DcMmcxXqcfdBaIcoN+y/86SmHv8fn4DazEQSH6KN3TjZcWvwujW56OHiiirsbHWZb4vx/0fg==}
     engines: {node: '>=12.17.0'}
 
-  sortablejs@1.15.7:
-    resolution: {integrity: sha512-Kk8wLQPlS+yi1ZEf48a4+fzHa4yxjC30M/Sr2AnQu+f/MPwvvX9XjZ6OWejiz8crBsLwSq8GHqaxaET7u6ux0A==}
-
   source-map-js@1.2.1:
     resolution: {integrity: sha512-UXWMKhLOwVKb728IUtQPXxfYU+usdybtUrK/8uGE8CQMvrhOpwvzDBwj0QhSL7MQc7vIsISBG8VQ8+IDQxpfQA==}
     engines: {node: '>=0.10.0'}
@@ -4514,6 +4517,10 @@ snapshots:
 
   '@floating-ui/utils@0.2.11': {}
 
+  '@fontsource/m-plus-rounded-1c@5.2.10': {}
+
+  '@fontsource/mochiy-pop-one@5.2.8': {}
+
   '@fontsource/noto-sans-sc@5.2.9': {}
 
   '@fontsource/nunito@5.2.7': {}
@@ -4921,10 +4928,6 @@ snapshots:
       tslib: 2.8.1
     optional: true
 
-  '@types/codemirror@5.60.17':
-    dependencies:
-      '@types/tern': 0.23.9
-
   '@types/esrecurse@4.3.1': {}
 
   '@types/estree@1.0.8': {}
@@ -4961,10 +4964,6 @@ snapshots:
   '@types/qs@6.15.0': {}
 
   '@types/sortablejs@1.15.9': {}
-
-  '@types/tern@0.23.9':
-    dependencies:
-      '@types/estree': 1.0.8
 
   '@types/web-bluetooth@0.0.20': {}
 
@@ -7443,8 +7442,6 @@ snapshots:
       is-fullwidth-code-point: 5.1.0
 
   snabbdom@3.6.3: {}
-
-  sortablejs@1.15.7: {}
 
   source-map-js@1.2.1: {}
 

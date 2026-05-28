@@ -1,6 +1,7 @@
-@import url("https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@500;700;800;900&family=Mochiy+Pop+One&display=swap");
+// 字体已迁移到 @fontsource self-host，见 src/styles/_fonts.scss
 
-.page-card {
+// --ai-* 主题 token（全项目共享，不再耦合在 .page-card 局部作用域里）
+:root {
   --ai-primary: #19c8b9;
   --ai-primary-active: #11a89b;
   --ai-text: #794f27;
@@ -13,7 +14,15 @@
   --ai-red: #fc736d;
   --ai-info: #5b9eee;
   --ai-success: #6fba2c;
+  --ai-warning: #f7cd67;
+  --ai-shadow-color: #bdaea0;
+  --ai-bg-card: #fcfaf2;
+  --ai-paper: #fdfdf5;
+  --ai-bg-2: #f4ead8;
+  --ai-primary-bg: #dff8f3;
+}
 
+.page-card {
   position: relative;
   font-family:
     "M PLUS Rounded 1c", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
