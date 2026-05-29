@@ -13,6 +13,16 @@
       class="develop-dialog-form"
     >
       <div class="field-desc">维护注册会员的资料、等级与账户状态。</div>
+      <el-form-item label="关联用户" prop="userId" :required="!props.data">
+        <AnimalSelect
+          v-if="!props.data"
+          v-model="userModel"
+          placeholder="请选择要关联的用户"
+          :options="userSelectOptions"
+          filterable
+        />
+        <span v-else class="associated-user">{{ associatedUsername }}</span>
+      </el-form-item>
       <el-row :gutter="15">
         <el-col :sm="12">
           <el-form-item label="昵称" prop="nickname">
@@ -34,7 +44,7 @@
           <el-form-item label="性别" prop="gender">
             <AnimalSelect v-model="genderModel" placeholder="请选择性别" :options="genderOptions" />
           </el-form-item>
-          <el-form-item label="会员等级" prop="memberLevel">
+          <el-form-item label="会员等级" prop="memberLevel" required>
             <AnimalSelect
               v-model="levelModel"
               placeholder="请选择会员等级"
@@ -52,7 +62,7 @@
             />
           </el-form-item>
           <el-form-item label="生日" prop="birthday">
-            <el-date-picker
+            <AnimalDatePicker
               v-model="birthdayModel"
               type="date"
               placeholder="请选择生日"
@@ -89,13 +99,16 @@ import { type FormInstance, type FormRules } from "element-plus";
 import AdminAnimalModal from "@/components/AdminPage/AdminAnimalModal.vue";
 import { Button, Input, Switch } from "animal-island-vue";
 import AnimalSelect from "@/components/AnimalSelect/index.vue";
+import AnimalDatePicker from "@/components/AnimalDatePicker/index.vue";
 import MemberAPI from "@/api/member/member";
 import MemberLevelAPI from "@/api/member/member-level";
-import type { MemberForm, MemberItem } from "@/types/api";
+import UserAPI from "@/api/system/user";
+import type { MemberForm, MemberItem, UnboundUser } from "@/types/api";
 
 const props = defineProps<{
   visible: boolean;
   data?: MemberItem | null;
+  presetUserId?: number;
 }>();
 
 const emit = defineEmits<{
@@ -106,11 +119,13 @@ const emit = defineEmits<{
 const formRef = ref<FormInstance>();
 const loading = ref(false);
 const levelOptions = ref<Array<{ label: string; value: number }>>([]);
+const unboundUsers = ref<UnboundUser[]>([]);
 
 const initialFormData: MemberForm = {
+  userId: undefined,
   nickname: "",
   realname: "",
-  gender: 0,
+  gender: 3,
   avatar: "",
   birthday: undefined,
   memberLevel: 0,
@@ -125,15 +140,44 @@ const title = computed(() => (props.data ? "编辑会员" : "新增会员"));
 const genderOptions = [
   { key: "1", label: "男" },
   { key: "2", label: "女" },
-  { key: "0", label: "保密" },
+  { key: "3", label: "保密" },
 ];
 
 const levelSelectOptions = computed(() =>
   levelOptions.value.map((item) => ({ key: String(item.value), label: item.label }))
 );
 
+const userSelectOptions = computed(() =>
+  unboundUsers.value.map((user) => ({
+    key: String(user.id),
+    label: user.phone ? `${user.username}（${user.phone}）` : user.username,
+  }))
+);
+
+// 编辑态展示已关联用户名（列表带 include=user 时有 user.username）
+const associatedUsername = computed(
+  () => props.data?.user?.username ?? (formData.userId ? `用户 #${formData.userId}` : "-")
+);
+
+const userModel = computed<string>({
+  get: () => (formData.userId ? String(formData.userId) : ""),
+  set: (value) => {
+    formData.userId = value === "" ? undefined : Number(value);
+    applyUserPrefill(formData.userId);
+  },
+});
+
+// 选定关联用户后，用其账号/手机号预填会员资料（可再修改）
+function applyUserPrefill(userId?: number): void {
+  if (!userId) return;
+  const user = unboundUsers.value.find((item) => item.id === userId);
+  if (!user) return;
+  formData.nickname = user.username;
+  if (user.phone) formData.phone = user.phone;
+}
+
 const genderModel = computed<string>({
-  get: () => String(formData.gender ?? 0),
+  get: () => String(formData.gender ?? 3),
   set: (value) => {
     formData.gender = Number(value);
   },
@@ -162,6 +206,16 @@ const birthdayModel = computed<Date | null>({
 });
 
 const rules: FormRules = {
+  userId: [
+    {
+      trigger: "change",
+      validator: (_rule, _value, callback) => {
+        // 仅新增态校验关联用户；编辑态不可改关联
+        if (!props.data && !formData.userId) return callback(new Error("请选择关联用户"));
+        callback();
+      },
+    },
+  ],
   nickname: [{ required: true, message: "请输入昵称", trigger: "blur" }],
   memberLevel: [
     {
@@ -185,6 +239,10 @@ async function loadLevelOptions(): Promise<void> {
   levelOptions.value = await MemberLevelAPI.getOptions();
 }
 
+async function loadUnboundUsers(): Promise<void> {
+  unboundUsers.value = await UserAPI.getUnboundUsers();
+}
+
 async function openDialog(): Promise<void> {
   resetForm();
   loading.value = true;
@@ -193,6 +251,7 @@ async function openDialog(): Promise<void> {
     if (props.data) {
       Object.assign(formData, {
         id: props.data.id,
+        userId: props.data.userId,
         nickname: props.data.nickname,
         realname: props.data.realname,
         gender: props.data.gender,
@@ -202,6 +261,12 @@ async function openDialog(): Promise<void> {
         phone: props.data.phone,
         status: props.data.status,
       });
+    } else {
+      await loadUnboundUsers();
+      if (props.presetUserId) {
+        formData.userId = props.presetUserId;
+        applyUserPrefill(props.presetUserId);
+      }
     }
     await nextTick();
     formRef.value?.clearValidate();
@@ -229,7 +294,9 @@ const handleSubmit = useDebounceFn(async () => {
   loading.value = true;
   try {
     if (formData.id) {
-      await MemberAPI.update(formData.id, formData);
+      // 编辑态不修改关联用户，剔除 userId 避免覆盖后端关联
+      const { userId, ...payload } = formData;
+      await MemberAPI.update(formData.id, payload as MemberForm);
       message.success("修改会员成功");
     } else {
       await MemberAPI.create(formData);
