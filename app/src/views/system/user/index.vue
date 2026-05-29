@@ -153,6 +153,15 @@
                     <SystemIco name="key" :size="12" />
                     重置密码
                   </span>
+                  <span
+                    v-if="!row.member?.id"
+                    v-hasPerm="'sys:member:add'"
+                    class="action-link act-edit"
+                    @click="handleAddMember(row)"
+                  >
+                    <SystemIco name="plus" :size="12" />
+                    添加会员
+                  </span>
                 </span>
               </td>
             </tr>
@@ -179,6 +188,7 @@
 <script setup lang="ts">
 import { confirm, message } from "@/utils/feedback";
 import { computed, onMounted, reactive, ref } from "vue";
+import { useRouter } from "vue-router";
 
 import { Button, Input, Switch } from "animal-island-vue";
 import AnimalSelect from "@/components/AnimalSelect/index.vue";
@@ -198,6 +208,7 @@ defineOptions({
 });
 
 const userStore = useUserStore();
+const router = useRouter();
 
 const queryParams = reactive<UserQueryParams>({
   pageNum: 1,
@@ -298,6 +309,11 @@ function handleCreateClick(): void {
 function handleEditClick(id: string): void {
   editingUserId.value = id;
   editVisible.value = true;
+}
+
+// 跳转会员管理新增流程，并预选当前用户为关联用户
+function handleAddMember(row: UserItem): void {
+  router.push({ path: "/member/member", query: { action: "add", userId: row.id } });
 }
 
 function handleResetPassword(row: UserItem): void {

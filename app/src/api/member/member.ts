@@ -15,6 +15,7 @@ const MemberAPI = {
     const apiParams: Record<string, any> = {
       page: pageNum,
       per_page: pageSize,
+      include: "user",
     };
 
     Object.entries(filters).forEach(([key, value]) => {

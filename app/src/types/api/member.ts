@@ -42,11 +42,15 @@ export interface MemberItem {
   updateTimestamp: number;
   city?: any[];
   phone?: string;
+  /** 关联用户（列表 include=user 时返回） */
+  user?: { id: number; username: string; phone?: string; email?: string };
 }
 
 /** 会员表单 */
 export interface MemberForm {
   id?: number;
+  /** 关联用户ID（新增会员时必填） */
+  userId?: number;
   nickname: string;
   realname?: string;
   gender: number;

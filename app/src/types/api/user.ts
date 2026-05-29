@@ -70,6 +70,14 @@ export interface UserItem {
   };
 }
 
+/** 未关联会员的用户（供新增会员时选择关联） */
+export interface UnboundUser {
+  id: number;
+  username: string;
+  phone?: string;
+  email?: string;
+}
+
 /** 用户表单对象 */
 export interface UserForm {
   /** 用户ID */

@@ -7,6 +7,7 @@ import type {
   UserItem,
   UserProfileForm,
   OptionItem,
+  UnboundUser,
 } from "@/types/api";
 
 const USER_BASE_URL = "/users";
@@ -44,6 +45,16 @@ const UserAPI = {
       __returnEnvelope: true,
     } as any);
     return adaptPagination<UserItem>(res);
+  },
+
+  /**
+   * 获取未关联会员的用户列表（供新增会员时选择关联）
+   */
+  getUnboundUsers() {
+    return request<any, UnboundUser[]>({
+      url: `${USER_BASE_URL}/unbound`,
+      method: "get",
+    });
   },
 
   /**

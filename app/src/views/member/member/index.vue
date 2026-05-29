@@ -194,13 +194,19 @@
       />
     </div>
 
-    <MemberEdit v-model:visible="editVisible" :data="editingMember" @done="handleQuery" />
+    <MemberEdit
+      v-model:visible="editVisible"
+      :data="editingMember"
+      :preset-user-id="presetUserId"
+      @done="handleQuery"
+    />
   </div>
 </template>
 
 <script setup lang="ts">
 import { confirm, message } from "@/utils/feedback";
 import { computed, onMounted, reactive, ref } from "vue";
+import { useRoute, useRouter } from "vue-router";
 
 import { Button, Input, Switch } from "animal-island-vue";
 import AnimalSelect from "@/components/AnimalSelect/index.vue";
@@ -232,6 +238,9 @@ const total = ref(0);
 const loading = ref(false);
 const editVisible = ref(false);
 const editingMember = ref<MemberItem | null>(null);
+const presetUserId = ref<number | undefined>(undefined);
+const route = useRoute();
+const router = useRouter();
 const levelOptions = ref<Array<{ label: string; value: number }>>([]);
 const statusLoadingId = ref<number | null>(null);
 
@@ -317,6 +326,7 @@ async function handleStatusToggle(row: MemberItem, val: boolean): Promise<void> 
 
 function handleCreateClick(): void {
   editingMember.value = null;
+  presetUserId.value = undefined;
   editVisible.value = true;
 }
 
@@ -353,9 +363,20 @@ function handleDelete(id?: number): void {
   );
 }
 
+// 用户列表「添加会员」跳转：预选关联用户并打开新增弹窗
+function handleAddFromQuery(): void {
+  if (route.query.action !== "add") return;
+  const userId = Number(route.query.userId);
+  editingMember.value = null;
+  presetUserId.value = Number.isNaN(userId) ? undefined : userId;
+  editVisible.value = true;
+  router.replace({ query: {} });
+}
+
 onMounted(() => {
   fetchLevelOptions();
   handleQuery();
+  handleAddFromQuery();
 });
 </script>
 
