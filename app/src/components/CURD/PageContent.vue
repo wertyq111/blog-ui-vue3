@@ -246,8 +246,10 @@
       </el-scrollbar>
       <!-- 弹窗底部操作按钮 -->
       <template #footer>
-        <Button type="primary" @click="handleExportsSubmit">确定</Button>
-        <Button type="default" @click="handleCloseExportsModal">取消</Button>
+        <div class="develop-dialog-footer">
+          <Button type="default" @click="handleCloseExportsModal">取消</Button>
+          <Button type="primary" @click="handleExportsSubmit">确定</Button>
+        </div>
       </template>
     </AdminAnimalModal>
     <!-- 导入弹窗 -->
@@ -302,14 +304,16 @@
       </el-scrollbar>
       <!-- 弹窗底部操作按钮 -->
       <template #footer>
-        <Button
-          type="primary"
-          :disabled="importFormData.files.length === 0"
-          @click="handleImportSubmit"
-        >
-          确定
-        </Button>
-        <Button type="default" @click="handleCloseImportModal">取消</Button>
+        <div class="develop-dialog-footer">
+          <Button type="default" @click="handleCloseImportModal">取消</Button>
+          <Button
+            type="primary"
+            :disabled="importFormData.files.length === 0"
+            @click="handleImportSubmit"
+          >
+            确定
+          </Button>
+        </div>
       </template>
     </AdminAnimalModal>
   </div>
