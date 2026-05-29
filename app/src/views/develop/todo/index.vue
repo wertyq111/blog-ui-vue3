@@ -96,6 +96,14 @@
           <SystemIco name="trash" :size="13" />
           删除
         </Button>
+        <div class="batch-status" :class="{ 'batch-status--disabled': !hasSelection }">
+          <AnimalTableSelect
+            :model-value="batchStatusModel"
+            :options="batchStatusOptions"
+            mode="tag"
+            @change="handleBatchStatus"
+          />
+        </div>
         <div class="toolbar-spacer" />
         <div class="tool-group">
           <Button class="btn-icon" type="default" size="small" title="刷新" @click="fetchList">
@@ -141,7 +149,13 @@
               <td class="cell-num">{{ row.id }}</td>
               <td class="tbl-name-cell">
                 <div class="todo-title-cell">
-                  <span :class="{ 'todo-title--done': row.status === 2 }">{{ row.title }}</span>
+                  <span
+                    class="todo-title-link"
+                    :class="{ 'todo-title--done': row.status === 2 }"
+                    title="点击预览内容"
+                    @click="openPreview(row)"
+                    >{{ row.title }}</span
+                  >
                   <div v-if="row.tags && row.tags.length" class="todo-tags-inline">
                     <AnimalTag v-for="(tag, idx) in row.tags" :key="idx" size="small" type="info">
                       {{ tag }}
@@ -234,6 +248,23 @@
       :platforms="platforms"
       @done="handleQuery"
     />
+
+    <!-- 内容预览弹窗 -->
+    <AdminAnimalModal
+      v-model:visible="previewVisible"
+      :title="previewTitle"
+      :width="720"
+      :show-footer="false"
+      content-class="todo-preview-modal"
+    >
+      <AnimalMarkdown
+        v-if="previewContent"
+        :model-value="previewContent"
+        preview-only
+        height="auto"
+      />
+      <div v-else class="todo-preview-empty">暂无内容</div>
+    </AdminAnimalModal>
   </div>
 </template>
 
@@ -253,6 +284,8 @@ import type { WorkPlatformItem } from "@/types/api/work-platform";
 import TodoEdit from "./todo-edit.vue";
 import SystemIco from "@/components/AdminPage/SystemIco.vue";
 import AnimalTag from "@/components/AnimalTag/index.vue";
+import AnimalMarkdown from "@/components/AnimalMarkdown/index.vue";
+import AdminAnimalModal from "@/components/AdminPage/AdminAnimalModal.vue";
 import { useTableSelection } from "@/composables/useTableSelection";
 import { formatDateTime } from "@/utils/format";
 
@@ -276,6 +309,22 @@ const todoList = ref<TodoItem[]>([]);
 const platforms = ref<WorkPlatformItem[]>([]);
 const editVisible = ref(false);
 const editingRow = ref<TodoItem | null>(null);
+
+// 内容预览弹窗
+const previewVisible = ref(false);
+const previewTitle = ref("");
+const previewContent = ref("");
+
+// 批量修改状态：首项为占位（触发器显示「批量状态」），选中真实状态后回调
+const BATCH_PLACEHOLDER = "";
+const batchStatusModel = ref<string | number>(BATCH_PLACEHOLDER);
+const batchStatusOptions = [
+  { value: BATCH_PLACEHOLDER, label: "批量状态", type: "info" as const },
+  { value: 0, label: "待办", type: "info" as const },
+  { value: 1, label: "进行中", type: "warning" as const },
+  { value: 2, label: "已完成", type: "success" as const },
+  { value: 3, label: "已取消", type: "danger" as const },
+];
 
 const statistics = reactive<TodoStatistics>({
   total: 0,
@@ -402,6 +451,12 @@ function handleEditClick(row: TodoItem): void {
   editVisible.value = true;
 }
 
+function openPreview(row: TodoItem): void {
+  previewTitle.value = row.title || "内容预览";
+  previewContent.value = row.content ?? "";
+  previewVisible.value = true;
+}
+
 async function handleQuickStatus(row: TodoItem, status: number): Promise<void> {
   const loadingInstance = loadingService({ lock: true });
   try {
@@ -414,6 +469,41 @@ async function handleQuickStatus(row: TodoItem, status: number): Promise<void> {
   } finally {
     loadingInstance.close();
   }
+}
+
+function handleBatchStatus(value: string | number): void {
+  if (value === BATCH_PLACEHOLDER) return;
+  const ids = [...checkedIds.value];
+  if (!ids.length) {
+    message.warning("请勾选待办项");
+    return;
+  }
+
+  const status = Number(value);
+  const label = batchStatusOptions.find((o) => o.value === value)?.label ?? "";
+
+  confirm(`确认将选中的 ${ids.length} 项待办状态改为「${label}」吗？`, "提示", {
+    confirmButtonText: "确定",
+    cancelButtonText: "取消",
+    type: "warning",
+  }).then(
+    async () => {
+      const loadingInstance = loadingService({ lock: true });
+      try {
+        for (const id of ids) {
+          await TodoAPI.updateStatus(Number(id), status);
+        }
+        message.success("状态已批量更新");
+        await fetchList();
+        fetchStatistics();
+      } catch {
+        // request 拦截器已统一弹出错误提示
+      } finally {
+        loadingInstance.close();
+      }
+    },
+    () => undefined
+  );
 }
 
 function buildQuickUpdatePayload(row: TodoItem, patch: Partial<TodoForm>): TodoForm {
@@ -519,6 +609,39 @@ onMounted(async () => {
   }
 }
 
+.batch-status {
+  display: inline-flex;
+  align-items: center;
+
+  // 触发器与左侧小按钮等高对齐（小按钮约 32px）
+  :deep(.animal-table-trigger-tag) {
+    height: 32px;
+
+    .ai-tag {
+      display: inline-flex;
+      align-items: center;
+      height: 100%;
+      padding: 0 14px;
+      border-radius: 999px;
+    }
+  }
+
+  &--disabled {
+    pointer-events: none;
+    opacity: 0.5;
+  }
+}
+
+.todo-title-link {
+  cursor: pointer;
+  transition: color 0.15s ease;
+
+  &:hover {
+    color: var(--ai-primary, #19c8b9);
+    text-decoration: underline;
+  }
+}
+
 .todo-title--done {
   text-decoration: line-through;
   opacity: 0.6;
@@ -594,5 +717,19 @@ onMounted(async () => {
   &--done {
     background-color: var(--ai-success, #6fba2c);
   }
+}
+
+.todo-preview-empty {
+  padding: 32px 0;
+  text-align: center;
+  color: var(--ai-text-3, #b3a892);
+  font-size: 13px;
+}
+</style>
+
+<style lang="scss">
+.todo-preview-modal {
+  max-height: 70vh;
+  overflow-y: auto;
 }
 </style>
