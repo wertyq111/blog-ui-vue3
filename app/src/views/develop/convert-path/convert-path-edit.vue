@@ -37,6 +37,7 @@
       </el-row>
       <el-form-item label="网址" prop="url">
         <Input v-model="formData.url" placeholder="请输入网址" :maxlength="120" allow-clear />
+        <div class="field-hint">网址为必填项；若无实际网址，可填「-」占位。</div>
       </el-form-item>
       <el-form-item label="服务器地址" prop="target">
         <Input
@@ -131,6 +132,7 @@ const sortModel = computed<string>({
 const rules: FormRules = {
   code: [{ required: true, message: "请输入项目编码", trigger: "blur" }],
   name: [{ required: true, message: "请输入项目名称", trigger: "blur" }],
+  url: [{ required: true, message: "请输入网址", trigger: "blur" }],
   target: [{ required: true, message: "请输入服务器地址", trigger: "blur" }],
 };
 
@@ -221,6 +223,13 @@ watch(
 </script>
 
 <style lang="scss" scoped>
+.field-hint {
+  margin-top: 4px;
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--cyber-text-mute);
+}
+
 .source-row {
   display: flex;
   align-items: center;
