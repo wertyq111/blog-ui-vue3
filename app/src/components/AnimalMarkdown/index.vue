@@ -108,6 +108,19 @@ const previewAttrs = computed<Record<string, any>>(() => ({
   :deep(.md-editor-preview) {
     color: var(--ai-text, #794f27);
   }
+  // 全局 reset 的 `ul, li { padding:0; list-style:none }` 会清掉预览区的项目符号/序号，
+  // 这里只在 Markdown 预览内把列表标记和缩进补回来，避免 1)/- 等结构在预览里糊成一团。
+  :deep(.md-editor-preview) ul {
+    list-style: disc;
+    padding-left: 1.6em;
+  }
+  :deep(.md-editor-preview) ol {
+    list-style: decimal;
+    padding-left: 1.6em;
+  }
+  :deep(.md-editor-preview) li {
+    list-style: inherit;
+  }
   :deep(.md-editor-preview a) {
     color: var(--ai-primary-active, #11a89b);
   }
