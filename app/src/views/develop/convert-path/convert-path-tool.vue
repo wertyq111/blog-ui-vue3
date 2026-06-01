@@ -36,7 +36,7 @@ import type { ServerPathItem } from "@/types/api/server-path";
 const input = ref("");
 const output = ref("");
 const allPaths = ref<ServerPathItem[]>([]);
-const { copy } = useClipboard();
+const { copy, isSupported } = useClipboard({ legacy: true });
 
 function parseSources(raw: string): string[] {
   try {
@@ -78,6 +78,10 @@ const onInput = useDebounceFn(autoConvert, 300);
 
 async function copyResult(): Promise<void> {
   if (!output.value) return;
+  if (!isSupported.value) {
+    message.error("当前环境不支持自动复制，请手动选择复制");
+    return;
+  }
   try {
     await copy(output.value);
     message.success("已复制到剪贴板");
