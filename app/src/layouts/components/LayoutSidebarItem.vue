@@ -23,7 +23,10 @@
           :class="{ 'submenu-title-noDropdown': !isNest }"
         >
           <template v-if="onlyOneChild.meta">
-            <MenuIcon :icon="onlyOneChild.meta.icon || item.meta?.icon" />
+            <MenuIcon
+              :icon="onlyOneChild.meta.icon || item.meta?.icon"
+              :path="resolvePath(onlyOneChild.path)"
+            />
             <span v-if="onlyOneChild.meta.title" class="ml-1">
               {{ translateRouteTitle(onlyOneChild.meta.title) }}
             </span>
@@ -36,7 +39,7 @@
     <el-sub-menu v-else :index="resolvePath(item.path)" :data-path="item.path" teleported>
       <template #title>
         <template v-if="item.meta">
-          <MenuIcon :icon="item.meta.icon" />
+          <MenuIcon :icon="item.meta.icon" :path="resolvePath(item.path)" />
           <span v-if="item.meta.title" class="ml-1">
             {{ translateRouteTitle(item.meta.title) }}
           </span>
@@ -60,7 +63,9 @@ import { RouteRecordRaw } from "vue-router";
 import { isExternal } from "@/utils";
 import { translateRouteTitle } from "@/lang/utils";
 import AnimalIcon from "@/components/AnimalIcon/index.vue";
+import AnimalMenuIcon from "@/components/AnimalMenuIcon/index.vue";
 import { resolveAnimalIcon } from "@/utils/menuAnimalIcon";
+import { resolveMenuIconName } from "@/utils/menuSemanticIcon";
 
 defineOptions({
   name: "LayoutSidebarItem",
@@ -68,17 +73,22 @@ defineOptions({
 });
 
 // 菜单图标组件
-// 菜单图标统一渲染为动森（animal-island-vue）图标
+// 命中语义映射 → 动森语义图标（多动效）；否则回退原动森道具图标
 const MenuIcon = defineComponent({
   name: "MenuIcon",
-  props: { icon: String },
+  props: { icon: String, path: String },
   setup(props) {
-    return () =>
-      h(AnimalIcon, {
+    return () => {
+      const semantic = resolveMenuIconName(props.icon, props.path);
+      if (semantic) {
+        return h(AnimalMenuIcon, { name: semantic, size: 22, class: "menu-icon" });
+      }
+      return h(AnimalIcon, {
         name: resolveAnimalIcon(props.icon),
-        size: 18,
+        size: 22,
         class: "menu-icon",
       });
+    };
   },
 });
 

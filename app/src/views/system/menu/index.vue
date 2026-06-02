@@ -88,7 +88,12 @@
                   <span v-else class="tree-caret-spacer" />
                   <span class="tree-name">
                     <span v-if="row.type === 0" class="tree-name-ico">
-                      <Icon :name="resolveAnimalIcon(row.icon, row.path)" :size="14" />
+                      <AnimalMenuIcon
+                        v-if="resolveMenuIconName(row.icon, row.path)"
+                        :name="resolveMenuIconName(row.icon, row.path)!"
+                        :size="18"
+                      />
+                      <Icon v-else :name="resolveAnimalIcon(row.icon, row.path)" :size="18" />
                     </span>
                     {{ row.title }}
                   </span>
@@ -165,8 +170,10 @@ import { computed, onMounted, reactive, ref } from "vue";
 
 import { Button, Input, Switch } from "animal-island-vue";
 import Icon from "@/components/AnimalIcon/index.vue";
+import AnimalMenuIcon from "@/components/AnimalMenuIcon/index.vue";
 import MenuAPI from "@/api/system/menu";
 import { resolveAnimalIcon } from "@/utils/menuAnimalIcon";
+import { resolveMenuIconName } from "@/utils/menuSemanticIcon";
 import type { MenuItem, MenuQueryParams } from "@/types/api";
 import MenuEdit from "./menu-edit.vue";
 import SystemIco from "@/components/AdminPage/SystemIco.vue";

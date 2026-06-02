@@ -185,13 +185,16 @@ const { showTagsView, isSidebarOpen, routes } = useLayout();
     flex: 1;
     min-height: 0;
 
+    // 让内容按自身高度撑开，超高时由 el-scrollbar 滚动（修复全展开后底部菜单被裁、滚不到）
     :deep(.el-scrollbar__view) {
-      height: 100%;
+      height: auto;
     }
 
     :deep(.sidebar-wrapper) {
-      height: 100%;
+      height: auto;
+      min-height: 100%;
       margin: 0;
+      overflow: visible;
       background: transparent;
       border: none;
       box-shadow: none;

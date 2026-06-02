@@ -47,7 +47,7 @@
       <el-row :gutter="15">
         <el-col :sm="12">
           <el-form-item label="菜单图标">
-            <icon-select v-model="formData.icon" :disabled="formData.type === 1" />
+            <icon-select v-model="formData.icon" variant="menu" :disabled="formData.type === 1" />
           </el-form-item>
           <el-form-item :label="menuTarget === 2 ? '外链地址' : '路由地址'" prop="path">
             <Input

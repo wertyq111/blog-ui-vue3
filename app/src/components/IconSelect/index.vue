@@ -7,7 +7,12 @@
   >
     <div ref="triggerRef" class="ais__trigger" @click="toggleOpen">
       <span v-if="selectedIcon" class="ais__value">
-        <Icon :name="resolveAnimalIcon(selectedIcon)" :size="18" />
+        <AnimalMenuIcon
+          v-if="isMenuVariant && isSemantic(selectedIcon)"
+          :name="selectedIcon"
+          :size="20"
+        />
+        <Icon v-else :name="resolveAnimalIcon(selectedIcon)" :size="18" />
         <span class="ais__value-name">{{ selectedIcon }}</span>
       </span>
       <span v-else class="ais__placeholder">点击选择图标</span>
@@ -45,14 +50,15 @@
         >
           <ul class="ais__grid">
             <li
-              v-for="name in ANIMAL_ICON_NAMES"
+              v-for="name in iconNames"
               :key="name"
               class="ais__item"
               :class="{ 'is-active': selectedIcon === name }"
               @click="selectIcon(name)"
             >
               <el-tooltip :content="name" placement="bottom" effect="light">
-                <Icon :name="name" :size="28" />
+                <AnimalMenuIcon v-if="isMenuVariant" :name="name" :size="30" />
+                <Icon v-else :name="name" :size="28" />
               </el-tooltip>
             </li>
           </ul>
@@ -66,18 +72,31 @@
 import { computed, ref } from "vue";
 import { onClickOutside, useElementBounding } from "@vueuse/core";
 import Icon from "@/components/AnimalIcon/index.vue";
+import AnimalMenuIcon from "@/components/AnimalMenuIcon/index.vue";
 import { ANIMAL_ICON_NAMES, resolveAnimalIcon } from "@/utils/menuAnimalIcon";
+import { MENU_ICON_NAMES, MENU_SEMANTIC_NAMES } from "@/utils/menuSemanticIcon";
 
-withDefaults(
+const props = withDefaults(
   defineProps<{
     width?: string;
     disabled?: boolean;
+    /** props: 动森道具图标集（默认）；menu: 动森语义菜单图标集（多动效） */
+    variant?: "props" | "menu";
   }>(),
   {
     width: "100%",
     disabled: false,
+    variant: "props",
   }
 );
+
+const isMenuVariant = computed(() => props.variant === "menu");
+const iconNames = computed(() =>
+  isMenuVariant.value ? MENU_ICON_NAMES : ANIMAL_ICON_NAMES
+);
+function isSemantic(name: string): boolean {
+  return MENU_SEMANTIC_NAMES.has(name);
+}
 
 const selectedIcon = defineModel<string>("modelValue", { default: "" });
 

@@ -1,0 +1,104 @@
+// 动森语义菜单图标：色板变量 + 描边基样 + 关键帧 + hover 触发
+// 说明：glyph 由 AnimalMenuIcon 经 v-html 注入（不受 scoped 作用域影响），
+// 故动效与触发集中在此全局文件。与已验收的 menu-icons-preview.html 行为一致。
+
+.amico {
+  flex-shrink: 0;
+  vertical-align: middle;
+
+  // 色板（与 AnimalIcon 一致）
+  --am-stroke: #543d2b;
+  --am-wood: #e8c39e;
+  --am-blue: #4ea5d9;
+  --am-red: #ff4d6d;
+  --am-grey: #b8c4cf;
+  --am-teal: #48a9a6;
+  --am-yellow: #ffcc3b;
+  --am-leaf: #7bd138;
+  --am-orange: #ff7b54;
+  --am-green: #45b649;
+
+  overflow: visible;
+
+  .s {
+    fill: none;
+    stroke: var(--am-stroke);
+    stroke-width: 1.3;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  .sf {
+    stroke: var(--am-stroke);
+    stroke-width: 1.3;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  // 所有会动的子部件统一以自身包围盒为变换原点（规避带 inline transform 的容器叠加动画飞散）
+  [class*="am-"] {
+    transform-box: fill-box;
+    transform-origin: center;
+  }
+}
+
+/* ===== 关键帧 ===== */
+@keyframes am-bob   { 0%,100% { transform: translateY(0); } 30% { transform: translateY(-2.4px); } 55% { transform: translateY(.4px); } 75% { transform: translateY(0); } }
+@keyframes am-smoke { 0% { opacity: 0; transform: translateY(2px) scale(.5); } 35% { opacity: .85; } 100% { opacity: 0; transform: translateY(-5px) scale(1.15); } }
+@keyframes am-glow  { 0%,100% { opacity: .45; } 50% { opacity: 1; } }
+@keyframes am-scan  { 0% { transform: translateX(-8px); opacity: 0; } 30% { opacity: .85; } 70% { opacity: .85; } 100% { transform: translateX(8px); opacity: 0; } }
+@keyframes am-bar   { 0%,100% { transform: scaleY(.55); } 50% { transform: scaleY(1); } }
+@keyframes am-blink { 0%,88%,100% { transform: scaleY(1); } 94% { transform: scaleY(.08); } }
+@keyframes am-spark { 0%,100% { opacity: 0; transform: scale(.3) rotate(0); } 50% { opacity: 1; transform: scale(1) rotate(35deg); } }
+@keyframes am-swing { 0%,100% { transform: rotate(-7deg); } 50% { transform: rotate(7deg); } }
+@keyframes am-flag  { 0%,100% { transform: skewX(0) translateY(0); } 50% { transform: skewX(-12deg) translateY(-.4px); } }
+@keyframes am-spin  { to { transform: rotate(360deg); } }
+@keyframes am-write { 0%,100% { transform: translateX(0) rotate(0); } 50% { transform: translateX(2.2px) rotate(5deg); } }
+@keyframes am-unfurl{ 0% { transform: scaleY(.15); opacity: .4; } 100% { transform: scaleY(1); opacity: 1; } }
+@keyframes am-hop   { 0%,100% { transform: translateY(0); } 40% { transform: translateY(-2.6px); } }
+@keyframes am-lite  { 0% { opacity: .25; } 100% { opacity: 1; } }
+@keyframes am-sheen { 0% { transform: translateX(-10px); opacity: 0; } 40% { opacity: .9; } 100% { transform: translateX(10px); opacity: 0; } }
+@keyframes am-tick  { 0%,100% { transform: rotate(-12deg); } 50% { transform: rotate(12deg); } }
+@keyframes am-ear   { 0%,100% { transform: rotate(0); } 30% { transform: rotate(-7deg); } 60% { transform: rotate(5deg); } }
+@keyframes am-wiggle{ 0%,100% { transform: rotate(-8deg); } 50% { transform: rotate(8deg); } }
+
+/* ===== hover 触发（图标自身 / 侧边栏整行 / 表格行） ===== */
+@mixin amico-play {
+  .am-bob   { animation: am-bob   .9s  ease infinite; }
+  .am-smoke { animation: am-smoke 1.6s ease-out infinite; }
+  .am-smoke2{ animation: am-smoke 1.6s ease-out .6s infinite; }
+  .am-glow  { animation: am-glow  1s   ease-in-out infinite; }
+  .am-scan  { animation: am-scan  1.4s ease-in-out infinite; }
+  .am-bar1  { animation: am-bar   .9s  ease-in-out infinite; }
+  .am-bar2  { animation: am-bar   .9s  ease-in-out .2s infinite; }
+  .am-bar3  { animation: am-bar   .9s  ease-in-out .4s infinite; }
+  .am-blink { animation: am-blink 2.4s ease-in-out infinite; }
+  .am-ear   { animation: am-ear   .9s  ease infinite; }
+  .am-spark { animation: am-spark 1.3s ease-in-out infinite; }
+  .am-swing { animation: am-swing 1.2s ease-in-out infinite; }
+  .am-flag  { animation: am-flag  .7s  ease-in-out infinite; }
+  .am-spin  { animation: am-spin  6s   linear infinite; }
+  .am-spinm { animation: am-spin  1.5s linear infinite; }
+  .am-tick  { animation: am-tick  1s   ease-in-out infinite; }
+  .am-write { animation: am-write .7s  ease-in-out infinite; }
+  .am-unfurl{ animation: am-unfurl .6s ease-out both; }
+  .am-hop   { animation: am-hop   .8s  ease infinite; }
+  .am-wiggle{ animation: am-wiggle .6s ease-in-out infinite; }
+  .am-spin4 { animation: am-spin  4s   linear infinite; }
+  .am-sheen { animation: am-sheen 1.4s ease-in-out infinite; }
+  .am-lite1 { animation: am-lite .5s ease 0s both, am-glow 1.2s ease-in-out .5s infinite; }
+  .am-lite2 { animation: am-lite .5s ease .2s both, am-glow 1.2s ease-in-out .7s infinite; }
+  .am-lite3 { animation: am-lite .5s ease .4s both, am-glow 1.2s ease-in-out .9s infinite; }
+  .am-lite4 { animation: am-lite .5s ease .6s both, am-glow 1.2s ease-in-out 1.1s infinite; }
+}
+
+.amico:hover {
+  @include amico-play;
+}
+.el-menu-item:hover .amico,
+.el-sub-menu__title:hover .amico {
+  @include amico-play;
+}
+.tbl tbody tr:hover .amico {
+  @include amico-play;
+}

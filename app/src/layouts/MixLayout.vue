@@ -19,7 +19,7 @@
           >
             <el-menu-item v-for="item in topMenuItems" :key="item.path" :index="item.path">
               <template v-if="item.meta">
-                <MenuIcon :icon="item.meta.icon" />
+                <MenuIcon :icon="item.meta.icon" :path="item.path" />
                 <span v-if="item.meta.title" class="ml-1">
                   {{ translateRouteTitle(item.meta.title) }}
                 </span>
@@ -79,7 +79,9 @@ import { isExternal } from "@/utils/index";
 import { translateRouteTitle } from "@/lang/utils";
 import { SidebarColor } from "@/enums/settings";
 import AnimalIcon from "@/components/AnimalIcon/index.vue";
+import AnimalMenuIcon from "@/components/AnimalMenuIcon/index.vue";
 import { resolveAnimalIcon } from "@/utils/menuAnimalIcon";
+import { resolveMenuIconName } from "@/utils/menuSemanticIcon";
 import BaseLayout from "./BaseLayout.vue";
 import LayoutLogo from "./components/LayoutLogo.vue";
 import LayoutToolbar from "./components/LayoutToolbar.vue";
@@ -89,17 +91,22 @@ import LayoutSidebarItem from "./components/LayoutSidebarItem.vue";
 import Hamburger from "@/components/Hamburger/index.vue";
 import variables from "@/styles/variables.module.scss";
 
-// 菜单图标统一渲染为动森（animal-island-vue）图标
+// 命中语义映射 → 动森语义图标（多动效）；否则回退原动森道具图标
 const MenuIcon = defineComponent({
   name: "MenuIcon",
-  props: { icon: String },
+  props: { icon: String, path: String },
   setup(props) {
-    return () =>
-      h(AnimalIcon, {
+    return () => {
+      const semantic = resolveMenuIconName(props.icon, props.path);
+      if (semantic) {
+        return h(AnimalMenuIcon, { name: semantic, size: 22, class: "menu-icon" });
+      }
+      return h(AnimalIcon, {
         name: resolveAnimalIcon(props.icon),
-        size: 18,
+        size: 22,
         class: "menu-icon",
       });
+    };
   },
 });
 
