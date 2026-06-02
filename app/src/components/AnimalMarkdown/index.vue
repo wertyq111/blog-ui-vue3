@@ -10,6 +10,10 @@ import { MdEditor, MdPreview } from "md-editor-v3";
 import "md-editor-v3/lib/style.css";
 import "md-editor-v3/lib/preview.css";
 import { useSettingsStore } from "@/store/modules/settings";
+import { registerWorkDailyIcons } from "@/utils/workDailyIcons";
+
+// 注册工作日常动森图标渲染（emoji → SVG），全局一次、幂等
+registerWorkDailyIcons();
 
 const DEFAULT_TOOLBARS = [
   "bold",
@@ -123,6 +127,20 @@ const previewAttrs = computed<Record<string, any>>(() => ({
   }
   :deep(.md-editor-preview a) {
     color: var(--ai-primary-active, #11a89b);
+  }
+  // 工作日常类别图标：把内容里的 emoji 升级成的行内 SVG（见 @/utils/workDailyIcons）
+  // 用属性选择器兜底，避免 md-editor sanitize 去掉 class 后失效
+  :deep(.md-editor-preview img.wd-cat-ico),
+  :deep(.md-editor-preview img[src*="/icons/work-daily/"]) {
+    display: inline-block;
+    width: 1.18em;
+    height: 1.18em;
+    margin: 0 0.32em 0 0;
+    vertical-align: -0.24em;
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
+    background: none;
   }
   :deep(blockquote) {
     border-left-color: var(--ai-primary, #19c8b9);
