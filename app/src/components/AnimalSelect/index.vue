@@ -196,11 +196,17 @@ onClickOutside(wrapperRef, (event) => {
 <style scoped lang="scss">
 .asel {
   position: relative;
-  width: 100%;
   font-family:
     Nunito, "Noto Sans SC", "Zen Maru Gothic", -apple-system, "PingFang SC",
     "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
   user-select: none;
+}
+/* 默认占满容器，但用 :where() 保持零特异度，
+   让消费方的宽度类（如 .filter-select{width:240px}）能正常覆盖。
+   否则 scoped 的 .asel[data-v] 特异度(0,2,0) 会压过普通类(0,1,0)，
+   导致下拉塌缩成内容宽、右侧 √ 被挤掉。 */
+:where(.asel) {
+  width: 100%;
 }
 
 /* 触发框 */
