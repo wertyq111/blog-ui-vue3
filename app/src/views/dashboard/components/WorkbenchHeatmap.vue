@@ -7,12 +7,17 @@
       </div>
       <div v-if="!loading" class="hm-legend">
         <span class="hm-legend-label">少</span>
-        <span v-for="l in 5" :key="l" class="hm-legend-cell" :style="{ background: levelColors[l - 1] }" />
+        <span
+          v-for="l in 5"
+          :key="l"
+          class="hm-legend-cell"
+          :style="{ background: levelColors[l - 1] }"
+        />
         <span class="hm-legend-label">多</span>
       </div>
     </div>
     <div v-if="loading" class="wb-heatmap__skeleton">
-      <el-skeleton-item variant="rect" style="width:100%;height:140px;border-radius:12px;" />
+      <el-skeleton-item variant="rect" style="width: 100%; height: 140px; border-radius: 12px" />
     </div>
     <div v-else class="hm-tooltip-host">
       <svg :width="svgSize.width" :height="svgSize.height" class="hm-svg">
@@ -48,8 +53,14 @@
       </svg>
       <div
         v-if="hover"
+        ref="tipRef"
         class="hm-tip"
-        :style="{ left: hover.x + 'px', top: hover.y + 'px' }"
+        :class="{ 'hm-tip--above': hover.above }"
+        :style="{
+          left: (hover.left ?? hover.x) + 'px',
+          top: (hover.top ?? hover.y) + 'px',
+          '--arrow-left': hover.arrowPx != null ? hover.arrowPx + 'px' : '50%',
+        }"
       >
         <div class="hm-tip-date">{{ hover.date }}</div>
         <div class="hm-tip-val">{{ hover.words > 0 ? `${fmtNum(hover.words)} 字` : "没写" }}</div>
@@ -60,26 +71,38 @@
     <div v-if="!loading && heatmap" class="hm-foot">
       <div class="hm-foot-item">
         <div class="hm-foot-label">最高单日</div>
-        <div class="hm-foot-value">{{ fmtNum(stats.maxDay) }}<span>字</span></div>
+        <div class="hm-foot-value">
+          {{ fmtNum(stats.maxDay) }}
+          <span>字</span>
+        </div>
       </div>
       <div class="hm-foot-item">
         <div class="hm-foot-label">活跃天</div>
-        <div class="hm-foot-value">{{ stats.activeDays }}<span>/365</span></div>
+        <div class="hm-foot-value">
+          {{ stats.activeDays }}
+          <span>/365</span>
+        </div>
       </div>
       <div class="hm-foot-item">
         <div class="hm-foot-label">空白天</div>
-        <div class="hm-foot-value">{{ stats.blankDays }}<span>天</span></div>
+        <div class="hm-foot-value">
+          {{ stats.blankDays }}
+          <span>天</span>
+        </div>
       </div>
       <div class="hm-foot-item">
         <div class="hm-foot-label">日均</div>
-        <div class="hm-foot-value">{{ fmtNum(stats.dailyAvg) }}<span>字</span></div>
+        <div class="hm-foot-value">
+          {{ fmtNum(stats.dailyAvg) }}
+          <span>字</span>
+        </div>
       </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from "vue";
+import { ref, computed, nextTick } from "vue";
 import type { DashboardHeatmap, DashboardHeatmapCell } from "@/types/api/dashboard-stats";
 
 const props = defineProps<{
@@ -90,6 +113,7 @@ const props = defineProps<{
 const CELL_SIZE = 13;
 const CELL_GAP = 3;
 const ROW_COUNT = 7;
+const TIP_PAD = 4;
 const levelColors = ["#f1f7e6", "#d8ecc6", "#a5d889", "#7cba70", "#4a8a36"];
 
 interface HeatmapDay {
@@ -101,9 +125,14 @@ interface HeatmapDay {
 interface HoverDay extends HeatmapDay {
   x: number;
   y: number;
+  left?: number;
+  arrowPx?: number;
+  top?: number;
+  above?: boolean;
 }
 
 const hover = ref<HoverDay | null>(null);
+const tipRef = ref<HTMLElement | null>(null);
 
 const stats = computed(() => {
   const cells = props.heatmap?.cells ?? [];
@@ -193,7 +222,8 @@ function parseLocalDate(date: string) {
 
 function getLevel(words: number) {
   if (words <= 0) return 0;
-  const buckets = props.heatmap?.buckets?.length === 4 ? props.heatmap.buckets : [0, 200, 800, 2000];
+  const buckets =
+    props.heatmap?.buckets?.length === 4 ? props.heatmap.buckets : [0, 200, 800, 2000];
   if (words >= buckets[3]) return 4;
   if (words >= buckets[2]) return 3;
   if (words >= buckets[1]) return 2;
@@ -205,11 +235,29 @@ function levelFill(level: number) {
 }
 
 function setHover(day: HeatmapDay, weekIndex: number, dayIndex: number) {
+  const cx = weekIndex * (CELL_SIZE + CELL_GAP) + CELL_SIZE / 2;
   hover.value = {
     ...day,
-    x: weekIndex * (CELL_SIZE + CELL_GAP) + CELL_SIZE / 2,
+    x: cx,
     y: dayIndex * (CELL_SIZE + CELL_GAP) + 32,
   };
+  // 测量 tip 实际尺寸后夹进热力图范围：水平避免最左/最右列被裁，垂直在底部行翻到格子上方
+  nextTick(() => {
+    const tip = tipRef.value;
+    if (!tip || !hover.value) return;
+    const tipW = tip.offsetWidth;
+    const tipH = tip.offsetHeight;
+    const hostW = svgSize.value.width;
+    const hostH = svgSize.value.height;
+    const left = Math.max(TIP_PAD, Math.min(cx - tipW / 2, hostW - tipW - TIP_PAD));
+
+    const cellTopY = 16 + dayIndex * (CELL_SIZE + CELL_GAP);
+    const belowTop = cellTopY + CELL_SIZE + 6;
+    const above = belowTop + tipH > hostH;
+    const top = above ? cellTopY - tipH - 6 : belowTop;
+
+    hover.value = { ...hover.value, left, arrowPx: cx - left, top, above };
+  });
 }
 </script>
 
@@ -341,17 +389,23 @@ function setHover(day: HeatmapDay, weekIndex: number, dayIndex: number) {
   background: var(--ai-text, #794f27);
   border-radius: 8px;
   box-shadow: 0 4px 14px rgba(0, 0, 0, 0.18);
-  transform: translateX(-50%);
 
   &::before {
     position: absolute;
     top: -4px;
-    left: 50%;
+    left: var(--arrow-left, 50%);
     margin-left: -4px;
     content: "";
     border: 4px solid transparent;
     border-top: 0;
     border-bottom-color: var(--ai-text, #794f27);
+  }
+
+  &--above::before {
+    top: auto;
+    bottom: -4px;
+    border-top: 4px solid var(--ai-text, #794f27);
+    border-bottom: 0;
   }
 }
 
