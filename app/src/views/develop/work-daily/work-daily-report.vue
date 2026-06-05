@@ -1562,10 +1562,6 @@ onBeforeUnmount(() => {
     transform-origin: 12px 12px;
   }
 
-  .claude-spin {
-    animation: claudeSlowTurn 12s linear infinite;
-  }
-
   .claude-bloom {
     animation: claudeBreath 3.2s ease-in-out infinite;
   }
@@ -1577,22 +1573,13 @@ onBeforeUnmount(() => {
   }
 }
 
-@keyframes claudeSlowTurn {
-  0% {
-    transform: rotate(0deg);
-  }
-  100% {
-    transform: rotate(360deg);
-  }
-}
-
 @keyframes claudeBreath {
   0%,
   100% {
-    transform: scale(0.96);
+    transform: scale(0.90);
   }
   50% {
-    transform: scale(1.04);
+    transform: scale(1.10);
   }
 }
 
@@ -1603,31 +1590,18 @@ onBeforeUnmount(() => {
     filter: drop-shadow(0 0 3px rgba(217, 119, 87, 0.65))
       drop-shadow(0 0 8px rgba(240, 170, 130, 0.35));
 
-    .claude-spin {
-      animation: claudeFastTurn 1.8s cubic-bezier(0.4, 0, 0.2, 1) infinite;
-    }
-
     .claude-bloom {
       animation: claudeActivePulse 0.9s cubic-bezier(0.25, 0.8, 0.25, 1) infinite alternate;
     }
   }
 }
 
-@keyframes claudeFastTurn {
-  0% {
-    transform: rotate(0deg);
-  }
-  100% {
-    transform: rotate(360deg);
-  }
-}
-
 @keyframes claudeActivePulse {
   0% {
-    transform: scale(0.96);
+    transform: scale(0.85);
   }
   100% {
-    transform: scale(1.12);
+    transform: scale(1.22);
   }
 }
 </style>
