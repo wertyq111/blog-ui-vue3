@@ -9,24 +9,17 @@
       </div>
     </div>
     <div v-if="loading" class="chart-skeleton">
-      <el-skeleton-item variant="rect" style="width:100%;height:180px;border-radius:12px;" />
+      <el-skeleton-item variant="rect" style="width: 100%; height: 180px; border-radius: 12px" />
     </div>
     <div v-else-if="!platformDist.length" class="chart-empty">暂无数据</div>
     <div v-else class="donut-wrap">
-      <svg :viewBox="`0 0 ${donutSize} ${donutSize}`" class="donut-svg">
-        <path
-          v-for="a in arcs"
-          :key="a.name"
-          :d="a.path"
-          :fill="a.color"
-        />
-        <text :x="donutCx" :y="donutCy - 4" text-anchor="middle" class="donut-center-big">
-          {{ topValueLabel }}
-        </text>
-        <text :x="donutCx" :y="donutCy + 16" text-anchor="middle" class="donut-center-sm">
-          {{ arcs[0]?.name ?? '' }}
-        </text>
-      </svg>
+      <div class="donut-chart">
+        <ECharts :options="chartOptions" width="100%" height="200px" />
+        <div class="donut-center">
+          <div class="donut-center-big">{{ topValueLabel }}</div>
+          <div class="donut-center-sm">{{ arcs[0]?.name ?? "" }}</div>
+        </div>
+      </div>
       <div class="donut-legend">
         <div v-for="a in arcs" :key="a.name" class="legend-row">
           <span class="legend-dot" :style="{ background: a.color }" />
@@ -41,6 +34,7 @@
 
 <script setup lang="ts">
 import { computed } from "vue";
+import ECharts from "@/components/ECharts/index.vue";
 import type { DashboardPlatformDist } from "@/types/api/dashboard-stats";
 
 const props = defineProps<{
@@ -50,43 +44,17 @@ const props = defineProps<{
 
 const COLORS = ["#19c8b9", "#f7cd67", "#f8a6b2", "#889df0", "#82d5bb", "#8ac68a"];
 
-const donutSize = 200;
-const donutCx = donutSize / 2;
-const donutCy = donutSize / 2;
-const R = 90;
-const r = 60;
-
 const arcs = computed(() => {
   if (!props.platformDist?.length) return [];
   const total = props.platformDist.reduce((s, d) => s + d.words, 0);
   if (total === 0) return [];
 
-  let acc = 0;
-  return props.platformDist.map((d, i) => {
-    const start = (acc / total) * Math.PI * 2 - Math.PI / 2;
-    acc += d.words;
-    const end = (acc / total) * Math.PI * 2 - Math.PI / 2;
-    const large = (end - start) > Math.PI ? 1 : 0;
-
-    const sx = donutCx + Math.cos(start) * R;
-    const sy = donutCy + Math.sin(start) * R;
-    const ex = donutCx + Math.cos(end) * R;
-    const ey = donutCy + Math.sin(end) * R;
-    const sx2 = donutCx + Math.cos(end) * r;
-    const sy2 = donutCy + Math.sin(end) * r;
-    const ex2 = donutCx + Math.cos(start) * r;
-    const ey2 = donutCy + Math.sin(start) * r;
-
-    const path = `M ${sx} ${sy} A ${R} ${R} 0 ${large} 1 ${ex} ${ey} L ${sx2} ${sy2} A ${r} ${r} 0 ${large} 0 ${ex2} ${ey2} Z`;
-
-    return {
-      name: d.name,
-      value: d.words,
-      share: d.words / total,
-      color: COLORS[i % COLORS.length],
-      path,
-    };
-  });
+  return props.platformDist.map((d, i) => ({
+    name: d.name,
+    value: d.words,
+    share: d.words / total,
+    color: COLORS[i % COLORS.length],
+  }));
 });
 
 const topValueLabel = computed(() => {
@@ -95,6 +63,40 @@ const topValueLabel = computed(() => {
   if (v >= 1000) return (v / 1000).toFixed(1) + "k";
   return v.toString();
 });
+
+const chartOptions = computed(() => ({
+  color: COLORS,
+  tooltip: {
+    trigger: "item",
+    backgroundColor: "#fffef8",
+    borderColor: "#e8e2d6",
+    borderWidth: 1,
+    padding: [6, 10],
+    textStyle: { color: "#794f27", fontWeight: 600, fontSize: 12 },
+    formatter: (p: any) =>
+      `${p.name}<br/><b>${Number(p.value).toLocaleString()}</b> 字 · ${p.percent}%`,
+  },
+  series: [
+    {
+      type: "pie",
+      radius: ["62%", "88%"],
+      center: ["50%", "50%"],
+      avoidLabelOverlap: false,
+      label: { show: false },
+      labelLine: { show: false },
+      emphasis: {
+        scale: true,
+        scaleSize: 6,
+        itemStyle: { shadowBlur: 10, shadowColor: "rgba(0,0,0,0.12)" },
+      },
+      data: arcs.value.map((a) => ({
+        name: a.name,
+        value: a.value,
+        itemStyle: { color: a.color },
+      })),
+    },
+  ],
+}));
 </script>
 
 <style lang="scss" scoped>
@@ -133,7 +135,9 @@ const topValueLabel = computed(() => {
   margin-top: 3px;
 }
 
-.chart-skeleton { padding: 4px 0; }
+.chart-skeleton {
+  padding: 4px 0;
+}
 
 .chart-empty {
   height: 150px;
@@ -152,22 +156,35 @@ const topValueLabel = computed(() => {
   flex: 1;
 }
 
-.donut-svg {
-  width: 100%;
+.donut-chart {
+  position: relative;
+  width: 200px;
+  height: 200px;
+}
+
+.donut-center {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  pointer-events: none;
 }
 
 .donut-center-big {
   font-size: 24px;
   font-weight: 800;
-  fill: var(--ai-text, #794f27);
+  line-height: 1;
+  color: var(--ai-text, #794f27);
   font-family: "Mochiy Pop One", "M PLUS Rounded 1c", Nunito, "Noto Sans SC", sans-serif;
 }
 
 .donut-center-sm {
   font-size: 10.5px;
   font-weight: 700;
-  fill: var(--ai-text-2, #9f927d);
-  font-family: inherit;
+  color: var(--ai-text-2, #9f927d);
 }
 
 .donut-legend {
