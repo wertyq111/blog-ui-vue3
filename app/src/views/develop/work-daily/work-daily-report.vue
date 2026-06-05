@@ -2,7 +2,7 @@
 <template>
   <div class="report-panel">
     <!-- 全局 SVG 渐变定义（用于多组件高效引用，无缝对齐） -->
-    <svg style="position: absolute; width: 0; height: 0; overflow: hidden;" aria-hidden="true">
+    <svg style="position: absolute; width: 0; height: 0; overflow: hidden" aria-hidden="true">
       <defs>
         <!-- Codex 经典开发云蓝紫渐变（还原图一） -->
         <linearGradient id="codexCloudGrad" x1="0%" y1="0%" x2="100%" y2="100%">
@@ -42,11 +42,7 @@
         style="width: 160px !important"
       />
       <div v-else-if="config.type === 'week'" class="report-field-range-wrap">
-        <AnimalDatePicker
-          v-model="config.weekRange"
-          type="daterange"
-          value-format="YYYY-MM-DD"
-        />
+        <AnimalDatePicker v-model="config.weekRange" type="daterange" value-format="YYYY-MM-DD" />
       </div>
       <AnimalDatePicker
         v-else
@@ -70,13 +66,51 @@
               <!-- OpenClaw 图二红色小怪兽吉祥物 (微缩版) -->
               <svg v-if="selectedAgentKey === 'openclaw'" viewBox="0 0 32 32" class="svg-openclaw">
                 <g class="claw-robot-group">
-                  <path class="claw-antenna-l" d="M12.5 10 C12 8, 11 6.5, 9.5 7" stroke="#eb4141" stroke-width="1.3" stroke-linecap="round" fill="none" />
-                  <path class="claw-antenna-r" d="M19.5 10 C20 8, 21 6.5, 22.5 7" stroke="#eb4141" stroke-width="1.3" stroke-linecap="round" fill="none" />
-                  <rect class="claw-leg-l" x="13" y="23" width="2" height="3.5" rx="0.6" fill="#eb4141" />
-                  <rect class="claw-leg-r" x="17" y="23" width="2" height="3.5" rx="0.6" fill="#eb4141" />
+                  <path
+                    class="claw-antenna-l"
+                    d="M12.5 10 C12 8, 11 6.5, 9.5 7"
+                    stroke="#eb4141"
+                    stroke-width="1.3"
+                    stroke-linecap="round"
+                    fill="none"
+                  />
+                  <path
+                    class="claw-antenna-r"
+                    d="M19.5 10 C20 8, 21 6.5, 22.5 7"
+                    stroke="#eb4141"
+                    stroke-width="1.3"
+                    stroke-linecap="round"
+                    fill="none"
+                  />
+                  <rect
+                    class="claw-leg-l"
+                    x="13"
+                    y="23"
+                    width="2"
+                    height="3.5"
+                    rx="0.6"
+                    fill="#eb4141"
+                  />
+                  <rect
+                    class="claw-leg-r"
+                    x="17"
+                    y="23"
+                    width="2"
+                    height="3.5"
+                    rx="0.6"
+                    fill="#eb4141"
+                  />
                   <circle class="claw-body" cx="16" cy="16.5" r="7.5" fill="#eb4141" />
-                  <path class="claw-hand-l" d="M8.5 14.5 C6.5 15.5, 6.5 18.5, 8.5 19.5 C9 19, 9.5 17.5, 9 15.5 Z" fill="#eb4141" />
-                  <path class="claw-hand-r" d="M23.5 14.5 C25.5 15.5, 25.5 18.5, 23.5 19.5 C23 19, 22.5 17.5, 23 15.5 Z" fill="#eb4141" />
+                  <path
+                    class="claw-hand-l"
+                    d="M8.5 14.5 C6.5 15.5, 6.5 18.5, 8.5 19.5 C9 19, 9.5 17.5, 9 15.5 Z"
+                    fill="#eb4141"
+                  />
+                  <path
+                    class="claw-hand-r"
+                    d="M23.5 14.5 C25.5 15.5, 25.5 18.5, 23.5 19.5 C23 19, 22.5 17.5, 23 15.5 Z"
+                    fill="#eb4141"
+                  />
                   <circle class="claw-eye-l" cx="13" cy="14" r="1.3" fill="#00f3db" />
                   <circle class="claw-eye-r" cx="19" cy="14" r="1.3" fill="#00f3db" />
                   <circle class="claw-eye-glow-l" cx="12.6" cy="13.6" r="0.4" fill="#ffffff" />
@@ -85,19 +119,74 @@
               </svg>
               <!-- Codex 图一蓝紫命令云 (微缩版) -->
               <svg v-else-if="selectedAgentKey === 'codex'" viewBox="0 0 32 32" class="svg-codex">
-                <rect x="2" y="2" width="28" height="28" rx="6.5" fill="#ffffff" stroke="rgba(121, 79, 39, 0.08)" stroke-width="0.5" />
-                <path class="codex-cloud" d="M16 6.5 C20 6.5, 23 9.5, 23 13.5 C25.5 13.5, 27.5 15.5, 27.5 18 C27.5 21, 25 23.5, 22 23.5 L10 23.5 C7 23.5, 4.5 21, 4.5 18 C4.5 15.5, 6.5 13.5, 9 13.5 C9 9.5, 12 6.5, 16 6.5 Z" fill="url(#codexCloudGrad)" />
+                <rect
+                  x="2"
+                  y="2"
+                  width="28"
+                  height="28"
+                  rx="6.5"
+                  fill="#ffffff"
+                  stroke="rgba(121, 79, 39, 0.08)"
+                  stroke-width="0.5"
+                />
+                <path
+                  class="codex-cloud"
+                  d="M16 6.5 C20 6.5, 23 9.5, 23 13.5 C25.5 13.5, 27.5 15.5, 27.5 18 C27.5 21, 25 23.5, 22 23.5 L10 23.5 C7 23.5, 4.5 21, 4.5 18 C4.5 15.5, 6.5 13.5, 9 13.5 C9 9.5, 12 6.5, 16 6.5 Z"
+                  fill="url(#codexCloudGrad)"
+                />
                 <g class="char-wrapper-gt">
-                  <path class="char-gt" d="M10.5 12 L14.5 15 L10.5 18" stroke="#ffffff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" fill="none" />
+                  <path
+                    class="char-gt"
+                    d="M10.5 12 L14.5 15 L10.5 18"
+                    stroke="#ffffff"
+                    stroke-width="2.2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    fill="none"
+                  />
                 </g>
                 <g class="char-wrapper-cursor">
-                  <line class="char-cursor" x1="16.5" y1="18" x2="21.5" y2="18" stroke="#ffffff" stroke-width="2.2" stroke-linecap="round" />
+                  <line
+                    class="char-cursor"
+                    x1="16.5"
+                    y1="18"
+                    x2="21.5"
+                    y2="18"
+                    stroke="#ffffff"
+                    stroke-width="2.2"
+                    stroke-linecap="round"
+                  />
                 </g>
               </svg>
               <!-- Gemini 双四角星 (微缩版) -->
               <svg v-else-if="selectedAgentKey === 'gemini'" viewBox="0 0 32 32" class="svg-gemini">
-                <path class="star-main" d="M14 4 C14 10, 10 14, 4 14 C10 14, 14 18, 14 24 C14 18, 18 14, 24 14 C18 14, 14 10, 14 4 Z" fill="url(#geminiGrad)" />
-                <path class="star-sub" d="M24 20 C24 23, 23 24, 20 24 C23 24, 24 25, 24 28 C24 25, 25 24, 28 24 C25 24, 24 23, 24 20 Z" fill="url(#geminiGradSmall)" />
+                <path
+                  class="star-main"
+                  d="M14 4 C14 10, 10 14, 4 14 C10 14, 14 18, 14 24 C14 18, 18 14, 24 14 C18 14, 14 10, 14 4 Z"
+                  fill="url(#geminiGrad)"
+                />
+                <path
+                  class="star-sub"
+                  d="M24 20 C24 23, 23 24, 20 24 C23 24, 24 25, 24 28 C24 25, 25 24, 28 24 C25 24, 24 23, 24 20 Z"
+                  fill="url(#geminiGradSmall)"
+                />
+              </svg>
+              <!-- Claude Anthropic 陶土橙放射星芒 (微缩版) -->
+              <svg v-else-if="selectedAgentKey === 'claude'" viewBox="0 0 32 32" class="svg-claude">
+                <g class="claude-burst" stroke="#d97757" stroke-width="2.2" stroke-linecap="round">
+                  <line x1="16" y1="12.8" x2="16" y2="5.5" />
+                  <line x1="17.6" y1="13.2" x2="21.3" y2="6.9" />
+                  <line x1="18.8" y1="14.4" x2="25.1" y2="10.8" />
+                  <line x1="19.2" y1="16" x2="26.5" y2="16" />
+                  <line x1="18.8" y1="17.6" x2="25.1" y2="21.3" />
+                  <line x1="17.6" y1="18.8" x2="21.3" y2="25.1" />
+                  <line x1="16" y1="19.2" x2="16" y2="26.5" />
+                  <line x1="14.4" y1="18.8" x2="10.8" y2="25.1" />
+                  <line x1="13.2" y1="17.6" x2="6.9" y2="21.3" />
+                  <line x1="12.8" y1="16" x2="5.5" y2="16" />
+                  <line x1="13.2" y1="14.4" x2="6.9" y2="10.8" />
+                  <line x1="14.4" y1="13.2" x2="10.8" y2="6.9" />
+                </g>
               </svg>
             </div>
             <span>{{ selectedModelLabel }}</span>
@@ -121,13 +210,51 @@
               <!-- OpenClaw 图二红色小怪兽吉祥物 -->
               <svg v-if="agent.key === 'openclaw'" viewBox="0 0 32 32" class="svg-openclaw">
                 <g class="claw-robot-group">
-                  <path class="claw-antenna-l" d="M12.5 10 C12 8, 11 6.5, 9.5 7" stroke="#eb4141" stroke-width="1.3" stroke-linecap="round" fill="none" />
-                  <path class="claw-antenna-r" d="M19.5 10 C20 8, 21 6.5, 22.5 7" stroke="#eb4141" stroke-width="1.3" stroke-linecap="round" fill="none" />
-                  <rect class="claw-leg-l" x="13" y="23" width="2" height="3.5" rx="0.6" fill="#eb4141" />
-                  <rect class="claw-leg-r" x="17" y="23" width="2" height="3.5" rx="0.6" fill="#eb4141" />
+                  <path
+                    class="claw-antenna-l"
+                    d="M12.5 10 C12 8, 11 6.5, 9.5 7"
+                    stroke="#eb4141"
+                    stroke-width="1.3"
+                    stroke-linecap="round"
+                    fill="none"
+                  />
+                  <path
+                    class="claw-antenna-r"
+                    d="M19.5 10 C20 8, 21 6.5, 22.5 7"
+                    stroke="#eb4141"
+                    stroke-width="1.3"
+                    stroke-linecap="round"
+                    fill="none"
+                  />
+                  <rect
+                    class="claw-leg-l"
+                    x="13"
+                    y="23"
+                    width="2"
+                    height="3.5"
+                    rx="0.6"
+                    fill="#eb4141"
+                  />
+                  <rect
+                    class="claw-leg-r"
+                    x="17"
+                    y="23"
+                    width="2"
+                    height="3.5"
+                    rx="0.6"
+                    fill="#eb4141"
+                  />
                   <circle class="claw-body" cx="16" cy="16.5" r="7.5" fill="#eb4141" />
-                  <path class="claw-hand-l" d="M8.5 14.5 C6.5 15.5, 6.5 18.5, 8.5 19.5 C9 19, 9.5 17.5, 9 15.5 Z" fill="#eb4141" />
-                  <path class="claw-hand-r" d="M23.5 14.5 C25.5 15.5, 25.5 18.5, 23.5 19.5 C23 19, 22.5 17.5, 23 15.5 Z" fill="#eb4141" />
+                  <path
+                    class="claw-hand-l"
+                    d="M8.5 14.5 C6.5 15.5, 6.5 18.5, 8.5 19.5 C9 19, 9.5 17.5, 9 15.5 Z"
+                    fill="#eb4141"
+                  />
+                  <path
+                    class="claw-hand-r"
+                    d="M23.5 14.5 C25.5 15.5, 25.5 18.5, 23.5 19.5 C23 19, 22.5 17.5, 23 15.5 Z"
+                    fill="#eb4141"
+                  />
                   <circle class="claw-eye-l" cx="13" cy="14" r="1.3" fill="#00f3db" />
                   <circle class="claw-eye-r" cx="19" cy="14" r="1.3" fill="#00f3db" />
                   <circle class="claw-eye-glow-l" cx="12.6" cy="13.6" r="0.4" fill="#ffffff" />
@@ -136,19 +263,74 @@
               </svg>
               <!-- Codex 图一蓝紫命令云 -->
               <svg v-else-if="agent.key === 'codex'" viewBox="0 0 32 32" class="svg-codex">
-                <rect x="2" y="2" width="28" height="28" rx="6.5" fill="#ffffff" stroke="rgba(121, 79, 39, 0.08)" stroke-width="0.5" />
-                <path class="codex-cloud" d="M16 6.5 C20 6.5, 23 9.5, 23 13.5 C25.5 13.5, 27.5 15.5, 27.5 18 C27.5 21, 25 23.5, 22 23.5 L10 23.5 C7 23.5, 4.5 21, 4.5 18 C4.5 15.5, 6.5 13.5, 9 13.5 C9 9.5, 12 6.5, 16 6.5 Z" fill="url(#codexCloudGrad)" />
+                <rect
+                  x="2"
+                  y="2"
+                  width="28"
+                  height="28"
+                  rx="6.5"
+                  fill="#ffffff"
+                  stroke="rgba(121, 79, 39, 0.08)"
+                  stroke-width="0.5"
+                />
+                <path
+                  class="codex-cloud"
+                  d="M16 6.5 C20 6.5, 23 9.5, 23 13.5 C25.5 13.5, 27.5 15.5, 27.5 18 C27.5 21, 25 23.5, 22 23.5 L10 23.5 C7 23.5, 4.5 21, 4.5 18 C4.5 15.5, 6.5 13.5, 9 13.5 C9 9.5, 12 6.5, 16 6.5 Z"
+                  fill="url(#codexCloudGrad)"
+                />
                 <g class="char-wrapper-gt">
-                  <path class="char-gt" d="M10.5 12 L14.5 15 L10.5 18" stroke="#ffffff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" fill="none" />
+                  <path
+                    class="char-gt"
+                    d="M10.5 12 L14.5 15 L10.5 18"
+                    stroke="#ffffff"
+                    stroke-width="2.2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    fill="none"
+                  />
                 </g>
                 <g class="char-wrapper-cursor">
-                  <line class="char-cursor" x1="16.5" y1="18" x2="21.5" y2="18" stroke="#ffffff" stroke-width="2.2" stroke-linecap="round" />
+                  <line
+                    class="char-cursor"
+                    x1="16.5"
+                    y1="18"
+                    x2="21.5"
+                    y2="18"
+                    stroke="#ffffff"
+                    stroke-width="2.2"
+                    stroke-linecap="round"
+                  />
                 </g>
               </svg>
               <!-- Gemini 双四角星 -->
               <svg v-else-if="agent.key === 'gemini'" viewBox="0 0 32 32" class="svg-gemini">
-                <path class="star-main" d="M14 4 C14 10, 10 14, 4 14 C10 14, 14 18, 14 24 C14 18, 18 14, 24 14 C18 14, 14 10, 14 4 Z" fill="url(#geminiGrad)" />
-                <path class="star-sub" d="M24 20 C24 23, 23 24, 20 24 C23 24, 24 25, 24 28 C24 25, 25 24, 28 24 C25 24, 24 23, 24 20 Z" fill="url(#geminiGradSmall)" />
+                <path
+                  class="star-main"
+                  d="M14 4 C14 10, 10 14, 4 14 C10 14, 14 18, 14 24 C14 18, 18 14, 24 14 C18 14, 14 10, 14 4 Z"
+                  fill="url(#geminiGrad)"
+                />
+                <path
+                  class="star-sub"
+                  d="M24 20 C24 23, 23 24, 20 24 C23 24, 24 25, 24 28 C24 25, 25 24, 28 24 C25 24, 24 23, 24 20 Z"
+                  fill="url(#geminiGradSmall)"
+                />
+              </svg>
+              <!-- Claude Anthropic 陶土橙放射星芒 -->
+              <svg v-else-if="agent.key === 'claude'" viewBox="0 0 32 32" class="svg-claude">
+                <g class="claude-burst" stroke="#d97757" stroke-width="2.2" stroke-linecap="round">
+                  <line x1="16" y1="12.8" x2="16" y2="5.5" />
+                  <line x1="17.6" y1="13.2" x2="21.3" y2="6.9" />
+                  <line x1="18.8" y1="14.4" x2="25.1" y2="10.8" />
+                  <line x1="19.2" y1="16" x2="26.5" y2="16" />
+                  <line x1="18.8" y1="17.6" x2="25.1" y2="21.3" />
+                  <line x1="17.6" y1="18.8" x2="21.3" y2="25.1" />
+                  <line x1="16" y1="19.2" x2="16" y2="26.5" />
+                  <line x1="14.4" y1="18.8" x2="10.8" y2="25.1" />
+                  <line x1="13.2" y1="17.6" x2="6.9" y2="21.3" />
+                  <line x1="12.8" y1="16" x2="5.5" y2="16" />
+                  <line x1="13.2" y1="14.4" x2="6.9" y2="10.8" />
+                  <line x1="14.4" y1="13.2" x2="10.8" y2="6.9" />
+                </g>
               </svg>
             </div>
             <span>{{ agent.label }}</span>
@@ -181,9 +363,7 @@
         {{ isExportActive ? "生成中" : "导出报表" }}
       </Button>
 
-      <Button type="default" size="small" @click="openExportHistory">
-        导出列表
-      </Button>
+      <Button type="default" size="small" @click="openExportHistory">导出列表</Button>
 
       <div class="import-group">
         <AnimalDatePicker
@@ -221,9 +401,7 @@
         <div v-if="historyLoading && !historyItems.length" class="export-history__empty">
           加载中...
         </div>
-        <div v-else-if="!historyItems.length" class="export-history__empty">
-          暂无生成记录
-        </div>
+        <div v-else-if="!historyItems.length" class="export-history__empty">暂无生成记录</div>
         <table v-else class="export-history__table">
           <thead>
             <tr>
@@ -324,7 +502,7 @@ interface ModelAgent {
 
 const modelAgents = computed<ModelAgent[]>(() => {
   const openClawModels = reportModels.value.filter(
-    (model) => !isLocalCodexModel(model) && !isLocalGeminiModel(model),
+    (model) => !isLocalCodexModel(model) && !isLocalGeminiModel(model) && !isLocalClaudeModel(model)
   );
   const codexModels = reportModels.value.filter(isLocalCodexModel);
   if (!codexModels.includes("local-codex/codex-cli")) {
@@ -333,6 +511,10 @@ const modelAgents = computed<ModelAgent[]>(() => {
   const geminiModels = reportModels.value.filter(isLocalGeminiModel);
   if (!geminiModels.includes("local-gemini/gemini-cli")) {
     geminiModels.push("local-gemini/gemini-cli");
+  }
+  const claudeModels = reportModels.value.filter(isLocalClaudeModel);
+  if (!claudeModels.includes("local-claude/claude-cli")) {
+    claudeModels.push("local-claude/claude-cli");
   }
   const agents: ModelAgent[] = [];
 
@@ -344,6 +526,9 @@ const modelAgents = computed<ModelAgent[]>(() => {
   }
   if (geminiModels.length) {
     agents.push({ key: "gemini", label: "Gemini", models: geminiModels });
+  }
+  if (claudeModels.length) {
+    agents.push({ key: "claude", label: "Claude", models: claudeModels });
   }
 
   return agents;
@@ -384,9 +569,14 @@ function isLocalGeminiModel(model: string): boolean {
   return model.startsWith("local-gemini/");
 }
 
+function isLocalClaudeModel(model: string): boolean {
+  return model.startsWith("local-claude/");
+}
+
 function formatModelLabel(model: string): string {
   if (model === "local-codex/codex-cli") return "Codex CLI";
   if (model === "local-gemini/gemini-cli") return "Gemini CLI";
+  if (model === "local-claude/claude-cli") return "Claude CLI";
   return model;
 }
 
@@ -558,7 +748,7 @@ async function refreshHistory(): Promise<void> {
     const result = await WorkDailyAPI.listReportExports({ page: 1, page_size: 20 });
     historyItems.value = result.items || [];
     const hasActive = historyItems.value.some(
-      (item) => item.status === "pending" || item.status === "running",
+      (item) => item.status === "pending" || item.status === "running"
     );
     if (hasActive && historyVisible.value) {
       startHistoryAutoRefresh();
@@ -610,11 +800,13 @@ function formatExportPeriod(item: WorkDailyReportExport): string {
 
 function formatStatus(status: string): string {
   return (
-    { pending: "排队中", running: "生成中", completed: "已完成", failed: "失败" } as Record<
-      string,
-      string
-    >
-  )[status] || status;
+    (
+      { pending: "排队中", running: "生成中", completed: "已完成", failed: "失败" } as Record<
+        string,
+        string
+      >
+    )[status] || status
+  );
 }
 
 function formatTimestamp(value: number | string | null | undefined): string {
@@ -993,7 +1185,9 @@ onBeforeUnmount(() => {
   flex-shrink: 0;
   border-radius: 7px;
   background: rgba(255, 255, 255, 0.85);
-  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.04), 0 1px 2px rgba(121, 79, 39, 0.08);
+  box-shadow:
+    inset 0 1px 2px rgba(0, 0, 0, 0.04),
+    0 1px 2px rgba(121, 79, 39, 0.08);
   padding: 2.5px;
   box-sizing: border-box;
   transition: all 0.25s cubic-bezier(0.25, 0.8, 0.25, 1);
@@ -1019,11 +1213,16 @@ onBeforeUnmount(() => {
     background: #f0f4fc;
     border-color: rgba(66, 133, 244, 0.15);
   }
+  &.claude {
+    background: #fdf1ea;
+    border-color: rgba(217, 119, 87, 0.18);
+  }
 }
 
 .svg-openclaw,
 .svg-codex,
-.svg-gemini {
+.svg-gemini,
+.svg-claude {
   width: 100%;
   height: 100%;
   overflow: visible;
@@ -1066,8 +1265,10 @@ onBeforeUnmount(() => {
   }
 
   // 4) 周期性眨眼
-  .claw-eye-l, .claw-eye-r,
-  .claw-eye-glow-l, .claw-eye-glow-r {
+  .claw-eye-l,
+  .claw-eye-r,
+  .claw-eye-glow-l,
+  .claw-eye-glow-r {
     transform-origin: 16px 14px;
     animation: eyeBlink 4.5s ease-in-out infinite;
   }
@@ -1075,44 +1276,81 @@ onBeforeUnmount(() => {
 
 // 眨眼动画
 @keyframes eyeBlink {
-  0%, 96%, 100% { transform: scaleY(1); }
-  98% { transform: scaleY(0.08); }
+  0%,
+  96%,
+  100% {
+    transform: scaleY(1);
+  }
+  98% {
+    transform: scaleY(0.08);
+  }
 }
 
 // 天线微摆动
 @keyframes antennaWiggleL {
-  0% { transform: rotate(-3deg); }
-  100% { transform: rotate(5deg); }
+  0% {
+    transform: rotate(-3deg);
+  }
+  100% {
+    transform: rotate(5deg);
+  }
 }
 @keyframes antennaWiggleR {
-  0% { transform: rotate(3deg); }
-  100% { transform: rotate(-5deg); }
+  0% {
+    transform: rotate(3deg);
+  }
+  100% {
+    transform: rotate(-5deg);
+  }
 }
 
 // 常态双手漂浮
 @keyframes handFloatL {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(-6deg) translateY(-0.5px); }
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(-6deg) translateY(-0.5px);
+  }
 }
 @keyframes handFloatR {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(6deg) translateY(-0.5px); }
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(6deg) translateY(-0.5px);
+  }
 }
 
 // 机器人呼吸浮动
 @keyframes openclawFloat {
-  0%, 100% { transform: translateY(0.5px); }
-  50% { transform: translateY(-1px); }
+  0%,
+  100% {
+    transform: translateY(0.5px);
+  }
+  50% {
+    transform: translateY(-1px);
+  }
 }
 
 // 胖爪极速扇动 (加力交互)
 @keyframes handWaveL {
-  0%, 100% { transform: rotate(-5deg); }
-  50% { transform: rotate(20deg) scale(1.05); }
+  0%,
+  100% {
+    transform: rotate(-5deg);
+  }
+  50% {
+    transform: rotate(20deg) scale(1.05);
+  }
 }
 @keyframes handWaveR {
-  0%, 100% { transform: rotate(5deg); }
-  50% { transform: rotate(-20deg) scale(1.05); }
+  0%,
+  100% {
+    transform: rotate(5deg);
+  }
+  50% {
+    transform: rotate(-20deg) scale(1.05);
+  }
 }
 
 // Hover/Active 吉祥物高光激活动画
@@ -1125,7 +1363,7 @@ onBeforeUnmount(() => {
     .claw-robot-group {
       animation: openclawFloat 1.5s ease-in-out infinite;
     }
-    
+
     // 双爪做快乐的招手/扇动
     .claw-hand-l {
       animation: handWaveL 0.4s ease-in-out infinite alternate;
@@ -1143,8 +1381,10 @@ onBeforeUnmount(() => {
     }
 
     // 极速眨眼聚焦
-    .claw-eye-l, .claw-eye-r,
-    .claw-eye-glow-l, .claw-eye-glow-r {
+    .claw-eye-l,
+    .claw-eye-r,
+    .claw-eye-glow-l,
+    .claw-eye-glow-r {
       animation: eyeBlink 1.8s ease-in-out infinite;
     }
   }
@@ -1156,18 +1396,21 @@ onBeforeUnmount(() => {
 .svg-codex {
   .codex-cloud {
     transform-origin: 16px 15px;
-    transition: transform 0.3s ease, filter 0.3s ease;
+    transition:
+      transform 0.3s ease,
+      filter 0.3s ease;
   }
-  
+
   .char-wrapper-gt {
     transform-origin: 12.5px 14.5px;
   }
-  
+
   .char-wrapper-cursor {
     transform-origin: 19px 17.5px;
   }
 
-  .char-gt, .char-cursor {
+  .char-gt,
+  .char-cursor {
     transition: transform 0.25s cubic-bezier(0.25, 0.8, 0.25, 1);
   }
 }
@@ -1204,8 +1447,13 @@ onBeforeUnmount(() => {
 }
 
 @keyframes cloudPulse {
-  0%, 100% { transform: scale(1); }
-  50% { transform: scale(0.96); }
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(0.96);
+  }
 }
 
 // Hover/Active 激活命令由外到内旋转滑入
@@ -1243,36 +1491,105 @@ onBeforeUnmount(() => {
 }
 
 @keyframes geminiStarBreath {
-  0%, 100% { transform: scale(1); opacity: 0.95; }
-  50% { transform: scale(1.06); opacity: 1; }
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 0.95;
+  }
+  50% {
+    transform: scale(1.06);
+    opacity: 1;
+  }
 }
 
 @keyframes geminiStarBreathSub {
-  0%, 100% { transform: scale(1.12); opacity: 1; }
-  50% { transform: scale(0.88); opacity: 0.85; }
+  0%,
+  100% {
+    transform: scale(1.12);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(0.88);
+    opacity: 0.85;
+  }
 }
 
 @keyframes geminiMainSpin {
-  0% { transform: rotate(0deg) scale(1.12); }
-  100% { transform: rotate(180deg) scale(1.12); }
+  0% {
+    transform: rotate(0deg) scale(1.12);
+  }
+  100% {
+    transform: rotate(180deg) scale(1.12);
+  }
 }
 
 @keyframes geminiSubSpin {
-  0% { transform: rotate(0deg) scale(1.15); }
-  100% { transform: rotate(-360deg) scale(1.15); }
+  0% {
+    transform: rotate(0deg) scale(1.15);
+  }
+  100% {
+    transform: rotate(-360deg) scale(1.15);
+  }
 }
 
 .report-model-select__agent:hover,
 .report-model-select__agent.is-active,
 .report-model-select__trigger:hover {
   .svg-gemini {
-    filter: drop-shadow(0 0 3px rgba(66, 133, 244, 0.35)) drop-shadow(0 0 6px rgba(163, 118, 235, 0.2));
-    
+    filter: drop-shadow(0 0 3px rgba(66, 133, 244, 0.35))
+      drop-shadow(0 0 6px rgba(163, 118, 235, 0.2));
+
     .star-main {
       animation: geminiMainSpin 0.75s cubic-bezier(0.4, 0, 0.2, 1) infinite alternate;
     }
     .star-sub {
       animation: geminiSubSpin 1.1s linear infinite;
+    }
+  }
+}
+
+/* ==========================================
+   4. Claude (Anthropic 陶土橙放射星芒) 动效
+   ========================================== */
+.svg-claude {
+  filter: drop-shadow(0 0 2px rgba(217, 119, 87, 0.35));
+  transition: filter 0.3s ease;
+
+  .claude-burst {
+    transform-origin: 16px 16px;
+    animation: claudeBurstBreath 2.8s ease-in-out infinite;
+  }
+}
+
+@keyframes claudeBurstBreath {
+  0%,
+  100% {
+    transform: scale(1) rotate(0deg);
+    opacity: 0.9;
+  }
+  50% {
+    transform: scale(1.07) rotate(15deg);
+    opacity: 1;
+  }
+}
+
+@keyframes claudeBurstSpin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.report-model-select__agent:hover,
+.report-model-select__agent.is-active,
+.report-model-select__trigger:hover {
+  .svg-claude {
+    filter: drop-shadow(0 0 3px rgba(217, 119, 87, 0.45));
+
+    .claude-burst {
+      animation: claudeBurstSpin 3s linear infinite;
     }
   }
 }
