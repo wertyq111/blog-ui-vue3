@@ -1,17 +1,13 @@
 <script setup lang="ts">
-import { ref, watch, onMounted, onUnmounted } from "vue";
-import { usePomoStore } from "@/store/modules/pomo";
-import { usePomoAudio } from "@/composables/usePomoAudio";
-import { usePomoNotify } from "@/composables/usePomoNotify";
+import { ref } from "vue";
+import { usePomoRuntime } from "@/composables/usePomoRuntime";
 import TabBar from "./components/TabBar.vue";
 import TaskListPanel from "./components/TaskListPanel.vue";
 import TimerPanel from "./components/TimerPanel.vue";
 
 type TabKey = "tasks" | "timer";
 
-const store = usePomoStore();
-const audio = usePomoAudio();
-const notify = usePomoNotify();
+const store = usePomoRuntime();
 
 const activeTab = ref<TabKey>("timer");
 const transitionName = ref<"slide-left" | "slide-right">("slide-left");
@@ -27,37 +23,6 @@ function onStartTask(id: number) {
   changeTab("timer");
   if (store.status === "idle") store.start();
 }
-
-// 完成一段副作用：响铃 + 通知
-watch(
-  () => store.completionTick,
-  () => {
-    if (store.settings.soundOn) audio.ding();
-    const focusDone = store.lastCompletedMode === "focus";
-    notify.notify("🍅 番茄森林", focusDone ? "专注完成，休息一下吧 🦊" : "休息结束，继续加油 💪");
-  }
-);
-
-// 首次开始计时请求通知权限
-const permRequested = ref(false);
-watch(
-  () => store.status,
-  (s) => {
-    if (s === "running" && !permRequested.value) {
-      permRequested.value = true;
-      notify.requestPermission();
-    }
-  }
-);
-
-let tickId: ReturnType<typeof setInterval> | undefined;
-onMounted(async () => {
-  await store.init();
-  tickId = setInterval(() => store.tick(), 250);
-});
-onUnmounted(() => {
-  if (tickId) clearInterval(tickId);
-});
 
 defineOptions({ name: "Pomo" });
 </script>
