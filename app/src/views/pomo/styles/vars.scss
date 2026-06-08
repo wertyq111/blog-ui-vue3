@@ -1,0 +1,49 @@
+// pomo 设计 token（移植自 pomo-forest variables.less，animal-island-vue-style）
+$primary:        #19c8b9;
+$primary-hover:  #3dd4c6;
+$primary-active: #50b9ab;
+$primary-bg:     #e6f9f6;
+
+$success:        #6fba2c;
+$warning:        #f5c31c;
+$error:          #e05a5a;
+$focus-yellow:   #ffcc00;
+
+$tomato:         #fc736d;
+$rest-orange:    #e59266;
+
+$text:           #794f27;
+$text-secondary: #9f927d;
+$text-disabled:  #c4b89e;
+
+$border:         #aaa69d;
+$border-hover:   #827157;
+$border-light:   #e8e2d6;
+
+$bg:             #f8f8f0;
+$bg-secondary:   #f0e8d8;
+$bg-input:       #f7f3df;
+$cream:          #f8f8f0;
+
+$shadow-warm:        #bdaea0;
+$shadow-soft:        #d4c9b4;
+$shadow-soft-strong: #a89878;
+
+$radius-sm:   16px;
+$radius-base: 18px;
+$radius-lg:   24px;
+$radius-pill: 50px;
+
+$space-xs: 4px;
+$space-sm: 8px;
+$space-md: 12px;
+$space-lg: 16px;
+$space-xl: 24px;
+
+$motion-fast: 0.15s;
+$motion-base: 0.25s;
+$motion-slow: 0.35s;
+$motion-ease: cubic-bezier(0.4, 0, 0.2, 1);
+
+$font: Nunito, "Noto Sans SC", "Zen Maru Gothic", "HarmonyOS Sans SC", "MiSans",
+  -apple-system, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
