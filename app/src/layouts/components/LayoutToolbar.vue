@@ -2,6 +2,11 @@
   <div :class="['navbar-actions', navbarActionsClass]">
     <!-- 桌面端工具项 -->
     <template v-if="isDesktop">
+      <!-- 番茄钟快控 -->
+      <div class="navbar-actions__item">
+        <PomoWidget />
+      </div>
+
       <!-- 全屏 -->
       <div class="navbar-actions__item">
         <Fullscreen />
@@ -72,6 +77,7 @@ import { useAppStore, useSettingsStore, useUserStore } from "@/store";
 
 // 导入子组件
 import Fullscreen from "@/components/Fullscreen/index.vue";
+import PomoWidget from "@/components/PomoWidget/index.vue";
 import LangSelect from "@/components/LangSelect/index.vue";
 import NoticeDropdown from "@/components/NoticeDropdown/index.vue";
 import TenantSwitcher from "@/components/TenantSwitcher/index.vue";
