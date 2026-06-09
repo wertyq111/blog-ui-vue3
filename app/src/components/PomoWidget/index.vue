@@ -2,9 +2,12 @@
 import { computed } from "vue";
 import { useRouter } from "vue-router";
 import { usePomoRuntime } from "@/composables/usePomoRuntime";
+import { deerSrc } from "@/views/pomo/deer";
 
 const store = usePomoRuntime();
 const router = useRouter();
+
+const deer = computed(() => deerSrc(store.characterState));
 
 const mmss = computed(() => {
   const s = Math.max(0, store.remaining);
@@ -33,6 +36,7 @@ function expand() {
     <template #dropdown>
       <div class="pomo-panel">
         <div class="pomo-panel__head" :class="store.mode">
+          <img :src="deer" class="deer" alt="" />
           <span class="label">🍅 {{ modeLabel }}</span>
           <span class="big">{{ mmss }}</span>
         </div>
@@ -125,9 +129,17 @@ function expand() {
     &__head {
       display: flex;
       align-items: center;
-      justify-content: space-between;
+      gap: 8px;
       margin-bottom: 10px;
+      .deer {
+        width: 46px;
+        height: 46px;
+        object-fit: contain;
+        flex-shrink: 0;
+        filter: drop-shadow(0 3px 4px rgba(61, 52, 40, 0.18));
+      }
       .label {
+        flex: 1;
         font-weight: 800;
         color: $text;
       }

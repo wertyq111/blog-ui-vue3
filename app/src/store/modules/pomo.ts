@@ -2,6 +2,7 @@ import { defineStore } from "pinia";
 import { ref, computed, watch } from "vue";
 import PomoAPI from "@/api/develop/pomo";
 import type { PomoTask, PomoSettings, PomoWeekItem } from "@/types/api/pomo";
+import type { DeerState } from "@/views/pomo/deer";
 
 type Mode = "focus" | "shortBreak" | "longBreak";
 type Status = "idle" | "running" | "paused";
@@ -136,6 +137,22 @@ export const usePomoStore = defineStore("pomo", () => {
     return Math.max(0, durationSec(mode.value) - elapsed());
   });
 
+  // 小鹿形象状态：专注完成短暂庆祝；运行中按 focus/休息；其余空闲
+  const celebrating = ref(false);
+  let celebrateTimer: ReturnType<typeof setTimeout> | undefined;
+  function triggerCelebrate() {
+    celebrating.value = true;
+    clearTimeout(celebrateTimer);
+    celebrateTimer = setTimeout(() => {
+      celebrating.value = false;
+    }, 3000);
+  }
+  const characterState = computed<DeerState>(() => {
+    if (celebrating.value) return "celebrate";
+    if (status.value !== "running") return "idle";
+    return mode.value === "focus" ? "focus" : "rest";
+  });
+
   function tick() {
     now.value = Date.now();
     if (!ready.value) return; // 设置未拉回前不判定完成，避免用默认时长误判
@@ -177,6 +194,7 @@ export const usePomoStore = defineStore("pomo", () => {
     const finished = mode.value;
     if (finished === "focus") {
       completedFocusInCycle.value++;
+      triggerCelebrate();
       // 落库：写完成段 + 关联任务番茄+1（服务端一步完成），随后刷新
       const taskId = linkedTaskId.value ?? 0;
       PomoAPI.storeSession(taskId)
@@ -229,6 +247,8 @@ export const usePomoStore = defineStore("pomo", () => {
     lastCompletedMode,
     remaining,
     currentTask,
+    characterState,
+    celebrating,
     durationSec,
     loadSettings,
     saveSettings,
