@@ -28,7 +28,7 @@ const label = computed(() =>
 
 <template>
   <div class="dial">
-    <svg viewBox="0 0 200 200" class="ring">
+    <svg viewBox="0 0 200 200" class="dial-ring">
       <circle class="track" cx="100" cy="100" :r="R" />
       <circle
         class="progress"
@@ -56,10 +56,10 @@ const label = computed(() =>
   height: 200px;
 }
 
-.ring {
+// 注意：类名不要用 "ring"——会撞 UnoCSS 的 ring 工具类（生成蓝色环形 box-shadow）
+.dial-ring {
   width: 100%;
   height: 100%;
-  outline: none; // 去掉点击 svg 时浏览器默认的圆角聚焦框（全局只压了 div:focus）
 }
 
 .track {
