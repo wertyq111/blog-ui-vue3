@@ -110,7 +110,7 @@ const visibleModel = computed<boolean>({
   set: (val) => emit("update:visible", val),
 });
 
-const previewDoc = ref<WorkDocItem>({ title: "", content: "" });
+const previewDoc = ref<Partial<WorkDocItem>>({ title: "", content: "" });
 const loading = ref(false);
 const fullscreen = ref(false);
 

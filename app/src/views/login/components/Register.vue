@@ -47,10 +47,10 @@
       </el-tooltip>
 
       <!-- 验证码 -->
-      <el-form-item prop="captchaCode">
+      <el-form-item prop="captcha">
         <div flex items-center gap-10px>
           <el-input
-            v-model.trim="model.captchaCode"
+            v-model.trim="model.captcha"
             :placeholder="t('login.captchaCode')"
             clearable
             class="flex-1"
@@ -127,9 +127,9 @@ const model = ref<Model>({
   username: "admin",
   password: "123456",
   confirmPassword: "",
-  captchaId: "",
-  captchaCode: "",
-  rememberMe: false,
+  captcha_key: "",
+  captcha: "",
+  remember: false,
 });
 
 const rules = computed(() => {
@@ -172,7 +172,7 @@ const rules = computed(() => {
         message: t("login.message.password.inconformity"),
       },
     ],
-    captchaCode: [
+    captcha: [
       {
         required: true,
         trigger: "blur",
@@ -188,8 +188,8 @@ function getCaptcha() {
   codeLoading.value = true;
   AuthAPI.getCaptcha()
     .then((data) => {
-      model.value.captchaId = data.captchaId;
-      captchaBase64.value = data.captchaBase64;
+      model.value.captcha_key = data.captcha_key;
+      captchaBase64.value = data.captcha_image_content;
     })
     .finally(() => (codeLoading.value = false));
 }

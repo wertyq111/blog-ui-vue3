@@ -11,8 +11,9 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from "vue";
+import { computed, type PropType } from "vue";
 import { MdEditor } from "md-editor-v3";
+import type { ToolbarNames } from "md-editor-v3";
 import "md-editor-v3/lib/style.css";
 import { useSettingsStore } from "@/store/modules/settings";
 
@@ -37,7 +38,7 @@ const props = defineProps({
     default: false,
   },
   toolbars: {
-    type: Array,
+    type: Array as PropType<ToolbarNames[]>,
     default: () => [
       "bold",
       "underline",

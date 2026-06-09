@@ -42,7 +42,7 @@
         <el-dropdown-item
           v-for="item in options"
           :key="String(item.value)"
-          :command="item.value"
+          :command="item.value ?? undefined"
           :disabled="modelValue === item.value"
           :class="{ 'is-active': modelValue === item.value }"
         >
