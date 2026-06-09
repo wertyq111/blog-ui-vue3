@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { Setting } from "@element-plus/icons-vue";
 import { usePomoStore } from "@/store/modules/pomo";
 
 defineProps<{ open: boolean }>();
@@ -28,7 +29,10 @@ function close() {
   <Transition name="modal">
     <div v-if="open" class="overlay" @click.self="close">
       <div class="panel">
-        <h2 class="title">⚙️ 设置</h2>
+        <h2 class="title">
+          <el-icon :size="22"><Setting /></el-icon>
+          <span>设置</span>
+        </h2>
 
         <div v-for="f in fields" :key="f.key" class="field">
           <span class="label">{{ f.label }}</span>
@@ -92,10 +96,13 @@ function close() {
 }
 .title {
   margin: 0 0 $space-sm;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
   font-size: 20px;
   font-weight: 900;
   color: $text;
-  text-align: center;
 }
 .field {
   display: flex;

@@ -1,12 +1,14 @@
 <script setup lang="ts">
+import { Memo, Timer } from "@element-plus/icons-vue";
+
 type TabKey = "tasks" | "timer";
 defineProps<{ active: TabKey }>();
 defineEmits<{ change: [tab: TabKey] }>();
 
-const tabs: { key: TabKey; icon: string; label: string }[] = [
-  { key: "tasks", icon: "📋", label: "提醒清单" },
-  { key: "timer", icon: "🍅", label: "番茄钟" },
-];
+const tabs = [
+  { key: "tasks", icon: Memo, label: "提醒清单" },
+  { key: "timer", icon: Timer, label: "番茄钟" },
+] as const;
 </script>
 
 <template>
@@ -18,7 +20,7 @@ const tabs: { key: TabKey; icon: string; label: string }[] = [
       :class="{ active: active === t.key }"
       @click="$emit('change', t.key)"
     >
-      <span class="icon">{{ t.icon }}</span>
+      <component :is="t.icon" class="tab-ico" />
       <span class="label">{{ t.label }}</span>
     </button>
   </nav>
@@ -26,33 +28,37 @@ const tabs: { key: TabKey; icon: string; label: string }[] = [
 
 <style scoped lang="scss">
 @use "../styles/vars" as *;
+
 .tab-bar {
-  display: flex;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
   gap: $space-sm;
   padding: $space-sm;
-  background: $bg-secondary;
-  border-top: 2px solid $border-light;
+  border-top: 2px solid rgba($border-light, 0.86);
+  background: rgba($bg-secondary, 0.86);
 }
 
 .tab {
-  flex: 1;
+  min-width: 0;
+  min-height: 54px;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 6px;
+  gap: 8px;
   padding: 10px 8px;
   border: none;
   border-radius: $radius-pill;
   background: transparent;
   color: $text-secondary;
   font-family: $font;
-  font-weight: 700;
-  font-size: 15px;
+  font-size: 16px;
+  font-weight: 900;
   cursor: pointer;
   transition: all $motion-base $motion-ease;
 
-  .icon {
-    font-size: 18px;
+  .tab-ico {
+    width: 21px;
+    height: 21px;
   }
 
   &:hover:not(.active) {
@@ -65,6 +71,13 @@ const tabs: { key: TabKey; icon: string; label: string }[] = [
     color: #fff;
     box-shadow: 0 4px 0 0 $primary-active;
     transform: translateY(-1px);
+  }
+}
+
+@media (max-height: 780px) {
+  .tab {
+    min-height: 48px;
+    font-size: 14px;
   }
 }
 </style>

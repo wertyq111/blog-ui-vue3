@@ -12,11 +12,6 @@ type TabKey = "tasks" | "timer";
 const store = usePomoRuntime();
 
 const activeTab = ref<TabKey>("timer");
-
-// 提醒清单 Tab 显示 list 形象；番茄钟 Tab 跟随计时状态
-const deerState = computed<DeerState>(() =>
-  activeTab.value === "tasks" ? "list" : store.characterState
-);
 const transitionName = ref<"slide-left" | "slide-right">("slide-left");
 
 function changeTab(tab: TabKey) {
@@ -31,6 +26,11 @@ function onStartTask(id: number) {
   if (store.status === "idle") store.start();
 }
 
+// 提醒清单 Tab 显示 list 形象；番茄钟 Tab 跟随计时状态（含完成庆祝，store.characterState 已含 celebrate）
+const deerState = computed<DeerState>(() =>
+  activeTab.value === "tasks" ? "list" : store.characterState
+);
+
 defineOptions({ name: "Pomo" });
 </script>
 
@@ -38,14 +38,17 @@ defineOptions({ name: "Pomo" });
   <div class="pomo-page">
     <div class="device">
       <header class="stage-area">
+        <div class="forest-glow" />
         <DeerStage :state="deerState" />
       </header>
+
       <main class="view-area">
         <Transition :name="transitionName">
           <TaskListPanel v-if="activeTab === 'tasks'" key="tasks" @start="onStartTask" />
           <TimerPanel v-else key="timer" />
         </Transition>
       </main>
+
       <TabBar :active="activeTab" @change="changeTab" />
     </div>
   </div>
@@ -64,8 +67,8 @@ defineOptions({ name: "Pomo" });
 .device {
   position: relative;
   width: 100%;
-  max-width: 460px;
-  height: min(760px, 86vh);
+  max-width: 420px;
+  height: min(760px, 88vh);
   display: flex;
   flex-direction: column;
   background: $bg;
@@ -77,7 +80,31 @@ defineOptions({ name: "Pomo" });
 }
 
 .stage-area {
+  position: relative;
   flex-shrink: 0;
+  height: 278px;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding-top: $space-md;
+  overflow: visible;
+  background:
+    radial-gradient(circle at 50% 18%, rgba(255, 255, 226, 0.92), transparent 34%),
+    radial-gradient(circle at 22% 52%, rgba(137, 186, 89, 0.24), transparent 30%),
+    radial-gradient(circle at 82% 48%, rgba(35, 155, 132, 0.16), transparent 28%),
+    linear-gradient(180deg, #d8f6ff 0%, #edf6df 74%, rgba(248, 248, 240, 0) 100%);
+}
+
+.forest-glow {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.62;
+  background:
+    radial-gradient(circle at 18% 14%, rgba(112, 160, 59, 0.26) 0 18px, transparent 19px),
+    radial-gradient(circle at 80% 18%, rgba(112, 160, 59, 0.22) 0 22px, transparent 23px),
+    radial-gradient(circle at 8% 36%, rgba(112, 160, 59, 0.18) 0 16px, transparent 17px),
+    radial-gradient(circle at 92% 36%, rgba(112, 160, 59, 0.2) 0 18px, transparent 19px);
 }
 
 .view-area {
@@ -112,5 +139,11 @@ defineOptions({ name: "Pomo" });
 .slide-right-leave-to {
   transform: translateX(100%);
   opacity: 0;
+}
+
+@media (max-height: 780px) {
+  .stage-area {
+    height: 244px;
+  }
 }
 </style>
