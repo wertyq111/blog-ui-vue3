@@ -47,6 +47,23 @@ export function usePomoRuntime() {
         }
       }
     );
+
+    // 浏览器标签页标题显示倒计时（运行/暂停时覆盖，空闲时还原）
+    const baseTitle = document.title;
+    watch(
+      () => [store.status, store.remaining, store.mode] as const,
+      ([s, r, m]) => {
+        if (s === "running" || s === "paused") {
+          const mm = String(Math.floor(r / 60)).padStart(2, "0");
+          const ss = String(r % 60).padStart(2, "0");
+          const label = m === "focus" ? "专注" : m === "shortBreak" ? "短休" : "长休";
+          document.title = `${s === "paused" ? "⏸" : "🍅"} ${mm}:${ss} ${label}`;
+        } else {
+          document.title = baseTitle;
+        }
+      },
+      { immediate: true }
+    );
   });
 
   return store;
