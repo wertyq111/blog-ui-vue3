@@ -59,6 +59,7 @@ const label = computed(() =>
 .ring {
   width: 100%;
   height: 100%;
+  outline: none; // 去掉点击 svg 时浏览器默认的圆角聚焦框（全局只压了 div:focus）
 }
 
 .track {
