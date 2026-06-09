@@ -1,5 +1,5 @@
 import { defineStore } from "pinia";
-import { ref, computed } from "vue";
+import { ref, computed, watch } from "vue";
 import PomoAPI from "@/api/develop/pomo";
 import type { PomoTask, PomoSettings, PomoWeekItem } from "@/types/api/pomo";
 
@@ -17,13 +17,35 @@ const DEFAULT_SETTINGS: PomoSettings = {
   whiteNoiseVolume: 0.6,
 };
 
+// 计时态本地持久化（仅同设备恢复，时间戳算法保证刷新后 remaining 自动算对）
+const TIMER_KEY = "pomo:timer";
+interface TimerSnapshot {
+  mode: Mode;
+  status: Status;
+  startedAt: number | null;
+  pausedRemaining: number | null;
+  linkedTaskId: number | null;
+  completedFocusInCycle: number;
+}
+function readTimerSnapshot(): Partial<TimerSnapshot> {
+  try {
+    return JSON.parse(localStorage.getItem(TIMER_KEY) || "null") || {};
+  } catch {
+    return {};
+  }
+}
+
 export const usePomoStore = defineStore("pomo", () => {
+  // settings/tasks/week 是否已从后端拉回，未就绪前不判定计时完成（防默认时长误判）
+  const ready = ref(false);
+
   // ---------- 设置 ----------
   const settings = ref<PomoSettings>({ ...DEFAULT_SETTINGS });
 
   async function loadSettings() {
     const data = await PomoAPI.getSettings();
     if (data) settings.value = { ...DEFAULT_SETTINGS, ...data };
+    ready.value = true;
   }
 
   async function saveSettings() {
@@ -71,16 +93,39 @@ export const usePomoStore = defineStore("pomo", () => {
     week.value = (await PomoAPI.getWeek()) ?? [];
   }
 
-  // ---------- 计时（本地时间戳算法） ----------
-  const mode = ref<Mode>("focus");
-  const status = ref<Status>("idle");
-  const startedAt = ref<number | null>(null);
-  const pausedRemaining = ref<number | null>(null);
-  const linkedTaskId = ref<number | null>(null);
-  const completedFocusInCycle = ref(0);
-  const completionTick = ref(0);
+  // ---------- 计时（本地时间戳算法，状态持久化到 localStorage） ----------
+  const snap = readTimerSnapshot();
+  const mode = ref<Mode>(snap.mode ?? "focus");
+  const status = ref<Status>(snap.status ?? "idle");
+  const startedAt = ref<number | null>(snap.startedAt ?? null);
+  const pausedRemaining = ref<number | null>(snap.pausedRemaining ?? null);
+  const linkedTaskId = ref<number | null>(snap.linkedTaskId ?? null);
+  const completedFocusInCycle = ref<number>(snap.completedFocusInCycle ?? 0);
+  const completionTick = ref(0); // 仅运行时信号，不持久化
   const lastCompletedMode = ref<Mode | null>(null);
   const now = ref(Date.now());
+
+  // 计时态变化即落盘（不监听 now，避免每 250ms 写一次）
+  watch(
+    [mode, status, startedAt, pausedRemaining, linkedTaskId, completedFocusInCycle],
+    () => {
+      try {
+        localStorage.setItem(
+          TIMER_KEY,
+          JSON.stringify({
+            mode: mode.value,
+            status: status.value,
+            startedAt: startedAt.value,
+            pausedRemaining: pausedRemaining.value,
+            linkedTaskId: linkedTaskId.value,
+            completedFocusInCycle: completedFocusInCycle.value,
+          })
+        );
+      } catch {
+        /* localStorage 不可用（隐私模式等）则忽略 */
+      }
+    }
+  );
 
   function elapsed(): number {
     return startedAt.value == null ? 0 : Math.floor((now.value - startedAt.value) / 1000);
@@ -93,6 +138,7 @@ export const usePomoStore = defineStore("pomo", () => {
 
   function tick() {
     now.value = Date.now();
+    if (!ready.value) return; // 设置未拉回前不判定完成，避免用默认时长误判
     if (status.value === "running" && elapsed() >= durationSec(mode.value)) complete();
   }
 
