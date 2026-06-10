@@ -39,7 +39,14 @@
           <path d="M4 2.5l4 3.5-4 3.5" />
         </svg>
       </span>
-      <span class="ai-tree__icon">{{ row.hasChildren ? "📁" : "📄" }}</span>
+      <span class="ai-tree__icon">
+        <AnimalItemIcon
+          v-if="iconKey && parseItemId(row.node[iconKey]) !== null"
+          :item="row.node[iconKey]"
+          :size="17"
+        />
+        <template v-else>{{ row.hasChildren ? "📁" : "📄" }}</template>
+      </span>
       <span class="ai-tree__label">{{ row.node[labelKey] }}</span>
       <span v-if="row.hasChildren" class="ai-tree__count">{{ row.node[childrenKey].length }}</span>
       <span class="ai-tree__actions" @click.stop>
@@ -62,6 +69,8 @@
 
 <script setup lang="ts">
 import { reactive, ref, watch } from "vue";
+import AnimalItemIcon from "@/components/AnimalItemIcon/index.vue";
+import { parseItemId } from "@/utils/animalItemIcon";
 
 type Key = number | string;
 
@@ -72,6 +81,8 @@ const props = withDefaults(
     nodeKey?: string;
     labelKey?: string;
     childrenKey?: string;
+    /** 节点上物品图标字段名；设置后该字段解析到有效物品图标则优先显示，否则回退 📁/📄 */
+    iconKey?: string;
     draggable?: boolean;
   }>(),
   {
@@ -79,6 +90,7 @@ const props = withDefaults(
     nodeKey: "id",
     labelKey: "name",
     childrenKey: "children",
+    iconKey: "",
     draggable: true,
   }
 );
@@ -331,6 +343,11 @@ function onDropRoot(): void {
 }
 
 .ai-tree__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 17px;
+  height: 17px;
   font-size: 13px;
 }
 

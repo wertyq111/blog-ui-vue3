@@ -20,7 +20,7 @@
         <AnimalSelect v-model="parentModel" placeholder="无（作为根分类）" :options="parentOptions" />
       </el-form-item>
       <el-form-item label="图标" prop="icon">
-        <IconSelect v-model="formData.icon" />
+        <IconSelect v-model="formData.icon" variant="item" />
       </el-form-item>
       <el-form-item label="排序" prop="sort">
         <Input v-model="sortModel" type="number" placeholder="排序号" />

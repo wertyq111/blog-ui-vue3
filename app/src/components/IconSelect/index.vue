@@ -6,7 +6,12 @@
     :style="{ width }"
   >
     <div ref="triggerRef" class="ais__trigger" @click="toggleOpen">
-      <span v-if="selectedIcon" class="ais__value">
+      <!-- item 变体：仅当解析到有效物品编号才展示，旧值无效则视作未选 -->
+      <span v-if="isItemVariant && selectedId !== null" class="ais__value">
+        <AnimalItemIcon :item="selectedId" :size="20" />
+        <span class="ais__value-name">{{ toItemId(selectedId) }}</span>
+      </span>
+      <span v-else-if="!isItemVariant && selectedIcon" class="ais__value">
         <AnimalMenuIcon
           v-if="isMenuVariant && isSemantic(selectedIcon)"
           :name="selectedIcon"
@@ -18,7 +23,7 @@
       <span v-else class="ais__placeholder">点击选择图标</span>
 
       <span
-        v-if="selectedIcon && !disabled"
+        v-if="hasClearable && !disabled"
         class="ais__clear"
         @click.stop="clearSelectedIcon"
       >
@@ -48,7 +53,34 @@
           class="ais__dropdown"
           :style="dropdownStyle"
         >
-          <ul class="ais__grid">
+          <!-- item 变体：488 物品图标 + 编号搜索 -->
+          <template v-if="isItemVariant">
+            <div class="ais__search">
+              <input
+                v-model="keyword"
+                class="ais__search-input"
+                type="text"
+                inputmode="numeric"
+                placeholder="按编号搜索，如 42"
+              />
+            </div>
+            <ul class="ais__grid">
+              <li
+                v-for="id in filteredItems"
+                :key="id"
+                class="ais__item"
+                :class="{ 'is-active': selectedId === id }"
+                @click="selectItem(id)"
+              >
+                <el-tooltip :content="toItemId(id)" placement="bottom" effect="light">
+                  <AnimalItemIcon :item="id" :size="30" />
+                </el-tooltip>
+              </li>
+              <li v-if="filteredItems.length === 0" class="ais__empty">无匹配图标</li>
+            </ul>
+          </template>
+          <!-- props / menu 变体：动森道具/语义图标 -->
+          <ul v-else class="ais__grid">
             <li
               v-for="name in iconNames"
               :key="name"
@@ -73,15 +105,17 @@ import { computed, ref } from "vue";
 import { onClickOutside, useElementBounding } from "@vueuse/core";
 import Icon from "@/components/AnimalIcon/index.vue";
 import AnimalMenuIcon from "@/components/AnimalMenuIcon/index.vue";
+import AnimalItemIcon from "@/components/AnimalItemIcon/index.vue";
 import { ANIMAL_ICON_NAMES, resolveAnimalIcon } from "@/utils/menuAnimalIcon";
 import { MENU_ICON_NAMES, MENU_SEMANTIC_NAMES } from "@/utils/menuSemanticIcon";
+import { ITEM_LIST, parseItemId, toItemId } from "@/utils/animalItemIcon";
 
 const props = withDefaults(
   defineProps<{
     width?: string;
     disabled?: boolean;
-    /** props: 动森道具图标集（默认）；menu: 动森语义菜单图标集（多动效） */
-    variant?: "props" | "menu";
+    /** props: 动森道具图标集（默认）；menu: 动森语义菜单图标集（多动效）；item: 488 物品图标集 */
+    variant?: "props" | "menu" | "item";
   }>(),
   {
     width: "100%",
@@ -91,6 +125,7 @@ const props = withDefaults(
 );
 
 const isMenuVariant = computed(() => props.variant === "menu");
+const isItemVariant = computed(() => props.variant === "item");
 const iconNames = computed(() =>
   isMenuVariant.value ? MENU_ICON_NAMES : ANIMAL_ICON_NAMES
 );
@@ -99,6 +134,19 @@ function isSemantic(name: string): boolean {
 }
 
 const selectedIcon = defineModel<string>("modelValue", { default: "" });
+
+// item 变体：存储值为 "item-N"；旧值解析为 null（回退占位、可重选）
+const selectedId = computed<number | null>(() => parseItemId(selectedIcon.value));
+// item 变体按解析到的有效编号判断可清除；其余按存储值是否非空
+const hasClearable = computed(() =>
+  isItemVariant.value ? selectedId.value !== null : !!selectedIcon.value
+);
+const keyword = ref("");
+const filteredItems = computed<number[]>(() => {
+  const kw = keyword.value.trim();
+  if (!kw) return ITEM_LIST;
+  return ITEM_LIST.filter((id) => String(id).includes(kw));
+});
 
 const wrapperRef = ref<HTMLElement>();
 const triggerRef = ref<HTMLElement>();
@@ -121,6 +169,11 @@ function toggleOpen(): void {
 
 function selectIcon(name: string): void {
   selectedIcon.value = name;
+  open.value = false;
+}
+
+function selectItem(id: number): void {
+  selectedIcon.value = toItemId(id);
   open.value = false;
 }
 
@@ -228,6 +281,35 @@ onClickOutside(wrapperRef, (event) => {
   background: #ffeea0;
   border-radius: 22px;
   box-shadow: 0 10px 26px rgba(110, 80, 40, 0.18);
+}
+.ais__search {
+  margin-bottom: 10px;
+}
+.ais__search-input {
+  width: 100%;
+  height: 34px;
+  padding: 0 12px;
+  font-size: 13px;
+  color: #725d42;
+  background: #fff;
+  border: 2px solid #f0dd8a;
+  border-radius: 12px;
+  outline: none;
+  transition: border-color 0.15s;
+}
+.ais__search-input:focus {
+  border-color: #19c8b9;
+}
+.ais__search-input::placeholder {
+  color: #c4b489;
+}
+.ais__empty {
+  width: 100%;
+  padding: 18px 0;
+  text-align: center;
+  font-size: 13px;
+  color: #a4946f;
+  list-style: none;
 }
 .ais__grid {
   display: flex;

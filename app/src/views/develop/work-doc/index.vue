@@ -27,6 +27,7 @@
         <AnimalTree
           :nodes="categoryTree"
           :selected-id="queryParams.categoryId ?? null"
+          icon-key="icon"
           @select="handleCategorySelect"
           @reorder="handleCategoryReorder"
         >
