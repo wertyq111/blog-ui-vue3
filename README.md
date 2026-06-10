@@ -1,6 +1,6 @@
 # blog-ui-vue3
 
-`blog-ui-vue3` 是与现有 `blog-ui` 并行的全新前端工程，目标是用 `Vue 3 + TypeScript + Vite + Node 22+` 重建后台壳层，同时继续兼容当前博客后台接口与动态菜单。
+`blog-ui-vue3` 是 blog 工作区的**主力前端**，用 `Vue 3 + TypeScript + Vite + Node 22+` 构建，兼容当前博客后台接口与动态菜单。旧版 `blog-ui`（Vue 2）已于 2026-06-10 进入维护模式，新功能一律在本仓库开发。
 
 该目录是一个**独立 git 仓库**，对应远端 `git@github.com:wertyq111/blog-ui-vue3.git`。后续 Vue3 前端代码、文档和提交都必须留在这个仓库内，不要提交到 overview 仓库，也不要回写到旧的 `blog-ui` 仓库。
 

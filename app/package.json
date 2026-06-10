@@ -1,6 +1,6 @@
 {
-  "name": "vue3-element-admin",
-  "description": "Vue3 + Vite + TypeScript + Element-Plus 的后台管理模板，vue-element-admin 的 Vue3 版本",
+  "name": "blog-ui-vue3",
+  "description": "个人博客 Vue 3 管理后台前端（主力前端），Vue 3 + Vite + TypeScript + Element Plus + animal-island-vue 动森风",
   "version": "4.3.0",
   "private": true,
   "type": "module",
