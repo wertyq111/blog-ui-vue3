@@ -427,14 +427,17 @@
                 </span>
               </td>
               <td>
-                <Button
-                  v-if="item.status === 'completed'"
-                  type="default"
-                  size="small"
-                  @click="handleDownloadItem(item)"
-                >
-                  下载
-                </Button>
+                <div v-if="item.status === 'completed'" class="export-history__actions">
+                  <Button type="primary" size="small" @click="handlePreviewItem(item)">
+                    预览
+                  </Button>
+                  <Button type="default" size="small" @click="handleDownloadItem(item)">
+                    下载
+                  </Button>
+                  <Button danger size="small" @click="handleDeleteItem(item)">
+                    删除
+                  </Button>
+                </div>
                 <span
                   v-else-if="item.status === 'failed'"
                   class="export-history__error"
@@ -449,11 +452,66 @@
         </table>
       </div>
     </AdminAnimalModal>
+
+    <AdminAnimalModal
+      v-model:visible="previewVisible"
+      :title="previewTitle"
+      width="880px"
+      content-class="report-preview-content"
+      @close="closePreview"
+    >
+      <div class="report-preview">
+        <div v-if="previewLoading" class="report-preview__loading">渲染中...</div>
+        <AnimalMarkdown
+          v-else-if="previewMode === 'edit'"
+          v-model="editContent"
+          height="70vh"
+        />
+        <iframe
+          v-else-if="previewUrl"
+          ref="previewFrameRef"
+          :src="previewUrl"
+          class="report-preview__frame"
+          title="报表预览"
+        ></iframe>
+      </div>
+      <template #footer>
+        <div class="report-preview__footer">
+          <span class="report-preview__tip">
+            {{
+              previewMode === "edit"
+                ? "编辑 Markdown 源，保存后预览/下载/打印都用新内容"
+                : "打印时记得勾「背景图形」，配色才会进 PDF"
+            }}
+          </span>
+          <div v-if="previewMode === 'edit'" class="report-preview__actions">
+            <Button type="default" size="small" :disabled="savingEdit" @click="cancelEdit">
+              取消
+            </Button>
+            <Button type="primary" size="small" :loading="savingEdit" @click="saveEdit">
+              保存
+            </Button>
+          </div>
+          <div v-else class="report-preview__actions">
+            <Button type="default" size="small" @click="closePreview">关闭</Button>
+            <Button type="default" size="small" :disabled="!previewItem" @click="enterEdit">
+              编辑
+            </Button>
+            <Button type="default" size="small" :disabled="!previewItem" @click="downloadPreview">
+              下载 HTML
+            </Button>
+            <Button type="primary" size="small" :disabled="!previewUrl" @click="printPreview">
+              打印 / 存 PDF
+            </Button>
+          </div>
+        </div>
+      </template>
+    </AdminAnimalModal>
   </div>
 </template>
 
 <script setup lang="ts">
-import { message } from "@/utils/feedback";
+import { confirm, message } from "@/utils/feedback";
 import { computed, onBeforeUnmount, onMounted, reactive, ref } from "vue";
 import { type UploadFile } from "element-plus";
 import { ArrowDown, ArrowRight, Check } from "@element-plus/icons-vue";
@@ -464,6 +522,7 @@ import AnimalDatePicker from "@/components/AnimalDatePicker/index.vue";
 import AnimalUpload from "@/components/AnimalUpload/index.vue";
 import SystemIco from "@/components/AdminPage/SystemIco.vue";
 import AdminAnimalModal from "@/components/AdminPage/AdminAnimalModal.vue";
+import AnimalMarkdown from "@/components/AnimalMarkdown/index.vue";
 import WorkDailyAPI, { type WorkDailyReportExport } from "@/api/develop/work-daily";
 
 const emit = defineEmits<{ imported: [] }>();
@@ -480,6 +539,16 @@ const historyVisible = ref(false);
 const historyLoading = ref(false);
 const historyItems = ref<WorkDailyReportExport[]>([]);
 let historyRefreshTimer: number | undefined;
+
+const previewVisible = ref(false);
+const previewLoading = ref(false);
+const previewUrl = ref("");
+const previewTitle = ref("报表预览");
+const previewItem = ref<WorkDailyReportExport | null>(null);
+const previewFrameRef = ref<HTMLIFrameElement | null>(null);
+const previewMode = ref<"view" | "edit">("view");
+const editContent = ref("");
+const savingEdit = ref(false);
 
 const config = reactive({
   type: "month" as "month" | "week" | "year",
@@ -706,8 +775,8 @@ async function pollExport(id: number, autoDownload: boolean): Promise<void> {
     stopExportPolling();
     if (result.export.status === "completed") {
       if (autoDownload) {
-        await downloadExport(result.export);
-        message.success("导出成功");
+        message.success("生成成功");
+        await openPreview(result.export);
       }
       return;
     }
@@ -720,7 +789,7 @@ async function pollExport(id: number, autoDownload: boolean): Promise<void> {
 
 async function downloadExport(exportItem: WorkDailyReportExport): Promise<void> {
   const response = await WorkDailyAPI.downloadReportExport(exportItem.id);
-  downloadFile(response, exportItem.fileName);
+  downloadFile(response, exportItem.fileName.replace(/\.md$/, ".html"));
 }
 
 async function handleImport(file: UploadFile): Promise<void> {
@@ -790,6 +859,127 @@ async function handleDownloadItem(item: WorkDailyReportExport): Promise<void> {
   }
 }
 
+function handleDeleteItem(item: WorkDailyReportExport): void {
+  confirm("确认删除这条报表生成记录吗？", "警告", {
+    confirmButtonText: "确定",
+    cancelButtonText: "取消",
+    type: "warning",
+  }).then(
+    async () => {
+      try {
+        await WorkDailyAPI.deleteReportExport(item.id);
+        message.success("删除成功");
+        if (previewItem.value?.id === item.id) closePreview();
+        await refreshHistory();
+      } catch {
+        message.error("删除失败");
+      }
+    },
+    () => message.info("已取消删除")
+  );
+}
+
+// 拉取带样式的 HTML（与下载/打印同一套渲染），用 blob 地址在 iframe 里预览，不触发下载
+async function renderPreviewHtml(id: number): Promise<void> {
+  previewLoading.value = true;
+  revokePreviewUrl();
+  try {
+    const response = await WorkDailyAPI.downloadReportExport(id, "html");
+    const blob = new Blob([response.data], { type: "text/html;charset=utf-8" });
+    previewUrl.value = URL.createObjectURL(blob);
+  } finally {
+    previewLoading.value = false;
+  }
+}
+
+async function openPreview(item: WorkDailyReportExport): Promise<void> {
+  previewItem.value = item;
+  previewTitle.value = item.fileName?.replace(/\.md$/, "") || "报表预览";
+  previewMode.value = "view";
+  previewVisible.value = true;
+  await renderPreviewHtml(item.id);
+}
+
+// 进入编辑：取 Markdown 原文（复用 format=md 下载）填入编辑器
+async function enterEdit(): Promise<void> {
+  if (!previewItem.value) return;
+  try {
+    const response = await WorkDailyAPI.downloadReportExport(previewItem.value.id, "md");
+    editContent.value =
+      typeof response.data === "string" ? response.data : await response.data.text();
+    previewMode.value = "edit";
+  } catch {
+    message.error("加载内容失败");
+  }
+}
+
+function cancelEdit(): void {
+  previewMode.value = "view";
+  editContent.value = "";
+}
+
+// 保存：写回报表记录，再用新内容重渲染预览，回到查看模式
+async function saveEdit(): Promise<void> {
+  if (!previewItem.value) return;
+  savingEdit.value = true;
+  try {
+    await WorkDailyAPI.updateReportExportContent(previewItem.value.id, editContent.value);
+    message.success("已保存");
+    previewMode.value = "view";
+    editContent.value = "";
+    await renderPreviewHtml(previewItem.value.id);
+  } catch {
+    message.error("保存失败");
+  } finally {
+    savingEdit.value = false;
+  }
+}
+
+async function handlePreviewItem(item: WorkDailyReportExport): Promise<void> {
+  try {
+    await openPreview(item);
+  } catch {
+    previewVisible.value = false;
+    message.error("预览失败");
+  }
+}
+
+async function downloadPreview(): Promise<void> {
+  if (!previewItem.value) return;
+  try {
+    await downloadExport(previewItem.value);
+  } catch {
+    message.error("下载失败");
+  }
+}
+
+// 直接触发 iframe 自身文档的打印（blob 与主页面同源），只打印报表内容、走报表的 A4 打印样式；
+// 若用浏览器 Cmd+P 会打印整个应用页面而非 iframe，所以必须从 iframe 内部触发
+function printPreview(): void {
+  const win = previewFrameRef.value?.contentWindow;
+  if (!win) {
+    message.error("预览未就绪，请稍候");
+    return;
+  }
+  win.focus();
+  win.print();
+}
+
+function revokePreviewUrl(): void {
+  if (previewUrl.value) {
+    URL.revokeObjectURL(previewUrl.value);
+    previewUrl.value = "";
+  }
+}
+
+function closePreview(): void {
+  previewVisible.value = false;
+  revokePreviewUrl();
+  previewItem.value = null;
+  previewMode.value = "view";
+  editContent.value = "";
+}
+
 function formatExportType(type: string): string {
   return ({ month: "月报", week: "周报", year: "年报" } as Record<string, string>)[type] || type;
 }
@@ -828,11 +1018,59 @@ onMounted(() => {
 onBeforeUnmount(() => {
   stopExportPolling();
   stopHistoryAutoRefresh();
+  revokePreviewUrl();
   document.removeEventListener("click", handleModelOutsideClick);
 });
 </script>
 
 <style lang="scss" scoped>
+/* 预览弹窗关掉外层 55vh 滚动容器，让 iframe 成为唯一滚动层，消除嵌套滚动闪烁 */
+:deep(.admin-animal-modal__content.report-preview-content) {
+  max-height: none;
+  overflow: hidden;
+  padding-right: 0;
+}
+
+.report-preview {
+  height: 70vh;
+  overscroll-behavior: contain;
+}
+
+.report-preview__loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: var(--ai-text-2, #9f927d);
+  font-size: 13px;
+}
+
+.report-preview__frame {
+  width: 100%;
+  height: 100%;
+  border: none;
+  border-radius: 12px;
+  background: #f6f1e7;
+}
+
+.report-preview__footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  width: 100%;
+}
+
+.report-preview__tip {
+  font-size: 12px;
+  color: var(--ai-text-2, #9f927d);
+}
+
+.report-preview__actions {
+  display: flex;
+  gap: 8px;
+}
+
 .report-panel {
   margin-bottom: 16px;
   padding: 16px 18px;
@@ -966,6 +1204,12 @@ onBeforeUnmount(() => {
 .export-history__pending {
   font-size: 12px;
   color: var(--ai-text-2, #9f927d);
+}
+
+.export-history__actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 14px;
 }
 </style>
 
