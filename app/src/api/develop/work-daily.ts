@@ -147,12 +147,30 @@ const WorkDailyAPI = {
     });
   },
 
-  /** 下载报表导出文件 */
-  downloadReportExport(id: number) {
+  /** 下载报表导出文件（html 自带阅读样式，md 为原文） */
+  downloadReportExport(id: number, format: "html" | "md" = "html") {
     return request({
       url: `${BASE_URL}/report/export/${id}/download`,
       method: "get",
+      params: { format },
       responseType: "blob",
+    });
+  },
+
+  /** 保存编辑后的报表 Markdown 内容 */
+  updateReportExportContent(id: number, content: string) {
+    return request({
+      url: `${BASE_URL}/report/export/${id}/content`,
+      method: "post",
+      data: { content },
+    });
+  },
+
+  /** 删除报表导出记录 */
+  deleteReportExport(id: number) {
+    return request({
+      url: `${BASE_URL}/report/export/${id}`,
+      method: "delete",
     });
   },
 
