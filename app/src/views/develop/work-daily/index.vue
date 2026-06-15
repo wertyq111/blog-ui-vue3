@@ -163,7 +163,7 @@
 
 <script setup lang="ts">
 import { confirm, message } from "@/utils/feedback";
-import { computed, onMounted, reactive, ref } from "vue";
+import { computed, onDeactivated, onMounted, reactive, ref } from "vue";
 import { useRoute, useRouter } from "vue-router";
 
 import { Button, Input } from "animal-island-vue";
@@ -318,6 +318,12 @@ function handleDelete(id: number): void {
 
 const route = useRoute();
 const router = useRouter();
+
+// 详情预览是 teleport 到 body 的弹窗，页面被 keep-alive 缓存，跳到工作文档标签时
+// 路由变化不会自动关它。失活时主动关闭，避免跳转后残留覆盖。
+onDeactivated(() => {
+  previewVisible.value = false;
+});
 
 onMounted(async () => {
   await fetchPlatforms();

@@ -139,7 +139,7 @@ async function copyMarkdownLink(): Promise<void> {
     message.error("文档未保存");
     return;
   }
-  const link = `[${previewDoc.value.title}](/develop/work-doc?id=${previewDoc.value.id})`;
+  const link = `[${previewDoc.value.title}](/#/develop/work-doc?id=${previewDoc.value.id})`;
 
   // 兼容非 HTTPS 环境的复制实现 (避免 navigator.clipboard 在非安全上下文中为 undefined)
   if (navigator.clipboard && window.isSecureContext) {

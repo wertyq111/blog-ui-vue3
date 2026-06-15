@@ -211,7 +211,7 @@
 
 <script setup lang="ts">
 import { confirm, message } from "@/utils/feedback";
-import { computed, onMounted, reactive, ref } from "vue";
+import { computed, onActivated, onMounted, reactive, ref, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 
 import { Button, Input } from "animal-island-vue";
@@ -392,7 +392,7 @@ function handlePreview(row: WorkDocItem): void {
 }
 
 function copyMarkdownLink(row: WorkDocItem): void {
-  const link = `[${row.title}](/develop/work-doc?id=${row.id})`;
+  const link = `[${row.title}](/#/develop/work-doc?id=${row.id})`;
   navigator.clipboard.writeText(link).then(() => message.success("Markdown 链接已复制"));
 }
 
@@ -458,6 +458,36 @@ onMounted(async () => {
     router.replace({ path: route.path, query: rest });
   }
 });
+
+// 通过 ?id= 深链打开文档预览。页面被 keep-alive 缓存：首次进入/从其它标签切回来由
+// onActivated 触发，同一标签内再次点链接由 watch 触发；openingDocId 去重，避免两条路径
+// 同时命中弹出两个预览。
+let openingDocId: number | null = null;
+async function openDocFromQuery(): Promise<void> {
+  if (!route.query.id) return;
+  const id = Number(route.query.id);
+  if (Number.isNaN(id) || openingDocId === id) return;
+  openingDocId = id;
+  try {
+    const doc = await WorkDocAPI.getInfo(id);
+    handlePreview(doc);
+  } finally {
+    const { id: _omitId, ...rest } = route.query;
+    void _omitId;
+    router.replace({ path: route.path, query: rest });
+    openingDocId = null;
+  }
+}
+
+onActivated(() => {
+  void openDocFromQuery();
+});
+watch(
+  () => route.query.id,
+  (id) => {
+    if (id) void openDocFromQuery();
+  }
+);
 </script>
 
 <style lang="scss" scoped>
