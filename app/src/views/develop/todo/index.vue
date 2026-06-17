@@ -637,7 +637,7 @@ onMounted(async () => {
   transition: color 0.15s ease;
 
   &:hover {
-    color: var(--ai-primary, #19c8b9);
+    color: var(--ai-primary);
     text-decoration: underline;
   }
 }
@@ -670,24 +670,24 @@ onMounted(async () => {
   gap: 12px;
   padding: 2px 2px 2px 10px;
   background: rgba(255, 255, 255, 0.55);
-  border: 1.5px solid rgba(121, 79, 39, 0.15);
+  border: 1.5px solid color-mix(in srgb, var(--ai-text) 15%, transparent);
   border-radius: 999px;
   font-family: inherit;
   transition: all 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-  box-shadow: 0 4px 10px rgba(121, 79, 39, 0.03);
+  box-shadow: 0 4px 10px color-mix(in srgb, var(--ai-text) 3%, transparent);
 
   &:hover {
     transform: translateX(-4px) scale(1.02);
     background: rgba(255, 255, 255, 0.85);
-    border-color: var(--ai-primary, #19c8b9);
-    box-shadow: 0 6px 12px rgba(25, 200, 185, 0.12);
+    border-color: var(--ai-primary);
+    box-shadow: 0 6px 12px color-mix(in srgb, var(--ai-primary) 12%, transparent);
   }
 }
 
 .ac-stat-label {
   font-size: 11px;
   font-weight: 800;
-  color: var(--ai-text, #794f27);
+  color: var(--ai-text);
   text-shadow: 0 1px 0 #ffffff;
 }
 
@@ -706,23 +706,23 @@ onMounted(async () => {
   text-shadow: 0 1px 1px rgba(0, 0, 0, 0.15);
 
   &--total {
-    background-color: var(--ai-text-2, #9f927d);
+    background-color: var(--ai-text-2);
   }
   &--pending {
-    background-color: #5b9eee;
+    background-color: var(--ai-info);
   }
   &--progress {
     background-color: #fca130;
   }
   &--done {
-    background-color: var(--ai-success, #6fba2c);
+    background-color: var(--ai-success);
   }
 }
 
 .todo-preview-empty {
   padding: 32px 0;
   text-align: center;
-  color: var(--ai-text-3, #b3a892);
+  color: var(--ai-text-3);
   font-size: 13px;
 }
 </style>
