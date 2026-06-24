@@ -10,17 +10,15 @@
           <stop offset="100%" stop-color="#2545ff" />
         </linearGradient>
 
-        <!-- Gemini Google 双子星经典极光渐变 -->
-        <linearGradient id="geminiGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stop-color="#a376eb" />
-          <stop offset="45%" stop-color="#4285f4" />
-          <stop offset="75%" stop-color="#24bca8" />
-          <stop offset="100%" stop-color="#34a853" />
+        <!-- Agy 双子星经典极光渐变 -->
+        <linearGradient id="agyGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stop-color="#9fbdf5" />
+          <stop offset="50%" stop-color="#dbd6fd" />
+          <stop offset="100%" stop-color="#eb98b2" />
         </linearGradient>
-        <linearGradient id="geminiGradSmall" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stop-color="#ff8b7f" />
-          <stop offset="50%" stop-color="#fbbc05" />
-          <stop offset="100%" stop-color="#a376eb" />
+        <linearGradient id="agyGradSmall" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stop-color="#9fbdf5" />
+          <stop offset="100%" stop-color="#dbd6fd" />
         </linearGradient>
 
         <!-- Claude 暖陶橙旋瓣标识 -->
@@ -170,17 +168,17 @@
                   />
                 </g>
               </svg>
-              <!-- Gemini 双四角星 (微缩版) -->
-              <svg v-else-if="selectedAgentKey === 'gemini'" viewBox="0 0 32 32" class="svg-gemini">
+              <!-- Agy 星芒 (微缩版) -->
+              <svg v-else-if="selectedAgentKey === 'agy'" viewBox="0 0 32 32" class="svg-agy">
                 <path
                   class="star-main"
                   d="M14 4 C14 10, 10 14, 4 14 C10 14, 14 18, 14 24 C14 18, 18 14, 24 14 C18 14, 14 10, 14 4 Z"
-                  fill="url(#geminiGrad)"
+                  fill="url(#agyGrad)"
                 />
                 <path
                   class="star-sub"
                   d="M24 20 C24 23, 23 24, 20 24 C23 24, 24 25, 24 28 C24 25, 25 24, 28 24 C25 24, 24 23, 24 20 Z"
-                  fill="url(#geminiGradSmall)"
+                  fill="url(#agyGradSmall)"
                 />
               </svg>
               <!-- Claude 暖陶橙旋瓣标识 (微缩版) -->
@@ -309,17 +307,17 @@
                   />
                 </g>
               </svg>
-              <!-- Gemini 双四角星 -->
-              <svg v-else-if="agent.key === 'gemini'" viewBox="0 0 32 32" class="svg-gemini">
+              <!-- Agy 星芒 -->
+              <svg v-else-if="agent.key === 'agy'" viewBox="0 0 32 32" class="svg-agy">
                 <path
                   class="star-main"
                   d="M14 4 C14 10, 10 14, 4 14 C10 14, 14 18, 14 24 C14 18, 18 14, 24 14 C18 14, 14 10, 14 4 Z"
-                  fill="url(#geminiGrad)"
+                  fill="url(#agyGrad)"
                 />
                 <path
                   class="star-sub"
                   d="M24 20 C24 23, 23 24, 20 24 C23 24, 24 25, 24 28 C24 25, 25 24, 28 24 C25 24, 24 23, 24 20 Z"
-                  fill="url(#geminiGradSmall)"
+                  fill="url(#agyGradSmall)"
                 />
               </svg>
               <!-- Claude 暖陶橙旋瓣标识 -->
@@ -573,15 +571,18 @@ interface ModelAgent {
 
 const modelAgents = computed<ModelAgent[]>(() => {
   const openClawModels = reportModels.value.filter(
-    (model) => !isLocalCodexModel(model) && !isLocalGeminiModel(model) && !isLocalClaudeModel(model)
+    (model) => !isLocalCodexModel(model) && !isLocalAgyModel(model) && !isLocalClaudeModel(model)
   );
   const codexModels = reportModels.value.filter(isLocalCodexModel);
   if (!codexModels.includes("local-codex/codex-cli")) {
     codexModels.push("local-codex/codex-cli");
   }
-  const geminiModels = reportModels.value.filter(isLocalGeminiModel);
-  if (!geminiModels.includes("local-gemini/gemini-cli")) {
-    geminiModels.push("local-gemini/gemini-cli");
+  const agyModels = reportModels.value.filter(isLocalAgyModel);
+  if (!agyModels.includes("local-agy/gemini-3.5-flash-high")) {
+    agyModels.push("local-agy/gemini-3.5-flash-high");
+  }
+  if (!agyModels.includes("local-agy/agy-cli")) {
+    agyModels.push("local-agy/agy-cli");
   }
   const claudeModels = reportModels.value.filter(isLocalClaudeModel);
   if (!claudeModels.includes("local-claude/claude-cli")) {
@@ -595,8 +596,8 @@ const modelAgents = computed<ModelAgent[]>(() => {
   if (codexModels.length) {
     agents.push({ key: "codex", label: "Codex", models: codexModels });
   }
-  if (geminiModels.length) {
-    agents.push({ key: "gemini", label: "Gemini", models: geminiModels });
+  if (agyModels.length) {
+    agents.push({ key: "agy", label: "Agy", models: agyModels });
   }
   if (claudeModels.length) {
     agents.push({ key: "claude", label: "Claude", models: claudeModels });
@@ -636,8 +637,8 @@ function isLocalCodexModel(model: string): boolean {
   return model.startsWith("local-codex/");
 }
 
-function isLocalGeminiModel(model: string): boolean {
-  return model.startsWith("local-gemini/");
+function isLocalAgyModel(model: string): boolean {
+  return model.startsWith("local-agy/");
 }
 
 function isLocalClaudeModel(model: string): boolean {
@@ -646,7 +647,8 @@ function isLocalClaudeModel(model: string): boolean {
 
 function formatModelLabel(model: string): string {
   if (model === "local-codex/codex-cli") return "Codex CLI";
-  if (model === "local-gemini/gemini-cli") return "Gemini CLI";
+  if (model === "local-agy/gemini-3.5-flash-high") return "Gemini 3.5 Flash (High)";
+  if (model === "local-agy/agy-cli") return "agy cli";
   if (model === "local-claude/claude-cli") return "Claude CLI";
   return model;
 }
@@ -686,7 +688,11 @@ async function fetchModels(): Promise<void> {
   try {
     const res = await WorkDailyAPI.getReportModels();
     reportModels.value = res.models || [];
-    if (res.currentModel) config.model = res.currentModel;
+    if (reportModels.value.includes("local-agy/gemini-3.5-flash-high")) {
+      config.model = "local-agy/gemini-3.5-flash-high";
+    } else if (res.currentModel) {
+      config.model = res.currentModel;
+    }
   } catch {
     reportModels.value = [];
   }
@@ -1455,7 +1461,7 @@ onBeforeUnmount(() => {
     background: #fbf5eb;
     border-color: rgba(142, 133, 255, 0.15);
   }
-  &.gemini {
+  &.agy {
     background: #f0f4fc;
     border-color: rgba(66, 133, 244, 0.15);
   }
@@ -1467,7 +1473,7 @@ onBeforeUnmount(() => {
 
 .svg-openclaw,
 .svg-codex,
-.svg-gemini,
+.svg-agy,
 .svg-claude {
   width: 100%;
   height: 100%;
@@ -1721,22 +1727,22 @@ onBeforeUnmount(() => {
 }
 
 /* ==========================================
-   3. Gemini (交叉极光星芒) 动效 (保持原有高颜值)
+   3. Agy (交叉极光星芒) 动效 (保持原有高颜值)
    ========================================== */
-.svg-gemini {
+.svg-agy {
   .star-main {
     transform-origin: 14px 14px;
-    animation: geminiStarBreath 2.8s ease-in-out infinite;
+    animation: agyStarBreath 2.8s ease-in-out infinite;
     transition: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
   }
   .star-sub {
     transform-origin: 24px 24px;
-    animation: geminiStarBreathSub 2.8s ease-in-out infinite;
+    animation: agyStarBreathSub 2.8s ease-in-out infinite;
     transition: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
   }
 }
 
-@keyframes geminiStarBreath {
+@keyframes agyStarBreath {
   0%,
   100% {
     transform: scale(1);
@@ -1748,7 +1754,7 @@ onBeforeUnmount(() => {
   }
 }
 
-@keyframes geminiStarBreathSub {
+@keyframes agyStarBreathSub {
   0%,
   100% {
     transform: scale(1.12);
@@ -1760,7 +1766,7 @@ onBeforeUnmount(() => {
   }
 }
 
-@keyframes geminiMainSpin {
+@keyframes agyMainSpin {
   0% {
     transform: rotate(0deg) scale(1.12);
   }
@@ -1769,7 +1775,7 @@ onBeforeUnmount(() => {
   }
 }
 
-@keyframes geminiSubSpin {
+@keyframes agySubSpin {
   0% {
     transform: rotate(0deg) scale(1.15);
   }
@@ -1781,15 +1787,15 @@ onBeforeUnmount(() => {
 .report-model-select__agent:hover,
 .report-model-select__agent.is-active,
 .report-model-select__trigger:hover {
-  .svg-gemini {
+  .svg-agy {
     filter: drop-shadow(0 0 3px rgba(66, 133, 244, 0.35))
       drop-shadow(0 0 6px rgba(163, 118, 235, 0.2));
 
     .star-main {
-      animation: geminiMainSpin 0.75s cubic-bezier(0.4, 0, 0.2, 1) infinite alternate;
+      animation: agyMainSpin 0.75s cubic-bezier(0.4, 0, 0.2, 1) infinite alternate;
     }
     .star-sub {
-      animation: geminiSubSpin 1.1s linear infinite;
+      animation: agySubSpin 1.1s linear infinite;
     }
   }
 }
