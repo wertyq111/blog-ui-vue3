@@ -2,11 +2,11 @@
   <div class="wb-streak">
     <!-- 连续打卡 card -->
     <div class="wb-streak__card streak-card">
-      <div class="streak-badge">连续打卡</div>
+      <div class="streak-badge">打卡天数</div>
       <div class="card-head">
         <div>
-          <div class="card-title">今天写了吗</div>
-          <div class="card-sub">最长 {{ metrics?.longest_streak.value ?? 0 }} 天 · 第 {{ currentWeek }} 周</div>
+          <div class="card-title">记录保持</div>
+          <div class="card-sub">记录天数 {{ metrics?.active_days.value ?? 0 }} 天 · 今年的第 {{ currentWeek }} 周</div>
         </div>
       </div>
       <div v-if="loading">
@@ -14,6 +14,7 @@
       </div>
       <template v-else>
         <div class="streak-big">
+          <div class="streak-unit">本周</div>
           <div class="streak-num">{{ metrics?.current_streak.value ?? 0 }}</div>
           <div class="streak-unit">天连续</div>
         </div>
