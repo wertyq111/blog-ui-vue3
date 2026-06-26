@@ -30,12 +30,19 @@
 
 <script setup lang="ts">
 import { computed } from "vue";
-import type { DashboardMetrics } from "@/types/api/dashboard-stats";
+import type { DashboardMetrics, DashboardHeatmap } from "@/types/api/dashboard-stats";
 
 const props = defineProps<{
   metrics: DashboardMetrics | null;
+  heatmap: DashboardHeatmap | null;
   loading: boolean;
 }>();
+
+const weekRecordedDays = computed(() => {
+  const cells = props.heatmap?.cells;
+  if (!cells?.length) return 0;
+  return cells.slice(-7).filter((c) => c.words > 0).length;
+});
 
 const cards = computed(() => {
   const m = props.metrics;
@@ -71,11 +78,10 @@ const cards = computed(() => {
     },
     {
       key: "streak",
-      label: "当前连续",
-      value: m ? m.current_streak.value.toString() : "—",
+      label: "本周记录天数",
+      value: m ? weekRecordedDays.value.toString() : "—",
       unit: "天",
-      hint: m?.current_streak.hint || "今天还没写呢",
-      warn: m ? m.current_streak.value === 0 : false,
+      warn: m ? weekRecordedDays.value === 0 : false,
     },
     {
       key: "longest",

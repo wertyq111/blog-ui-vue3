@@ -8,7 +8,7 @@
       :last-updated="lastUpdated"
     />
 
-    <WorkbenchKpi :metrics="data?.metrics ?? null" :loading="loading" />
+    <WorkbenchKpi :metrics="data?.metrics ?? null" :heatmap="data?.heatmap ?? null" :loading="loading" />
 
     <template v-if="currentView === 'overview'">
       <div class="grid-heatmap">

@@ -14,9 +14,9 @@
       </div>
       <template v-else>
         <div class="streak-big">
-          <div class="streak-unit">本周</div>
-          <div class="streak-num">{{ metrics?.current_streak.value ?? 0 }}</div>
-          <div class="streak-unit">天连续</div>
+          <div class="streak-unit">本周已记录</div>
+          <div class="streak-num">{{ weekRecordedDays }}</div>
+          <div class="streak-unit">天</div>
         </div>
         <div class="streak-warn">
           <span class="streak-warn-ico">✏️</span>
@@ -85,6 +85,8 @@ const weekDots = computed(() => {
     };
   });
 });
+
+const weekRecordedDays = computed(() => weekDots.value.filter((d) => d.words > 0).length);
 
 const bookCount = computed(() => {
   const total = props.metrics?.total_words?.value ?? 0;
