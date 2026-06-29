@@ -65,6 +65,14 @@ const TodoAPI = {
       method: "delete",
     });
   },
+
+  /** 获取待办详情 */
+  getInfo(id: number) {
+    return request<any, TodoItem>({
+      url: `${BASE_URL}/${id}`,
+      method: "get",
+    });
+  },
 };
 
 export default TodoAPI;
