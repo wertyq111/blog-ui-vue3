@@ -168,6 +168,25 @@
         </button>
         <button
           class="btn-ai"
+          @click="$router.push({ path: '/develop/todo', query: { action: 'add' } })"
+        >
+          <svg
+            viewBox="0 0 24 24"
+            width="15"
+            height="15"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path d="M4 7h11M4 12h11M4 17h7" />
+            <path d="M18 6l2 2 3-3" />
+          </svg>
+          新建待办
+        </button>
+        <button
+          class="btn-ai"
           @click="$router.push({ path: '/develop/convert-path', query: { tool: 'open' } })"
         >
           <svg
