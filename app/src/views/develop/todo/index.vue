@@ -149,13 +149,26 @@
               <td class="cell-num">{{ row.id }}</td>
               <td class="tbl-name-cell">
                 <div class="todo-title-cell">
-                  <span
-                    class="todo-title-link"
-                    :class="{ 'todo-title--done': row.status === 2 }"
-                    title="点击预览内容"
-                    @click="openPreview(row)"
-                    >{{ row.title }}</span
-                  >
+                  <el-popover trigger="hover" :width="520" placement="top">
+                    <template #reference>
+                      <span
+                        class="todo-title-link"
+                        :class="{ 'todo-title--done': row.status === 2 }"
+                        title="点击预览内容"
+                        @click="openPreview(row)"
+                        >{{ row.title }}</span
+                      >
+                    </template>
+                    <div class="todo-hover-preview">
+                      <AnimalMarkdown
+                        v-if="row.content"
+                        :model-value="row.content"
+                        preview-only
+                        height="auto"
+                      />
+                      <div v-else class="todo-preview-empty">暂无内容</div>
+                    </div>
+                  </el-popover>
                   <div v-if="row.tags && row.tags.length" class="todo-tags-inline">
                     <AnimalTag v-for="(tag, idx) in row.tags" :key="idx" size="small" type="info">
                       {{ tag }}
@@ -271,7 +284,8 @@
 <script setup lang="ts">
 import { confirm, message } from "@/utils/feedback";
 import { loadingService } from "@/directives/loading";
-import { computed, onMounted, reactive, ref } from "vue";
+import { computed, onActivated, onDeactivated, onMounted, reactive, ref, watch } from "vue";
+import { useRoute, useRouter } from "vue-router";
 import { Button, Input } from "animal-island-vue";
 import AnimalSelect from "@/components/AnimalSelect/index.vue";
 import AnimalDatePicker from "@/components/AnimalDatePicker/index.vue";
@@ -457,6 +471,45 @@ function openPreview(row: TodoItem): void {
   previewVisible.value = true;
 }
 
+const route = useRoute();
+const router = useRouter();
+
+// 详情预览是 teleport 到 body 的弹窗，页面被 keep-alive 缓存，切到其它标签时
+// 路由变化不会自动关它。失活时主动关闭，避免跳转后残留覆盖。
+onDeactivated(() => {
+  previewVisible.value = false;
+});
+
+// 通过 ?id= 深链打开待办预览。页面被 keep-alive 缓存：首次进入/从其它标签切回来由
+// onActivated 触发，同一标签内再次点链接由 watch 触发；openingId 去重，避免两条路径
+// 同时命中弹出两个预览。
+let openingId: number | null = null;
+async function openTodoFromQuery(): Promise<void> {
+  if (!route.query.id) return;
+  const id = Number(route.query.id);
+  if (Number.isNaN(id) || openingId === id) return;
+  openingId = id;
+  try {
+    const todo = await TodoAPI.getInfo(id);
+    openPreview(todo);
+  } finally {
+    const { id: _omitId, ...rest } = route.query;
+    void _omitId;
+    router.replace({ path: route.path, query: rest });
+    openingId = null;
+  }
+}
+
+onActivated(() => {
+  void openTodoFromQuery();
+});
+watch(
+  () => route.query.id,
+  (id) => {
+    if (id) void openTodoFromQuery();
+  }
+);
+
 async function handleQuickStatus(row: TodoItem, status: number): Promise<void> {
   const loadingInstance = loadingService({ lock: true });
   try {
@@ -590,6 +643,13 @@ onMounted(async () => {
   await fetchPlatforms();
   await fetchStatistics();
   handleQuery();
+  if (route.query.action === "add") {
+    handleCreateClick();
+    const { action, ...rest } = route.query;
+    void action;
+    router.replace({ path: route.path, query: rest });
+  }
+  void openTodoFromQuery();
 });
 </script>
 
@@ -724,6 +784,11 @@ onMounted(async () => {
   text-align: center;
   color: var(--ai-text-3);
   font-size: 13px;
+}
+
+.todo-hover-preview {
+  max-height: 400px;
+  overflow-y: auto;
 }
 </style>
 
