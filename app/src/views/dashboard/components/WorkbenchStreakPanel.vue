@@ -44,14 +44,13 @@
 <script setup lang="ts">
 import { computed } from "vue";
 import type { DashboardMetrics, DashboardHeatmap } from "@/types/api/dashboard-stats";
+import { buildWeekDots, countWeekRecorded } from "./weekDots";
 
 const props = defineProps<{
   metrics: DashboardMetrics | null;
   heatmap: DashboardHeatmap | null;
   loading: boolean;
 }>();
-
-const DOW_LABELS = ["日", "一", "二", "三", "四", "五", "六"];
 
 const currentWeek = computed(() => {
   const now = new Date();
@@ -60,33 +59,9 @@ const currentWeek = computed(() => {
   return Math.ceil((diff / 86400000 + start.getDay() + 1) / 7);
 });
 
-const weekDots = computed(() => {
-  if (!props.heatmap?.cells?.length) return [];
+const weekDots = computed(() => buildWeekDots(props.heatmap));
 
-  const cells = props.heatmap.cells;
-  const buckets = props.heatmap.buckets || [0, 500, 1500, 3000];
-  const last7 = cells.slice(-7);
-
-  return last7.map((c) => {
-    const d = new Date(c.date);
-    const dow = d.getDay();
-    let level = 0;
-    if (c.words > 0) {
-      if (c.words >= buckets[3]) level = 4;
-      else if (c.words >= buckets[2]) level = 3;
-      else if (c.words >= buckets[1]) level = 2;
-      else level = 1;
-    }
-    return {
-      date: c.date,
-      words: c.words,
-      level,
-      label: DOW_LABELS[dow],
-    };
-  });
-});
-
-const weekRecordedDays = computed(() => weekDots.value.filter((d) => d.words > 0).length);
+const weekRecordedDays = computed(() => countWeekRecorded(weekDots.value));
 
 const bookCount = computed(() => {
   const total = props.metrics?.total_words?.value ?? 0;
