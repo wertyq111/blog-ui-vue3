@@ -522,6 +522,7 @@ import SystemIco from "@/components/AdminPage/SystemIco.vue";
 import AdminAnimalModal from "@/components/AdminPage/AdminAnimalModal.vue";
 import AnimalMarkdown from "@/components/AnimalMarkdown/index.vue";
 import WorkDailyAPI, { type WorkDailyReportExport } from "@/api/develop/work-daily";
+import { useStyledHtmlPreview } from "@/composables/useStyledHtmlPreview";
 
 const emit = defineEmits<{ imported: [] }>();
 
@@ -539,11 +540,16 @@ const historyItems = ref<WorkDailyReportExport[]>([]);
 let historyRefreshTimer: number | undefined;
 
 const previewVisible = ref(false);
-const previewLoading = ref(false);
-const previewUrl = ref("");
+const {
+  previewUrl,
+  previewLoading,
+  previewFrameRef,
+  render: renderPreview,
+  print: printFrame,
+  revoke: revokePreviewUrl,
+} = useStyledHtmlPreview();
 const previewTitle = ref("报表预览");
 const previewItem = ref<WorkDailyReportExport | null>(null);
-const previewFrameRef = ref<HTMLIFrameElement | null>(null);
 const previewMode = ref<"view" | "edit">("view");
 const editContent = ref("");
 const savingEdit = ref(false);
@@ -887,15 +893,10 @@ function handleDeleteItem(item: WorkDailyReportExport): void {
 
 // 拉取带样式的 HTML（与下载/打印同一套渲染），用 blob 地址在 iframe 里预览，不触发下载
 async function renderPreviewHtml(id: number): Promise<void> {
-  previewLoading.value = true;
-  revokePreviewUrl();
-  try {
+  await renderPreview(async () => {
     const response = await WorkDailyAPI.downloadReportExport(id, "html");
-    const blob = new Blob([response.data], { type: "text/html;charset=utf-8" });
-    previewUrl.value = URL.createObjectURL(blob);
-  } finally {
-    previewLoading.value = false;
-  }
+    return new Blob([response.data], { type: "text/html;charset=utf-8" });
+  });
 }
 
 async function openPreview(item: WorkDailyReportExport): Promise<void> {
@@ -962,19 +963,8 @@ async function downloadPreview(): Promise<void> {
 // 直接触发 iframe 自身文档的打印（blob 与主页面同源），只打印报表内容、走报表的 A4 打印样式；
 // 若用浏览器 Cmd+P 会打印整个应用页面而非 iframe，所以必须从 iframe 内部触发
 function printPreview(): void {
-  const win = previewFrameRef.value?.contentWindow;
-  if (!win) {
+  if (!printFrame()) {
     message.error("预览未就绪，请稍候");
-    return;
-  }
-  win.focus();
-  win.print();
-}
-
-function revokePreviewUrl(): void {
-  if (previewUrl.value) {
-    URL.revokeObjectURL(previewUrl.value);
-    previewUrl.value = "";
   }
 }
 
