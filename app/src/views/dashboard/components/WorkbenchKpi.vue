@@ -31,6 +31,7 @@
 <script setup lang="ts">
 import { computed } from "vue";
 import type { DashboardMetrics, DashboardHeatmap } from "@/types/api/dashboard-stats";
+import { buildWeekDots, countWeekRecorded } from "./weekDots";
 
 const props = defineProps<{
   metrics: DashboardMetrics | null;
@@ -38,11 +39,7 @@ const props = defineProps<{
   loading: boolean;
 }>();
 
-const weekRecordedDays = computed(() => {
-  const cells = props.heatmap?.cells;
-  if (!cells?.length) return 0;
-  return cells.slice(-7).filter((c) => c.words > 0).length;
-});
+const weekRecordedDays = computed(() => countWeekRecorded(buildWeekDots(props.heatmap)));
 
 const cards = computed(() => {
   const m = props.metrics;
