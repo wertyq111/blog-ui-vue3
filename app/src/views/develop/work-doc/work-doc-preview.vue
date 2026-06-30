@@ -42,6 +42,28 @@
               <el-icon><DocumentCopy /></el-icon>
             </Button>
           </el-tooltip>
+          <el-tooltip content="下载 HTML" placement="top">
+            <Button
+              class="doc-icon-button"
+              type="default"
+              size="small"
+              :loading="exporting"
+              @click="handleDownloadHtml"
+            >
+              <el-icon><Download /></el-icon>
+            </Button>
+          </el-tooltip>
+          <el-tooltip content="打印 / 存 PDF" placement="top">
+            <Button
+              class="doc-icon-button"
+              type="default"
+              size="small"
+              :loading="exporting"
+              @click="handlePrint"
+            >
+              <el-icon><Printer /></el-icon>
+            </Button>
+          </el-tooltip>
           <el-tooltip content="关闭详情" placement="top">
             <Button class="doc-icon-button" type="default" size="small" @click="closePreview">
               <el-icon><Close /></el-icon>
@@ -82,6 +104,13 @@
         </div>
       </div>
     </div>
+    <iframe
+      ref="previewFrameRef"
+      :src="previewUrl"
+      style="position: absolute; width: 0; height: 0; border: 0; visibility: hidden"
+      title="文档打印"
+      @load="onExportFrameLoad"
+    ></iframe>
   </AdminAnimalModal>
 </template>
 
@@ -95,6 +124,8 @@ import AnimalMarkdown from "@/components/AnimalMarkdown/index.vue";
 import WorkDocAPI from "@/api/develop/work-doc";
 import type { WorkDocItem } from "@/types/api/work-doc";
 import AdminAnimalModal from "@/components/AdminPage/AdminAnimalModal.vue";
+import { useStyledHtmlPreview } from "@/composables/useStyledHtmlPreview";
+import { downloadFile } from "@/utils/download";
 
 const props = defineProps<{
   visible: boolean;
@@ -131,6 +162,7 @@ function toggleFullscreen(): void {
 }
 
 function closePreview(): void {
+  revokeExport();
   emit("update:visible", false);
 }
 
@@ -170,6 +202,59 @@ async function copyMarkdownLink(): Promise<void> {
       message.error("复制失败");
     }
     document.body.removeChild(textArea);
+  }
+}
+
+const { previewUrl, previewFrameRef, render: renderExport, print: printFrame, revoke: revokeExport } =
+  useStyledHtmlPreview();
+const exporting = ref(false);
+let pendingPrint = false;
+
+async function fetchExportBlob(): Promise<Blob> {
+  const id = previewDoc.value?.id;
+  if (!id) throw new Error("文档未保存");
+  const response = await WorkDocAPI.exportHtml(id);
+  return new Blob([response.data], { type: "text/html;charset=utf-8" });
+}
+
+async function handleDownloadHtml(): Promise<void> {
+  if (!previewDoc.value?.id) {
+    message.error("文档未保存");
+    return;
+  }
+  exporting.value = true;
+  try {
+    const response = await WorkDocAPI.exportHtml(previewDoc.value.id);
+    downloadFile(response, `${previewDoc.value.title || "文档"}.html`);
+  } catch {
+    message.error("导出失败");
+  } finally {
+    exporting.value = false;
+  }
+}
+
+async function handlePrint(): Promise<void> {
+  if (!previewDoc.value?.id) {
+    message.error("文档未保存");
+    return;
+  }
+  exporting.value = true;
+  try {
+    pendingPrint = true;
+    await renderExport(fetchExportBlob);
+  } catch {
+    pendingPrint = false;
+    message.error("打印准备失败");
+  } finally {
+    exporting.value = false;
+  }
+}
+
+// 隐藏 iframe 加载完带样式 HTML 后再触发打印，避免内容未就绪
+function onExportFrameLoad(): void {
+  if (pendingPrint && previewUrl.value) {
+    pendingPrint = false;
+    printFrame();
   }
 }
 
