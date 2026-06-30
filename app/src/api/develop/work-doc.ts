@@ -59,6 +59,15 @@ const WorkDocAPI = {
       method: "get",
     });
   },
+
+  /** 导出文档为带样式 HTML（返回完整响应，data 为 Blob） */
+  exportHtml(id: number) {
+    return request({
+      url: `${BASE_URL}/${id}/export`,
+      method: "get",
+      responseType: "blob",
+    });
+  },
 };
 
 export default WorkDocAPI;
