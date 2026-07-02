@@ -119,7 +119,8 @@ const WorkDailyAPI = {
       url: `${BASE_URL}/report/export`,
       method: "post",
       data,
-    });
+      __silent: true,
+    } as any);
   },
 
   /** 获取当前报表导出任务 */

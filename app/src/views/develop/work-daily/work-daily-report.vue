@@ -748,8 +748,9 @@ async function handleExport(): Promise<void> {
       message.success("导出任务已创建");
     }
     startExportPolling(result.export.id, true);
-  } catch {
-    message.error("导出失败");
+  } catch (error) {
+    if (!(error instanceof Error)) throw error;
+    message.error(error.message);
   } finally {
     creatingExport.value = false;
   }
