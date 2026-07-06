@@ -246,13 +246,13 @@ onClickOutside(wrapperRef, (event) => {
   flex: 1;
   font-size: 13px;
   font-weight: 700;
-  color: #794f27;
+  color: #725d42;
 }
 .ats__placeholder {
   flex: 1;
   font-size: 13px;
   font-weight: 600;
-  color: #9f927d;
+  color: var(--ai-text-3);
 }
 .ats__arrow {
   display: flex;

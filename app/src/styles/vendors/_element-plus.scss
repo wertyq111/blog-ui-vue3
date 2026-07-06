@@ -11,11 +11,7 @@
     font-weight: 700;
   }
 
-  background: linear-gradient(
-    180deg,
-    rgba(255, 255, 255, 0.78) 0%,
-    rgba(255, 255, 255, 0.64) 100%
-  );
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.78) 0%, rgba(255, 255, 255, 0.64) 100%);
 }
 
 .el-button {
@@ -120,8 +116,20 @@
 }
 
 .el-input__inner::placeholder,
-.el-textarea__inner::placeholder {
+.el-textarea__inner::placeholder,
+.el-select__placeholder {
   color: var(--cyber-text-mute) !important;
+}
+
+.el-form .el-input__inner,
+.el-form .el-select__selected-item {
+  color: #725d42 !important;
+}
+
+.el-form .el-input__inner::placeholder,
+.el-form .el-textarea__inner::placeholder,
+.el-form .el-select__placeholder {
+  color: var(--ai-text-3) !important;
 }
 
 .el-table {
@@ -307,7 +315,8 @@
     font-size: 14px !important;
     margin-bottom: 8px !important;
 
-    span, div {
+    span,
+    div {
       color: var(--ai-text) !important;
       font-weight: 800 !important;
     }
@@ -343,7 +352,7 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      
+
       .el-date-table-cell__text {
         width: 24px !important;
         height: 24px !important;
@@ -407,7 +416,7 @@
     &.in-range {
       .el-date-table-cell {
         background-color: rgba(124, 186, 112, 0.1) !important;
-        
+
         .el-date-table-cell__text {
           color: var(--ai-text) !important;
           background-color: transparent !important;
@@ -419,7 +428,11 @@
     // 范围起点
     &.start-date {
       .el-date-table-cell {
-        background: linear-gradient(90deg, transparent 50%, rgba(124, 186, 112, 0.1) 50%) !important;
+        background: linear-gradient(
+          90deg,
+          transparent 50%,
+          rgba(124, 186, 112, 0.1) 50%
+        ) !important;
         position: relative;
         overflow: visible;
 
@@ -451,7 +464,11 @@
     // 范围终点
     &.end-date {
       .el-date-table-cell {
-        background: linear-gradient(90deg, rgba(124, 186, 112, 0.1) 50%, transparent 50%) !important;
+        background: linear-gradient(
+          90deg,
+          rgba(124, 186, 112, 0.1) 50%,
+          transparent 50%
+        ) !important;
         position: relative;
         overflow: visible;
 
@@ -539,7 +556,7 @@
 
     &__content {
       padding: 12px 15px !important;
-      
+
       &.is-left {
         border-right: 1.5px dashed rgba(232, 226, 214, 0.6) !important;
       }
@@ -592,7 +609,8 @@
       content: "";
       width: 15px;
       height: 15px;
-      background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cdefs%3E%3ClinearGradient id='leafGrad' x1='0%25' y1='100%25' x2='100%25' y2='0%25'%3E%3Cstop offset='0%25' stop-color='%237ec859'/%3E%3Cstop offset='100%25' stop-color='%23a1e075'/%3E%3C/linearGradient%3E%3C/defs%3E%3Cpath d='M3,21 C3,14 8,6 18,3 C21,5 21,11 17,17 C15.5,16 14.5,15.5 13.5,16 C13.5,14.5 12.5,13 11,13.5 C10,11.5 8,11 6.5,12.5 C5.5,8.5 3,21 3,21 Z' fill='url(%23leafGrad)' stroke='%23387820' stroke-width='2' stroke-linejoin='round'/%3E%3Cpath d='M5,19 Q11,13 16,7' stroke='%23387820' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E") no-repeat center / contain;
+      background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cdefs%3E%3ClinearGradient id='leafGrad' x1='0%25' y1='100%25' x2='100%25' y2='0%25'%3E%3Cstop offset='0%25' stop-color='%237ec859'/%3E%3Cstop offset='100%25' stop-color='%23a1e075'/%3E%3C/linearGradient%3E%3C/defs%3E%3Cpath d='M3,21 C3,14 8,6 18,3 C21,5 21,11 17,17 C15.5,16 14.5,15.5 13.5,16 C13.5,14.5 12.5,13 11,13.5 C10,11.5 8,11 6.5,12.5 C5.5,8.5 3,21 3,21 Z' fill='url(%23leafGrad)' stroke='%23387820' stroke-width='2' stroke-linejoin='round'/%3E%3Cpath d='M5,19 Q11,13 16,7' stroke='%23387820' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E")
+        no-repeat center / contain;
       display: inline-block;
     }
   }
@@ -622,7 +640,8 @@
       content: "";
       width: 14px;
       height: 14px;
-      background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cdefs%3E%3ClinearGradient id='cherryGrad' x1='0%25' y1='100%25' x2='0%25' y2='0%25'%3E%3Cstop offset='0%25' stop-color='%23f294a5'/%3E%3Cstop offset='100%25' stop-color='%23ffccd5'/%3E%3C/linearGradient%3E%3Cg id='petal'%3E%3Cpath d='M12,12 C9.5,8.5 7.5,5.5 9.5,3.5 C10.8,2.2 12,4.3 12,5 C12,4.3 13.2,2.2 14.5,3.5 C16.5,5.5 14.5,8.5 12,12 Z' fill='url(%23cherryGrad)' stroke='%23d67284' stroke-width='1.5' stroke-linejoin='round'/%3E%3C/g%3E%3C/defs%3E%3Cg%3E%3Cuse href='%23petal'/%3E%3Cuse href='%23petal' transform='rotate(72 12 12)'/%3E%3Cuse href='%23petal' transform='rotate(144 12 12)'/%3E%3Cuse href='%23petal' transform='rotate(216 12 12)'/%3E%3Cuse href='%23petal' transform='rotate(288 12 12)'/%3E%3C/g%3E%3Ccircle cx='12' cy='12' r='2.5' fill='%23ffe277' stroke='%23e0a943' stroke-width='1.2'/%3E%3C/svg%3E") no-repeat center / contain;
+      background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cdefs%3E%3ClinearGradient id='cherryGrad' x1='0%25' y1='100%25' x2='0%25' y2='0%25'%3E%3Cstop offset='0%25' stop-color='%23f294a5'/%3E%3Cstop offset='100%25' stop-color='%23ffccd5'/%3E%3C/linearGradient%3E%3Cg id='petal'%3E%3Cpath d='M12,12 C9.5,8.5 7.5,5.5 9.5,3.5 C10.8,2.2 12,4.3 12,5 C12,4.3 13.2,2.2 14.5,3.5 C16.5,5.5 14.5,8.5 12,12 Z' fill='url(%23cherryGrad)' stroke='%23d67284' stroke-width='1.5' stroke-linejoin='round'/%3E%3C/g%3E%3C/defs%3E%3Cg%3E%3Cuse href='%23petal'/%3E%3Cuse href='%23petal' transform='rotate(72 12 12)'/%3E%3Cuse href='%23petal' transform='rotate(144 12 12)'/%3E%3Cuse href='%23petal' transform='rotate(216 12 12)'/%3E%3Cuse href='%23petal' transform='rotate(288 12 12)'/%3E%3C/g%3E%3Ccircle cx='12' cy='12' r='2.5' fill='%23ffe277' stroke='%23e0a943' stroke-width='1.2'/%3E%3C/svg%3E")
+        no-repeat center / contain;
       display: inline-block;
     }
   }
@@ -640,7 +659,7 @@
 
 .el-input.animal-date {
   box-shadow: none !important;
-  
+
   .el-input__wrapper {
     background-color: #f7f3df !important;
     border: 2px solid var(--ai-text-3) !important;
@@ -679,7 +698,7 @@
 
   .el-input__suffix-inner {
     color: var(--ai-text-3) !important;
-    
+
     .el-input__clear {
       &:hover {
         color: var(--ai-red) !important;
@@ -849,4 +868,220 @@
 /* 限制 Element Plus 选择器下拉列表最大高度 */
 .el-select-dropdown__wrap {
   max-height: 250px !important;
+}
+
+/* ==========================================================================
+   Checkbox / Radio —— 动森圆形对勾（splash circle）
+   对齐 animal-island-ui 预览页：多选与单选同一套视觉，圆形框、
+   选中 teal 填充 + 白色对勾 + splash 水花动画（keyframes 定义在 animal-theme-override.scss）
+   ========================================================================== */
+.el-checkbox__inner,
+.el-radio__inner {
+  width: 18px;
+  height: 18px;
+  background: rgb(247, 243, 223);
+  border: 2px solid #c4b89e;
+  border-radius: 50%;
+  transition:
+    border-color 0.25s cubic-bezier(0.4, 0, 0.2, 1),
+    background-color 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.el-checkbox__inner:hover,
+.el-radio__inner:hover {
+  border-color: var(--ai-primary);
+}
+
+/* 白色对勾：checkbox 沿用 EP 的 ::after 勾形并放大适配 18px；radio 的圆点 ::after 改成同款勾形 */
+.el-checkbox__inner::after,
+.el-radio__inner::after {
+  box-sizing: content-box;
+  width: 4px;
+  height: 9px;
+  border: 2px solid #fff;
+  border-top: 0;
+  border-left: 0;
+  border-radius: 1px;
+  background: transparent;
+  position: absolute;
+  left: 5px;
+  top: 1.5px;
+  content: "";
+  transform: rotate(45deg) scaleY(0);
+  transform-origin: center;
+  transition: transform 0.15s ease-in 0.05s;
+}
+
+.el-checkbox__input.is-checked .el-checkbox__inner,
+.el-radio__input.is-checked .el-radio__inner {
+  background: var(--ai-primary);
+  border-color: var(--ai-primary-active);
+  animation: ai-cbx-splash 0.6s ease forwards;
+}
+
+.el-checkbox__input.is-checked .el-checkbox__inner::after,
+.el-radio__input.is-checked .el-radio__inner::after {
+  transform: rotate(45deg) scaleY(1);
+}
+
+/* 半选（全选列这类）：保持圆形 + teal 填充，白色短横由 EP ::before 绘制 */
+.el-checkbox__input.is-indeterminate .el-checkbox__inner {
+  background: var(--ai-primary);
+  border-color: var(--ai-primary-active);
+}
+
+.el-checkbox__label,
+.el-radio__label {
+  color: #725d42;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+}
+
+.el-checkbox__input.is-checked + .el-checkbox__label,
+.el-radio__input.is-checked + .el-radio__label {
+  color: #794f27;
+}
+
+.el-checkbox__input.is-disabled .el-checkbox__inner,
+.el-radio__input.is-disabled .el-radio__inner {
+  background: #f0ece2;
+  border-color: #d4c9b4;
+  animation: none;
+}
+
+.el-checkbox__input.is-disabled + .el-checkbox__label,
+.el-radio__input.is-disabled + .el-radio__label {
+  color: #c4b89e;
+}
+
+.el-checkbox__original:focus-visible + .el-checkbox__inner,
+.el-radio__original:focus-visible + .el-radio__inner {
+  outline: 2px solid #f5c31c;
+  outline-offset: 2px;
+}
+
+/* ==========================================================================
+   Form —— 对齐 animal-island-ui Form 预览页
+   只覆盖表单语义层；项目已有非表单卡片、表格和按钮视觉保持不变。
+   ========================================================================== */
+.el-form {
+  color: var(--ai-text);
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.el-form-item {
+  margin-bottom: 16px !important;
+}
+
+.el-form-item .el-form-item {
+  margin-bottom: 0 !important;
+}
+
+.el-form-item__label {
+  color: var(--ai-text) !important;
+  font-weight: 500 !important;
+  line-height: 1.6;
+  letter-spacing: 0.01em;
+}
+
+.el-form--label-top .el-form-item__label {
+  margin-bottom: 6px !important;
+}
+
+.el-form--inline {
+  gap: 8px;
+}
+
+.el-form--inline .el-form-item {
+  margin-right: 0;
+  margin-bottom: 8px !important;
+}
+
+.el-form-item.is-required:not(.is-no-asterisk).asterisk-left > .el-form-item__label::before,
+.el-form-item.is-required:not(.is-no-asterisk).asterisk-left
+  > .el-form-item__label-wrap
+  > .el-form-item__label::before {
+  margin-right: 4px;
+  color: var(--ai-red);
+}
+
+.el-form-item__content {
+  line-height: 1.6;
+}
+
+.el-form-item__error,
+.el-form-item--default .el-form-item__error {
+  position: static;
+  width: 100%;
+  min-height: 22px;
+  padding-top: 4px;
+  color: var(--ai-red);
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1.5;
+}
+
+/* 输入类控件：奶油纸背景、胶囊边框、底部 3D 阴影 */
+.el-form .el-input__wrapper,
+.el-form .el-select__wrapper,
+.el-form .el-date-editor.el-input__wrapper,
+.el-form .el-range-editor.el-input__wrapper {
+  min-height: 40px;
+  padding: 0 18px;
+  background: rgb(247, 243, 223) !important;
+  border: 2.5px solid var(--ai-text-3) !important;
+  border-radius: 50px !important;
+  box-shadow: 0 3px 0 0 #d4c9b4 !important;
+}
+
+.el-form .el-textarea__inner {
+  padding: 12px 16px;
+  background: rgb(247, 243, 223) !important;
+  border: 2.5px solid var(--ai-text-3) !important;
+  border-radius: 18px !important;
+  box-shadow: 0 3px 0 0 #d4c9b4 !important;
+}
+
+.el-form .el-input__wrapper:hover,
+.el-form .el-select__wrapper:hover,
+.el-form .el-date-editor.el-input__wrapper:hover,
+.el-form .el-range-editor.el-input__wrapper:hover,
+.el-form .el-textarea__inner:hover {
+  border-color: #a89878 !important;
+  box-shadow: 0 3px 0 0 var(--ai-text-3) !important;
+}
+
+.el-form .el-input__wrapper.is-focus,
+.el-form .el-select__wrapper.is-focused,
+.el-form .el-date-editor.el-input__wrapper.is-focus,
+.el-form .el-range-editor.el-input__wrapper.is-active,
+.el-form .el-textarea__inner:focus {
+  border-color: #ffcc00 !important;
+  box-shadow:
+    0 3px 0 0 #e0b800,
+    0 0 0 3px rgba(255, 204, 0, 0.15) !important;
+}
+
+.el-form-item.is-error .el-input__wrapper,
+.el-form-item.is-error .el-select__wrapper,
+.el-form-item.is-error .el-date-editor.el-input__wrapper,
+.el-form-item.is-error .el-range-editor.el-input__wrapper,
+.el-form-item.is-error .el-textarea__inner,
+.el-form-item.is-error .animal-input,
+.el-form-item.is-error .asel__trigger,
+.el-form-item.is-error .ams__trigger,
+.el-form-item.is-error .ats__trigger,
+.el-form-item.is-error .ais__trigger {
+  border-color: #e05a5a !important;
+  box-shadow: 0 3px 0 0 #c94444 !important;
+}
+
+.el-form .is-disabled .el-input__wrapper,
+.el-form .is-disabled.el-select__wrapper,
+.el-form .el-textarea.is-disabled .el-textarea__inner {
+  background: #f0ece2 !important;
+  border-color: #d4c9b4 !important;
+  box-shadow: none !important;
+  opacity: 0.6;
 }

@@ -18,14 +18,30 @@
         title="清空"
         @click.stop="clearValue"
       >
-        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor"
-          stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+        <svg
+          viewBox="0 0 24 24"
+          width="14"
+          height="14"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2.4"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
           <path d="M6 6l12 12M18 6L6 18" />
         </svg>
       </span>
       <span class="asel__arrow" :class="{ 'asel__arrow--open': open }">
-        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor"
-          stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+        <svg
+          viewBox="0 0 24 24"
+          width="16"
+          height="16"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2.2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
           <path d="M6 9l6 6 6-6" />
         </svg>
       </span>
@@ -54,8 +70,16 @@
             >
               <span class="asel__option-label">{{ opt.label }}</span>
               <span v-if="opt.key === model" class="asel__check">
-                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor"
-                  stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round">
+                <svg
+                  viewBox="0 0 24 24"
+                  width="16"
+                  height="16"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2.6"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
                   <path d="M4 12l5 5 11-11" />
                 </svg>
               </span>
@@ -107,9 +131,7 @@ const open = ref(false);
 const searchText = ref("");
 const dropdownStyle = ref<Record<string, string>>({});
 
-const selectedLabel = computed(
-  () => props.options.find((o) => o.key === model.value)?.label ?? ""
-);
+const selectedLabel = computed(() => props.options.find((o) => o.key === model.value)?.label ?? "");
 
 const filteredOptions = computed(() => {
   if (!props.filterable || !searchText.value.trim()) return props.options;
@@ -197,8 +219,14 @@ onClickOutside(wrapperRef, (event) => {
 .asel {
   position: relative;
   font-family:
-    Nunito, "Noto Sans SC", "Zen Maru Gothic", -apple-system, "PingFang SC",
-    "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+    Nunito,
+    "Noto Sans SC",
+    "Zen Maru Gothic",
+    -apple-system,
+    "PingFang SC",
+    "Hiragino Sans GB",
+    "Microsoft YaHei",
+    sans-serif;
   user-select: none;
 }
 /* 默认占满容器，但用 :where() 保持零特异度，
@@ -246,7 +274,7 @@ onClickOutside(wrapperRef, (event) => {
   overflow: hidden;
   font-size: 13px;
   font-weight: 700;
-  color: #794f27;
+  color: #725d42;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
@@ -254,7 +282,7 @@ onClickOutside(wrapperRef, (event) => {
   flex: 1;
   font-size: 13px;
   font-weight: 600;
-  color: #9f927d;
+  color: var(--ai-text-3);
 }
 
 .asel__clear {
@@ -281,7 +309,9 @@ onClickOutside(wrapperRef, (event) => {
   flex-shrink: 0;
   align-items: center;
   color: #a09080;
-  transition: transform 0.2s, color 0.2s;
+  transition:
+    transform 0.2s,
+    color 0.2s;
 }
 .asel__arrow--open {
   color: #fca130;
@@ -347,7 +377,11 @@ onClickOutside(wrapperRef, (event) => {
   white-space: nowrap;
   cursor: pointer;
   border-radius: 999px;
-  transition: background 0.15s, color 0.15s, padding-left 0.2s, font-weight 0.15s;
+  transition:
+    background 0.15s,
+    color 0.15s,
+    padding-left 0.2s,
+    font-weight 0.15s;
 }
 .asel__option:not(.asel__option--selected):hover {
   padding-left: 28px;
@@ -385,7 +419,9 @@ onClickOutside(wrapperRef, (event) => {
 /* 展开动画 */
 .asel-fade-enter-active,
 .asel-fade-leave-active {
-  transition: opacity 0.18s ease, transform 0.18s ease;
+  transition:
+    opacity 0.18s ease,
+    transform 0.18s ease;
 }
 .asel-fade-enter-from,
 .asel-fade-leave-to {

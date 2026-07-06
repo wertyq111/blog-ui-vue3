@@ -128,6 +128,9 @@
           <img class="hero-avatar" :src="avatarSrc" :alt="nickname" />
         </div>
       </div>
+      <div class="hero-time">
+        <Time />
+      </div>
       <div class="hero-actions">
         <button
           class="btn-ai btn-ai-primary"
@@ -448,10 +451,20 @@ onMounted(() => {
 }
 
 .hero-text {
-  flex: 1;
   min-width: 0;
   position: relative;
   z-index: 4;
+}
+
+// 动森 HUD 实时时钟（animal-island-vue Time），居中在问候语与操作按钮之间的空档
+.hero-time {
+  position: relative;
+  z-index: 4;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  margin: 0 auto;
 }
 
 .hero-eyebrow {
@@ -527,7 +540,7 @@ onMounted(() => {
   display: flex;
   gap: 28px;
   animation: heroTicker 22s linear infinite;
-  
+
   &:hover {
     animation-play-state: paused;
   }
@@ -562,13 +575,21 @@ onMounted(() => {
 }
 
 @keyframes heroTicker {
-  0% { transform: translate3d(0, 0, 0); }
-  100% { transform: translate3d(calc(-50% - 14px), 0, 0); }
+  0% {
+    transform: translate3d(0, 0, 0);
+  }
+  100% {
+    transform: translate3d(calc(-50% - 14px), 0, 0);
+  }
 }
 
 @keyframes scroller-weather-float {
-  0% { transform: translateY(0.5px); }
-  100% { transform: translateY(-1px); }
+  0% {
+    transform: translateY(0.5px);
+  }
+  100% {
+    transform: translateY(-1px);
+  }
 }
 
 .hero-actions {
@@ -678,7 +699,7 @@ onMounted(() => {
   }
   .hero-top-scroller {
     color: #f8f4d8;
-    
+
     .scroller-weather {
       color: #f8f4d8;
     }
@@ -691,6 +712,9 @@ onMounted(() => {
 
 @media (max-width: 1100px) {
   .hero-char {
+    display: none;
+  }
+  .hero-time {
     display: none;
   }
   .hero-leaf-2 {

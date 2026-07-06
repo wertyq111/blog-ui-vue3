@@ -71,7 +71,10 @@
             <span class="ats__option-label">+ 创建新标签 "{{ searchText }}"</span>
           </div>
 
-          <div v-if="!filteredOptions.length && (!searchText || exactMatchExists)" class="ats__empty">
+          <div
+            v-if="!filteredOptions.length && (!searchText || exactMatchExists)"
+            class="ats__empty"
+          >
             暂无匹配标签
           </div>
         </div>
@@ -355,7 +358,7 @@ onClickOutside(wrapperRef, (event) => {
   padding: 0;
 
   &::placeholder {
-    color: #a09080;
+    color: var(--ai-text-3);
     font-weight: 400;
     font-size: 14px;
   }

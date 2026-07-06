@@ -22,11 +22,7 @@
       </span>
       <span v-else class="ais__placeholder">点击选择图标</span>
 
-      <span
-        v-if="hasClearable && !disabled"
-        class="ais__clear"
-        @click.stop="clearSelectedIcon"
-      >
+      <span v-if="hasClearable && !disabled" class="ais__clear" @click.stop="clearSelectedIcon">
         ×
       </span>
       <span class="ais__arrow" :class="{ 'ais__arrow--open': open }">
@@ -47,12 +43,7 @@
 
     <Teleport to="body">
       <transition name="ais-fade">
-        <div
-          v-if="open"
-          ref="dropdownRef"
-          class="ais__dropdown"
-          :style="dropdownStyle"
-        >
+        <div v-if="open" ref="dropdownRef" class="ais__dropdown" :style="dropdownStyle">
           <!-- item 变体：488 物品图标 + 编号搜索 -->
           <template v-if="isItemVariant">
             <div class="ais__search">
@@ -126,9 +117,7 @@ const props = withDefaults(
 
 const isMenuVariant = computed(() => props.variant === "menu");
 const isItemVariant = computed(() => props.variant === "item");
-const iconNames = computed(() =>
-  isMenuVariant.value ? MENU_ICON_NAMES : ANIMAL_ICON_NAMES
-);
+const iconNames = computed(() => (isMenuVariant.value ? MENU_ICON_NAMES : ANIMAL_ICON_NAMES));
 function isSemantic(name: string): boolean {
   return MENU_SEMANTIC_NAMES.has(name);
 }
@@ -191,8 +180,15 @@ onClickOutside(wrapperRef, (event) => {
 <style scoped lang="scss">
 .ais {
   position: relative;
-  font-family: Nunito, "Noto Sans SC", "Zen Maru Gothic", -apple-system, "PingFang SC",
-    "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+  font-family:
+    Nunito,
+    "Noto Sans SC",
+    "Zen Maru Gothic",
+    -apple-system,
+    "PingFang SC",
+    "Hiragino Sans GB",
+    "Microsoft YaHei",
+    sans-serif;
   user-select: none;
 }
 
@@ -241,7 +237,7 @@ onClickOutside(wrapperRef, (event) => {
 .ais__placeholder {
   flex: 1;
   font-size: 14px;
-  color: #a09080;
+  color: var(--ai-text-3);
   font-weight: 400;
 }
 .ais__clear {
@@ -266,7 +262,9 @@ onClickOutside(wrapperRef, (event) => {
   align-items: center;
   flex-shrink: 0;
   color: #a09080;
-  transition: transform 0.2s, color 0.2s;
+  transition:
+    transform 0.2s,
+    color 0.2s;
 }
 .ais__arrow--open {
   transform: rotate(180deg);
@@ -360,7 +358,9 @@ onClickOutside(wrapperRef, (event) => {
 
 .ais-fade-enter-active,
 .ais-fade-leave-active {
-  transition: opacity 0.18s ease, transform 0.18s ease;
+  transition:
+    opacity 0.18s ease,
+    transform 0.18s ease;
 }
 .ais-fade-enter-from,
 .ais-fade-leave-to {
