@@ -87,9 +87,9 @@ const weatherBadgeStyle = computed(() => ({
 <style lang="scss" scoped>
 .weather-avatar-frame {
   position: relative;
+  flex-shrink: 0;
   width: 200px;
   height: 200px;
-  flex-shrink: 0;
   isolation: isolate;
 }
 
@@ -97,35 +97,40 @@ const weatherBadgeStyle = computed(() => ({
   display: block;
   width: 100%;
   height: 100%;
-  border-radius: 50%;
   object-fit: cover;
+  border-radius: 50%;
 }
 
 .weather-avatar-frame__ring {
   position: absolute;
+
+  // 素材为 512 画布、环体内孔约 336：显示 290px 时内孔约 190px，
+  // 内沿压住 200px 头像边缘 ~5px；环心在画布中偏 (254.5, 248)，用 +1/+4px 校正
+  top: calc(50% + 4px);
+  left: calc(50% + 1px);
   z-index: 2;
-  inset: -14px;
-  width: calc(100% + 28px);
-  height: calc(100% + 28px);
+  width: 290px;
+  height: 290px;
   pointer-events: none;
   user-select: none;
+  transform: translate(-50%, -50%);
 }
 
 .weather-avatar-frame__badge {
   position: absolute;
-  z-index: 3;
   top: -13px;
   right: -18px;
+  z-index: 3;
   display: grid;
+  place-items: center;
   width: 54px;
   height: 54px;
-  place-items: center;
+  pointer-events: none;
   border: 5px solid var(--ai-bg-card);
   border-radius: 50%;
   box-shadow:
     0 3px 0 var(--ai-shadow-color),
     0 5px 12px rgba(61, 52, 40, 0.16);
-  pointer-events: none;
   transform-origin: 50% 60%;
 }
 
