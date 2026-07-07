@@ -125,7 +125,7 @@
             {{ greeting }}，
             <em>{{ nickname }}</em>
           </h1>
-          <img class="hero-avatar" :src="avatarSrc" :alt="nickname" />
+          <WeatherAvatarFrame :src="avatarSrc" :alt="nickname" :weather="currentWeather" />
         </div>
       </div>
       <WorkbenchTime class="hero-time" :weather="currentWeather" />
@@ -216,6 +216,7 @@ import { useUserStore } from "@/store/modules/user";
 import { resolveAvatar } from "@/utils/avatar";
 import WeatherScene from "./WeatherScene.vue";
 import WorkbenchTime from "./WorkbenchTime.vue";
+import WeatherAvatarFrame from "./WeatherAvatarFrame.vue";
 import WeatherAPI from "@/api/weather";
 
 const userStore = useUserStore();
@@ -488,18 +489,9 @@ onMounted(() => {
 .hero-greet-row {
   display: flex;
   align-items: center;
-  gap: 14px;
-}
-
-.hero-avatar {
-  width: 200px;
-  height: 200px;
-  border-radius: 50%;
-  object-fit: cover;
-  flex-shrink: 0;
-  //background: #fff;
-  //border: 2px solid #fff;
-  //box-shadow: 0 3px 0 0 #bdaea0;
+  // 环显示 290px，左侧可见外沿比 200px 布局框多伸出约 18px；
+  // gap 留 30px 使昵称与环之间仍有约 12px 视觉间距
+  gap: 30px;
 }
 
 .hero-title {
