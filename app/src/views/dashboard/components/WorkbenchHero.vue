@@ -128,9 +128,7 @@
           <img class="hero-avatar" :src="avatarSrc" :alt="nickname" />
         </div>
       </div>
-      <div class="hero-time">
-        <Time />
-      </div>
+      <WorkbenchTime class="hero-time" />
       <div class="hero-actions">
         <button
           class="btn-ai btn-ai-primary"
@@ -217,6 +215,7 @@ import { computed, ref, onMounted } from "vue";
 import { useUserStore } from "@/store/modules/user";
 import { resolveAvatar } from "@/utils/avatar";
 import WeatherScene from "./WeatherScene.vue";
+import WorkbenchTime from "./WorkbenchTime.vue";
 import WeatherAPI from "@/api/weather";
 
 const userStore = useUserStore();
@@ -456,13 +455,10 @@ onMounted(() => {
   z-index: 4;
 }
 
-// 动森 HUD 实时时钟（animal-island-vue Time），居中在问候语与操作按钮之间的空档
+// 动森 HUD 实时时钟（中文 + 贪吃豆边框），居中在问候语与操作按钮之间的空档
 .hero-time {
   position: relative;
   z-index: 4;
-  display: flex;
-  align-items: center;
-  justify-content: center;
   flex-shrink: 0;
   margin: 0 auto;
 }
@@ -716,6 +712,10 @@ onMounted(() => {
   }
   .hero-time {
     display: none;
+  }
+  // 时钟隐藏后恢复 flex:1，让操作按钮回到贴右布局
+  .hero-text {
+    flex: 1;
   }
   .hero-leaf-2 {
     right: 20px;
