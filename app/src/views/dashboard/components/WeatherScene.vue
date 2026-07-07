@@ -7,6 +7,10 @@
         <svg viewBox="0 0 100 50"><ellipse cx="30" cy="28" rx="28" ry="16"/><ellipse cx="62" cy="22" rx="24" ry="16"/><ellipse cx="82" cy="32" rx="14" ry="10"/></svg>
       </div>
       <div v-for="i in 4" :key="'sp'+i" class="w-spark" :style="{ top: `${15+(i-1)*14}%`, left: `${12+(i-1)*20}%`, animationDelay: `${(i-1)*0.6}s` }" />
+      <svg v-for="i in 3" :key="'bd'+i" class="w-bird" viewBox="0 0 32 16"
+        :style="{ top: `${14+(i-1)*11}%`, animationDelay: `-${(i-1)*5}s`, animationDuration: `${15+(i-1)*4}s` }">
+        <path class="w-bird-wing" d="M2 12 Q9 2 16 10 Q23 2 30 12" fill="none" stroke="#5a4a32" stroke-width="2.2" stroke-linecap="round"/>
+      </svg>
     </template>
 
     <!-- Partly Cloudy -->
@@ -21,6 +25,10 @@
       <div class="w-cloud w-cloud-sm" style="top:70%;right:30%;animation-duration:22s">
         <svg viewBox="0 0 80 40"><ellipse cx="22" cy="22" rx="20" ry="11"/><ellipse cx="50" cy="18" rx="20" ry="12"/><ellipse cx="68" cy="26" rx="10" ry="8"/></svg>
       </div>
+      <svg v-for="i in 3" :key="'bd'+i" class="w-bird" viewBox="0 0 32 16"
+        :style="{ top: `${16+(i-1)*12}%`, animationDelay: `-${(i-1)*6}s`, animationDuration: `${16+(i-1)*3}s` }">
+        <path class="w-bird-wing" d="M2 12 Q9 2 16 10 Q23 2 30 12" fill="none" stroke="#5a4a32" stroke-width="2.2" stroke-linecap="round"/>
+      </svg>
     </template>
 
     <!-- Cloudy -->
@@ -44,15 +52,19 @@
           :class="['w-drop', weather === 'heavyRain' && 'w-drop-heavy']"
           :style="{ left: `${((i-1)*(weather === 'heavyRain' ? 1.7 : 2.8))%100}%`, animationDelay: `-${((i-1)*0.07)%1.2}s`, animationDuration: `${(weather === 'heavyRain' ? 0.45 : 0.7)+((i-1)%4)*0.05}s` }" />
       </div>
+      <div class="w-splash-layer">
+        <span v-for="i in 8" :key="'spl'+i" class="w-splash"
+          :style="{ left: `${6+(i-1)*12.5}%`, animationDelay: `-${((i-1)*0.37)%1.4}s` }" />
+      </div>
       <div v-if="weather === 'heavyRain'" class="w-puddle" />
     </template>
 
     <!-- Thunder -->
     <template v-else-if="weather === 'thunder'">
-      <div class="w-cloud w-cloud-dark" style="top:6%;left:16%">
+      <div class="w-cloud w-cloud-dark w-cloud-thunder" style="top:6%;left:16%">
         <svg viewBox="0 0 160 70"><ellipse cx="40" cy="38" rx="38" ry="22"/><ellipse cx="86" cy="28" rx="36" ry="22"/><ellipse cx="130" cy="42" rx="24" ry="16"/></svg>
       </div>
-      <div class="w-cloud w-cloud-dark" style="top:20%;right:6%;width:180px">
+      <div class="w-cloud w-cloud-dark w-cloud-thunder" style="top:20%;right:6%;width:180px">
         <svg viewBox="0 0 160 70"><ellipse cx="40" cy="38" rx="38" ry="22"/><ellipse cx="86" cy="28" rx="36" ry="22"/><ellipse cx="130" cy="42" rx="24" ry="16"/></svg>
       </div>
       <div class="w-rain-layer">
@@ -63,6 +75,9 @@
         <svg viewBox="0 0 30 80" fill="#ffe66e" stroke="#c89a3a" stroke-width="1.5" stroke-linejoin="round"><path d="M14 0 L4 42 L13 42 L8 80 L26 32 L17 32 L22 0 Z"/></svg>
       </div>
       <div class="w-bolt w-bolt-2">
+        <svg viewBox="0 0 30 80" fill="#ffe66e" stroke="#c89a3a" stroke-width="1.5" stroke-linejoin="round"><path d="M14 0 L4 42 L13 42 L8 80 L26 32 L17 32 L22 0 Z"/></svg>
+      </div>
+      <div class="w-bolt w-bolt-3">
         <svg viewBox="0 0 30 80" fill="#ffe66e" stroke="#c89a3a" stroke-width="1.5" stroke-linejoin="round"><path d="M14 0 L4 42 L13 42 L8 80 L26 32 L17 32 L22 0 Z"/></svg>
       </div>
       <div class="w-flash" />
@@ -78,7 +93,7 @@
       </div>
       <div class="w-snow-layer">
         <span v-for="i in 30" :key="'fl'+i" class="w-flake"
-          :style="{ left: `${((i-1)*3.4)%100}%`, animationDelay: `-${((i-1)*0.4)%6}s`, animationDuration: `${5+((i-1)%5)}s`, width: `${6+((i-1)%4)*2}px`, height: `${6+((i-1)%4)*2}px` }">&#10052;</span>
+          :style="{ left: `${((i-1)*3.4)%100}%`, animationDelay: `-${((i-1)*0.4)%6}s`, animationDuration: `${5+((i-1)%5)}s`, width: `${6+((i-1)%4)*2}px`, height: `${6+((i-1)%4)*2}px`, '--sway': `${(i%2 ? 1 : -1)*(22+((i-1)%3)*14)}px` }">&#10052;</span>
       </div>
       <div class="w-snow-ground" />
     </template>
@@ -153,6 +168,8 @@
       <div class="w-cloud w-cloud-night" style="top:40%;left:10%">
         <svg viewBox="0 0 100 50"><ellipse cx="30" cy="28" rx="28" ry="16"/><ellipse cx="62" cy="22" rx="24" ry="16"/><ellipse cx="82" cy="32" rx="14" ry="10"/></svg>
       </div>
+      <span v-for="i in 4" :key="'ff'+i" class="w-firefly"
+        :style="{ top: `${45+((i-1)*11)%35}%`, left: `${12+((i-1)*24)%80}%`, animationDelay: `-${(i-1)*1.7}s` }" />
       <span class="w-shoot" />
     </template>
   </div>
@@ -259,6 +276,32 @@ const weatherBg = computed(() => WEATHER_BG[props.weather] || WEATHER_BG.partlyC
   50% { opacity: 1; transform: scale(1); }
 }
 
+/* birds（晴/多云的远景飞鸟）*/
+.w-bird {
+  position: absolute;
+  left: -6%;
+  width: 26px;
+  height: 13px;
+  z-index: 3;
+  animation: w-bird-fly linear infinite;
+}
+.w-bird-wing {
+  transform-box: fill-box;
+  transform-origin: 50% 60%;
+  animation: w-bird-flap 0.5s ease-in-out infinite alternate;
+}
+@keyframes w-bird-fly {
+  0% { transform: translate(-40px, 0); }
+  25% { transform: translate(30vw, -12px); }
+  50% { transform: translate(60vw, 4px); }
+  75% { transform: translate(90vw, -8px); }
+  100% { transform: translate(125vw, 0); }
+}
+@keyframes w-bird-flap {
+  from { transform: scaleY(1); }
+  to { transform: scaleY(0.55); }
+}
+
 /* ===== Clouds ===== */
 .w-cloud {
   position: absolute;
@@ -303,6 +346,33 @@ const weatherBg = computed(() => WEATHER_BG[props.weather] || WEATHER_BG.partlyC
   10% { opacity: 1; }
   100% { transform: translateY(120vh); opacity: 0.8; }
 }
+/* 雨点落地水花：底部循环扩散的椭圆涟漪 */
+.w-splash-layer {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 2px;
+  height: 20px;
+  z-index: 3;
+  pointer-events: none;
+}
+.w-splash {
+  position: absolute;
+  bottom: 0;
+  width: 12px;
+  height: 5px;
+  border: 1.5px solid rgba(210, 235, 255, 0.8);
+  border-radius: 50%;
+  opacity: 0;
+  transform: scale(0.2);
+  animation: w-splash-pop 1.4s ease-out infinite;
+}
+@keyframes w-splash-pop {
+  0% { transform: scale(0.2); opacity: 0; }
+  15% { opacity: 0.9; }
+  60%, 100% { transform: scale(1.4); opacity: 0; }
+}
+
 .w-puddle {
   position: absolute; bottom: 0; left: 0; right: 0;
   height: 18px;
@@ -320,6 +390,19 @@ const weatherBg = computed(() => WEATHER_BG[props.weather] || WEATHER_BG.partlyC
 }
 .w-bolt-1 { top: 30%; left: 30%; animation: w-bolt-flash 5s linear infinite; }
 .w-bolt-2 { top: 28%; right: 22%; animation: w-bolt-flash 5s linear infinite 2.5s; }
+.w-bolt-3 { top: 46%; left: 56%; width: 16px; animation: w-bolt-flash 5s linear infinite; }
+
+/* 雷云随闪电发光（与 w-bolt-flash / w-flash-bg 同 5s 时间轴，97%/99% 两次亮起） */
+.w-cloud-thunder {
+  animation:
+    w-cloud-drift 28s ease-in-out infinite,
+    w-cloud-glow 5s linear infinite;
+}
+@keyframes w-cloud-glow {
+  0%, 96%, 98%, 100% { filter: drop-shadow(0 4px 0 rgba(255, 255, 255, 0.15)) brightness(1); }
+  97% { filter: drop-shadow(0 0 18px rgba(255, 240, 150, 0.8)) brightness(1.6); }
+  99% { filter: drop-shadow(0 0 14px rgba(255, 240, 150, 0.7)) brightness(1.45); }
+}
 .w-bolt svg { width: 100%; height: auto; filter: drop-shadow(0 0 8px #fff066); }
 @keyframes w-bolt-flash {
   0%, 96%, 100% { opacity: 0; }
@@ -356,10 +439,13 @@ const weatherBg = computed(() => WEATHER_BG[props.weather] || WEATHER_BG.partlyC
   text-shadow: 0 1px 2px rgba(0,0,0,0.1);
   animation: w-flake-fall linear infinite;
 }
+/* 之字摇摆下落：--sway 由模板按雪花奇偶交错正负 */
 @keyframes w-flake-fall {
   0% { transform: translate(0, -20%) rotate(0deg); opacity: 0; }
   10% { opacity: 1; }
-  100% { transform: translate(40px, 120vh) rotate(720deg); opacity: 0.6; }
+  33% { transform: translate(var(--sway, 40px), 38vh) rotate(240deg); }
+  66% { transform: translate(calc(var(--sway, 40px) * -0.6), 76vh) rotate(480deg); }
+  100% { transform: translate(var(--sway, 40px), 120vh) rotate(720deg); opacity: 0.6; }
 }
 .w-snow-ground {
   position: absolute; left: 0; right: 0; bottom: 0;
@@ -485,6 +571,25 @@ const weatherBg = computed(() => WEATHER_BG[props.weather] || WEATHER_BG.partlyC
   0%, 100% { opacity: 0.4; transform: scale(0.8); }
   50% { opacity: 1; transform: scale(1.4); }
 }
+/* 萤火虫：夜间低空游走的柔光点 */
+.w-firefly {
+  position: absolute;
+  width: 5px;
+  height: 5px;
+  background: #d9f28a;
+  border-radius: 50%;
+  box-shadow: 0 0 8px 2px rgba(217, 242, 138, 0.7);
+  z-index: 3;
+  animation: w-firefly-wander 7s ease-in-out infinite;
+}
+@keyframes w-firefly-wander {
+  0%, 100% { transform: translate(0, 0); opacity: 0.15; }
+  20% { opacity: 1; }
+  35% { transform: translate(26px, -14px); opacity: 0.35; }
+  55% { transform: translate(8px, -30px); opacity: 1; }
+  75% { transform: translate(-16px, -12px); opacity: 0.3; }
+}
+
 .w-shoot {
   position: absolute;
   top: 18%; left: 30%;

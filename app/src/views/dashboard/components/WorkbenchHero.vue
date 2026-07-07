@@ -128,7 +128,7 @@
           <img class="hero-avatar" :src="avatarSrc" :alt="nickname" />
         </div>
       </div>
-      <WorkbenchTime class="hero-time" />
+      <WorkbenchTime class="hero-time" :weather="currentWeather" />
       <div class="hero-actions">
         <button
           class="btn-ai btn-ai-primary"
