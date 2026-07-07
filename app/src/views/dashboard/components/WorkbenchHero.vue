@@ -489,7 +489,9 @@ onMounted(() => {
 .hero-greet-row {
   display: flex;
   align-items: center;
-  gap: 14px;
+  // 环显示 290px，左侧可见外沿比 200px 布局框多伸出约 18px；
+  // gap 留 30px 使昵称与环之间仍有约 12px 视觉间距
+  gap: 30px;
 }
 
 .hero-title {
