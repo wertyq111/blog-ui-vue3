@@ -949,6 +949,16 @@
   animation: none;
 }
 
+/* 禁用+已勾选：白勾在浅米底上不可见，换成禁用灰勾（对齐 EP 原生灰勾保护） */
+.el-checkbox__input.is-disabled .el-checkbox__inner::after,
+.el-radio__input.is-disabled .el-radio__inner::after {
+  border-color: #c4b89e;
+}
+
+.el-checkbox__input.is-disabled .el-checkbox__inner::before {
+  background-color: #c4b89e;
+}
+
 .el-checkbox__input.is-disabled + .el-checkbox__label,
 .el-radio__input.is-disabled + .el-radio__label {
   color: #c4b89e;
@@ -974,10 +984,6 @@
   margin-bottom: 16px !important;
 }
 
-.el-form-item .el-form-item {
-  margin-bottom: 0 !important;
-}
-
 .el-form-item__label {
   color: var(--ai-text) !important;
   font-weight: 500 !important;
@@ -989,13 +995,18 @@
   margin-bottom: 6px !important;
 }
 
+/* EP 的 .el-form--inline 本身不是 flex 容器（间距原靠 form-item 的 margin-right:32px），
+   这里改成真 flex 让 gap 生效，行内间距由 gap 统一控制 */
 .el-form--inline {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
   gap: 8px;
 }
 
 .el-form--inline .el-form-item {
   margin-right: 0;
-  margin-bottom: 8px !important;
+  margin-bottom: 0 !important;
 }
 
 .el-form-item.is-required:not(.is-no-asterisk).asterisk-left > .el-form-item__label::before,
@@ -1033,6 +1044,18 @@
   border: 2.5px solid var(--ai-text-3) !important;
   border-radius: 50px !important;
   box-shadow: 0 3px 0 0 #d4c9b4 !important;
+}
+
+/* el-input-number 的步进按钮绝对定位在 wrapper 内，需还原 EP 预留的按钮空间，
+   否则被上面的 padding: 0 18px 压掉后文字会顶进按钮下方 */
+.el-form .el-input-number .el-input__wrapper {
+  padding-left: 42px;
+  padding-right: 42px;
+}
+
+.el-form .el-input-number.is-controls-right .el-input__wrapper {
+  padding-left: 18px;
+  padding-right: 42px;
 }
 
 .el-form .el-textarea__inner {

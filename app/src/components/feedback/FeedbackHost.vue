@@ -116,10 +116,10 @@ function iconSvg(type: FeedbackType): string {
   color: #794f27;
   pointer-events: auto;
   cursor: pointer;
-  background: var(--afb-bg, rgb(247, 243, 223));
-  border: 2px solid var(--afb-border, #c4b89e);
+  background: var(--afb-bg);
+  border: 2px solid var(--afb-border);
   border-radius: 999px;
-  box-shadow: var(--afb-shadow, 0 6px 18px rgba(61, 52, 40, 0.14));
+  box-shadow: var(--afb-shadow);
 }
 
 .afb__notifies {
@@ -141,10 +141,10 @@ function iconSvg(type: FeedbackType): string {
   align-items: center;
   padding: 14px 16px;
   pointer-events: auto;
-  background: var(--afb-bg, rgb(247, 243, 223));
-  border: 2px solid var(--afb-border, #c4b89e);
+  background: var(--afb-bg);
+  border: 2px solid var(--afb-border);
   border-radius: 18px;
-  box-shadow: var(--afb-shadow, 0 6px 18px rgba(61, 52, 40, 0.14));
+  box-shadow: var(--afb-shadow);
 }
 .afb__notify-body {
   flex: 1;
@@ -198,8 +198,8 @@ function iconSvg(type: FeedbackType): string {
   justify-content: center;
   flex-shrink: 0;
   border-radius: 50%;
-  background: var(--afb-icon-bg, transparent);
-  color: var(--afb-icon-color, inherit);
+  background: var(--afb-icon-bg);
+  color: var(--afb-icon-color);
 }
 .afb__message .afb__icon {
   width: 26px;
