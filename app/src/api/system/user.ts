@@ -160,6 +160,23 @@ const UserAPI = {
     });
   },
 
+  /** 上传并裁剪当前用户头像 */
+  uploadAvatar(payload: { file: File; cropX: number; cropY: number; cropSize: number }) {
+    const formData = new FormData();
+    formData.append("file", payload.file);
+    formData.append("crop_x", String(payload.cropX));
+    formData.append("crop_y", String(payload.cropY));
+    formData.append("crop_size", String(payload.cropSize));
+
+    return request<any, UserItem>({
+      url: "/user/avatar",
+      method: "post",
+      data: formData,
+      headers: { "Content-Type": "multipart/form-data" },
+      __silent: true,
+    } as any);
+  },
+
   /**
    *  获取角色下拉列表（用于获取角色选项）
    */
