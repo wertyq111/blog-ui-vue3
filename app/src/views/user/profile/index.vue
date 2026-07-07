@@ -158,25 +158,19 @@
             <p>管理基础身份信息、头像素材与账号绑定状态。</p>
           </div>
           <div class="avatar-upload">
-            <div class="avatar-upload__label">头像上传</div>
-            <div class="avatar-upload__drop" title="上传头像" @click="triggerUpload">
-              <img v-if="form.avatar" :src="form.avatar" alt="avatar" />
-              <svg
-                v-else
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-                stroke-linecap="round"
-              >
-                <line x1="12" y1="5" x2="12" y2="19" />
-                <line x1="5" y1="12" x2="19" y2="12" />
-              </svg>
+            <div class="avatar-upload__preview" title="当前头像">
+              <img :src="currentAvatar" alt="当前头像" />
+              <span class="avatar-upload__status">当前头像</span>
+            </div>
+            <div class="avatar-upload__meta">
+              <strong>头像素材</strong>
+              <span>支持 JPG、PNG、GIF、WebP，最大 5MB</span>
+              <Button size="small" type="primary" @click="triggerUpload">更换头像</Button>
             </div>
             <input
               ref="fileInput"
               type="file"
-              accept="image/*"
+              accept="image/jpeg,image/png,image/gif,image/webp"
               style="display: none"
               @change="handleAvatarChange"
             />
@@ -208,7 +202,11 @@
                   <span class="req">*</span>
                   性别
                 </label>
-                <AnimalSelect v-model="genderModel" :options="genderOptions" placeholder="请选择性别" />
+                <AnimalSelect
+                  v-model="genderModel"
+                  :options="genderOptions"
+                  placeholder="请选择性别"
+                />
               </div>
               <div class="field">
                 <label>联系方式</label>
@@ -262,17 +260,26 @@
         </Tabs>
       </section>
     </div>
+
+    <AvatarCropModal
+      v-model:visible="cropVisible"
+      :file="cropFile"
+      :loading="avatarSaving"
+      @reselect="triggerUpload"
+      @confirm="handleAvatarConfirm"
+    />
   </div>
 </template>
 
 <script setup lang="ts">
 import { message } from "@/utils/feedback";
-import { ref, reactive, computed, onMounted } from "vue";
+import { ref, reactive, computed, onMounted, watch } from "vue";
 import UserAPI from "@/api/system/user";
-import FileAPI from "@/api/file";
 import { useUserStore } from "@/store/modules/user";
 import AnimalTextarea from "@/components/AnimalTextarea/index.vue";
 import AnimalSelect from "@/components/AnimalSelect/index.vue";
+import AvatarCropModal from "./AvatarCropModal.vue";
+import { resolveAvatar } from "@/utils/avatar";
 import type { UserProfileForm } from "@/types/api";
 
 defineOptions({ name: "Profile" });
@@ -283,6 +290,15 @@ const saving = ref(false);
 const active = ref<string>("info");
 const fileInput = ref<HTMLInputElement | null>(null);
 const videoError = ref(false);
+const cropVisible = ref(false);
+const cropFile = ref<File | null>(null);
+const avatarSaving = ref(false);
+
+watch(cropVisible, (visible) => {
+  if (!visible && !avatarSaving.value) {
+    cropFile.value = null;
+  }
+});
 
 interface ProfileForm {
   realname: string;
@@ -339,6 +355,7 @@ const personaVideo = computed(() => {
 });
 
 const displayName = computed(() => form.nickname || form.realname || form.email || "数字分身档案");
+const currentAvatar = computed(() => resolveAvatar(form.avatar, form.gender));
 const heroSubtitle = computed(() => {
   const map: Record<number, string> = {
     1: "男性数字形象在线，轻交互模式已启用。",
@@ -480,23 +497,48 @@ function triggerUpload() {
   fileInput.value?.click();
 }
 
-async function handleAvatarChange(event: Event) {
+function handleAvatarChange(event: Event) {
   const target = event.target as HTMLInputElement;
   const file = target.files?.[0];
   if (!file) return;
-  loading.value = true;
+
+  const allowedTypes = ["image/jpeg", "image/png", "image/gif", "image/webp"];
+  if (!allowedTypes.includes(file.type)) {
+    message.error("请选择 JPG、PNG、GIF 或 WebP 图片");
+    target.value = "";
+    return;
+  }
+  if (file.size > 5 * 1024 * 1024) {
+    message.error("头像文件不能超过 5MB");
+    target.value = "";
+    return;
+  }
+
+  cropFile.value = file;
+  cropVisible.value = true;
+  target.value = "";
+}
+
+async function handleAvatarConfirm(payload: {
+  file: File;
+  cropX: number;
+  cropY: number;
+  cropSize: number;
+}) {
+  avatarSaving.value = true;
   try {
-    const data = await FileAPI.uploadFile(file);
-    await UserAPI.updateProfile({ avatar: data.url });
-    form.avatar = data.url;
-    lastLoaded.avatar = data.url;
-    userStore.userInfo.avatar = data.url;
+    const data = await UserAPI.uploadAvatar(payload);
+    const avatar = data.member?.avatar || "";
+    form.avatar = avatar;
+    lastLoaded.avatar = avatar;
+    userStore.userInfo.avatar = avatar;
+    cropVisible.value = false;
+    cropFile.value = null;
     message.success("头像更新成功");
   } catch (e: any) {
     message.error(e?.message || "头像上传失败");
   } finally {
-    loading.value = false;
-    target.value = "";
+    avatarSaving.value = false;
   }
 }
 
@@ -1029,46 +1071,61 @@ onMounted(loadProfile);
   line-height: 1.7;
 }
 .avatar-upload {
-  min-width: 150px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  min-width: 310px;
   padding: 14px;
   border-radius: 22px;
   background: rgba(255, 255, 255, 0.72);
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.78);
-  text-align: center;
 }
-.avatar-upload__label {
-  font-size: 11.5px;
-  font-weight: 700;
-  color: #6f8681;
-  letter-spacing: 0.04em;
-  margin-bottom: 10px;
-}
-.avatar-upload__drop {
-  width: 110px;
-  height: 110px;
-  margin: 0 auto;
-  border-radius: 20px;
-  background: rgba(237, 246, 242, 0.92);
-  border: 1px dashed rgba(32, 201, 178, 0.3);
-  display: grid;
-  place-items: center;
-  color: rgba(32, 201, 178, 0.7);
-  cursor: pointer;
+.avatar-upload__preview {
+  position: relative;
+  flex: 0 0 auto;
+  width: 92px;
+  height: 92px;
   overflow: hidden;
-  transition: background 0.18s;
+  border: 5px solid rgba(255, 255, 255, 0.96);
+  border-radius: 50%;
+  background: rgba(237, 246, 242, 0.92);
+  box-shadow:
+    0 0 0 2px rgba(32, 201, 178, 0.48),
+    0 6px 16px rgba(61, 52, 40, 0.13);
 }
-.avatar-upload__drop:hover {
-  background: rgba(214, 255, 114, 0.32);
-}
-.avatar-upload__drop svg {
-  width: 28px;
-  height: 28px;
-}
-.avatar-upload__drop img {
+.avatar-upload__preview img {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  border-radius: 20px;
+}
+.avatar-upload__status {
+  position: absolute;
+  right: 4px;
+  bottom: 3px;
+  left: 4px;
+  padding: 3px 6px;
+  border-radius: 50px;
+  background: rgba(23, 50, 45, 0.72);
+  color: white;
+  font-size: 9px;
+  font-weight: 700;
+  text-align: center;
+}
+.avatar-upload__meta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 7px;
+}
+.avatar-upload__meta strong {
+  color: var(--teal-ink);
+  font-size: 14px;
+}
+.avatar-upload__meta span {
+  max-width: 170px;
+  color: #6f8681;
+  font-size: 11px;
+  line-height: 1.5;
 }
 
 .profile-tabs {
@@ -1182,6 +1239,7 @@ onMounted(loadProfile);
   }
   .avatar-upload {
     width: 100%;
+    min-width: 0;
   }
   .profile-form {
     grid-template-columns: 1fr;
