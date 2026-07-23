@@ -8,7 +8,7 @@
     </div>
 
     <!-- 执行区 -->
-    <div class="list-card">
+    <div ref="execCardRef" class="list-card">
       <div class="list-head">
         <div>
           <div class="list-title">推送执行</div>
@@ -223,6 +223,7 @@ const scriptKey = ref(scriptOptions[0].value);
 const inputText = ref("");
 const previewData = ref<PlatformScriptPreview | null>(null);
 const result = ref<PlatformScriptRunItem | null>(null);
+const execCardRef = ref<HTMLElement>();
 const previewing = ref(false);
 const running = ref(false);
 
@@ -311,6 +312,24 @@ async function copyOutput(): Promise<void> {
 
 function handleViewOutput(row: PlatformScriptRunItem): void {
   result.value = row;
+  // 回填该条的推送文本到输入框，便于按相同数据再次推送
+  inputText.value = row.rawText || buildTextFromRow(row);
+  previewData.value = null;
+  message.success("已回填该条推送文本，可重新解析后再次发送");
+  execCardRef.value?.scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
+/** 历史记录无原始文本时，用字段按标准格式重建推送文本 */
+function buildTextFromRow(row: PlatformScriptRunItem): string {
+  return [
+    `申请编号:${row.applId}`,
+    `收款银行账户:${row.custBankAcctNo}`,
+    `合同号:${row.cntrctNo}`,
+    `提款金额:${row.custPayAmt}`,
+    `交易对手户名:${row.cntprNme}`,
+    `开户网点号:${row.actcpeBchnwId}`,
+    `开户网点名:${row.actopeBchnwNme}`,
+  ].join("\n");
 }
 
 async function fetchList(): Promise<void> {
