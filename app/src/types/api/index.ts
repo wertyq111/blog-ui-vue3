@@ -36,6 +36,9 @@ export * from "./work-daily";
 export * from "./work-doc-category";
 export * from "./work-doc";
 
+// Design 模块
+export * from "./product-image-extractor";
+
 // 其他模块
 export * from "./file";
 export * from "./todo";
