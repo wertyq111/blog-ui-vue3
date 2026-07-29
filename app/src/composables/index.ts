@@ -12,3 +12,7 @@ export type { RecentMenuItem } from "./useRecentMenus";
 
 // 公开整页路由的文档滚动解锁
 export { usePublicPageScroll } from "./usePublicPageScroll";
+
+// 标签栏溢出折叠
+export { useTagsOverflow, computeCollapsed } from "./useTagsOverflow";
+export type { CollapseInput, UseTagsOverflowOptions } from "./useTagsOverflow";
