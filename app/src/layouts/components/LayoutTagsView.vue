@@ -1,54 +1,46 @@
 <template>
   <div class="tags-container">
-    <!-- 水平滚动容器 -->
-    <el-scrollbar
-      ref="scrollbarRef"
-      class="scroll-container"
-      :view-style="{ height: '100%' }"
-      @wheel="handleScroll"
-    >
-      <div h-full flex-y-center gap-6px>
-        <a href="/#/" class="tab tab-home" title="返回博客首页">
-          <svg
-            viewBox="0 0 24 24"
-            width="13"
-            height="13"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="1.8"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          >
-            <path d="M3 11l9-8 9 8" />
-            <path d="M5 9v11h14V9" />
-          </svg>
-          主页
-        </a>
-        <el-tag
-          v-for="tag in visitedViews"
-          :key="tag.fullPath"
-          cursor-pointer
-          class="tab"
-          :closable="!tag.affix"
-          :effect="tagsViewStore.isActive(tag) ? 'dark' : 'light'"
-          :type="tagsViewStore.isActive(tag) ? 'primary' : 'info'"
-          @click.middle="handleMiddleClick(tag)"
-          @contextmenu.prevent="(event: MouseEvent) => openContextMenu(tag, event)"
-          @close="closeSelectedTag(tag)"
-          @click="
-            router.push({
-              path: tag.fullPath,
-              query: tag.query,
-            })
-          "
+    <div ref="rowRef" class="tags-row">
+      <a ref="leadRef" href="/#/" class="tab tab-home" title="返回博客首页">
+        <svg
+          viewBox="0 0 24 24"
+          width="13"
+          height="13"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.8"
+          stroke-linecap="round"
+          stroke-linejoin="round"
         >
-          {{ translateRouteTitle(tag.title) }}
-        </el-tag>
-      </div>
-    </el-scrollbar>
-    <!-- Tabbar spacer + dropdown button -->
-    <div class="tabbar-spacer" />
-    <button class="tabbar-drop" title="更多标签" @click="openTabMenu">
+          <path d="M3 11l9-8 9 8" />
+          <path d="M5 9v11h14V9" />
+        </svg>
+        主页
+      </a>
+      <el-tag
+        v-for="(tag, index) in visitedViews"
+        :key="tag.fullPath"
+        :ref="(el: any) => setItemRef(el, index)"
+        cursor-pointer
+        class="tab"
+        :class="{ 'is-collapsed': collapsedIndexes.has(index) }"
+        :closable="!tag.affix"
+        :effect="tagsViewStore.isActive(tag) ? 'dark' : 'light'"
+        :type="tagsViewStore.isActive(tag) ? 'primary' : 'info'"
+        @click.middle="handleMiddleClick(tag)"
+        @contextmenu.prevent="(event: MouseEvent) => openContextMenu(tag, event)"
+        @close="closeSelectedTag(tag)"
+        @click="
+          router.push({
+            path: tag.fullPath,
+            query: tag.query,
+          })
+        "
+      >
+        {{ translateRouteTitle(tag.title) }}
+      </el-tag>
+    </div>
+    <button v-if="hasOverflow" class="tabbar-drop" title="更多标签" @click.stop="openTabMenu">
       <svg
         viewBox="0 0 24 24"
         width="14"
@@ -103,7 +95,8 @@
 import { useRoute, useRouter, type RouteRecordRaw } from "vue-router";
 import { resolve } from "path-browserify";
 import { translateRouteTitle } from "@/lang/utils";
-import { usePermissionStore, useTagsViewStore } from "@/store";
+import { useAppStore, usePermissionStore, useTagsViewStore } from "@/store";
+import { useTagsOverflow } from "@/composables";
 
 interface ContextMenu {
   visible: boolean;
@@ -120,6 +113,59 @@ const tagsViewStore = useTagsViewStore();
 
 const { visitedViews } = storeToRefs(tagsViewStore);
 
+const appStore = useAppStore();
+
+/** 与 .tags-row 的 gap 保持一致 */
+const TAB_GAP = 6;
+/** 溢出按钮宽 28px + 间距 6px */
+const DROP_RESERVE = 34;
+
+const rowRef = ref<HTMLElement>();
+const leadRef = ref<HTMLElement>();
+const itemEls = ref<HTMLElement[]>([]);
+
+/**
+ * 收集标签 DOM。el-tag 是组件，需要取 $el 拿到真实元素。
+ */
+const setItemRef = (el: any, index: number) => {
+  const dom = (el?.$el ?? el) as HTMLElement | null;
+  if (dom) {
+    itemEls.value[index] = dom;
+  }
+};
+
+const activeIndex = computed(() =>
+  visitedViews.value.findIndex((tag) => tagsViewStore.isActive(tag))
+);
+
+const affixIndexes = computed(() =>
+  visitedViews.value.reduce<number[]>((acc, tag, index) => {
+    if (tag.affix) {
+      acc.push(index);
+    }
+    return acc;
+  }, [])
+);
+
+const {
+  collapsedIndexes,
+  hasOverflow,
+  update: updateOverflow,
+} = useTagsOverflow({
+  rowRef,
+  leadRef,
+  itemEls,
+  activeIndex,
+  affixIndexes,
+  reserveWidth: DROP_RESERVE,
+  gap: TAB_GAP,
+});
+
+/** 被折叠的标签，供下拉面板展示 */
+const collapsedTags = computed(() =>
+  visitedViews.value.filter((_, index) => collapsedIndexes.value.has(index))
+);
+
 // 当前选中的标签
 const selectedTag = ref<TagView | null>(null);
 
@@ -129,9 +175,6 @@ const contextMenu = reactive<ContextMenu>({
   x: 0,
   y: 0,
 });
-
-// 滚动条引用
-const scrollbarRef = ref();
 
 // 路由映射缓存，提升查找性能
 const routePathMap = computed(() => {
@@ -269,24 +312,6 @@ const closeContextMenu = () => {
 };
 
 /**
- * 处理滚轮事件
- */
-const handleScroll = (event: WheelEvent) => {
-  closeContextMenu();
-
-  const scrollWrapper = scrollbarRef.value?.wrapRef;
-  if (!scrollWrapper) return;
-
-  const hasHorizontalScroll = scrollWrapper.scrollWidth > scrollWrapper.clientWidth;
-  if (!hasHorizontalScroll) return;
-
-  const deltaY = event.deltaY || -(event as any).wheelDelta || 0;
-  const newScrollLeft = scrollWrapper.scrollLeft + deltaY;
-
-  scrollbarRef.value.setScrollLeft(newScrollLeft);
-};
-
-/**
  * 刷新标签
  */
 const refreshSelectedTag = (tag: TagView | null) => {
@@ -395,7 +420,27 @@ watch(
 // 初始化
 onMounted(() => {
   initAffixTags();
+  nextTick(updateOverflow);
 });
+
+// 标签增减、切换、语言变化后重算折叠
+watch(
+  visitedViews,
+  () => {
+    nextTick(() => {
+      itemEls.value.length = visitedViews.value.length;
+      updateOverflow();
+    });
+  },
+  { deep: true }
+);
+
+watch(activeIndex, () => nextTick(updateOverflow));
+
+watch(
+  () => appStore.language,
+  () => nextTick(updateOverflow)
+);
 
 /**
  * 打开标签下拉菜单（复用右键菜单逻辑，定位到下拉按钮位置）
@@ -416,6 +461,7 @@ useContextMenuManager();
 
 <style lang="scss" scoped>
 .tags-container {
+  position: relative;
   display: flex;
   align-items: center;
   gap: 6px;
@@ -433,13 +479,28 @@ useContextMenuManager();
   box-shadow: 0 3px 0 0 rgba(74, 138, 54, 0.08);
   backdrop-filter: none;
 
-  .scroll-container {
+  // overflow: hidden 是保险丝：测量完成前的一帧不会闪出溢出内容，
+  // 也彻底杜绝横向滚动条
+  .tags-row {
+    position: relative;
     display: flex;
     align-items: center;
+    gap: 6px;
     height: 100%;
-    white-space: nowrap;
     flex: 1;
     min-width: 0;
+    overflow: hidden;
+    white-space: nowrap;
+  }
+
+  // 折叠的标签用绝对定位脱离文档流，而不是 display: none，
+  // 这样 offsetWidth 始终可读，不会出现「隐藏后量不到宽 → 下次算错」的抖动
+  .tab.is-collapsed {
+    position: absolute;
+    top: 0;
+    left: 0;
+    visibility: hidden;
+    pointer-events: none;
   }
 
   .tab-home {
@@ -512,11 +573,13 @@ useContextMenuManager();
   }
 }
 
-.tabbar-spacer {
-  flex: 1;
-}
-
+// 绝对定位而非参与 flex 流：否则按钮显隐会改变 .tags-row 宽度，
+// 而宽度又决定按钮显隐，在 ResizeObserver 回调里形成回环
 .tabbar-drop {
+  position: absolute;
+  top: 50%;
+  right: 14px;
+  transform: translateY(-50%);
   width: 28px;
   height: 28px;
   border-radius: 50%;
@@ -525,13 +588,12 @@ useContextMenuManager();
   cursor: pointer;
   display: grid;
   place-items: center;
-  color: #9f927d;
-  flex-shrink: 0;
+  color: var(--ai-text-2);
   transition: background 0.18s;
 
   &:hover {
     background: rgba(255, 255, 255, 0.9);
-    color: #794f27;
+    color: var(--ai-text);
   }
 }
 
