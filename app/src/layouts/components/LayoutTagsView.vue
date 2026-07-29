@@ -88,6 +88,33 @@
         </li>
       </ul>
     </Teleport>
+
+    <!-- 溢出标签面板 -->
+    <Teleport to="body">
+      <ul
+        v-show="overflowMenu.visible"
+        class="overflow-menu"
+        :style="{ right: overflowMenu.right + 'px', top: overflowMenu.top + 'px' }"
+        @click.stop
+      >
+        <li
+          v-for="tag in collapsedTags"
+          :key="tag.fullPath"
+          :class="{ 'is-active': tagsViewStore.isActive(tag) }"
+          @click="goToCollapsedTag(tag)"
+        >
+          <span class="overflow-menu__title">{{ translateRouteTitle(tag.title) }}</span>
+          <span
+            v-if="!tag.affix"
+            class="overflow-menu__close"
+            title="关闭标签"
+            @click.stop="closeSelectedTag(tag)"
+          >
+            ×
+          </span>
+        </li>
+      </ul>
+    </Teleport>
   </div>
 </template>
 
@@ -164,6 +191,49 @@ const {
 /** 被折叠的标签，供下拉面板展示 */
 const collapsedTags = computed(() =>
   visitedViews.value.filter((_, index) => collapsedIndexes.value.has(index))
+);
+
+/**
+ * 溢出面板状态，与右键菜单互斥。
+ * 这一组必须声明在 route 的 immediate watch 之前：immediate 回调在 setup 期间
+ * 同步执行并调用 closeOverflowMenu，声明靠后会落进暂时性死区。
+ */
+const overflowMenu = reactive({
+  visible: false,
+  right: 0,
+  top: 0,
+});
+
+/**
+ * 打开溢出标签面板。
+ * 按钮贴容器右缘，用 right 定位可以避开「面板宽度未知时 left 算不准」。
+ */
+const openTabMenu = (event: MouseEvent) => {
+  const rect = (event.currentTarget as HTMLElement).getBoundingClientRect();
+  overflowMenu.right = window.innerWidth - rect.right;
+  overflowMenu.top = rect.bottom + 8;
+  overflowMenu.visible = true;
+  contextMenu.visible = false;
+};
+
+const closeOverflowMenu = () => {
+  overflowMenu.visible = false;
+};
+
+/** 点击折叠标签：跳转并收起面板 */
+const goToCollapsedTag = (tag: TagView) => {
+  router.push({ path: tag.fullPath, query: tag.query });
+  closeOverflowMenu();
+};
+
+// 折叠列表被关空后自动收起面板
+watch(
+  () => collapsedTags.value.length,
+  (length) => {
+    if (length === 0) {
+      closeOverflowMenu();
+    }
+  }
 );
 
 // 当前选中的标签
@@ -300,6 +370,7 @@ const openContextMenu = (tag: TagView, event: MouseEvent) => {
   contextMenu.x = event.clientX;
   contextMenu.y = event.clientY;
   contextMenu.visible = true;
+  overflowMenu.visible = false;
 
   selectedTag.value = tag;
 };
@@ -387,14 +458,15 @@ const closeAllTags = (tag: TagView | null) => {
   });
 };
 
-// 右键菜单管理
+// 菜单管理：外部点击关闭右键菜单与溢出面板
 const useContextMenuManager = () => {
   const handleOutsideClick = () => {
     closeContextMenu();
+    closeOverflowMenu();
   };
 
   watchEffect(() => {
-    if (contextMenu.visible) {
+    if (contextMenu.visible || overflowMenu.visible) {
       document.addEventListener("click", handleOutsideClick);
     } else {
       document.removeEventListener("click", handleOutsideClick);
@@ -413,6 +485,7 @@ watch(
   () => {
     addCurrentTag();
     updateCurrentTag();
+    closeOverflowMenu();
   },
   { immediate: true }
 );
@@ -441,19 +514,6 @@ watch(
   () => appStore.language,
   () => nextTick(updateOverflow)
 );
-
-/**
- * 打开标签下拉菜单（复用右键菜单逻辑，定位到下拉按钮位置）
- */
-const openTabMenu = (event: MouseEvent) => {
-  const target = event.currentTarget as HTMLElement;
-  const rect = target.getBoundingClientRect();
-  contextMenu.x = rect.left;
-  contextMenu.y = rect.bottom + 4;
-  contextMenu.visible = true;
-  // 选择最后一个标签作为上下文
-  selectedTag.value = visitedViews.value[visitedViews.value.length - 1] || null;
-};
 
 // 启用右键菜单管理
 useContextMenuManager();
@@ -597,7 +657,8 @@ useContextMenuManager();
   }
 }
 
-.contextmenu {
+.contextmenu,
+.overflow-menu {
   position: absolute;
   z-index: 3000;
   padding: 8px 0;
@@ -624,6 +685,50 @@ useContextMenuManager();
     &:hover {
       background: rgba(253, 246, 238, 0.92);
       color: #c4917c;
+    }
+  }
+}
+
+// 溢出面板用视口坐标定位，故覆盖为 fixed
+.overflow-menu {
+  position: fixed;
+  min-width: 160px;
+  max-height: 320px;
+  overflow-y: auto;
+
+  li {
+    justify-content: space-between;
+    padding-right: 12px;
+
+    &.is-active .overflow-menu__title {
+      font-weight: 800;
+      color: #4a8a36;
+    }
+  }
+
+  &__title {
+    flex: 1;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+
+  &__close {
+    display: grid;
+    flex-shrink: 0;
+    place-items: center;
+    width: 18px;
+    height: 18px;
+    font-size: 14px;
+    line-height: 1;
+    color: var(--ai-text);
+    border-radius: 50%;
+    opacity: 0.55;
+
+    &:hover {
+      color: #4a8a36;
+      background-color: rgba(74, 138, 54, 0.15);
+      opacity: 1;
     }
   }
 }
