@@ -39,21 +39,21 @@
       >
         {{ translateRouteTitle(tag.title) }}
       </el-tag>
+      <button v-if="hasOverflow" class="tabbar-drop" title="更多标签" @click.stop="openTabMenu">
+        <svg
+          viewBox="0 0 24 24"
+          width="14"
+          height="14"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.8"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <path d="M6 9l6 6 6-6" />
+        </svg>
+      </button>
     </div>
-    <button v-if="hasOverflow" class="tabbar-drop" title="更多标签" @click.stop="openTabMenu">
-      <svg
-        viewBox="0 0 24 24"
-        width="14"
-        height="14"
-        fill="none"
-        stroke="currentColor"
-        stroke-width="1.8"
-        stroke-linecap="round"
-        stroke-linejoin="round"
-      >
-        <path d="M6 9l6 6 6-6" />
-      </svg>
-    </button>
 
     <!-- 标签右键菜单 -->
     <Teleport to="body">
@@ -520,8 +520,9 @@ useContextMenuManager();
 </script>
 
 <style lang="scss" scoped>
+// 不要给这里加 position：它一旦变成已定位元素，半透明绿背景就会升到
+// 已定位元素绘制层，盖住 LeftLayout 里 z-index: 0 的 .amb 漂浮云朵
 .tags-container {
-  position: relative;
   display: flex;
   align-items: center;
   gap: 6px;
@@ -634,11 +635,12 @@ useContextMenuManager();
 }
 
 // 绝对定位而非参与 flex 流：否则按钮显隐会改变 .tags-row 宽度，
-// 而宽度又决定按钮显隐，在 ResizeObserver 回调里形成回环
+// 而宽度又决定按钮显隐，在 ResizeObserver 回调里形成回环。
+// 锚点是 .tags-row 而不是 .tags-container，后者必须保持 static
 .tabbar-drop {
   position: absolute;
   top: 50%;
-  right: 14px;
+  right: 0;
   transform: translateY(-50%);
   width: 28px;
   height: 28px;
