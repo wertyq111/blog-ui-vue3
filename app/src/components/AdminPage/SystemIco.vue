@@ -42,6 +42,10 @@ const ICO_PATHS: Record<string, string> = {
   expand: '<path d="M4 14v6h6M20 10V4h-6M4 4l6 6M20 20l-6-6"/>',
   collapse: '<path d="M9 4v6H3M15 20v-6h6M3 10l6-6M21 14l-6 6"/>',
   chevRight: '<path d="M9 6l6 6-6 6"/>',
+  check: '<circle cx="12" cy="12" r="9"/><path d="M8 12.5l2.5 2.5L16 9.5"/>',
+  close: '<circle cx="12" cy="12" r="9"/><path d="M9 9l6 6M15 9l-6 6"/>',
+  clock: '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.5 2"/>',
+  loading: '<path d="M12 3a9 9 0 109 9"/>',
 };
 
 const path = computed(() => ICO_PATHS[props.name] || "");

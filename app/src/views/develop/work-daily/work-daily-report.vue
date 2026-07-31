@@ -385,7 +385,7 @@
     <AdminAnimalModal
       v-model:visible="historyVisible"
       title="报表生成记录"
-      width="70%"
+      width="1100px"
       :show-footer="false"
       @close="handleHistoryClose"
     >
@@ -420,9 +420,16 @@
               <td>{{ formatExportPeriod(item) }}</td>
               <td>{{ formatModelLabel(item.model || "") || "-" }}</td>
               <td>
-                <span class="export-history__status" :class="`is-${item.status}`">
-                  {{ formatStatus(item.status) }}
-                </span>
+                <el-tooltip
+                  :content="formatStatus(item.status)"
+                  placement="top"
+                  effect="light"
+                  popper-class="export-history__tip-popper"
+                >
+                  <span class="export-history__status" :class="`is-${item.status}`">
+                    <SystemIco :name="formatStatusIcon(item.status)" :size="18" />
+                  </span>
+                </el-tooltip>
               </td>
               <td>
                 <div v-if="item.status === 'completed'" class="export-history__actions">
@@ -436,13 +443,17 @@
                     删除
                   </Button>
                 </div>
-                <span
+                <el-tooltip
                   v-else-if="item.status === 'failed'"
-                  class="export-history__error"
-                  :title="item.errorMessage || ''"
+                  :content="item.errorMessage || '失败（无详细信息）'"
+                  placement="top"
+                  effect="light"
+                  popper-class="export-history__tip-popper"
                 >
-                  {{ item.errorMessage || "失败（无详细信息）" }}
-                </span>
+                  <span class="export-history__error">
+                    {{ item.errorMessage || "失败（无详细信息）" }}
+                  </span>
+                </el-tooltip>
                 <span v-else class="export-history__pending">处理中...</span>
               </td>
             </tr>
@@ -987,6 +998,15 @@ function formatExportPeriod(item: WorkDailyReportExport): string {
   return `${item.periodStart || ""} ~ ${item.periodEnd || ""}`;
 }
 
+function formatStatusIcon(status: string): string {
+  return (
+    ({ pending: "clock", running: "loading", completed: "check", failed: "close" } as Record<
+      string,
+      string
+    >)[status] || "clock"
+  );
+}
+
 function formatStatus(status: string): string {
   return (
     (
@@ -1145,6 +1165,7 @@ onBeforeUnmount(() => {
     border-bottom: 1px dashed var(--ai-border, #e8e2d6);
     text-align: left;
     vertical-align: middle;
+    white-space: nowrap;
   }
 
   th {
@@ -1159,13 +1180,15 @@ onBeforeUnmount(() => {
 }
 
 .export-history__status {
-  display: inline-block;
-  padding: 2px 10px;
-  border-radius: 10px;
-  font-size: 12px;
-  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
   background: rgba(159, 146, 125, 0.18);
   color: var(--ai-text-2, #9f927d);
+  cursor: help;
 
   &.is-pending {
     background: rgba(255, 196, 87, 0.2);
@@ -1175,6 +1198,10 @@ onBeforeUnmount(() => {
   &.is-running {
     background: rgba(25, 200, 185, 0.18);
     color: #11a89b;
+
+    svg {
+      animation: export-history-spin 0.9s linear infinite;
+    }
   }
 
   &.is-completed {
@@ -1188,6 +1215,12 @@ onBeforeUnmount(() => {
   }
 }
 
+@keyframes export-history-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
 .export-history__error {
   display: inline-block;
   max-width: 280px;
@@ -1196,6 +1229,7 @@ onBeforeUnmount(() => {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  cursor: help;
 }
 
 .export-history__pending {
@@ -1211,6 +1245,21 @@ onBeforeUnmount(() => {
 </style>
 
 <style lang="scss">
+/*
+ * 生成记录里状态图标、被省略号截断的失败原因，都靠 hover tooltip 给出全文。
+ * tooltip teleport 到 body，z-index 必须高于 .animal-modal__mask（2100），
+ * 与项目其他弹层（AnimalSelect 等）统一取 2600；Element Plus 的 z-index 写在
+ * 行内 style 上，只能用 !important 压过。
+ */
+.el-popper.export-history__tip-popper {
+  z-index: 2600 !important;
+  max-width: 460px;
+  font-size: 12px;
+  line-height: 1.6;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
 .report-panel {
   .report-field {
     width: 160px !important;
