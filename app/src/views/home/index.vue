@@ -771,9 +771,28 @@ const modules = [
 
 // 🌌 夜空闪烁
 .home-page--night {
+  // ── 夜间 token 覆盖（取值来自 夜晚模板.dc.html 的 [data-mode="night"]）──
+  // 这一组接管全页约 120 处 token 引用；下方的逐元素规则只处理 token 之外的特例
+  --ai-text: #fffdec;
+  --ai-text-2: #a9b3d8;
+  --ai-primary: #a5b4fc;
+  --ai-primary-active: #8b9cf5;
+  --ai-border: #2c3859;
+  --ai-outline: #0f1731;
+  --ai-btn-face: #223058;
+  --ai-btn-shadow: #0a1024;
+  --ai-shadow-color: #0b1123;
+
+  --home-hill-back: #24406b;
+  --home-hill-back-op: 1;      // 暗色山丘不能再压透明度，否则糊成一片
+  --home-hill-front: #1a3054;
+  --home-hill-front-op: 1;
+  --home-cloud-fill: rgba(200, 210, 240, 0.35);
+  --home-particle-op: 0.35;
+
   background: linear-gradient(180deg, #151e3f 0%, #213352 60%, #1e2836 100%);
-  color: #fffdec;
-  
+  color: var(--ai-text);
+
   .sky {
     background: radial-gradient(1000px 500px at 20% 0%, rgba(136, 157, 240, 0.15) 0%, transparent 60%);
   }
@@ -813,7 +832,10 @@ const modules = [
     border-color: #2c3859;
 
     p {
-      color: var(--ai-shadow-color);
+      // 原字面值 #bdaea0 在这里是「柔和正文色」，不是阴影色。
+      // token 化时按昼间语义归给了 --ai-shadow-color，其夜间值 #0b1123
+      // 会在 #1c274c 卡片上变成近黑字，故改用语义正确的 --ai-text-2。
+      color: var(--ai-text-2);
     }
   }
 
