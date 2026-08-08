@@ -14,13 +14,13 @@
     </div>
 
     <!-- 漂浮的白云 -->
-    <svg class="cloud cloud-1" viewBox="0 0 140 70" fill="#fff">
+    <svg class="cloud cloud-1" viewBox="0 0 140 70">
       <ellipse cx="40" cy="45" rx="40" ry="22"/><ellipse cx="80" cy="35" rx="35" ry="22"/><ellipse cx="115" cy="48" rx="22" ry="16"/>
     </svg>
-    <svg class="cloud cloud-2" viewBox="0 0 100 50" fill="#fff">
+    <svg class="cloud cloud-2" viewBox="0 0 100 50">
       <ellipse cx="30" cy="30" rx="28" ry="16"/><ellipse cx="65" cy="22" rx="24" ry="16"/><ellipse cx="85" cy="34" rx="14" ry="11"/>
     </svg>
-    <svg class="cloud cloud-3" viewBox="0 0 80 40" fill="#fff">
+    <svg class="cloud cloud-3" viewBox="0 0 80 40">
       <ellipse cx="22" cy="22" rx="22" ry="12"/><ellipse cx="52" cy="18" rx="20" ry="13"/><ellipse cx="70" cy="26" rx="10" ry="8"/>
     </svg>
 
@@ -723,6 +723,14 @@ const modules = [
   --ai-btn-shadow: #d4c9b4;    // 拟物投影
   --ai-shadow-color: #bdaea0;  // 柔和阴影
 
+  // ── 首页专有槽 ──────────────────────────────────────────
+  --home-hill-back: #6fba2c;      // 后层山丘
+  --home-hill-back-op: 0.45;
+  --home-hill-front: #8ac68a;     // 前层山丘
+  --home-hill-front-op: 0.65;
+  --home-cloud-fill: #fff;        // 云朵填充
+  --home-particle-op: 1;          // 飘落 🍃🌸 透明度
+
   position: relative;
   width: 100%;
   font-family: var(--el-font-family);
@@ -897,6 +905,7 @@ const modules = [
   pointer-events: none;
   opacity: 0.8;
   filter: drop-shadow(0 4px 0 rgba(0, 0, 0, 0.03));
+  fill: var(--home-cloud-fill);
 }
 
 .cloud-1 { top: 8%; left: 6%; width: 130px; animation: ac-cloud-float 50s linear infinite; }
@@ -939,6 +948,7 @@ const modules = [
 .particle {
   position: absolute;
   font-size: 16px;
+  opacity: var(--home-particle-op);
   animation: ac-particle-fall 14s linear infinite;
 
   &--leaf-1 { left: 5%; top: -5%; animation-duration: 10s; }
@@ -977,15 +987,15 @@ const modules = [
   
   &--back {
     left: -10%;
-    background: #6fba2c;
-    opacity: 0.45;
+    background: var(--home-hill-back);
+    opacity: var(--home-hill-back-op);
     animation: ac-hill-wave 16s ease-in-out infinite alternate;
   }
 
   &--front {
     left: -8%;
-    background: #8ac68a;
-    opacity: 0.65;
+    background: var(--home-hill-front);
+    opacity: var(--home-hill-front-op);
     height: 170px;
     animation: ac-hill-wave-rev 12s ease-in-out infinite alternate;
   }
