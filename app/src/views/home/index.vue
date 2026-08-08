@@ -23,6 +23,7 @@
         <span class="night-firefly night-firefly--2"></span>
         <span class="night-firefly night-firefly--3"></span>
         <span class="night-firefly night-firefly--4"></span>
+        <span class="night-shooting-star"></span>
       </div>
     </div>
 
@@ -1005,6 +1006,41 @@ const modules = [
   }
 }
 
+// 流星：22s 一次，实际掠过只占 0.7s（3.2%），其余时间靠关键帧停在终点透明处充当间隔。
+// 用 linear —— 流星是匀速掠过，且 ease-in 会让它「起步慢」，正好错过用户在看的那一瞬。
+.night-shooting-star {
+  position: absolute;
+  top: 6%;
+  right: 26%;
+  width: 64px;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, #fffdec);
+  border-radius: 2px;
+  opacity: 0;
+  animation: night-shoot 22s linear 4s infinite;
+}
+
+@keyframes night-shoot {
+  0% {
+    opacity: 0;
+    transform: translate(0, 0) rotate(28deg);
+  }
+
+  0.5% {
+    opacity: 1;
+  }
+
+  3.2% {
+    opacity: 0;
+    transform: translate(-360px, 220px) rotate(28deg);
+  }
+
+  100% {
+    opacity: 0;
+    transform: translate(-360px, 220px) rotate(28deg);
+  }
+}
+
 @keyframes night-moonrise {
   from {
     opacity: 0;
@@ -1052,6 +1088,12 @@ const modules = [
 
   .night-firefly {
     opacity: 0.6;
+    animation: none;
+  }
+
+  // 流星没有「更温和的版本」——静止的白杠是视觉垃圾，直接隐藏才对
+  .night-shooting-star {
+    opacity: 0;
     animation: none;
   }
 
