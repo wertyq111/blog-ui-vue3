@@ -11,6 +11,19 @@
         <span class="star star--5">✦</span>
         <span class="star star--6">✦</span>
       </div>
+
+      <!-- 夜景层：月亮 + 萤火虫，仅夜间渲染 -->
+      <div v-if="currentTimePeriod === 'night'" class="night-scene">
+        <div class="night-moon">
+          <span class="night-moon__crater night-moon__crater--1"></span>
+          <span class="night-moon__crater night-moon__crater--2"></span>
+          <span class="night-moon__crater night-moon__crater--3"></span>
+        </div>
+        <span class="night-firefly night-firefly--1"></span>
+        <span class="night-firefly night-firefly--2"></span>
+        <span class="night-firefly night-firefly--3"></span>
+        <span class="night-firefly night-firefly--4"></span>
+      </div>
     </div>
 
     <!-- 漂浮的白云 -->
@@ -895,6 +908,164 @@ const modules = [
 }
 
 // 夜空闪烁的繁星
+// ============================================
+// 夜景层（月亮 / 萤火虫），仅 currentTimePeriod === "night" 时渲染。
+// 走 v-if 而非 opacity 开关：昼间零 DOM、零动画、零合成层。
+// 缓动取自 Emil Kowalski 的标准曲线，不用内置 ease-out（太弱）。
+// ============================================
+.night-scene {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.night-moon {
+  position: absolute;
+  top: 10%;
+  right: 9%;
+  width: 96px;
+  height: 96px;
+  background: radial-gradient(circle at 34% 32%, #fff8dc 0%, #ffe9a8 52%, #f4d489 100%);
+  border-radius: 50%;
+  box-shadow:
+    0 0 0 12px rgba(255, 233, 168, 0.1),
+    0 0 70px 22px rgba(255, 233, 168, 0.22);
+  animation: night-moonrise 2.4s cubic-bezier(0.23, 1, 0.32, 1) both;
+
+  &__crater {
+    position: absolute;
+    background: rgba(200, 170, 110, 0.32);
+    border-radius: 50%;
+
+    &--1 {
+      top: 26px;
+      left: 22px;
+      width: 16px;
+      height: 16px;
+    }
+
+    &--2 {
+      top: 54px;
+      left: 46px;
+      width: 11px;
+      height: 11px;
+      opacity: 0.85;
+    }
+
+    &--3 {
+      top: 34px;
+      left: 58px;
+      width: 8px;
+      height: 8px;
+      opacity: 0.7;
+    }
+  }
+}
+
+.night-firefly {
+  position: absolute;
+  width: 6px;
+  height: 6px;
+  background: #ffe9a8;
+  border-radius: 50%;
+  box-shadow: 0 0 12px 4px rgba(255, 233, 168, 0.5);
+  animation: night-firefly-drift 10s cubic-bezier(0.77, 0, 0.175, 1) infinite;
+
+  &--1 {
+    bottom: 22%;
+    left: 14%;
+    width: 7px;
+    height: 7px;
+    animation-duration: 9s;
+  }
+
+  &--2 {
+    bottom: 16%;
+    left: 34%;
+    width: 5px;
+    height: 5px;
+    animation-duration: 11s;
+    animation-delay: 1.5s;
+  }
+
+  &--3 {
+    bottom: 28%;
+    left: 58%;
+    animation-duration: 10s;
+    animation-delay: 0.8s;
+  }
+
+  &--4 {
+    bottom: 19%;
+    left: 74%;
+    width: 5px;
+    height: 5px;
+    animation-duration: 12s;
+    animation-delay: 2.2s;
+  }
+}
+
+@keyframes night-moonrise {
+  from {
+    opacity: 0;
+    transform: translateY(34px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+// 关键帧名与 .night-firefly 类名刻意错开，避免读代码时把两者当成一个东西
+@keyframes night-firefly-drift {
+  0% {
+    opacity: 0.15;
+    transform: translate(0, 0);
+  }
+
+  25% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0.5;
+    transform: translate(60px, -38px);
+  }
+
+  75% {
+    opacity: 1;
+  }
+
+  100% {
+    opacity: 0.15;
+    transform: translate(0, 0);
+  }
+}
+
+// 无障碍：前庭敏感用户去掉位移，保留静态存在感（gentler，不是 zero）
+@media (prefers-reduced-motion: reduce) {
+  .night-moon {
+    transform: none;
+    animation: night-moon-fade 0.2s ease both;
+  }
+
+  .night-firefly {
+    opacity: 0.6;
+    animation: none;
+  }
+
+  @keyframes night-moon-fade {
+    from {
+      opacity: 0;
+    }
+
+    to {
+      opacity: 1;
+    }
+  }
+}
+
 .starry-night-stars {
   position: absolute;
   inset: 0;
