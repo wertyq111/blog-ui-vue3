@@ -284,9 +284,21 @@ template 中三处（`index.vue:17`、`:20`、`:23`）把 `fill="#fff"` 从 `<sv
 ```bash
 cd blog-ui-vue3/app
 pnpm type-check && pnpm build-only && pnpm exec stylelint "src/views/home/index.vue"
-grep -c 'fill="#fff"' src/views/home/index.vue   # 期望 0
-git status --porcelain                            # 期望只有 M app/src/views/home/index.vue
+grep -c 'class="cloud[^"]*"[^>]*fill=' src/views/home/index.vue   # 期望 0
+git status --porcelain -- app/src/                                 # 期望只有 M app/src/views/home/index.vue
 ```
+
+`grep` 必须限定到 `class="cloud..."`。全文搜 `fill="#fff"` 会命中 template `:143` 那个装饰徽章 SVG 的星形路径——它按 Global Constraints 本就不该动，不是漏网。
+
+stylelint 数量必须与基线**完全相等**（本仓库 `views/home/index.vue` 存量 201 个 `order/properties-order`，见 `lessons.md` 2026-06-10「CI 一律不挂 lint」）。基线测法：
+
+```bash
+git show HEAD:app/src/views/home/index.vue > src/views/home/_base_check.vue
+pnpm exec stylelint "src/views/home/_base_check.vue" 2>&1 | tail -2
+rm src/views/home/_base_check.vue
+```
+
+**不要跑 `--fix`**：它会重排整个文件的属性顺序，把 diff 炸开、掩盖真实改动。新增声明自己排对位置即可（本任务踩过一次：`fill` 必须写在 `filter` 之后）。
 
 - [ ] **Step 6: 提交**
 
@@ -548,7 +560,20 @@ git commit -m "feat: 首页夜景层新增月亮升起与萤火虫动效"
 }
 ```
 
-- [ ] **Step 3: 给岛民护照加夜间灯笼呼吸**
+- [x] **Step 3（执行时判定为不做）：lamp 灯笼呼吸**
+
+执行时按 `animate` skill 的判定链走了一遍，结论是**不做**，三条理由：
+
+1. 设计稿里 `lamp` 挂的是一枚纯装饰小牌子「灯亮着 🏮」，首页没有这个元素。
+2. 本计划原定的替代载体 `.ac-passport` 是**岛民护照内容卡**（昵称、岛屿编号、label/value 明细），让用户正在阅读的内容为了样式而做透明度呼吸，是 `animate` skill 明令禁止的（"data the user is reading or acting on should not move for style"）。原计划只顾着调呼吸幅度，没意识到载体本身选错了。
+3. 首页唯一真正的装饰光源——尾部露营区的篝火 `.camp-fire`（`index.vue:2093`）——**已经有自己的 `ac-fire-flicker` 闪烁动画**。
+
+首页夜间此时已有星星闪烁、萤火虫脉动、篝火闪烁三处光呼吸，再加第四处只会变成噪音。`animate` skill 明确把「产出零行代码」列为成功结果之一。
+
+可选的非动画替代（本次未做，属计划外）：夜间给 `.camp-fire` 加一层暖色 `filter: drop-shadow(...)` 强化辉光。那是静态配色，不是动效，需要时另开。
+
+<details>
+<summary>原 Step 3 内容（已作废，保留备查）</summary>
 
 `.ac-passport` 在昼间不应有呼吸动画，所以动画挂在夜间块里。在 `.home-page--night` 内追加：
 
@@ -570,6 +595,8 @@ git commit -m "feat: 首页夜景层新增月亮升起与萤火虫动效"
 ```
 
 设计稿原值是 `.55 → 1`，那个幅度用在整张护照卡上会像闪烁故障（设计稿里它挂的是一枚小徽章）。`0.82 → 1` 是收敛后的幅度。
+
+</details>
 
 - [ ] **Step 4: 验证**
 
