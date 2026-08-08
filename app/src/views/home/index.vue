@@ -711,6 +711,18 @@ const modules = [
 
 <style lang="scss" scoped>
 .home-page {
+  // ── 昼夜 token（昼间值 = 抽取前的字面值，等值重构）────────────
+  // 夜间覆盖见 .home-page--night
+  --ai-text: #794f27;          // 正文/标题棕
+  --ai-text-2: #9f927d;        // 次级文字
+  --ai-primary: #19c8b9;       // 主题青
+  --ai-primary-active: #11a89b;
+  --ai-border: #e8e2d6;        // 浅描边
+  --ai-outline: #794f27;       // 拟物粗描边（与 --ai-text 昼间同值、夜间相反）
+  --ai-btn-face: #fffef6;      // 按钮/卡片面
+  --ai-btn-shadow: #d4c9b4;    // 拟物投影
+  --ai-shadow-color: #bdaea0;  // 柔和阴影
+
   position: relative;
   width: 100%;
   font-family: var(--el-font-family);
@@ -793,7 +805,7 @@ const modules = [
     border-color: #2c3859;
 
     p {
-      color: #bdaea0;
+      color: var(--ai-shadow-color);
     }
   }
 
@@ -812,13 +824,13 @@ const modules = [
 
   .ac-passport {
     background: #1c274c;
-    border-color: #794f27;
+    border-color: var(--ai-outline);
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
   }
 
   .ac-passport__card {
     background: #1e2836;
-    border-color: #794f27;
+    border-color: var(--ai-outline);
   }
 
   .ac-passport__details .label {
@@ -1002,7 +1014,7 @@ const modules = [
   padding: 16px 40px;
   background: rgba(253, 253, 245, 0.8);
   backdrop-filter: blur(16px);
-  border-bottom: 2px solid #e8e2d6;
+  border-bottom: 2px solid var(--ai-border);
   box-shadow: 0 4px 16px rgba(121, 79, 39, 0.04);
 }
 
@@ -1012,19 +1024,19 @@ const modules = [
   gap: 10px;
   font-weight: 900;
   font-size: 18px;
-  color: #794f27;
+  color: var(--ai-text);
   cursor: pointer;
 }
 
 .brand-mark {
   width: 38px;
   height: 38px;
-  background: linear-gradient(135deg, #19c8b9 0%, #82d5bb 100%);
-  border: 2px solid #794f27;
+  background: linear-gradient(135deg, var(--ai-primary) 0%, #82d5bb 100%);
+  border: 2px solid var(--ai-outline);
   border-radius: 50% 45% 50% 48% / 48% 50% 45% 50%;
   display: grid;
   place-items: center;
-  box-shadow: 0 3px 0 0 #794f27;
+  box-shadow: 0 3px 0 0 var(--ai-outline);
 
   svg { width: 22px; height: 22px; color: #fff; }
 }
@@ -1043,7 +1055,7 @@ const modules = [
   padding: 8px 20px;
   border-radius: 999px;
   font-weight: 800;
-  color: #9f927d;
+  color: var(--ai-text-2);
   cursor: pointer;
   transition: all 0.22s cubic-bezier(0.25, 1, 0.5, 1);
   text-decoration: none;
@@ -1068,7 +1080,7 @@ const modules = [
 
   &:hover {
     background: #f0e8d8;
-    color: #794f27;
+    color: var(--ai-text);
 
     .nav-link-finger {
       opacity: 1;
@@ -1083,8 +1095,8 @@ const modules = [
 
 .nav-link-active {
   background: #ffffff;
-  color: #794f27;
-  border: 1.5px solid #e8e2d6;
+  color: var(--ai-text);
+  border: 1.5px solid var(--ai-border);
   box-shadow: 0 3px 6px rgba(61, 52, 40, 0.05);
 }
 
@@ -1095,11 +1107,11 @@ const modules = [
   gap: 6px;
   padding: 6px 14px;
   background: #fffef0;
-  border: 2px solid #e8e2d6;
+  border: 2px solid var(--ai-border);
   border-radius: 16px;
   font-size: 13px;
   font-weight: 800;
-  color: #794f27;
+  color: var(--ai-text);
   box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.02);
   margin-right: 6px;
 
@@ -1123,14 +1135,14 @@ const modules = [
   font-family: inherit;
   font-weight: 900;
   font-size: 15px;
-  color: #794f27;
-  background: #fffef6;
-  border: 2.5px solid #794f27;
+  color: var(--ai-text);
+  background: var(--ai-btn-face);
+  border: 2.5px solid var(--ai-outline);
   border-radius: 50px;
   cursor: pointer;
   letter-spacing: 0.05em;
   line-height: 1;
-  box-shadow: 0 5px 0 0 #d4c9b4;
+  box-shadow: 0 5px 0 0 var(--ai-btn-shadow);
   transition: all 0.2s cubic-bezier(0.25, 1, 0.5, 1);
   text-decoration: none;
   overflow: hidden;
@@ -1157,9 +1169,9 @@ const modules = [
 
   &:hover {
     transform: translateY(-2px);
-    box-shadow: 0 7px 0 0 #d4c9b4;
-    border-color: #19c8b9;
-    color: #11a89b;
+    box-shadow: 0 7px 0 0 var(--ai-btn-shadow);
+    border-color: var(--ai-primary);
+    color: var(--ai-primary-active);
 
     .btn-ai-finger {
       opacity: 1;
@@ -1178,20 +1190,20 @@ const modules = [
 
   &:active {
     transform: translateY(3px);
-    box-shadow: 0 2px 0 0 #d4c9b4;
+    box-shadow: 0 2px 0 0 var(--ai-btn-shadow);
   }
 }
 
 .btn-ai-primary {
   color: #fff;
   background: linear-gradient(180deg, #84cf4f 0%, #6fba2c 100%);
-  border-color: #794f27;
+  border-color: var(--ai-outline);
   box-shadow: 0 5px 0 0 #5a9e1e;
 
   &:hover {
     box-shadow: 0 7px 0 0 #5a9e1e;
     color: #fff;
-    border-color: #19c8b9;
+    border-color: var(--ai-primary);
   }
 
   &:active {
@@ -1200,7 +1212,7 @@ const modules = [
 }
 
 .btn-ai-lg { padding: 16px 34px; font-size: 17px; }
-.btn-ai-sm { padding: 8px 18px; font-size: 13px; box-shadow: 0 3px 0 0 #d4c9b4; }
+.btn-ai-sm { padding: 8px 18px; font-size: 13px; box-shadow: 0 3px 0 0 var(--ai-btn-shadow); }
 
 @keyframes ac-btn-wiggle {
   0% { transform: scale(1) rotate(-5deg); }
@@ -1230,9 +1242,9 @@ const modules = [
   gap: 8px;
   padding: 6px 16px;
   background: #ffffff;
-  border: 2px solid #794f27;
+  border: 2px solid var(--ai-outline);
   border-radius: 999px;
-  color: #11a89b;
+  color: var(--ai-primary-active);
   font-weight: 800;
   font-size: 12px;
   letter-spacing: 2.5px;
@@ -1243,7 +1255,7 @@ const modules = [
   width: 8px;
   height: 8px;
   border-radius: 50%;
-  background: #19c8b9;
+  background: var(--ai-primary);
   box-shadow: 0 0 0 3px rgba(25, 200, 185, 0.25);
 }
 
@@ -1256,8 +1268,8 @@ const modules = [
   color: #fffdec;
   text-shadow:
     0 2.5px 0 #eed09d,
-    0 5px 0 #794f27, // 动森深褐黑描边厚度
-    0 7.5px 0 #794f27,
+    0 5px 0 var(--ai-outline), // 动森深褐黑描边厚度
+    0 7.5px 0 var(--ai-outline),
     0 12px 24px rgba(90, 58, 24, 0.18);
 }
 
@@ -1271,11 +1283,11 @@ const modules = [
   max-width: 500px;
   font-size: 16px;
   line-height: 1.8;
-  color: #794f27;
+  color: var(--ai-text);
   font-weight: 700;
   margin-bottom: 32px;
 
-  b { color: #11a89b; font-weight: 800; }
+  b { color: var(--ai-primary-active); font-weight: 800; }
 }
 
 .hero-actions { display: flex; gap: 14px; flex-wrap: wrap; }
@@ -1291,7 +1303,7 @@ const modules = [
   aspect-ratio: 1;
   border-radius: 50%;
   background: linear-gradient(180deg, #ffffff 0%, #fff7e0 100%);
-  border: 5px solid #794f27; // 动森深褐黑相框粗边
+  border: 5px solid var(--ai-outline); // 动森深褐黑相框粗边
   box-shadow:
     0 0 0 4px #eef9d6,
     0 16px 36px rgba(90, 58, 24, 0.14);
@@ -1307,13 +1319,13 @@ const modules = [
 .hero-name {
   margin-top: 18px;
   padding: 6px 24px;
-  background: #fffef6;
-  border: 2px.5 solid #794f27;
+  background: var(--ai-btn-face);
+  border: 2px.5 solid var(--ai-outline);
   border-radius: 24px 30px 28px 26px / 26px 24px 30px 28px;
   font-weight: 900;
   font-size: 16px;
-  color: #794f27;
-  box-shadow: 0 4px 0 0 #d4c9b4;
+  color: var(--ai-text);
+  box-shadow: 0 4px 0 0 var(--ai-btn-shadow);
 }
 
 // 浮动的红色气球礼物
@@ -1335,11 +1347,11 @@ const modules = [
 
   .present-box {
     margin-top: -12px;
-    background: #fffef6;
-    border: 2px.5 solid #794f27;
+    background: var(--ai-btn-face);
+    border: 2px.5 solid var(--ai-outline);
     border-radius: 12px;
     padding: 6px 12px;
-    box-shadow: 0 3px 0 0 #794f27;
+    box-shadow: 0 3px 0 0 var(--ai-outline);
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -1357,7 +1369,7 @@ const modules = [
     .lbl {
       font-size: 8px;
       font-weight: 800;
-      color: #bdaea0;
+      color: var(--ai-shadow-color);
       margin-bottom: 2px;
     }
 
@@ -1378,10 +1390,10 @@ const modules = [
   align-items: center;
   gap: 8px;
   background: #ffffff;
-  border: 2px.5 solid #794f27;
+  border: 2px.5 solid var(--ai-outline);
   border-radius: 20px 24px 22px 26px / 24px 22px 26px 20px;
   padding: 6px 16px;
-  box-shadow: 0 4px 0 0 #794f27;
+  box-shadow: 0 4px 0 0 var(--ai-outline);
   z-index: 3;
   transform: rotate(6deg);
   animation: ac-fossil-sway 5s ease-in-out infinite alternate;
@@ -1398,7 +1410,7 @@ const modules = [
     .lbl {
       font-size: 8px;
       font-weight: 800;
-      color: #bdaea0;
+      color: var(--ai-shadow-color);
     }
 
     .num {
@@ -1439,20 +1451,20 @@ const modules = [
 }
 
 .stat {
-  background: #fffef6;
-  border: 2.5px solid #794f27;
+  background: var(--ai-btn-face);
+  border: 2.5px solid var(--ai-outline);
   border-radius: 24px;
   padding: 16px 22px;
   display: flex;
   align-items: center;
   gap: 14px;
-  box-shadow: 0 4px 0 0 #d4c9b4;
+  box-shadow: 0 4px 0 0 var(--ai-btn-shadow);
   transition: all 0.2s cubic-bezier(0.25, 1, 0.5, 1);
 
   &:hover {
     transform: translateY(-3px);
-    box-shadow: 0 6px 0 0 #d4c9b4;
-    border-color: #19c8b9;
+    box-shadow: 0 6px 0 0 var(--ai-btn-shadow);
+    border-color: var(--ai-primary);
   }
 }
 
@@ -1465,7 +1477,7 @@ const modules = [
   flex-shrink: 0;
 }
 
-.stat-ico-mint { background: #e6f9f6; color: #11a89b; }
+.stat-ico-mint { background: #e6f9f6; color: var(--ai-primary-active); }
 .stat-ico-yellow { background: #fff2ba; color: #9f7c00; }
 .stat-ico-pink { background: #ffe0e6; color: #c05f76; }
 .stat-ico-blue { background: #dfe9ff; color: #6a86d8; }
@@ -1474,12 +1486,12 @@ const modules = [
   font-size: 22px;
   font-weight: 900;
   line-height: 1;
-  color: #794f27;
+  color: var(--ai-text);
 
-  small { font-size: 11px; font-weight: 800; color: #9f927d; margin-left: 2px; }
+  small { font-size: 11px; font-weight: 800; color: var(--ai-text-2); margin-left: 2px; }
 }
 
-.stat-lbl { font-size: 11px; color: #bdaea0; font-weight: 800; margin-top: 5px; }
+.stat-lbl { font-size: 11px; color: var(--ai-shadow-color); font-weight: 800; margin-top: 5px; }
 
 // ============================================
 // 7. 背包 Slot 物品功能区
@@ -1504,14 +1516,14 @@ const modules = [
   font-size: 12px;
   letter-spacing: 4px;
   font-weight: 900;
-  color: #11a89b;
+  color: var(--ai-primary-active);
 }
 
 .section-title {
   margin: 6px 0 0;
   font-size: 34px;
   font-weight: 900;
-  color: #794f27;
+  color: var(--ai-text);
   letter-spacing: -0.02em;
   
   // 对各颜色包格做细腻的拟色适配 (使用 & 连字符修正 SCSS 同级类匹配)
@@ -1529,7 +1541,7 @@ const modules = [
   &--mint { .pocket-slot-ico-wrap { background: #e3faf2; } }
 }
 
-.section-sub { color: #9f927d; font-size: 14px; font-weight: 700; max-width: 480px; }
+.section-sub { color: var(--ai-text-2); font-size: 14px; font-weight: 700; max-width: 480px; }
 
 .modules-pocket {
   display: grid;
@@ -1540,8 +1552,8 @@ const modules = [
 // 动森经典背包格子道具卡片
 .pocket-slot {
   position: relative;
-  background: #fffef6;
-  border: 3px solid #794f27;
+  background: var(--ai-btn-face);
+  border: 3px solid var(--ai-outline);
   border-radius: 28px;
   padding: 24px 20px;
   height: 206px;
@@ -1550,8 +1562,8 @@ const modules = [
   cursor: pointer;
   transition: all 0.25s cubic-bezier(0.25, 1, 0.5, 1);
   overflow: hidden;
-  box-shadow: 0 5px 0 0 #d4c9b4;
-  color: #794f27;
+  box-shadow: 0 5px 0 0 var(--ai-btn-shadow);
+  color: var(--ai-text);
   text-decoration: none;
 
   // 内阴影和极柔格子平铺底纹
@@ -1575,8 +1587,8 @@ const modules = [
     height: 60px;
     display: grid;
     place-items: center;
-    background: #e8e2d6;
-    border: 2px solid #794f27;
+    background: var(--ai-border);
+    border: 2px solid var(--ai-outline);
     border-radius: 18px;
     margin-bottom: auto;
     z-index: 1;
@@ -1584,7 +1596,7 @@ const modules = [
   }
 
   .pocket-slot-ico {
-    color: #794f27;
+    color: var(--ai-text);
     display: grid;
     place-items: center;
   }
@@ -1599,7 +1611,7 @@ const modules = [
 
   .pocket-slot-sub {
     font-size: 12px;
-    color: #bdaea0;
+    color: var(--ai-shadow-color);
     font-weight: 800;
     margin-top: 4px;
     z-index: 1;
@@ -1608,25 +1620,25 @@ const modules = [
   // 动森手指光标避让
   &:hover {
     transform: translateY(-6px) scale(1.02);
-    box-shadow: 0 10px 0 0 #d4c9b4;
-    border-color: #19c8b9;
-    color: #11a89b;
+    box-shadow: 0 10px 0 0 var(--ai-btn-shadow);
+    border-color: var(--ai-primary);
+    color: var(--ai-primary-active);
 
     .pocket-slot-ico-wrap {
       transform: scale(1.1) rotate(6deg);
       background: #e6f9f6;
-      border-color: #19c8b9;
-      color: #11a89b;
+      border-color: var(--ai-primary);
+      color: var(--ai-primary-active);
     }
 
     .pocket-slot-sub {
-      color: #19c8b9;
+      color: var(--ai-primary);
     }
   }
 
   &:active {
     transform: translateY(3px) scale(0.98);
-    box-shadow: 0 2px 0 0 #d4c9b4;
+    box-shadow: 0 2px 0 0 var(--ai-btn-shadow);
   }
 }
 
@@ -1636,8 +1648,8 @@ const modules = [
   top: 16px;
   right: 16px;
   background: rgba(121, 79, 39, 0.08);
-  border: 1.5px solid #794f27;
-  color: #794f27;
+  border: 1.5px solid var(--ai-outline);
+  color: var(--ai-text);
   font-size: 10px;
   font-weight: 900;
   padding: 2px 8px;
@@ -1673,7 +1685,7 @@ const modules = [
   width: 100%;
   max-width: 720px;
   background: #fffef2;
-  border: 3.5px solid #794f27;
+  border: 3.5px solid var(--ai-outline);
   border-radius: 36px;
   box-shadow: 0 16px 40px rgba(121, 79, 39, 0.1);
   overflow: hidden;
@@ -1695,14 +1707,14 @@ const modules = [
       margin: 0;
       font-size: 20px;
       font-weight: 900;
-      color: #794f27;
+      color: var(--ai-text);
       letter-spacing: 2px;
       line-height: 1;
     }
     span {
       font-size: 10px;
       font-weight: 800;
-      color: #bdaea0;
+      color: var(--ai-shadow-color);
       letter-spacing: 0.5px;
     }
   }
@@ -1734,7 +1746,7 @@ const modules = [
   display: flex;
   padding: 28px;
   gap: 28px;
-  background: #fffef6;
+  background: var(--ai-btn-face);
 }
 
 // 大头照片框
@@ -1749,7 +1761,7 @@ const modules = [
 .ac-passport__photo {
   width: 170px;
   height: 170px;
-  border: 3px solid #794f27;
+  border: 3px solid var(--ai-outline);
   border-radius: 20px;
   overflow: hidden;
   background: #ffffff;
@@ -1766,7 +1778,7 @@ const modules = [
   margin-top: 8px;
   font-size: 9px;
   font-weight: 900;
-  color: #bdaea0;
+  color: var(--ai-shadow-color);
   letter-spacing: 1px;
 }
 
@@ -1810,7 +1822,7 @@ const modules = [
   .value {
     font-size: 15px;
     font-weight: 900;
-    color: #794f27;
+    color: var(--ai-text);
 
     &.fruit-color {
       color: #fc736d; // 特产色
@@ -1820,7 +1832,7 @@ const modules = [
       font-style: italic;
       font-size: 13.5px;
       line-height: 1.6;
-      color: #794f27;
+      color: var(--ai-text);
     }
   }
 }
@@ -1834,13 +1846,13 @@ const modules = [
 
 .title-pill {
   background: #f7cd67;
-  border: 2px solid #794f27;
-  color: #794f27;
+  border: 2px solid var(--ai-outline);
+  color: var(--ai-text);
   font-size: 11px;
   font-weight: 900;
   padding: 3px 12px;
   border-radius: 999px;
-  box-shadow: 0 2px 0 0 #794f27;
+  box-shadow: 0 2px 0 0 var(--ai-outline);
 }
 
 // ============================================
@@ -1854,13 +1866,13 @@ const modules = [
 .island-inner {
   max-width: 1200px;
   margin: 0 auto;
-  background: #fffef6;
+  background: var(--ai-btn-face);
   border-radius: 48px;
-  border: 3.5px solid #794f27;
+  border: 3.5px solid var(--ai-outline);
   padding: 48px 40px;
   text-align: center;
   position: relative;
-  box-shadow: 0 8px 0 0 #d4c9b4;
+  box-shadow: 0 8px 0 0 var(--ai-btn-shadow);
 }
 
 // 露营帐篷
@@ -1888,13 +1900,13 @@ const modules = [
 .island-title {
   font-size: 34px;
   line-height: 1.1;
-  color: #794f27;
+  color: var(--ai-text);
   margin: 0 0 12px;
   font-weight: 900;
 }
 
 .island-sub {
-  color: #9f927d;
+  color: var(--ai-text-2);
   font-weight: 700;
   max-width: 500px;
   margin: 0 auto 28px;
@@ -1907,7 +1919,7 @@ const modules = [
 .foot {
   text-align: center;
   padding: 24px 0 60px;
-  color: #9f927d;
+  color: var(--ai-text-2);
   font-size: 12px;
   font-weight: 700;
 }
@@ -1961,7 +1973,7 @@ const modules = [
 
 .hero-tag--unauth {
   color: #58a032 !important;
-  border-color: #794f27 !important;
+  border-color: var(--ai-outline) !important;
 }
 
 .hero-avatar-wrap--unauth {
@@ -1987,7 +1999,7 @@ const modules = [
 .nook-counter-top {
   height: 14px;
   background: #a98056;
-  border: 3.5px solid #794f27;
+  border: 3.5px solid var(--ai-outline);
   border-radius: 8px;
   box-shadow: 0 4px 0 rgba(0, 0, 0, 0.08);
 }
@@ -1995,7 +2007,7 @@ const modules = [
 .nook-counter-body {
   flex: 1;
   background: #eed09d;
-  border: 3.5px solid #794f27;
+  border: 3.5px solid var(--ai-outline);
   border-top: none;
   border-radius: 0 0 16px 16px;
   display: flex;
@@ -2020,12 +2032,12 @@ const modules = [
 .nook-counter-sign {
   font-size: 13px;
   font-weight: 900;
-  color: #794f27;
-  background: #fffef6;
-  border: 2px solid #794f27;
+  color: var(--ai-text);
+  background: var(--ai-btn-face);
+  border: 2px solid var(--ai-outline);
   border-radius: 8px;
   padding: 4px 10px;
-  box-shadow: 0 2.5px 0 0 #794f27;
+  box-shadow: 0 2.5px 0 0 var(--ai-outline);
   letter-spacing: 1px;
 }
 
@@ -2054,7 +2066,7 @@ const modules = [
   width: 72px;
   height: 100px;
   background: #fffdf0;
-  border: 3px solid #794f27;
+  border: 3px solid var(--ai-outline);
   border-radius: 12px;
   z-index: 1;
   transform: rotate(18deg);
@@ -2071,7 +2083,7 @@ const modules = [
     font-weight: 900;
     text-align: center;
     padding: 3px 0;
-    border-bottom: 2.5px solid #794f27;
+    border-bottom: 2.5px solid var(--ai-outline);
   }
 
   .ticket-body {
@@ -2090,7 +2102,7 @@ const modules = [
       width: 8px;
       height: 8px;
       background: #eaf6db; // 默认匹配天空时域的混合
-      border: 3px solid #794f27;
+      border: 3px solid var(--ai-outline);
       border-radius: 50%;
     }
     &::before { left: -7px; }
@@ -2101,9 +2113,9 @@ const modules = [
   .ticket-text {
     font-size: 9px;
     font-weight: 900;
-    color: #794f27;
+    color: var(--ai-text);
     background: #f7cd67;
-    border: 1.5px solid #794f27;
+    border: 1.5px solid var(--ai-outline);
     border-radius: 4px;
     padding: 1px 4px;
   }
@@ -2118,7 +2130,7 @@ const modules = [
 .nook-bubble {
   position: absolute;
   background: #fffdf2;
-  border: 3px solid #794f27;
+  border: 3px solid var(--ai-outline);
   border-radius: 20px;
   padding: 12px 16px;
   box-shadow: 0 8px 0 rgba(121, 79, 39, 0.05), 0 12px 24px rgba(0,0,0,0.03);
@@ -2148,14 +2160,14 @@ const modules = [
     height: 0;
     border-style: solid;
     border-width: 12px 12px 0 12px;
-    border-color: #794f27 transparent transparent transparent;
+    border-color: var(--ai-outline) transparent transparent transparent;
     z-index: -1;
   }
 
   .nook-bubble-name {
     font-size: 10px;
     font-weight: 900;
-    color: #11a89b;
+    color: var(--ai-primary-active);
     margin-bottom: 4px;
     letter-spacing: 0.5px;
   }
@@ -2163,7 +2175,7 @@ const modules = [
   .nook-bubble-content {
     font-size: 12px;
     font-weight: 800;
-    color: #794f27;
+    color: var(--ai-text);
     line-height: 1.5;
   }
 
@@ -2191,7 +2203,7 @@ const modules = [
     }
 
     .nook-bubble-name {
-      color: #9f927d;
+      color: var(--ai-text-2);
     }
 
     .nook-bubble-content {
@@ -2251,7 +2263,7 @@ const modules = [
   .board-title {
     font-size: 18px;
     font-weight: 900;
-    color: #794f27;
+    color: var(--ai-text);
     letter-spacing: 1px;
   }
 }
@@ -2286,7 +2298,7 @@ const modules = [
 // 告示板便签纸
 .board-sticky {
   background: #fffdf0;
-  border: 2.5px solid #794f27;
+  border: 2.5px solid var(--ai-outline);
   border-radius: 12px;
   padding: 16px;
   box-shadow: 4px 6px 0 rgba(78, 54, 30, 0.12);
@@ -2298,7 +2310,7 @@ const modules = [
   .sticky-head {
     font-size: 13px;
     font-weight: 900;
-    color: #794f27;
+    color: var(--ai-text);
     border-bottom: 1.5px dashed rgba(121, 79, 39, 0.15);
     padding-bottom: 6px;
   }
@@ -2306,12 +2318,12 @@ const modules = [
   .sticky-content {
     font-size: 12px;
     font-weight: 800;
-    color: #794f27;
+    color: var(--ai-text);
     line-height: 1.6;
     flex: 1;
 
     strong {
-      color: #11a89b;
+      color: var(--ai-primary-active);
       font-weight: 900;
     }
   }
@@ -2319,7 +2331,7 @@ const modules = [
   .sticky-foot {
     font-size: 10px;
     font-weight: 800;
-    color: #bdaea0;
+    color: var(--ai-shadow-color);
     text-align: right;
   }
 }
