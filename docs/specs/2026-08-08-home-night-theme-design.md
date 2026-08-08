@@ -72,9 +72,27 @@
 
 ### 3.1 复用全局 `--ai-*` 名（首页内局部覆盖，不动 `:root`）
 
-`--ai-text` `--ai-text-2` `--ai-border` `--ai-bg-card` `--ai-shadow-color` `--ai-outline` `--ai-btn-face` `--ai-btn-shadow`
+按首页 `<style>` 块内的实际出现次数，共 9 个：
 
-夜间取值来自设计稿 `[data-mode="night"]` 块，例如 `--ai-text: #fffdec`、`--ai-bg-card: #1c274c`、`--ai-outline: #0f1731`、`--ai-btn-face: #223058`、`--ai-btn-shadow: #0a1024`。
+| Token | 昼间值（= 现状） | 出现次数 | 夜间值 |
+|---|---|---|---|
+| `--ai-outline` | `#794f27` | 36 | `#0f1731` |
+| `--ai-text` | `#794f27` | 23 | `#fffdec` |
+| `--ai-btn-shadow` | `#d4c9b4` | 11 | `#0a1024` |
+| `--ai-primary-active` | `#11a89b` | 9 | `#8b9cf5` |
+| `--ai-btn-face` | `#fffef6` | 8 | `#223058` |
+| `--ai-shadow-color` | `#bdaea0` | 8 | `#0b1123` |
+| `--ai-primary` | `#19c8b9` | 8 | `#a5b4fc` |
+| `--ai-text-2` | `#9f927d` | 6 | `#a9b3d8` |
+| `--ai-border` | `#e8e2d6` | 4 | `#2c3859` |
+
+夜间值取自设计稿 `[data-mode="night"]` 块。
+
+**`--ai-text` 与 `--ai-outline` 昼间同为 `#794f27`、夜间走向相反**（一个变浅到 `#fffdec`，一个变深到 `#0f1731`）——这是首页 token 化最大的坑：同一个字面值承担两种语义，必须按 CSS 属性名区分（`color:` 归 `--ai-text`，`border*` / `box-shadow` / `text-shadow` 归 `--ai-outline`），不能做全局字符串替换，否则夜间文字会变成深蓝底上的近黑色。
+
+**不取 `--ai-bg-card`**：设计稿有该 token，但首页 style 块内 `#fcfaf2` 出现 0 次，首页不用它。
+
+**增取 `--ai-primary` / `--ai-primary-active`**：设计稿有对应夜间值，且首页有 17 处使用，性价比高。
 
 在 `.home-page` 上定义这些名字只影响该子树（CSS 变量继承特性），`_system-management.scss` 的全局 `:root` 一个字不改。
 
@@ -154,4 +172,5 @@
 - 修改 `utils/theme.ts`、恢复 `ThemeMode.DARK`、引入 `data-mode` 属性。
 - 修改 `_system-management.scss` 的全局 `:root`。
 - 调整时段阈值（保持 night = 19–05）。
-- 首页 298 处颜色字面值的全量 token 化（只抽夜间需要变的约 14 个语义槽）。
+- 首页 298 处颜色字面值的全量 token 化（只抽夜间需要变的 15 个语义槽：9 个 `--ai-*` + 6 个 `--home-*`，覆盖 style 块内约 120 处）。
+- template 里 inline SVG 的 `fill=` / `stroke=` 属性（装饰插画，含 16 处 `#794f27`）。唯一例外是云朵的 `fill`，见 §3.2。
