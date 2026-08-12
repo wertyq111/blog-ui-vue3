@@ -128,83 +128,86 @@
           <WeatherAvatarFrame :src="avatarSrc" :alt="nickname" :weather="currentWeather" />
         </div>
       </div>
-      <WorkbenchTime class="hero-time" :weather="currentWeather" />
-      <div class="hero-actions">
-        <button
-          class="btn-ai btn-ai-primary"
-          @click="$router.push({ path: '/develop/work-daily', query: { action: 'add' } })"
-        >
-          <svg
-            viewBox="0 0 24 24"
-            width="15"
-            height="15"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
+      <!-- 时钟 + 快捷按钮：宽屏 display:contents 摊平成同级列，窄屏收成右侧竖列 -->
+      <div class="hero-side">
+        <WorkbenchTime class="hero-time" :weather="currentWeather" />
+        <div class="hero-actions">
+          <button
+            class="btn-ai btn-ai-primary"
+            @click="$router.push({ path: '/develop/work-daily', query: { action: 'add' } })"
           >
-            <path d="M4 16L15 5l3 3-11 11H4v-3z" />
-          </svg>
-          记录日常
-        </button>
-        <button
-          class="btn-ai"
-          @click="$router.push({ path: '/develop/work-doc', query: { action: 'add' } })"
-        >
-          <svg
-            viewBox="0 0 24 24"
-            width="15"
-            height="15"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
+            <svg
+              viewBox="0 0 24 24"
+              width="15"
+              height="15"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path d="M4 16L15 5l3 3-11 11H4v-3z" />
+            </svg>
+            记录日常
+          </button>
+          <button
+            class="btn-ai"
+            @click="$router.push({ path: '/develop/work-doc', query: { action: 'add' } })"
           >
-            <rect x="5" y="4" width="14" height="16" rx="2" />
-            <path d="M9 8h6M9 12h6M9 16h4" />
-          </svg>
-          新建文档
-        </button>
-        <button
-          class="btn-ai"
-          @click="$router.push({ path: '/develop/todo', query: { action: 'add' } })"
-        >
-          <svg
-            viewBox="0 0 24 24"
-            width="15"
-            height="15"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
+            <svg
+              viewBox="0 0 24 24"
+              width="15"
+              height="15"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <rect x="5" y="4" width="14" height="16" rx="2" />
+              <path d="M9 8h6M9 12h6M9 16h4" />
+            </svg>
+            新建文档
+          </button>
+          <button
+            class="btn-ai"
+            @click="$router.push({ path: '/develop/todo', query: { action: 'add' } })"
           >
-            <path d="M4 7h11M4 12h11M4 17h7" />
-            <path d="M18 6l2 2 3-3" />
-          </svg>
-          新建待办
-        </button>
-        <button
-          class="btn-ai"
-          @click="$router.push({ path: '/develop/convert-path', query: { tool: 'open' } })"
-        >
-          <svg
-            viewBox="0 0 24 24"
-            width="15"
-            height="15"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
+            <svg
+              viewBox="0 0 24 24"
+              width="15"
+              height="15"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path d="M4 7h11M4 12h11M4 17h7" />
+              <path d="M18 6l2 2 3-3" />
+            </svg>
+            新建待办
+          </button>
+          <button
+            class="btn-ai"
+            @click="$router.push({ path: '/develop/convert-path', query: { tool: 'open' } })"
           >
-            <path d="M3 10.5L10 4l7 6.5" />
-            <path d="M5 9.5V16h10V9.5" />
-          </svg>
-          路径转换
-        </button>
+            <svg
+              viewBox="0 0 24 24"
+              width="15"
+              height="15"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path d="M3 10.5L10 4l7 6.5" />
+              <path d="M5 9.5V16h10V9.5" />
+            </svg>
+            路径转换
+          </button>
+        </div>
       </div>
     </div>
   </div>
@@ -492,6 +495,9 @@ onMounted(() => {
   // 环显示 290px，不透明外沿比 200px 布局框多伸出约 17px（gap 按布局框边缘算）；
   // gap 44px 扣掉外沿后昵称与环之间约有 27px 可见间距
   gap: 44px;
+  // 环是 absolute 的 290px，布局框右侧外溢 46px（其中不透明环体约 18px，其余是素材透明留白），
+  // 这段完全不占布局。不补出来的话 .hero-row 的 gap 是"假"的，右邻的时钟会直接压在环上。
+  padding-right: 46px;
 }
 
 .hero-title {
@@ -578,6 +584,12 @@ onMounted(() => {
   100% {
     transform: translateY(-1px);
   }
+}
+
+// 时钟 + 按钮的容器。宽屏用 display:contents 摊平，两者仍是 .hero-row 的直接 flex 项，
+// 与加这层 div 之前完全等价；窄屏才实体化成右侧竖列。
+.hero-side {
+  display: contents;
 }
 
 .hero-actions {
@@ -698,16 +710,63 @@ onMounted(() => {
   }
 }
 
-@media (max-width: 1100px) {
+// 三列（问候语 | 时钟 | 按钮）诚实占位 = 466 + 24 + 300 + 24 + 508 = 1322px 行宽，
+// 侧栏展开(230px)时对应 viewport 约 1660px。低于此把时钟收到按钮上方，而不是隐藏时钟。
+@media (max-width: 1660px) {
+  .hero-side {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    flex-shrink: 0;
+    gap: 14px;
+  }
+  // 竖列后时钟不再靠 margin:0 auto 吃剩余空间，改由 .hero-text 撑开
+  .hero-time {
+    margin: 0;
+  }
+  .hero-text {
+    flex: 1;
+  }
+  // 空间已经够，不该再把「早上好，昵称」压成两三行
+  .hero-title {
+    white-space: nowrap;
+  }
+  // 吉祥物固定在右下角，向内伸进内容区 78px，竖列后必然被按钮压住；
+  // 让位需要 66px 横向余量，1300~1450 区间根本没有，只能收起
   .hero-char {
     display: none;
   }
-  .hero-time {
-    display: none;
+  // 这条 padding 原本是给吉祥物让位的，吉祥物已隐藏；
+  // 留着会让按钮右沿比时钟右沿内缩 26px，竖列下两者必须对齐
+  .hero-actions {
+    padding-right: 0;
   }
-  // 时钟隐藏后恢复 flex:1，让操作按钮回到贴右布局
-  .hero-text {
-    flex: 1;
+}
+
+// 竖列也放不下一排 4 个按钮时折成 2×2
+@media (max-width: 1300px) {
+  .hero-actions {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    width: max-content;
+  }
+}
+
+// 侧栏要到 992px 才自动收起，1024 这类宽度 hero 只有 774px，
+// 200px 头像 + 46px 环外沿再也让不出位置，这一档把环整体缩小
+@media (max-width: 1100px) {
+  .weather-avatar-frame {
+    --waf-size: 160px;
+    --waf-ring: 232px;
+  }
+  .hero-greet-row {
+    gap: 34px;
+    padding-right: 36px; // 232px 环的右侧外溢
+  }
+  // 右列宽度由时钟固定的 300px 决定（不是按钮的 236px），这一档剩给问候语的空间
+  // 已经不足以让标题独占一行，放开 nowrap 让它正常折行，否则会溢出压到时钟上
+  .hero-title {
+    white-space: normal;
   }
   .hero-leaf-2 {
     right: 20px;
@@ -726,8 +785,14 @@ onMounted(() => {
   .hero-title {
     font-size: 24px;
   }
+  // 整体纵向后右侧竖列改为整行左对齐
+  .hero-side {
+    align-items: flex-start;
+    width: 100%;
+  }
   .hero-actions {
     width: 100%;
+    justify-content: flex-start;
   }
 }
 </style>

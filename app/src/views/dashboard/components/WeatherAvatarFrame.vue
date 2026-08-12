@@ -86,10 +86,14 @@ const weatherBadgeStyle = computed(() => ({
 
 <style lang="scss" scoped>
 .weather-avatar-frame {
+  // 头像盒与环的尺寸暴露成变量，供窄屏场景按比例缩小（环的偏移校正也跟着按比例算）
+  --waf-size: 200px;
+  --waf-ring: 290px;
+
   position: relative;
   flex-shrink: 0;
-  width: 200px;
-  height: 200px;
+  width: var(--waf-size);
+  height: var(--waf-size);
   isolation: isolate;
 }
 
@@ -106,11 +110,11 @@ const weatherBadgeStyle = computed(() => ({
 
   // 素材为 512 画布、环体内孔约 336：显示 290px 时内孔约 190px，
   // 内沿压住 200px 头像边缘 ~5px；环心在画布中偏 (254.5, 248)，用 +1/+4px 校正
-  top: calc(50% + 4px);
-  left: calc(50% + 1px);
+  top: calc(50% + var(--waf-ring) * 4 / 290);
+  left: calc(50% + var(--waf-ring) * 1 / 290);
   z-index: 2;
-  width: 290px;
-  height: 290px;
+  width: var(--waf-ring);
+  height: var(--waf-ring);
   pointer-events: none;
   user-select: none;
   transform: translate(-50%, -50%);
