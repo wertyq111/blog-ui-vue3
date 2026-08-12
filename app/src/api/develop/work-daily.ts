@@ -89,6 +89,20 @@ const WorkDailyAPI = {
     });
   },
 
+  /** 上传 Markdown 正文图片，落盘后端 public/uploads/work-daily/YYYYMMDD */
+  uploadImage(file: File) {
+    const formData = new FormData();
+    formData.append("file", file);
+    return request<any, { url: string; path: string }>({
+      url: `${BASE_URL}/image`,
+      method: "post",
+      data: formData,
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    });
+  },
+
   /** 导入 Markdown */
   importMarkdown(file: File, year?: string) {
     const formData = new FormData();
