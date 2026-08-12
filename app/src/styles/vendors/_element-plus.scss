@@ -301,6 +301,44 @@
   padding: 0 !important;
   overflow: hidden;
 
+  // 面板开合过渡：EP 默认的 el-zoom-in-top 是 300ms 的 scaleY(0) → scaleY(1)，
+  // 整块日历先被压成一条线再拉开，640px 的双日历尤其明显（文字跟着纵向拉伸）。
+  // 改成「从触发框方向轻微下沉 + 缩放淡入」：只动 transform/opacity，走 GPU 合成。
+  // 选择器带 4 个类，特异性高于 base.css 的单类规则，无需 !important。
+  &.el-zoom-in-top-enter-active,
+  &.el-zoom-in-top-leave-active {
+    transform-origin: top center;
+    transition:
+      opacity 160ms cubic-bezier(0.23, 1, 0.32, 1),
+      transform 220ms cubic-bezier(0.23, 1, 0.32, 1);
+  }
+
+  // 弹层被翻转到触发框上方时，缩放锚点跟着换到底边（EP 自己也是这么处理的）
+  &.el-zoom-in-top-enter-active[data-popper-placement^="top"],
+  &.el-zoom-in-top-leave-active[data-popper-placement^="top"] {
+    transform-origin: bottom center;
+  }
+
+  &.el-zoom-in-top-enter-from {
+    opacity: 0;
+    transform: translateY(-8px) scale(0.96);
+  }
+
+  &.el-zoom-in-top-enter-to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+
+  // 关闭沿原路退回，但更快：用户已经做完决定，不该等系统收场动画
+  // （EP 的写法是把「隐藏态」放在 leave-active 上，这里保持同一结构）
+  &.el-zoom-in-top-leave-active {
+    opacity: 0;
+    transform: translateY(-4px) scale(0.98);
+    transition:
+      opacity 120ms cubic-bezier(0.23, 1, 0.32, 1),
+      transform 140ms cubic-bezier(0.23, 1, 0.32, 1);
+  }
+
   .el-picker-panel,
   .el-date-picker,
   .el-date-range-picker {
@@ -325,8 +363,30 @@
 
     button {
       color: var(--ai-text-2) !important;
+      transition:
+        color 140ms ease,
+        transform 140ms cubic-bezier(0.23, 1, 0.32, 1);
+
       &:hover {
         color: var(--ai-primary) !important;
+      }
+
+      // 按下的即时反馈；翻月按钮一天可能点几十次，位移量刻意压到勉强可感
+      &:active {
+        transform: scale(0.88);
+      }
+    }
+
+    // 触屏点击会触发假 hover，位移只给真鼠标
+    @media (hover: hover) and (pointer: fine) {
+      .el-picker-panel__icon-btn.arrow-left:hover,
+      .el-picker-panel__icon-btn.d-arrow-left:hover {
+        transform: translateX(-2px);
+      }
+
+      .el-picker-panel__icon-btn.arrow-right:hover,
+      .el-picker-panel__icon-btn.d-arrow-right:hover {
+        transform: translateX(2px);
       }
     }
   }
@@ -568,6 +628,30 @@
   // 隐藏箭头
   .el-popper__arrow {
     display: none !important;
+  }
+}
+
+/* 2.1 减弱动效：保留淡入淡出（它承担「面板出现/消失」的可读性），去掉位移和缩放。
+   必须排在 2. 之后：与上面的规则同特异性，靠源码顺序覆盖 transform。 */
+@media (prefers-reduced-motion: reduce) {
+  .el-popper.el-picker__popper.animal-datepicker-popper {
+    &.el-zoom-in-top-enter-active,
+    &.el-zoom-in-top-leave-active {
+      transform: none;
+      transition: opacity 140ms ease;
+    }
+
+    // 选择器要和 2. 里的翻月按钮规则一一对齐，否则特异性不够压不掉 transform
+    .el-date-picker__header,
+    .el-date-range-picker__header {
+      button:active,
+      .el-picker-panel__icon-btn.arrow-left:hover,
+      .el-picker-panel__icon-btn.d-arrow-left:hover,
+      .el-picker-panel__icon-btn.arrow-right:hover,
+      .el-picker-panel__icon-btn.d-arrow-right:hover {
+        transform: none;
+      }
+    }
   }
 }
 
