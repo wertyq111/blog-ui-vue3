@@ -1,16 +1,17 @@
 <!-- 动森风 Markdown 编辑/预览组件：包装 md-editor-v3 + 动森皮肤 -->
 <template>
   <MdPreview v-if="previewOnly" v-model="model" v-bind="previewAttrs" />
-  <MdEditor v-else v-model="model" v-bind="editorAttrs" />
+  <MdEditor v-else ref="editorRef" v-model="model" v-bind="editorAttrs" />
 </template>
 
 <script setup lang="ts">
-import { computed } from "vue";
-import { MdEditor, MdPreview } from "md-editor-v3";
+import { computed, ref } from "vue";
+import { MdEditor, MdPreview, type ExposeParam } from "md-editor-v3";
 import "md-editor-v3/lib/style.css";
 import "md-editor-v3/lib/preview.css";
 import { useSettingsStore } from "@/store/modules/settings";
 import { registerWorkDailyIcons } from "@/utils/workDailyIcons";
+import WorkDailyAPI from "@/api/develop/work-daily";
 
 // 注册工作日常动森图标渲染（emoji → SVG），全局一次、幂等
 registerWorkDailyIcons();
@@ -74,6 +75,47 @@ const model = computed({
   set: (val) => emit("update:modelValue", val),
 });
 
+const editorRef = ref<ExposeParam>();
+
+// 逐个上传，失败的丢弃（request 拦截器已弹错误提示），只把成功的地址交回编辑器
+const uploadImages = async (files: File[]) => {
+  const results = await Promise.all(
+    files.map((file) =>
+      WorkDailyAPI.uploadImage(file)
+        .then((res) => res.url)
+        .catch(() => null)
+    )
+  );
+  return results.filter((url): url is string => !!url);
+};
+
+// 工具栏「上传图片」与粘贴图片都走这里：md-editor 拿到 urls 后自动插入 ![](url)
+const handleUploadImg = async (files: File[], callback: (urls: string[]) => void) => {
+  callback(await uploadImages(files));
+};
+
+// 拖拽图片：md-editor-v3 不内置，CodeMirror 默认会把文件当文本读（等于什么都不插）。
+// 这里先 preventDefault 掐掉 CodeMirror 的默认 drop，再自己上传并在光标处插入。
+const handleDrop = async (event: DragEvent) => {
+  const files = Array.from(event.dataTransfer?.files ?? []).filter((file) =>
+    file.type.startsWith("image/")
+  );
+  if (!files.length) {
+    return;
+  }
+  event.preventDefault();
+  const urls = await uploadImages(files);
+  if (!urls.length) {
+    return;
+  }
+  editorRef.value?.insert(() => ({
+    targetValue: urls.map((url) => `![图片](${url})`).join("\n"),
+    select: false,
+    deviationStart: 0,
+    deviationEnd: 0,
+  }));
+};
+
 // md-editor-v3 prop 类型较复杂，用 Record 透传，避免逐 prop 严格校验
 const editorAttrs = computed<Record<string, any>>(() => ({
   class: ["animal-md"],
@@ -82,6 +124,8 @@ const editorAttrs = computed<Record<string, any>>(() => ({
   previewOnly: false,
   disabled: !props.editable,
   toolbars: props.toolbars ?? DEFAULT_TOOLBARS,
+  onUploadImg: handleUploadImg,
+  onDrop: handleDrop,
 }));
 
 const previewAttrs = computed<Record<string, any>>(() => ({
