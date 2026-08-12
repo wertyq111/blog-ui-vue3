@@ -99,8 +99,8 @@ function handleRefresh() {
   border: 0;
   border-bottom: 2px solid #e8e2d6;
   border-radius: 0;
+  // sticky 头部不加 backdrop-filter：正文每次滚动都从它下面经过，合成器每帧重做背景快照
   background: rgba(253, 253, 245, 0.85);
-  backdrop-filter: blur(14px);
   box-shadow: none;
 }
 

@@ -168,6 +168,9 @@
   }
 }
 
+// 这些浮层不要加 backdrop-filter：它们可见时页面常在逐帧合成（悬停 popover 时滚表格、
+// message 滑入、下拉面板内部滚动），快照来不及就按「无滤镜」合成。而 --cyber-panel-strong
+// 本身 94% 不透明，模糊几乎不可见——纯付出合成器代价（工作日常列表同时挂 22 个 popover）。
 .el-dialog,
 .el-dropdown-menu,
 .el-select-dropdown,
@@ -180,7 +183,6 @@
   border-radius: 24px !important;
   box-shadow: var(--cyber-shadow-strong) !important;
   color: var(--cyber-text) !important;
-  backdrop-filter: blur(18px);
 }
 
 /* 下拉/选择器弹层圆角裁切：外层 popper 默认小圆角会让边角看起来是直角，统一裁切成圆角 */

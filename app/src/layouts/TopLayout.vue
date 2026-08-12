@@ -62,7 +62,6 @@ const isLogoCollapsed = computed(() => width.value < 768);
     background: var(--cyber-panel-shell);
     border: 1px solid var(--cyber-border-strong);
     box-shadow: var(--cyber-shadow);
-    backdrop-filter: blur(18px);
 
     &-left {
       display: flex;

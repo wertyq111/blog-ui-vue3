@@ -43,9 +43,10 @@ body {
   min-height: 100vh;
 }
 
+// 同 .animal-modal__mask：铺满视口的高透明遮罩不加 backdrop-filter。抽屉滑入期间逐帧合成，
+// 快照来不及就按「无滤镜」合成，24% 不透明度下后面页面会明显透出来一帧。
 .layout__overlay {
   background: rgba(121, 79, 39, 0.24) !important;
-  backdrop-filter: blur(6px);
 }
 
 // Navbar and tags-container are now fully styled in their own scoped components.
@@ -55,7 +56,6 @@ body {
   border: 1px solid var(--cyber-border-strong);
   background: rgba(253, 253, 245, 0.54);
   box-shadow: none;
-  backdrop-filter: blur(16px);
 }
 
 // Layout-left margin resets (styling is in scoped components now)
