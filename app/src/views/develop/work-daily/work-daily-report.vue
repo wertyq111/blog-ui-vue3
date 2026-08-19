@@ -73,62 +73,8 @@
         >
           <div class="report-model-select__trigger-content">
             <div v-if="selectedAgentKey" class="agent-logo-wrapper mini" :class="selectedAgentKey">
-              <!-- OpenClaw 图二红色小怪兽吉祥物 (微缩版) -->
-              <svg v-if="selectedAgentKey === 'openclaw'" viewBox="0 0 32 32" class="svg-openclaw">
-                <g class="claw-robot-group">
-                  <path
-                    class="claw-antenna-l"
-                    d="M12.5 10 C12 8, 11 6.5, 9.5 7"
-                    stroke="#eb4141"
-                    stroke-width="1.3"
-                    stroke-linecap="round"
-                    fill="none"
-                  />
-                  <path
-                    class="claw-antenna-r"
-                    d="M19.5 10 C20 8, 21 6.5, 22.5 7"
-                    stroke="#eb4141"
-                    stroke-width="1.3"
-                    stroke-linecap="round"
-                    fill="none"
-                  />
-                  <rect
-                    class="claw-leg-l"
-                    x="13"
-                    y="23"
-                    width="2"
-                    height="3.5"
-                    rx="0.6"
-                    fill="#eb4141"
-                  />
-                  <rect
-                    class="claw-leg-r"
-                    x="17"
-                    y="23"
-                    width="2"
-                    height="3.5"
-                    rx="0.6"
-                    fill="#eb4141"
-                  />
-                  <circle class="claw-body" cx="16" cy="16.5" r="7.5" fill="#eb4141" />
-                  <path
-                    class="claw-hand-l"
-                    d="M8.5 14.5 C6.5 15.5, 6.5 18.5, 8.5 19.5 C9 19, 9.5 17.5, 9 15.5 Z"
-                    fill="#eb4141"
-                  />
-                  <path
-                    class="claw-hand-r"
-                    d="M23.5 14.5 C25.5 15.5, 25.5 18.5, 23.5 19.5 C23 19, 22.5 17.5, 23 15.5 Z"
-                    fill="#eb4141"
-                  />
-                  <circle class="claw-eye-l" cx="13" cy="14" r="1.3" fill="#00f3db" />
-                  <circle class="claw-eye-r" cx="19" cy="14" r="1.3" fill="#00f3db" />
-                  <circle class="claw-eye-glow-l" cx="12.6" cy="13.6" r="0.4" fill="#ffffff" />
-                  <circle class="claw-eye-glow-r" cx="18.6" cy="13.6" r="0.4" fill="#ffffff" />
-                </g>
-              </svg>
               <!-- Codex 图一蓝紫命令云 (微缩版) -->
-              <svg v-else-if="selectedAgentKey === 'codex'" viewBox="0 0 32 32" class="svg-codex">
+              <svg v-if="selectedAgentKey === 'codex'" viewBox="0 0 32 32" class="svg-codex">
                 <rect
                   x="2"
                   y="2"
@@ -212,62 +158,8 @@
             @click="handleAgentClick(agent)"
           >
             <div class="agent-logo-wrapper" :class="agent.key">
-              <!-- OpenClaw 图二红色小怪兽吉祥物 -->
-              <svg v-if="agent.key === 'openclaw'" viewBox="0 0 32 32" class="svg-openclaw">
-                <g class="claw-robot-group">
-                  <path
-                    class="claw-antenna-l"
-                    d="M12.5 10 C12 8, 11 6.5, 9.5 7"
-                    stroke="#eb4141"
-                    stroke-width="1.3"
-                    stroke-linecap="round"
-                    fill="none"
-                  />
-                  <path
-                    class="claw-antenna-r"
-                    d="M19.5 10 C20 8, 21 6.5, 22.5 7"
-                    stroke="#eb4141"
-                    stroke-width="1.3"
-                    stroke-linecap="round"
-                    fill="none"
-                  />
-                  <rect
-                    class="claw-leg-l"
-                    x="13"
-                    y="23"
-                    width="2"
-                    height="3.5"
-                    rx="0.6"
-                    fill="#eb4141"
-                  />
-                  <rect
-                    class="claw-leg-r"
-                    x="17"
-                    y="23"
-                    width="2"
-                    height="3.5"
-                    rx="0.6"
-                    fill="#eb4141"
-                  />
-                  <circle class="claw-body" cx="16" cy="16.5" r="7.5" fill="#eb4141" />
-                  <path
-                    class="claw-hand-l"
-                    d="M8.5 14.5 C6.5 15.5, 6.5 18.5, 8.5 19.5 C9 19, 9.5 17.5, 9 15.5 Z"
-                    fill="#eb4141"
-                  />
-                  <path
-                    class="claw-hand-r"
-                    d="M23.5 14.5 C25.5 15.5, 25.5 18.5, 23.5 19.5 C23 19, 22.5 17.5, 23 15.5 Z"
-                    fill="#eb4141"
-                  />
-                  <circle class="claw-eye-l" cx="13" cy="14" r="1.3" fill="#00f3db" />
-                  <circle class="claw-eye-r" cx="19" cy="14" r="1.3" fill="#00f3db" />
-                  <circle class="claw-eye-glow-l" cx="12.6" cy="13.6" r="0.4" fill="#ffffff" />
-                  <circle class="claw-eye-glow-r" cx="18.6" cy="13.6" r="0.4" fill="#ffffff" />
-                </g>
-              </svg>
               <!-- Codex 图一蓝紫命令云 -->
-              <svg v-else-if="agent.key === 'codex'" viewBox="0 0 32 32" class="svg-codex">
+              <svg v-if="agent.key === 'codex'" viewBox="0 0 32 32" class="svg-codex">
                 <rect
                   x="2"
                   y="2"
@@ -587,34 +479,16 @@ interface ModelAgent {
 }
 
 const modelAgents = computed<ModelAgent[]>(() => {
-  const openClawModels = reportModels.value.filter(
-    (model) => !isLocalCodexModel(model) && !isLocalAgyModel(model) && !isLocalClaudeModel(model)
-  );
   const codexModels = reportModels.value.filter(isLocalCodexModel);
-  if (!codexModels.includes("local-codex/codex-cli")) {
-    codexModels.push("local-codex/codex-cli");
-  }
   const agyModels = reportModels.value.filter(isLocalAgyModel);
-  if (!agyModels.includes("local-agy/gemini-3.5-flash-high")) {
-    agyModels.push("local-agy/gemini-3.5-flash-high");
-  }
-  if (!agyModels.includes("local-agy/agy-cli")) {
-    agyModels.push("local-agy/agy-cli");
-  }
   const claudeModels = reportModels.value.filter(isLocalClaudeModel);
-  if (!claudeModels.includes("local-claude/claude-cli")) {
-    claudeModels.push("local-claude/claude-cli");
-  }
   const agents: ModelAgent[] = [];
 
-  if (openClawModels.length) {
-    agents.push({ key: "openclaw", label: "OpenClaw", models: openClawModels });
-  }
   if (codexModels.length) {
     agents.push({ key: "codex", label: "Codex", models: codexModels });
   }
   if (agyModels.length) {
-    agents.push({ key: "agy", label: "Agy", models: agyModels });
+    agents.push({ key: "agy", label: "Gemini", models: agyModels });
   }
   if (claudeModels.length) {
     agents.push({ key: "claude", label: "Claude", models: claudeModels });
@@ -662,12 +536,20 @@ function isLocalClaudeModel(model: string): boolean {
   return model.startsWith("local-claude/");
 }
 
+const MODEL_LABELS: Record<string, string> = {
+  "local-codex/gpt-5.5": "GPT-5.5",
+  "local-codex/gpt-5.6-sol": "GPT-5.6 Sol",
+  "local-codex/gpt-5.6-terra": "GPT-5.6 Terra",
+  "local-agy/gemini-3.5-flash-high": "Gemini 3.5 Flash (High)",
+  "local-agy/gemini-3.6-flash-high": "Gemini 3.6 Flash (High)",
+  "local-agy/gemini-3.7-flash-high": "Gemini 3.7 Flash (High)",
+  "local-claude/claude-opus-4-6": "Opus 4.6",
+  "local-claude/claude-opus-4-8": "Opus 4.8",
+  "local-claude/claude-opus-5": "Opus 5",
+};
+
 function formatModelLabel(model: string): string {
-  if (model === "local-codex/codex-cli") return "Codex CLI";
-  if (model === "local-agy/gemini-3.5-flash-high") return "Gemini 3.5 Flash (High)";
-  if (model === "local-agy/agy-cli") return "agy cli";
-  if (model === "local-claude/claude-cli") return "Claude CLI";
-  return model;
+  return MODEL_LABELS[model] ?? model;
 }
 
 function isAgentSelected(agent: ModelAgent): boolean {
@@ -1493,10 +1375,6 @@ onBeforeUnmount(() => {
   }
 
   // 自适应外框底色
-  &.openclaw {
-    background: #fff4f5;
-    border-color: rgba(235, 65, 65, 0.15);
-  }
   &.codex {
     background: #fbf5eb;
     border-color: rgba(142, 133, 255, 0.15);
@@ -1511,7 +1389,6 @@ onBeforeUnmount(() => {
   }
 }
 
-.svg-openclaw,
 .svg-codex,
 .svg-agy,
 .svg-claude {
@@ -1519,167 +1396,6 @@ onBeforeUnmount(() => {
   height: 100%;
   overflow: visible;
   display: block;
-}
-
-/* ==========================================
-   1. OpenClaw (图二红色吉祥物) 灵动动效
-   ========================================== */
-.svg-openclaw {
-  filter: drop-shadow(0 0 2.5px rgba(235, 65, 65, 0.45));
-  transition: filter 0.3s ease;
-
-  // 1) 机器人整体呼吸慢速浮动
-  .claw-robot-group {
-    transform-origin: 16px 16.5px;
-    animation: openclawFloat 2.8s ease-in-out infinite;
-  }
-
-  // 2) 天线高频信号微抖动
-  .claw-antenna-l {
-    transform-origin: 12.5px 10px;
-    animation: antennaWiggleL 2s ease-in-out infinite alternate;
-  }
-  .claw-antenna-r {
-    transform-origin: 19.5px 10px;
-    animation: antennaWiggleR 2s ease-in-out infinite alternate;
-  }
-
-  // 3) 小胖手微幅常态摇摆，Hover 时大幅扇动
-  .claw-hand-l {
-    transform-origin: 9px 15.5px;
-    animation: handFloatL 3s ease-in-out infinite alternate;
-    transition: transform 0.25s cubic-bezier(0.25, 0.8, 0.25, 1.1);
-  }
-  .claw-hand-r {
-    transform-origin: 23px 15.5px;
-    animation: handFloatR 3s ease-in-out infinite alternate;
-    transition: transform 0.25s cubic-bezier(0.25, 0.8, 0.25, 1.1);
-  }
-
-  // 4) 周期性眨眼
-  .claw-eye-l,
-  .claw-eye-r,
-  .claw-eye-glow-l,
-  .claw-eye-glow-r {
-    transform-origin: 16px 14px;
-    animation: eyeBlink 4.5s ease-in-out infinite;
-  }
-}
-
-// 眨眼动画
-@keyframes eyeBlink {
-  0%,
-  96%,
-  100% {
-    transform: scaleY(1);
-  }
-  98% {
-    transform: scaleY(0.08);
-  }
-}
-
-// 天线微摆动
-@keyframes antennaWiggleL {
-  0% {
-    transform: rotate(-3deg);
-  }
-  100% {
-    transform: rotate(5deg);
-  }
-}
-@keyframes antennaWiggleR {
-  0% {
-    transform: rotate(3deg);
-  }
-  100% {
-    transform: rotate(-5deg);
-  }
-}
-
-// 常态双手漂浮
-@keyframes handFloatL {
-  0% {
-    transform: rotate(0deg);
-  }
-  100% {
-    transform: rotate(-6deg) translateY(-0.5px);
-  }
-}
-@keyframes handFloatR {
-  0% {
-    transform: rotate(0deg);
-  }
-  100% {
-    transform: rotate(6deg) translateY(-0.5px);
-  }
-}
-
-// 机器人呼吸浮动
-@keyframes openclawFloat {
-  0%,
-  100% {
-    transform: translateY(0.5px);
-  }
-  50% {
-    transform: translateY(-1px);
-  }
-}
-
-// 胖爪极速扇动 (加力交互)
-@keyframes handWaveL {
-  0%,
-  100% {
-    transform: rotate(-5deg);
-  }
-  50% {
-    transform: rotate(20deg) scale(1.05);
-  }
-}
-@keyframes handWaveR {
-  0%,
-  100% {
-    transform: rotate(5deg);
-  }
-  50% {
-    transform: rotate(-20deg) scale(1.05);
-  }
-}
-
-// Hover/Active 吉祥物高光激活动画
-.report-model-select__agent:hover,
-.report-model-select__agent.is-active,
-.report-model-select__trigger:hover {
-  .svg-openclaw {
-    filter: drop-shadow(0 0 4.5px rgba(235, 65, 65, 0.75));
-
-    .claw-robot-group {
-      animation: openclawFloat 1.5s ease-in-out infinite;
-    }
-
-    // 双爪做快乐的招手/扇动
-    .claw-hand-l {
-      animation: handWaveL 0.4s ease-in-out infinite alternate;
-    }
-    .claw-hand-r {
-      animation: handWaveR 0.4s ease-in-out infinite alternate;
-    }
-
-    // 接收信号高频摇晃
-    .claw-antenna-l {
-      animation: antennaWiggleL 0.3s ease-in-out infinite alternate;
-    }
-    .claw-antenna-r {
-      animation: antennaWiggleR 0.3s ease-in-out infinite alternate;
-    }
-
-    // 极速眨眼聚焦
-    .claw-eye-l,
-    .claw-eye-r,
-    .claw-eye-glow-l,
-    .claw-eye-glow-r {
-      animation: eyeBlink 1.8s ease-in-out infinite;
-    }
-  }
 }
 
 /* ==========================================
