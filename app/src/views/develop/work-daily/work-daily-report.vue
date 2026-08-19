@@ -540,6 +540,7 @@ const MODEL_LABELS: Record<string, string> = {
   "local-codex/gpt-5.5": "GPT-5.5",
   "local-codex/gpt-5.6-sol": "GPT-5.6 Sol",
   "local-codex/gpt-5.6-terra": "GPT-5.6 Terra",
+  "local-agy/gemini-3.1-pro-high": "Gemini 3.1 Pro (High)",
   "local-agy/gemini-3.5-flash-high": "Gemini 3.5 Flash (High)",
   "local-agy/gemini-3.6-flash-high": "Gemini 3.6 Flash (High)",
   "local-agy/gemini-3.7-flash-high": "Gemini 3.7 Flash (High)",
