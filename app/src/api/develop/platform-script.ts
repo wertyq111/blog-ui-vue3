@@ -25,23 +25,24 @@ const PlatformScriptAPI = {
     return adaptPagination<PlatformScriptRunItem>(res);
   },
 
-  /** 解析预览（不发送） */
-  preview(scriptKey: string, text: string) {
-    return request<any, PlatformScriptPreview>({
+  /** 解析预览 / 查询（不修改） */
+  preview(scriptKey: string, params: { text?: string; login?: string }) {
+    return request<any, any>({
       url: `${BASE_URL}/preview`,
       method: "post",
-      data: { scriptKey, text },
+      data: { scriptKey, ...params },
     });
   },
 
-  /** 执行推送 */
-  run(scriptKey: string, text: string) {
+  /** 执行推送 / 修改 */
+  run(scriptKey: string, params: { text?: string; login?: string; mobile?: string }) {
     return request<any, PlatformScriptRunItem>({
       url: `${BASE_URL}/run`,
       method: "post",
-      data: { scriptKey, text },
+      data: { scriptKey, ...params },
     });
   },
+
 
   /** 执行记录详情 */
   getInfo(id: number) {

@@ -1,25 +1,25 @@
-<!-- 平台脚本：粘贴银行推送文本 -> 解析预览 -> 确认发送 -> 远端脚本执行结果 -->
+<!-- 平台脚本：支持多种平台脚本（交行放款推送、ChemNet 验证码手机号修改等） -->
 <template>
   <div class="page-card">
     <div class="page-head">
       <div class="page-eyebrow">DEVELOP WORKSPACE</div>
       <h1 class="page-title">平台脚本</h1>
-      <p class="page-desc">粘贴银行方发来的推送文本，自动解析参数并生成自增订单号，确认后驱动远端脚本执行并返回报文。</p>
+      <p class="page-desc">平台运维与测试脚本工具集：包含银行推送自动化、ChemNet 数据库凭据管理与状态修改。</p>
     </div>
 
     <!-- 执行区 -->
     <div ref="execCardRef" class="list-card">
       <div class="list-head">
         <div>
-          <div class="list-title">推送执行</div>
-          <div class="list-sub">选择脚本并粘贴推送文本，先解析预览核对，再确认发送到远端。</div>
+          <div class="list-title">脚本操作</div>
+          <div class="list-sub">选择对应的业务脚本，输入参数进行查询预览与执行修改。</div>
         </div>
       </div>
 
       <div class="filter-bar">
         <div class="filter-field">
           <label class="filter-label">脚本：</label>
-          <el-select v-model="scriptKey" class="filter-select" style="width: 260px">
+          <el-select v-model="scriptKey" class="filter-select" style="width: 360px" @change="handleScriptChange">
             <el-option
               v-for="opt in scriptOptions"
               :key="opt.value"
@@ -30,47 +30,135 @@
         </div>
       </div>
 
-      <div class="ps-field">
-        <div class="ps-field__label">推送文本</div>
-        <el-input
-          v-model="inputText"
-          type="textarea"
-          :rows="8"
-          :placeholder="placeholder"
-        />
-      </div>
-
-      <div class="toolbar">
-        <Button type="primary" size="small" :disabled="previewing" @click="handlePreview">
-          <SystemIco name="search" :size="13" />
-          解析预览
-        </Button>
-        <Button type="default" size="small" @click="handleClear">清空</Button>
-      </div>
-
-      <!-- 预览 -->
-      <div v-if="previewData" class="ps-panel ps-panel--preview">
-        <div class="ps-panel__title">
-          <SystemIco name="edit" :size="13" />
-          解析结果（核对无误后确认发送）
+      <!-- 脚本 1：Sinoloans 交行放款推送 -->
+      <template v-if="scriptKey === 'sinoloans-comm3-loan'">
+        <div class="ps-field">
+          <div class="ps-field__label">推送文本</div>
+          <el-input
+            v-model="inputText"
+            type="textarea"
+            :rows="8"
+            :placeholder="placeholder"
+          />
         </div>
-        <div class="ps-grid">
-          <div v-for="def in fieldDefs" :key="def.key" class="ps-grid__item">
-            <span class="ps-grid__label">{{ def.label }}</span>
-            <span class="ps-grid__value cell-mono">{{ previewData.fields[def.key] }}</span>
-          </div>
-          <div class="ps-grid__item ps-grid__item--ordr">
-            <span class="ps-grid__label">订单号 ordrNo（自增）</span>
-            <span class="ps-grid__value cell-mono">{{ previewData.ordr_no }}</span>
-          </div>
-        </div>
-        <div class="ps-panel__footer">
-          <Button type="primary" size="small" :disabled="running" @click="handleConfirmSend">
-            确认发送
+
+        <div class="toolbar">
+          <Button type="primary" size="small" :disabled="previewing" @click="handlePreviewSinoloans">
+            <SystemIco name="search" :size="13" />
+            解析预览
           </Button>
-          <Button type="default" size="small" @click="previewData = null">取消</Button>
+          <Button type="default" size="small" @click="handleClearSinoloans">清空</Button>
         </div>
-      </div>
+
+        <!-- 预览 -->
+        <div v-if="previewData" class="ps-panel ps-panel--preview">
+          <div class="ps-panel__title">
+            <SystemIco name="edit" :size="13" />
+            解析结果（核对无误后确认发送）
+          </div>
+          <div class="ps-grid">
+            <div v-for="def in fieldDefs" :key="def.key" class="ps-grid__item">
+              <span class="ps-grid__label">{{ def.label }}</span>
+              <span class="ps-grid__value cell-mono">{{ previewData.fields[def.key] }}</span>
+            </div>
+            <div class="ps-grid__item ps-grid__item--ordr">
+              <span class="ps-grid__label">订单号 ordrNo（自增）</span>
+              <span class="ps-grid__value cell-mono">{{ previewData.ordr_no }}</span>
+            </div>
+          </div>
+          <div class="ps-panel__footer">
+            <Button type="primary" size="small" :disabled="running" @click="handleConfirmSendSinoloans">
+              确认发送
+            </Button>
+            <Button type="default" size="small" @click="previewData = null">取消</Button>
+          </div>
+        </div>
+      </template>
+
+      <!-- 脚本 2：ChemNet 验证码手机号修改 -->
+      <template v-else-if="scriptKey === 'chemnet-secret-code'">
+        <div class="filter-bar" style="margin-top: 12px">
+          <div class="filter-field">
+            <label class="filter-label">账号 (login)：</label>
+            <Input
+              v-model="chemnetLogin"
+              class="filter-input"
+              style="width: 280px"
+              placeholder="请输入账号 login (如 tianjibio123)"
+              allow-clear
+              @keyup.enter="handleQueryChemnet"
+            />
+          </div>
+          <Button type="primary" size="small" :disabled="previewing" @click="handleQueryChemnet">
+            <SystemIco name="search" :size="13" />
+            查询账号信息
+          </Button>
+          <Button type="default" size="small" @click="handleClearChemnet">清空</Button>
+        </div>
+
+        <!-- 查询结果展示 -->
+        <div v-if="chemnetQueryResult" class="ps-panel ps-panel--preview">
+          <div class="ps-panel__title">
+            <SystemIco name="edit" :size="13" />
+            账号查询结果（数据表：hub_chinachemnet.secret_code）
+          </div>
+
+          <div v-if="!chemnetQueryResult.found" class="ps-empty-tip">
+            未找到账号 <span class="cell-mono font-bold">{{ chemnetQueryResult.login }}</span> 的相关记录。
+          </div>
+
+          <template v-else-if="chemnetQueryResult.record">
+            <div class="ps-grid">
+              <div class="ps-grid__item">
+                <span class="ps-grid__label">账号 (login)</span>
+                <span class="ps-grid__value cell-mono font-bold">{{ chemnetQueryResult.record.login }}</span>
+              </div>
+              <div class="ps-grid__item">
+                <span class="ps-grid__label">当前手机号 (mobile)</span>
+                <span class="ps-grid__value cell-mono ps-highlight-mobile">{{ chemnetQueryResult.record.mobile }}</span>
+              </div>
+              <div class="ps-grid__item">
+                <span class="ps-grid__label">最新验证码 (code)</span>
+                <span class="ps-grid__value cell-mono">{{ chemnetQueryResult.record.code || '（空）' }}</span>
+              </div>
+              <div class="ps-grid__item">
+                <span class="ps-grid__label">记录 ID</span>
+                <span class="ps-grid__value cell-mono">{{ chemnetQueryResult.record.id }}</span>
+              </div>
+              <div class="ps-grid__item">
+                <span class="ps-grid__label">发送时间 (post_time)</span>
+                <span class="ps-grid__value cell-mono">{{ chemnetQueryResult.record.post_time }}</span>
+              </div>
+              <div class="ps-grid__item">
+                <span class="ps-grid__label">来源 IP (post_ip)</span>
+                <span class="ps-grid__value cell-mono">{{ chemnetQueryResult.record.post_ip || '（无）' }}</span>
+              </div>
+            </div>
+
+            <!-- 修改手机号表单 -->
+            <div class="ps-edit-box">
+              <div class="ps-edit-box__title">修改手机号</div>
+              <div class="ps-edit-box__form">
+                <div class="filter-field">
+                  <label class="filter-label">新手机号：</label>
+                  <Input
+                    v-model="chemnetNewMobile"
+                    class="filter-input"
+                    style="width: 240px"
+                    placeholder="请输入 11 位新手机号"
+                    allow-clear
+                    @keyup.enter="handleConfirmUpdateChemnet"
+                  />
+                </div>
+                <Button type="primary" size="small" :disabled="running" @click="handleConfirmUpdateChemnet">
+                  <SystemIco name="edit" :size="13" />
+                  确认修改手机号
+                </Button>
+              </div>
+            </div>
+          </template>
+        </div>
+      </template>
 
       <!-- 执行结果 -->
       <div v-if="result" class="ps-panel ps-panel--result">
@@ -78,14 +166,14 @@
           <el-tag :type="statusMeta(result.status).type" size="small">
             {{ statusMeta(result.status).text }}
           </el-tag>
-          <span class="ps-result-ordr cell-mono">订单号：{{ result.ordrNo }}</span>
+          <span class="ps-result-ordr cell-mono">流水号：{{ result.ordrNo }}</span>
           <Button v-if="result.output" type="default" size="small" @click="copyOutput">复制输出</Button>
         </div>
         <div v-if="result.error" class="ps-error">{{ result.error }}</div>
         <el-input
           :model-value="result.output || '（无输出）'"
           type="textarea"
-          :rows="12"
+          :rows="8"
           readonly
           class="ps-output"
         />
@@ -97,17 +185,17 @@
       <div class="list-head">
         <div>
           <div class="list-title">执行记录</div>
-          <div class="list-sub">每次发送都会存档，订单号按脚本历史最大值自增。</div>
+          <div class="list-sub">每次发送与修改操作均会自动存档留痕。</div>
         </div>
       </div>
 
       <div class="filter-bar">
         <div class="filter-field">
-          <label class="filter-label">申请编号：</label>
+          <label class="filter-label">搜索条件：</label>
           <Input
             v-model="queryParams.appl_id"
             class="filter-input"
-            placeholder="请输入申请编号"
+            placeholder="请输入申请编号 / 账号"
             allow-clear
             @keyup.enter="handleQuery"
           />
@@ -124,9 +212,10 @@
           <thead>
             <tr>
               <th style="width: 70px">ID</th>
-              <th style="width: 210px">订单号</th>
-              <th style="width: 210px">申请编号</th>
-              <th>交易对手户名</th>
+              <th style="width: 170px">流水/订单号</th>
+              <th style="width: 130px">脚本类型</th>
+              <th style="width: 200px">申请编号 / 账号</th>
+              <th>详情 / 手机号</th>
               <th style="width: 90px">状态</th>
               <th style="width: 160px">时间</th>
               <th style="width: 90px">操作</th>
@@ -136,8 +225,13 @@
             <tr v-for="row in dataList" :key="row.id">
               <td class="cell-num">{{ row.id }}</td>
               <td class="cell-mono">{{ row.ordrNo }}</td>
-              <td class="cell-mono">{{ row.applId }}</td>
-              <td>{{ row.cntprNme }}</td>
+              <td>
+                <el-tag size="small" :type="row.scriptKey === 'chemnet-secret-code' ? 'info' : 'primary'">
+                  {{ formatScriptKey(row.scriptKey) }}
+                </el-tag>
+              </td>
+              <td class="cell-mono font-bold">{{ row.applId }}</td>
+              <td>{{ formatRecordDetail(row) }}</td>
               <td>
                 <el-tag :type="statusMeta(row.status).type" size="small">
                   {{ statusMeta(row.status).text }}
@@ -154,7 +248,7 @@
               </td>
             </tr>
             <tr v-if="!loading && dataList.length === 0" class="empty-row">
-              <td colspan="7">暂无数据</td>
+              <td colspan="8">暂无数据</td>
             </tr>
           </tbody>
         </table>
@@ -180,8 +274,8 @@ import { Button, Input } from "animal-island-vue";
 import SystemIco from "@/components/AdminPage/SystemIco.vue";
 import PlatformScriptAPI from "@/api/develop/platform-script";
 import type {
+  ChemnetPreviewResult,
   PlatformScriptFields,
-  PlatformScriptPreview,
   PlatformScriptQueryParams,
   PlatformScriptRunItem,
 } from "@/types/api/platform-script";
@@ -190,6 +284,7 @@ defineOptions({ name: "PlatformScript", inheritAttrs: false });
 
 const scriptOptions = [
   { value: "sinoloans-comm3-loan", label: "sinoloans 交行个经贷放款测试推送" },
+  { value: "chemnet-secret-code", label: "ChemNet 验证码手机号修改 (hub_chinachemnet.secret_code)" },
 ];
 
 /** 执行状态对应的标签样式与文案 */
@@ -197,6 +292,19 @@ function statusMeta(status: string): { type: "success" | "warning" | "danger"; t
   if (status === "success") return { type: "success", text: "已执行" };
   if (status === "timeout") return { type: "warning", text: "执行超时" };
   return { type: "danger", text: "执行失败" };
+}
+
+function formatScriptKey(key: string): string {
+  if (key === "chemnet-secret-code") return "ChemNet 手机号";
+  if (key === "sinoloans-comm3-loan") return "交行放款";
+  return key;
+}
+
+function formatRecordDetail(row: PlatformScriptRunItem): string {
+  if (row.scriptKey === "chemnet-secret-code") {
+    return row.custBankAcctNo ? `修改手机: ${row.custBankAcctNo}` : (row.rawText || "-");
+  }
+  return row.cntprNme ? `对手: ${row.cntprNme}` : (row.rawText || "-");
 }
 
 const fieldDefs: { key: keyof PlatformScriptFields; label: string }[] = [
@@ -220,8 +328,16 @@ const placeholder = [
 ].join("\n");
 
 const scriptKey = ref(scriptOptions[0].value);
+
+// Sinoloans 表单状态
 const inputText = ref("");
-const previewData = ref<PlatformScriptPreview | null>(null);
+const previewData = ref<any>(null);
+
+// ChemNet 表单状态
+const chemnetLogin = ref("");
+const chemnetNewMobile = ref("");
+const chemnetQueryResult = ref<ChemnetPreviewResult | null>(null);
+
 const result = ref<PlatformScriptRunItem | null>(null);
 const execCardRef = ref<HTMLElement>();
 const previewing = ref(false);
@@ -238,7 +354,15 @@ const loading = ref(false);
 const total = ref(0);
 const dataList = ref<PlatformScriptRunItem[]>([]);
 
-async function handlePreview(): Promise<void> {
+function handleScriptChange(): void {
+  previewData.value = null;
+  chemnetQueryResult.value = null;
+  result.value = null;
+}
+
+/* ================= Sinoloans 操作 ================= */
+
+async function handlePreviewSinoloans(): Promise<void> {
   if (!inputText.value.trim()) {
     message.warning("请先粘贴推送文本");
     return;
@@ -246,16 +370,15 @@ async function handlePreview(): Promise<void> {
   previewing.value = true;
   result.value = null;
   try {
-    previewData.value = await PlatformScriptAPI.preview(scriptKey.value, inputText.value);
+    previewData.value = await PlatformScriptAPI.preview(scriptKey.value, { text: inputText.value });
   } catch {
-    // 错误信息已由请求拦截器统一提示
     previewData.value = null;
   } finally {
     previewing.value = false;
   }
 }
 
-function handleConfirmSend(): void {
+function handleConfirmSendSinoloans(): void {
   if (!previewData.value) return;
   const ordrNo = previewData.value.ordr_no;
 
@@ -266,7 +389,7 @@ function handleConfirmSend(): void {
   }).then(
     () => {
       running.value = true;
-      PlatformScriptAPI.run(scriptKey.value, inputText.value)
+      PlatformScriptAPI.run(scriptKey.value, { text: inputText.value })
         .then((run) => {
           result.value = run;
           previewData.value = null;
@@ -279,8 +402,82 @@ function handleConfirmSend(): void {
           }
           fetchList();
         })
-        .catch(() => {
-          // 错误信息已由请求拦截器统一提示
+        .finally(() => {
+          running.value = false;
+        });
+    },
+    () => {}
+  );
+}
+
+function handleClearSinoloans(): void {
+  inputText.value = "";
+  previewData.value = null;
+  result.value = null;
+}
+
+/* ================= ChemNet 操作 ================= */
+
+async function handleQueryChemnet(): Promise<void> {
+  if (!chemnetLogin.value.trim()) {
+    message.warning("请输入要查询的账号 (login)");
+    return;
+  }
+  previewing.value = true;
+  result.value = null;
+  try {
+    const res = await PlatformScriptAPI.preview(scriptKey.value, { login: chemnetLogin.value.trim() });
+    chemnetQueryResult.value = res;
+    if (res.found && res.record) {
+      chemnetNewMobile.value = res.record.mobile || "";
+      message.success(`已查询到账号 [${res.login}] 的信息`);
+    } else {
+      message.warning(`未找到账号 [${res.login}] 的记录`);
+    }
+  } catch {
+    chemnetQueryResult.value = null;
+  } finally {
+    previewing.value = false;
+  }
+}
+
+function handleConfirmUpdateChemnet(): void {
+  const login = chemnetLogin.value.trim();
+  const newMobile = chemnetNewMobile.value.trim();
+
+  if (!login) {
+    message.warning("请输入账号 (login)");
+    return;
+  }
+  if (!newMobile || !/^1\d{10}$/.test(newMobile)) {
+    message.warning("请输入合法的 11 位新手机号码");
+    return;
+  }
+
+  const currentMobile = chemnetQueryResult.value?.record?.mobile || "未知";
+
+  confirm(
+    `确认将账号【${login}】的手机号码从【${currentMobile}】修改为【${newMobile}】吗？`,
+    "确认修改手机号",
+    {
+      confirmButtonText: "确认修改",
+      cancelButtonText: "取消",
+      type: "warning",
+    }
+  ).then(
+    () => {
+      running.value = true;
+      PlatformScriptAPI.run(scriptKey.value, { login, mobile: newMobile })
+        .then((run) => {
+          result.value = run;
+          if (run.status === "success") {
+            message.success(`账号 [${login}] 手机号已成功更新为 [${newMobile}]`);
+            // 重新查询刷新界面
+            handleQueryChemnet();
+          } else {
+            message.error(run.error || "修改失败");
+          }
+          fetchList();
         })
         .finally(() => {
           running.value = false;
@@ -290,11 +487,14 @@ function handleConfirmSend(): void {
   );
 }
 
-function handleClear(): void {
-  inputText.value = "";
-  previewData.value = null;
+function handleClearChemnet(): void {
+  chemnetLogin.value = "";
+  chemnetNewMobile.value = "";
+  chemnetQueryResult.value = null;
   result.value = null;
 }
+
+/* ================= 通用操作与历史记录 ================= */
 
 async function copyOutput(): Promise<void> {
   if (!result.value?.output) return;
@@ -312,14 +512,20 @@ async function copyOutput(): Promise<void> {
 
 function handleViewOutput(row: PlatformScriptRunItem): void {
   result.value = row;
-  // 回填该条的推送文本到输入框，便于按相同数据再次推送
-  inputText.value = row.rawText || buildTextFromRow(row);
-  previewData.value = null;
-  message.success("已回填该条推送文本，可重新解析后再次发送");
+  if (row.scriptKey === "chemnet-secret-code") {
+    scriptKey.value = "chemnet-secret-code";
+    chemnetLogin.value = row.applId;
+    chemnetNewMobile.value = row.custBankAcctNo || "";
+    handleQueryChemnet();
+  } else {
+    scriptKey.value = "sinoloans-comm3-loan";
+    inputText.value = row.rawText || buildTextFromRow(row);
+    previewData.value = null;
+  }
+  message.success("已回填该条记录数据");
   execCardRef.value?.scrollIntoView({ behavior: "smooth", block: "start" });
 }
 
-/** 历史记录无原始文本时，用字段按标准格式重建推送文本 */
 function buildTextFromRow(row: PlatformScriptRunItem): string {
   return [
     `申请编号:${row.applId}`,
@@ -425,6 +631,38 @@ onMounted(fetchList);
 .ps-grid__item--ordr .ps-grid__value {
   font-weight: 700;
   color: #c0662b;
+}
+
+.ps-highlight-mobile {
+  font-size: 15px;
+  font-weight: 700;
+  color: #2b7a0b;
+}
+
+.ps-empty-tip {
+  padding: 12px 0;
+  font-size: 13px;
+  color: #c0662b;
+}
+
+.ps-edit-box {
+  margin-top: 16px;
+  padding-top: 14px;
+  border-top: 1px dashed rgba(74, 138, 54, 0.2);
+}
+
+.ps-edit-box__title {
+  margin-bottom: 10px;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--ai-text, #794f27);
+}
+
+.ps-edit-box__form {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
 }
 
 .ps-panel__footer {

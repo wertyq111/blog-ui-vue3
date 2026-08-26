@@ -25,6 +25,29 @@ export interface PlatformScriptPreview {
   fields: PlatformScriptFields;
 }
 
+/** ChemNet 验证码表记录 */
+
+export interface ChemnetSecretCodeRecord {
+  id: string;
+  login: string;
+  mobile: string;
+  code: string;
+  num: string;
+  status: string;
+  post_time: string;
+  post_ip: string;
+}
+
+/** ChemNet 查询/预览结果 */
+export interface ChemnetPreviewResult {
+  script_key: string;
+  login: string;
+  found: boolean;
+  record: ChemnetSecretCodeRecord | null;
+  list: ChemnetSecretCodeRecord[];
+  ordr_no: string;
+}
+
 /** 执行记录 / 执行结果（走 BaseResource，小驼峰键） */
 export interface PlatformScriptRunItem {
   id: number;
@@ -44,3 +67,4 @@ export interface PlatformScriptRunItem {
   error: string | null;
   createTime?: string;
 }
+
