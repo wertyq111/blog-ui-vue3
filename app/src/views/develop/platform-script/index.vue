@@ -16,17 +16,31 @@
         </div>
       </div>
 
-      <div class="filter-bar">
-        <div class="filter-field">
-          <label class="filter-label">脚本：</label>
-          <el-select v-model="scriptKey" class="filter-select" style="width: 360px" @change="handleScriptChange">
-            <el-option
-              v-for="opt in scriptOptions"
-              :key="opt.value"
-              :label="opt.label"
-              :value="opt.value"
-            />
-          </el-select>
+      <!-- 脚本卡片选择列表 -->
+      <div class="ps-card-grid">
+        <div
+          v-for="opt in scriptOptions"
+          :key="opt.value"
+          class="ps-script-card"
+          :class="{ 'ps-script-card--active': scriptKey === opt.value }"
+          @click="selectScript(opt.value)"
+        >
+          <div class="ps-script-card__header">
+            <div class="ps-script-card__icon-title">
+              <span class="ps-script-card__icon">{{ opt.icon }}</span>
+              <span class="ps-script-card__name">{{ opt.title }}</span>
+            </div>
+            <el-tag size="small" :type="opt.tagType" effect="plain" class="ps-script-card__tag">
+              {{ opt.tag }}
+            </el-tag>
+          </div>
+          <div class="ps-script-card__desc">{{ opt.desc }}</div>
+          <div class="ps-script-card__footer">
+            <span v-if="scriptKey === opt.value" class="ps-script-card__badge">
+              <SystemIco name="check" :size="12" /> 已选择
+            </span>
+            <span v-else class="ps-script-card__action">点击切换</span>
+          </div>
         </div>
       </div>
 
@@ -420,10 +434,37 @@ import type {
 defineOptions({ name: "PlatformScript", inheritAttrs: false });
 
 const scriptOptions = [
-  { value: "sinoloans-comm3-loan", label: "sinoloans 交行个经贷放款测试推送" },
-  { value: "chemnet-secret-code", label: "ChemNet 验证码手机号修改 (hub_chinachemnet.secret_code)" },
-  { value: "bankofsun-comm2-credit", label: "bankofsun 交行企业贷2.0授信测试数据生成" },
+  {
+    value: "bankofsun-comm2-credit",
+    icon: "🏢",
+    title: "bankofsun 交行企业贷 2.0 授信数据生成",
+    tag: "bankofsun",
+    tagType: "success" as const,
+    desc: "企业信息文本智能解析、建档档案比对与一键阶段一至三（已同意担保）流转",
+  },
+  {
+    value: "sinoloans-comm3-loan",
+    icon: "🏦",
+    title: "sinoloans 交行个经贷放款测试推送",
+    tag: "sinoloans",
+    tagType: "primary" as const,
+    desc: "解析放款报文参数并生成自增订单号，真实推送到银行测试网关",
+  },
+  {
+    value: "chemnet-secret-code",
+    icon: "📱",
+    title: "ChemNet 验证码手机号修改",
+    tag: "ChemNet",
+    tagType: "warning" as const,
+    desc: "查询用户注册手机号并修改 hub_chinachemnet.secret_code",
+  },
 ];
+
+function selectScript(val: string): void {
+  if (scriptKey.value === val) return;
+  scriptKey.value = val;
+  handleScriptChange();
+}
 
 /** 执行状态对应的标签样式与文案 */
 function statusMeta(status: string): { type: "success" | "warning" | "danger"; text: string } {
@@ -944,6 +985,109 @@ onMounted(fetchList);
 </script>
 
 <style lang="scss" scoped>
+.ps-card-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+  margin: 6px 0 16px;
+
+  @media (max-width: 1100px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.ps-script-card {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 14px 16px;
+  border-radius: 14px;
+  border: 1.5px solid rgba(121, 79, 39, 0.14);
+  background: var(--ai-bg-card, #ffffff);
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  user-select: none;
+
+  &:hover {
+    border-color: rgba(74, 138, 54, 0.45);
+    background: rgba(247, 251, 243, 0.4);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(121, 79, 39, 0.06);
+  }
+}
+
+.ps-script-card--active {
+  border-color: #4a8a36 !important;
+  background: rgba(74, 138, 54, 0.08) !important;
+  box-shadow: 0 4px 14px rgba(74, 138, 54, 0.14);
+
+  .ps-script-card__name {
+    color: #2b7a0b;
+    font-weight: 700;
+  }
+}
+
+.ps-script-card__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.ps-script-card__icon-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.ps-script-card__icon {
+  font-size: 18px;
+  line-height: 1;
+}
+
+.ps-script-card__name {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ai-text, #794f27);
+  line-height: 1.3;
+}
+
+.ps-script-card__tag {
+  flex-shrink: 0;
+  font-weight: 600;
+}
+
+.ps-script-card__desc {
+  font-size: 12px;
+  color: rgba(121, 79, 39, 0.65);
+  line-height: 1.45;
+  margin-bottom: 10px;
+  flex: 1;
+}
+
+.ps-script-card__footer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  font-size: 11px;
+}
+
+.ps-script-card__badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: #2b7a0b;
+  font-weight: 700;
+  background: rgba(43, 122, 11, 0.1);
+  padding: 2px 8px;
+  border-radius: 8px;
+}
+
+.ps-script-card__action {
+  color: rgba(121, 79, 39, 0.45);
+}
+
 .ps-field {
   margin: 8px 0 12px;
 }
