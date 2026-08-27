@@ -27,7 +27,9 @@
         >
           <div class="ps-script-card__header">
             <div class="ps-script-card__icon-title">
-              <span class="ps-script-card__icon">{{ opt.icon }}</span>
+              <div class="ps-script-card__icon-wrap" :class="`ps-script-card__icon-wrap--${opt.tagType}`">
+                <AnimalMenuIcon :name="opt.iconName" :size="24" />
+              </div>
               <span class="ps-script-card__name">{{ opt.title }}</span>
             </div>
             <el-tag size="small" :type="opt.tagType" effect="plain" class="ps-script-card__tag">
@@ -426,6 +428,7 @@ import { useClipboard } from "@vueuse/core";
 
 import { Button, Input } from "animal-island-vue";
 import SystemIco from "@/components/AdminPage/SystemIco.vue";
+import AnimalMenuIcon from "@/components/AnimalMenuIcon/index.vue";
 import PlatformScriptAPI from "@/api/develop/platform-script";
 import type {
   BankofsunComm2CreditFields,
@@ -442,7 +445,7 @@ defineOptions({ name: "PlatformScript", inheritAttrs: false });
 const scriptOptions = [
   {
     value: "bankofsun-comm2-credit",
-    icon: "🏢",
+    iconName: "script-corporate-credit",
     title: "bankofsun 交行企业贷 2.0 授信数据生成",
     tag: "bankofsun",
     tagType: "success" as const,
@@ -450,7 +453,7 @@ const scriptOptions = [
   },
   {
     value: "sinoloans-comm3-loan",
-    icon: "🏦",
+    iconName: "script-loan-disburse",
     title: "sinoloans 交行个经贷放款测试推送",
     tag: "sinoloans",
     tagType: "primary" as const,
@@ -458,7 +461,7 @@ const scriptOptions = [
   },
   {
     value: "chemnet-secret-code",
-    icon: "📱",
+    iconName: "script-phone-code",
     title: "ChemNet 验证码手机号修改",
     tag: "ChemNet",
     tagType: "warning" as const,
@@ -1047,12 +1050,45 @@ onMounted(fetchList);
 .ps-script-card__icon-title {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
 }
 
-.ps-script-card__icon {
-  font-size: 18px;
-  line-height: 1;
+.ps-script-card__icon-wrap {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 12px;
+  background: rgba(121, 79, 39, 0.06);
+  border: 1.5px solid rgba(121, 79, 39, 0.12);
+  flex-shrink: 0;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+
+  &--success {
+    background: rgba(111, 186, 44, 0.12);
+    border-color: rgba(111, 186, 44, 0.3);
+  }
+
+  &--primary {
+    background: rgba(78, 165, 217, 0.12);
+    border-color: rgba(78, 165, 217, 0.3);
+  }
+
+  &--warning {
+    background: rgba(255, 204, 59, 0.18);
+    border-color: rgba(255, 180, 0, 0.35);
+  }
+}
+
+.ps-script-card:hover .ps-script-card__icon-wrap {
+  transform: scale(1.08) translateY(-1px);
+  box-shadow: 0 3px 8px rgba(61, 52, 40, 0.1);
+}
+
+.ps-script-card--active .ps-script-card__icon-wrap {
+  transform: scale(1.05);
+  box-shadow: 0 2px 6px rgba(74, 138, 54, 0.18);
 }
 
 .ps-script-card__name {

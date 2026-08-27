@@ -13,6 +13,7 @@
 
 <script setup lang="ts">
 import { computed } from "vue";
+import { PLATFORM_SCRIPT_GLYPHS } from "@/constants/animal-glyphs/platform-script";
 
 defineOptions({ name: "AnimalMenuIcon" });
 
@@ -500,6 +501,9 @@ const GLYPH_DATABASE: Record<string, string> = {
     '<circle class="am-glow" cx="16.5" cy="15" r="1.4" fill="#fff"/>' +
     '<line class="s" x1="19" y1="17.4" x2="21.3" y2="19.7" stroke-width="2"/>' +
     "</g>",
+
+  // 平台脚本专属动森图标（由 @/constants/animal-glyphs/platform-script 模块化维护）
+  ...PLATFORM_SCRIPT_GLYPHS,
 };
 
 const glyph = computed<string>(() => GLYPH_DATABASE[props.name] || "");

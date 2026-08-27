@@ -102,3 +102,6 @@
 .tbl tbody tr:hover .amico {
   @include amico-play;
 }
+.ps-script-card:hover .amico {
+  @include amico-play;
+}
