@@ -80,6 +80,7 @@ export interface BankofsunMatchedCompanyData {
 export interface BankofsunComm2PreviewResult {
   script_key: string;
   fields: BankofsunComm2CreditFields;
+  explicit_keys?: string[];
   matched: boolean;
   match_message: string;
   company_data: BankofsunMatchedCompanyData | null;

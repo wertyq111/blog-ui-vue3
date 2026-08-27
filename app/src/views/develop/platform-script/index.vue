@@ -209,7 +209,7 @@
             </el-tag>
             <span class="ps-match-tip">
               {{ bankofsunPreviewData.matched
-                ? `匹配成功 (企业 CID: ${bankofsunPreviewData.company_data?.cid || '-'})，下方已为您列出当前建档原值与待更新对比，发生变更的内容已突出显示`
+                ? `匹配成功 (企业 CID: ${bankofsunPreviewData.company_data?.cid || '-'})，未传字段已自动继承档案原值，仅当您显式提供新值时才会进行修改`
                 : '未检索到该企业档案，流转时将自动在平台创建新企业档案与补充材料'
               }}
             </span>
@@ -223,8 +223,8 @@
                   <tr>
                     <th style="width: 150px">对比字段</th>
                     <th style="width: 37%">当前建档原值 (查询结果)</th>
-                    <th style="width: 37%">本次更新值 (待提交)</th>
-                    <th style="width: 100px; text-align: center">变化比对</th>
+                    <th style="width: 37%">本次提交执行值</th>
+                    <th style="width: 110px; text-align: center">变化比对</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -240,7 +240,7 @@
                     <td class="cell-mono ps-diff-cell-old">
                       {{ diff.oldValDisplay }}
                     </td>
-                    <td class="cell-mono ps-diff-cell-new">
+                    <td class="cell-mono ps-diff-cell-new" :class="{ 'ps-text-highlight': diff.diffType === 'changed' || diff.diffType === 'added' }">
                       {{ diff.newValDisplay }}
                     </td>
                     <td style="text-align: center">
@@ -250,8 +250,8 @@
                       <el-tag v-else-if="diff.diffType === 'added'" type="primary" size="small">
                         新补充
                       </el-tag>
-                      <el-tag v-else-if="diff.diffType === 'cleared'" type="danger" size="small">
-                        已清空
+                      <el-tag v-else-if="diff.diffType === 'inherited'" type="info" size="small">
+                        继承原值
                       </el-tag>
                       <el-tag v-else type="info" size="small">
                         无变化
@@ -575,7 +575,7 @@ interface BankofsunDiffItem {
   label: string;
   oldValDisplay: string;
   newValDisplay: string;
-  diffType: "same" | "changed" | "added" | "cleared";
+  diffType: "same" | "changed" | "added" | "inherited";
 }
 
 const bankofsunDiffList = computed<BankofsunDiffItem[]>(() => {
@@ -584,6 +584,7 @@ const bankofsunDiffList = computed<BankofsunDiffItem[]>(() => {
   }
   const companyData = bankofsunPreviewData.value.company_data;
   const fields = bankofsunPreviewData.value.fields;
+  const explicitKeys = new Set(bankofsunPreviewData.value.explicit_keys || []);
 
   const compareDefs: {
     key: string;
@@ -650,12 +651,14 @@ const bankofsunDiffList = computed<BankofsunDiffItem[]>(() => {
   return compareDefs.map((def) => {
     const rawOld = def.getOld(companyData).trim();
     const rawNew = def.getNew(fields).trim();
+    const isExplicit = explicitKeys.has(def.key);
 
-    let diffType: "same" | "changed" | "added" | "cleared" = "same";
-    if (!rawOld && rawNew) {
+    let diffType: "same" | "changed" | "added" | "inherited" = "same";
+
+    if (!isExplicit && def.key !== "company" && def.key !== "social_credit_code") {
+      diffType = "inherited";
+    } else if (!rawOld && rawNew) {
       diffType = "added";
-    } else if (rawOld && !rawNew) {
-      diffType = "cleared";
     } else if (rawOld !== rawNew) {
       diffType = "changed";
     }
