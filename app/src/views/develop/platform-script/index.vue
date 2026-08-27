@@ -160,6 +160,73 @@
         </div>
       </template>
 
+      <!-- 脚本 3：Bankofsun 交行企业贷 2.0 自动化流转 -->
+      <template v-else-if="scriptKey === 'bankofsun-comm2-credit'">
+        <div class="ps-field">
+          <div class="ps-field__label">企业及授信申请文本</div>
+          <el-input
+            v-model="bankofsunText"
+            type="textarea"
+            :rows="8"
+            :placeholder="bankofsunPlaceholder"
+          />
+        </div>
+
+        <div class="toolbar">
+          <Button type="primary" size="small" :disabled="previewing" @click="handlePreviewBankofsun">
+            <SystemIco name="search" :size="13" />
+            解析与匹配预览
+          </Button>
+          <Button type="default" size="small" @click="handleFillSampleBankofsun">填入测试示例</Button>
+          <Button type="default" size="small" @click="handleClearBankofsun">清空</Button>
+        </div>
+
+        <!-- 预览面板 -->
+        <div v-if="bankofsunPreviewData" class="ps-panel ps-panel--preview">
+          <div class="ps-panel__title">
+            <SystemIco name="edit" :size="13" />
+            企业信息解析与建档匹配（核对无误后一键自动流转至阶段三）
+          </div>
+
+          <!-- 匹配状态指示 -->
+          <div class="ps-match-status" :class="bankofsunPreviewData.matched ? 'ps-match-status--found' : 'ps-match-status--new'">
+            <el-tag :type="bankofsunPreviewData.matched ? 'success' : 'warning'" size="small">
+              {{ bankofsunPreviewData.matched ? '已在平台建档' : '未在平台建档' }}
+            </el-tag>
+            <span class="ps-match-tip">
+              {{ bankofsunPreviewData.matched
+                ? `匹配成功 (企业 CID: ${bankofsunPreviewData.company_data?.cid || '-'})，流转时将自动更新企业及补充资料`
+                : '未检索到该企业档案，流转时将自动在平台创建新企业档案与补充材料'
+              }}
+            </span>
+          </div>
+
+          <div class="ps-grid">
+            <div v-for="def in bankofsunFieldDefs" :key="def.key" class="ps-grid__item">
+              <span class="ps-grid__label">{{ def.label }}</span>
+              <span class="ps-grid__value cell-mono">
+                {{ bankofsunPreviewData.fields[def.key] !== undefined && bankofsunPreviewData.fields[def.key] !== ''
+                  ? bankofsunPreviewData.fields[def.key]
+                  : '（未填写/默认）'
+                }}
+              </span>
+            </div>
+            <div class="ps-grid__item ps-grid__item--ordr">
+              <span class="ps-grid__label">订单号 / 流水号 ordrNo（自增）</span>
+              <span class="ps-grid__value cell-mono">{{ bankofsunPreviewData.ordr_no }}</span>
+            </div>
+          </div>
+
+          <div class="ps-panel__footer">
+            <Button type="primary" size="small" :disabled="running" @click="handleConfirmRunBankofsun">
+              <SystemIco name="save" :size="13" />
+              一键执行流转（阶段一至阶段三）
+            </Button>
+            <Button type="default" size="small" @click="bankofsunPreviewData = null">取消</Button>
+          </div>
+        </div>
+      </template>
+
       <!-- 执行结果 -->
       <div v-if="result" class="ps-panel ps-panel--result">
         <div class="ps-panel__title">
@@ -274,6 +341,8 @@ import { Button, Input } from "animal-island-vue";
 import SystemIco from "@/components/AdminPage/SystemIco.vue";
 import PlatformScriptAPI from "@/api/develop/platform-script";
 import type {
+  BankofsunComm2CreditFields,
+  BankofsunComm2PreviewResult,
   ChemnetPreviewResult,
   PlatformScriptFields,
   PlatformScriptQueryParams,
@@ -285,6 +354,7 @@ defineOptions({ name: "PlatformScript", inheritAttrs: false });
 const scriptOptions = [
   { value: "sinoloans-comm3-loan", label: "sinoloans 交行个经贷放款测试推送" },
   { value: "chemnet-secret-code", label: "ChemNet 验证码手机号修改 (hub_chinachemnet.secret_code)" },
+  { value: "bankofsun-comm2-credit", label: "bankofsun 交行企业贷2.0授信测试数据生成" },
 ];
 
 /** 执行状态对应的标签样式与文案 */
@@ -297,12 +367,16 @@ function statusMeta(status: string): { type: "success" | "warning" | "danger"; t
 function formatScriptKey(key: string): string {
   if (key === "chemnet-secret-code") return "ChemNet 手机号";
   if (key === "sinoloans-comm3-loan") return "交行放款";
+  if (key === "bankofsun-comm2-credit") return "交行企业贷 2.0";
   return key;
 }
 
 function formatRecordDetail(row: PlatformScriptRunItem): string {
   if (row.scriptKey === "chemnet-secret-code") {
     return row.custBankAcctNo ? `修改手机: ${row.custBankAcctNo}` : (row.rawText || "-");
+  }
+  if (row.scriptKey === "bankofsun-comm2-credit") {
+    return row.custBankAcctNo ? `税号: ${row.custBankAcctNo}` : (row.rawText || "-");
   }
   return row.cntprNme ? `对手: ${row.cntprNme}` : (row.rawText || "-");
 }
@@ -317,6 +391,19 @@ const fieldDefs: { key: keyof PlatformScriptFields; label: string }[] = [
   { key: "actope_bchnw_nme", label: "开户网点名" },
 ];
 
+const bankofsunFieldDefs: { key: keyof BankofsunComm2CreditFields; label: string }[] = [
+  { key: "company", label: "企业全称" },
+  { key: "social_credit_code", label: "统一社会信用代码" },
+  { key: "legal", label: "法人姓名" },
+  { key: "id_card", label: "法人身份证号" },
+  { key: "mobile", label: "手机号" },
+  { key: "buyer_company_type", label: "企业类型" },
+  { key: "trade_amount", label: "近两年平均交易量 (万元)" },
+  { key: "loan_cardno", label: "对公客户号 / 贷款卡号" },
+  { key: "amount", label: "申请额度 (分)" },
+  { key: "ecif_cst_no", label: "法人客户号" },
+];
+
 const placeholder = [
   "申请编号:SYBG5231803687502921728",
   "收款银行账户:6222620110099748528",
@@ -325,6 +412,18 @@ const placeholder = [
   "交易对手户名:王瑾诗",
   "开户网点号: 01310207999",
   "开户网点名:交通银行上海陕西南路支行",
+].join("\n");
+
+const bankofsunPlaceholder = [
+  "企业名称: 起起落落测试公司八",
+  "统一社会信用代码: 9144080021832648A3",
+  "法人姓名: 王五",
+  "法人身份证号: 350623198711261343",
+  "手机号: 13800000000",
+  "企业类型: 贸易型企业",
+  "近两年平均交易量: 5000",
+  "对公客户号: 0115687030449558",
+  "申请额度: 60000000",
 ].join("\n");
 
 const scriptKey = ref(scriptOptions[0].value);
@@ -337,6 +436,10 @@ const previewData = ref<any>(null);
 const chemnetLogin = ref("");
 const chemnetNewMobile = ref("");
 const chemnetQueryResult = ref<ChemnetPreviewResult | null>(null);
+
+// Bankofsun 企业贷 2.0 表单状态
+const bankofsunText = ref("");
+const bankofsunPreviewData = ref<BankofsunComm2PreviewResult | null>(null);
 
 const result = ref<PlatformScriptRunItem | null>(null);
 const execCardRef = ref<HTMLElement>();
@@ -357,6 +460,7 @@ const dataList = ref<PlatformScriptRunItem[]>([]);
 function handleScriptChange(): void {
   previewData.value = null;
   chemnetQueryResult.value = null;
+  bankofsunPreviewData.value = null;
   result.value = null;
 }
 
@@ -494,6 +598,78 @@ function handleClearChemnet(): void {
   result.value = null;
 }
 
+/* ================= Bankofsun 交行企业贷 2.0 操作 ================= */
+
+async function handlePreviewBankofsun(): Promise<void> {
+  if (!bankofsunText.value.trim()) {
+    message.warning("请先粘贴企业及授信申请文本");
+    return;
+  }
+  previewing.value = true;
+  result.value = null;
+  try {
+    const res = await PlatformScriptAPI.preview(scriptKey.value, { text: bankofsunText.value });
+    bankofsunPreviewData.value = res;
+    if (res.matched) {
+      message.success(`已检索到平台企业档案 (CID: ${res.company_data?.cid || '-'})`);
+    } else {
+      message.info("未匹配到企业，执行时将自动创建档案");
+    }
+  } catch {
+    bankofsunPreviewData.value = null;
+  } finally {
+    previewing.value = false;
+  }
+}
+
+function handleFillSampleBankofsun(): void {
+  bankofsunText.value = bankofsunPlaceholder;
+  bankofsunPreviewData.value = null;
+  result.value = null;
+  message.success("已填入测试企业数据示例");
+}
+
+function handleClearBankofsun(): void {
+  bankofsunText.value = "";
+  bankofsunPreviewData.value = null;
+  result.value = null;
+}
+
+function handleConfirmRunBankofsun(): void {
+  if (!bankofsunPreviewData.value) return;
+  const companyName = bankofsunPreviewData.value.fields.company;
+  const ordrNo = bankofsunPreviewData.value.ordr_no;
+
+  confirm(
+    `确认对企业【${companyName}】一键执行阶段一至阶段三自动流转吗？（流水号：${ordrNo}）`,
+    "确认执行流转",
+    {
+      confirmButtonText: "确认执行",
+      cancelButtonText: "取消",
+      type: "warning",
+    }
+  ).then(
+    () => {
+      running.value = true;
+      PlatformScriptAPI.run(scriptKey.value, { text: bankofsunText.value })
+        .then((run) => {
+          result.value = run;
+          bankofsunPreviewData.value = null;
+          if (run.status === "success") {
+            message.success(`企业【${companyName}】授信数据已成功生成并达成阶段三！`);
+          } else {
+            message.error(run.error || "执行流转失败");
+          }
+          fetchList();
+        })
+        .finally(() => {
+          running.value = false;
+        });
+    },
+    () => {}
+  );
+}
+
 /* ================= 通用操作与历史记录 ================= */
 
 async function copyOutput(): Promise<void> {
@@ -517,6 +693,10 @@ function handleViewOutput(row: PlatformScriptRunItem): void {
     chemnetLogin.value = row.applId;
     chemnetNewMobile.value = row.custBankAcctNo || "";
     handleQueryChemnet();
+  } else if (row.scriptKey === "bankofsun-comm2-credit") {
+    scriptKey.value = "bankofsun-comm2-credit";
+    bankofsunText.value = row.rawText || buildBankofsunTextFromRow(row);
+    bankofsunPreviewData.value = null;
   } else {
     scriptKey.value = "sinoloans-comm3-loan";
     inputText.value = row.rawText || buildTextFromRow(row);
@@ -524,6 +704,16 @@ function handleViewOutput(row: PlatformScriptRunItem): void {
   }
   message.success("已回填该条记录数据");
   execCardRef.value?.scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
+function buildBankofsunTextFromRow(row: PlatformScriptRunItem): string {
+  return [
+    `企业名称:${row.applId}`,
+    `统一社会信用代码:${row.custBankAcctNo}`,
+    `法人姓名:${row.cntprNme}`,
+    `近两年平均交易量:${row.custPayAmt}`,
+    `对公客户号:${row.cntrctNo}`,
+  ].join("\n");
 }
 
 function buildTextFromRow(row: PlatformScriptRunItem): string {
@@ -669,6 +859,26 @@ onMounted(fetchList);
   display: flex;
   gap: 8px;
   margin-top: 14px;
+}
+
+.ps-match-status {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 14px;
+  padding: 8px 12px;
+  border-radius: 10px;
+  background: rgba(74, 138, 54, 0.08);
+  font-size: 13px;
+}
+
+.ps-match-status--new {
+  background: rgba(230, 140, 30, 0.1);
+}
+
+.ps-match-tip {
+  font-size: 12px;
+  color: var(--ai-text, #794f27);
 }
 
 .ps-error {

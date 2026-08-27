@@ -48,6 +48,44 @@ export interface ChemnetPreviewResult {
   ordr_no: string;
 }
 
+/** bankofsun 企业贷 2.0 解析字段 */
+export interface BankofsunComm2CreditFields {
+  company: string;
+  social_credit_code: string;
+  legal: string;
+  id_card: string;
+  mobile: string;
+  buyer_company_type: string;
+  trade_amount: number;
+  loan_cardno: string;
+  amount: number;
+  ecif_cst_no?: string;
+}
+
+/** bankofsun 匹配企业信息 */
+export interface BankofsunMatchedCompanyData {
+  cid: number;
+  company: string;
+  social_credit_code: string;
+  legal?: string;
+  id_card?: string;
+  mobile?: string;
+  company_type?: string;
+  buyerCompanyType?: string;
+  aveInterAmt?: string | number;
+  ECIFCstNo?: string;
+}
+
+/** bankofsun 预览/匹配结果 */
+export interface BankofsunComm2PreviewResult {
+  script_key: string;
+  fields: BankofsunComm2CreditFields;
+  matched: boolean;
+  match_message: string;
+  company_data: BankofsunMatchedCompanyData | null;
+  ordr_no: string;
+}
+
 /** 执行记录 / 执行结果（走 BaseResource，小驼峰键） */
 export interface PlatformScriptRunItem {
   id: number;
