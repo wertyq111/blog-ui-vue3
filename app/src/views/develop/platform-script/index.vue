@@ -195,24 +195,94 @@
             </el-tag>
             <span class="ps-match-tip">
               {{ bankofsunPreviewData.matched
-                ? `匹配成功 (企业 CID: ${bankofsunPreviewData.company_data?.cid || '-'})，流转时将自动更新企业及补充资料`
+                ? `匹配成功 (企业 CID: ${bankofsunPreviewData.company_data?.cid || '-'})，下方已为您列出当前建档原值与待更新对比，发生变更的内容已突出显示`
                 : '未检索到该企业档案，流转时将自动在平台创建新企业档案与补充材料'
               }}
             </span>
           </div>
 
-          <div class="ps-grid">
-            <div v-for="def in bankofsunFieldDefs" :key="def.key" class="ps-grid__item">
-              <span class="ps-grid__label">{{ def.label }}</span>
-              <span class="ps-grid__value cell-mono">
-                {{ formatBankofsunFieldValue(def.key, bankofsunPreviewData.fields[def.key]) }}
-              </span>
+          <!-- 1. 已建档：对比表格视图 -->
+          <template v-if="bankofsunPreviewData.matched && bankofsunPreviewData.company_data">
+            <div class="ps-diff-table-wrap">
+              <table class="tbl ps-diff-table">
+                <thead>
+                  <tr>
+                    <th style="width: 150px">对比字段</th>
+                    <th style="width: 37%">当前建档原值 (查询结果)</th>
+                    <th style="width: 37%">本次更新值 (待提交)</th>
+                    <th style="width: 100px; text-align: center">变化比对</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr
+                    v-for="diff in bankofsunDiffList"
+                    :key="diff.key"
+                    :class="[
+                      diff.diffType === 'changed' ? 'ps-diff-row--changed' : '',
+                      diff.diffType === 'added' ? 'ps-diff-row--added' : '',
+                    ]"
+                  >
+                    <td class="font-bold">{{ diff.label }}</td>
+                    <td class="cell-mono ps-diff-cell-old">
+                      {{ diff.oldValDisplay }}
+                    </td>
+                    <td class="cell-mono ps-diff-cell-new">
+                      {{ diff.newValDisplay }}
+                    </td>
+                    <td style="text-align: center">
+                      <el-tag v-if="diff.diffType === 'changed'" type="warning" size="small" effect="dark">
+                        已修改
+                      </el-tag>
+                      <el-tag v-else-if="diff.diffType === 'added'" type="primary" size="small">
+                        新补充
+                      </el-tag>
+                      <el-tag v-else-if="diff.diffType === 'cleared'" type="danger" size="small">
+                        已清空
+                      </el-tag>
+                      <el-tag v-else type="info" size="small">
+                        无变化
+                      </el-tag>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
             </div>
-            <div class="ps-grid__item ps-grid__item--ordr">
-              <span class="ps-grid__label">订单号 / 流水号 ordrNo（自增）</span>
-              <span class="ps-grid__value cell-mono">{{ bankofsunPreviewData.ordr_no }}</span>
+
+            <!-- 流转专属参数 -->
+            <div class="ps-extra-params">
+              <div class="ps-extra-params__title">流转申请参数：</div>
+              <div class="ps-grid">
+                <div class="ps-grid__item">
+                  <span class="ps-grid__label">对公客户号 / 贷款卡号</span>
+                  <span class="ps-grid__value cell-mono font-bold">{{ bankofsunPreviewData.fields.loan_cardno || '（未填写/默认）' }}</span>
+                </div>
+                <div class="ps-grid__item">
+                  <span class="ps-grid__label">申请授信额度</span>
+                  <span class="ps-grid__value cell-mono font-bold">{{ formatBankofsunFieldValue('amount', bankofsunPreviewData.fields.amount) }}</span>
+                </div>
+                <div class="ps-grid__item ps-grid__item--ordr">
+                  <span class="ps-grid__label">订单号 / 流水号 ordrNo（自增）</span>
+                  <span class="ps-grid__value cell-mono">{{ bankofsunPreviewData.ordr_no }}</span>
+                </div>
+              </div>
             </div>
-          </div>
+          </template>
+
+          <!-- 2. 未建档：直接展示所有解析字段 -->
+          <template v-else>
+            <div class="ps-grid">
+              <div v-for="def in bankofsunFieldDefs" :key="def.key" class="ps-grid__item">
+                <span class="ps-grid__label">{{ def.label }}</span>
+                <span class="ps-grid__value cell-mono">
+                  {{ formatBankofsunFieldValue(def.key, bankofsunPreviewData.fields[def.key]) }}
+                </span>
+              </div>
+              <div class="ps-grid__item ps-grid__item--ordr">
+                <span class="ps-grid__label">订单号 / 流水号 ordrNo（自增）</span>
+                <span class="ps-grid__value cell-mono">{{ bankofsunPreviewData.ordr_no }}</span>
+              </div>
+            </div>
+          </template>
 
           <div class="ps-panel__footer">
             <Button type="primary" size="small" :disabled="running" @click="handleConfirmRunBankofsun">
@@ -331,7 +401,7 @@
 
 <script setup lang="ts">
 import { confirm, message } from "@/utils/feedback";
-import { onMounted, reactive, ref } from "vue";
+import { computed, onMounted, reactive, ref } from "vue";
 import { useClipboard } from "@vueuse/core";
 
 import { Button, Input } from "animal-island-vue";
@@ -340,6 +410,7 @@ import PlatformScriptAPI from "@/api/develop/platform-script";
 import type {
   BankofsunComm2CreditFields,
   BankofsunComm2PreviewResult,
+  BankofsunMatchedCompanyData,
   ChemnetPreviewResult,
   PlatformScriptFields,
   PlatformScriptQueryParams,
@@ -457,6 +528,109 @@ const chemnetQueryResult = ref<ChemnetPreviewResult | null>(null);
 // Bankofsun 企业贷 2.0 表单状态
 const bankofsunText = ref("");
 const bankofsunPreviewData = ref<BankofsunComm2PreviewResult | null>(null);
+
+interface BankofsunDiffItem {
+  key: string;
+  label: string;
+  oldValDisplay: string;
+  newValDisplay: string;
+  diffType: "same" | "changed" | "added" | "cleared";
+}
+
+const bankofsunDiffList = computed<BankofsunDiffItem[]>(() => {
+  if (!bankofsunPreviewData.value?.matched || !bankofsunPreviewData.value?.company_data) {
+    return [];
+  }
+  const companyData = bankofsunPreviewData.value.company_data;
+  const fields = bankofsunPreviewData.value.fields;
+
+  const compareDefs: {
+    key: string;
+    label: string;
+    getOld: (d: BankofsunMatchedCompanyData) => string;
+    getNew: (f: BankofsunComm2CreditFields) => string;
+    formatOld?: (v: string) => string;
+    formatNew?: (v: string) => string;
+  }[] = [
+    {
+      key: "company",
+      label: "企业全称",
+      getOld: (d) => d.company || "",
+      getNew: (f) => f.company || "",
+    },
+    {
+      key: "social_credit_code",
+      label: "统一社会信用代码",
+      getOld: (d) => d.social_credit_code || "",
+      getNew: (f) => f.social_credit_code || "",
+    },
+    {
+      key: "legal",
+      label: "法人姓名",
+      getOld: (d) => d.legal || "",
+      getNew: (f) => f.legal || "",
+    },
+    {
+      key: "id_card",
+      label: "法人身份证号",
+      getOld: (d) => d.id_card || "",
+      getNew: (f) => f.id_card || "",
+    },
+    {
+      key: "mobile",
+      label: "手机号",
+      getOld: (d) => d.mobile || "",
+      getNew: (f) => f.mobile || "",
+    },
+    {
+      key: "buyer_company_type",
+      label: "企业类型",
+      getOld: (d) => (d.buyerCompanyType ? (d.buyerCompanyType.toUpperCase() === "S" ? "S" : "M") : ""),
+      getNew: (f) => f.buyer_company_type || "",
+      formatOld: (v) => (v ? (v === "S" ? "S（生产型/微型企业，代码 0）" : "M（贸易型企业，代码 1）") : "（未设置）"),
+      formatNew: (v) => (v ? (v === "S" ? "S（生产型/微型企业，代码 0）" : "M（贸易型企业，代码 1）") : "（未填写）"),
+    },
+    {
+      key: "trade_amount",
+      label: "近两年平均交易量",
+      getOld: (d) => (d.aveInterAmt !== undefined && d.aveInterAmt !== null && d.aveInterAmt !== "" ? String(d.aveInterAmt) : ""),
+      getNew: (f) => (f.trade_amount !== undefined && f.trade_amount !== null ? String(f.trade_amount) : ""),
+      formatOld: (v) => (v ? `${v} 万元` : "（未设置）"),
+      formatNew: (v) => (v ? `${v} 万元` : "（未填写）"),
+    },
+    {
+      key: "ecif_cst_no",
+      label: "法人客户号",
+      getOld: (d) => d.ECIFCstNo || "",
+      getNew: (f) => f.ecif_cst_no || "",
+    },
+  ];
+
+  return compareDefs.map((def) => {
+    const rawOld = def.getOld(companyData).trim();
+    const rawNew = def.getNew(fields).trim();
+
+    let diffType: "same" | "changed" | "added" | "cleared" = "same";
+    if (!rawOld && rawNew) {
+      diffType = "added";
+    } else if (rawOld && !rawNew) {
+      diffType = "cleared";
+    } else if (rawOld !== rawNew) {
+      diffType = "changed";
+    }
+
+    const oldValDisplay = def.formatOld ? def.formatOld(rawOld) : (rawOld || "（空）");
+    const newValDisplay = def.formatNew ? def.formatNew(rawNew) : (rawNew || "（保持为空）");
+
+    return {
+      key: def.key,
+      label: def.label,
+      oldValDisplay,
+      newValDisplay,
+      diffType,
+    };
+  });
+});
 
 const result = ref<PlatformScriptRunItem | null>(null);
 const execCardRef = ref<HTMLElement>();
@@ -895,6 +1069,70 @@ onMounted(fetchList);
 
 .ps-match-tip {
   font-size: 12px;
+  color: var(--ai-text, #794f27);
+}
+
+.ps-diff-table-wrap {
+  margin: 12px 0 16px;
+  overflow-x: auto;
+  border-radius: 12px;
+  border: 1px solid rgba(121, 79, 39, 0.15);
+  background: var(--ai-bg-card, #ffffff);
+}
+
+.ps-diff-table {
+  width: 100%;
+  border-collapse: collapse;
+
+  th {
+    background: rgba(74, 138, 54, 0.08);
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--ai-text, #794f27);
+    padding: 10px 12px;
+  }
+
+  td {
+    font-size: 13px;
+    padding: 8px 12px;
+    border-top: 1px solid rgba(121, 79, 39, 0.08);
+  }
+}
+
+.ps-diff-row--changed {
+  background: rgba(230, 140, 30, 0.09) !important;
+
+  .ps-diff-cell-new {
+    color: #c0662b;
+    font-weight: 700;
+  }
+}
+
+.ps-diff-row--added {
+  background: rgba(43, 122, 11, 0.08) !important;
+
+  .ps-diff-cell-new {
+    color: #2b7a0b;
+    font-weight: 700;
+  }
+}
+
+.ps-diff-cell-old {
+  color: rgba(121, 79, 39, 0.65);
+}
+
+.ps-extra-params {
+  margin-top: 14px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: rgba(243, 247, 252, 0.7);
+  border: 1px dashed rgba(64, 120, 200, 0.25);
+}
+
+.ps-extra-params__title {
+  margin-bottom: 8px;
+  font-size: 12px;
+  font-weight: 700;
   color: var(--ai-text, #794f27);
 }
 
