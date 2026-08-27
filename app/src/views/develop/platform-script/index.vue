@@ -205,10 +205,7 @@
             <div v-for="def in bankofsunFieldDefs" :key="def.key" class="ps-grid__item">
               <span class="ps-grid__label">{{ def.label }}</span>
               <span class="ps-grid__value cell-mono">
-                {{ bankofsunPreviewData.fields[def.key] !== undefined && bankofsunPreviewData.fields[def.key] !== ''
-                  ? bankofsunPreviewData.fields[def.key]
-                  : '（未填写/默认）'
-                }}
+                {{ formatBankofsunFieldValue(def.key, bankofsunPreviewData.fields[def.key]) }}
               </span>
             </div>
             <div class="ps-grid__item ps-grid__item--ordr">
@@ -379,6 +376,26 @@ function formatRecordDetail(row: PlatformScriptRunItem): string {
     return row.custBankAcctNo ? `税号: ${row.custBankAcctNo}` : (row.rawText || "-");
   }
   return row.cntprNme ? `对手: ${row.cntprNme}` : (row.rawText || "-");
+}
+
+function formatBankofsunFieldValue(key: keyof BankofsunComm2CreditFields, value: any): string {
+  if (value === undefined || value === null || value === "") {
+    return "（未填写/默认）";
+  }
+  if (key === "buyer_company_type") {
+    if (value === "S") return "S（生产型/微型企业，代码 0）";
+    if (value === "M") return "M（贸易型企业，代码 1）";
+    return String(value);
+  }
+  if (key === "amount") {
+    const yuan = Number(value) / 100;
+    const wan = yuan / 10000;
+    return `${value} 分（${wan} 万元）`;
+  }
+  if (key === "trade_amount") {
+    return `${value} 万元`;
+  }
+  return String(value);
 }
 
 const fieldDefs: { key: keyof PlatformScriptFields; label: string }[] = [
