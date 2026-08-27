@@ -1,6 +1,11 @@
 <template>
   <div class="weather-avatar-frame">
-    <img class="weather-avatar-frame__avatar" :src="src" :alt="alt" />
+    <img
+      class="weather-avatar-frame__avatar"
+      :src="currentSrc"
+      :alt="alt"
+      @error="imgFailed = true"
+    />
     <img class="weather-avatar-frame__ring" :src="weatherAvatarRing" alt="" aria-hidden="true" />
     <Transition name="weather-avatar-badge" mode="out-in">
       <span
@@ -23,7 +28,8 @@
 </template>
 
 <script setup lang="ts">
-import { computed, type Component } from "vue";
+import { computed, ref, watch, type Component } from "vue";
+import { defaultAvatarByGender } from "@/utils/avatar";
 import {
   Cherry,
   Cloudy,
@@ -82,6 +88,21 @@ const weatherBadgeStyle = computed(() => ({
   backgroundColor: weatherConfig.value.background,
   color: weatherConfig.value.color,
 }));
+
+const imgFailed = ref(false);
+const currentSrc = computed(() => {
+  if (imgFailed.value || !props.src) {
+    return defaultAvatarByGender();
+  }
+  return props.src;
+});
+
+watch(
+  () => props.src,
+  () => {
+    imgFailed.value = false;
+  }
+);
 </script>
 
 <style lang="scss" scoped>
