@@ -221,9 +221,15 @@
               <table class="tbl ps-diff-table">
                 <thead>
                   <tr>
-                    <th style="width: 150px">对比字段</th>
-                    <th style="width: 37%">当前建档原值 (查询结果)</th>
-                    <th style="width: 37%">本次提交执行值</th>
+                    <th style="width: 140px">对比字段</th>
+                    <th class="ps-th-old" style="width: 38%">
+                      <span class="ps-th-badge ps-th-badge--old">原档案</span>
+                      当前建档原值 (查询结果)
+                    </th>
+                    <th class="ps-th-new" style="width: 38%">
+                      <span class="ps-th-badge ps-th-badge--new">新提交</span>
+                      本次提交执行值 (流转更新)
+                    </th>
                     <th style="width: 110px; text-align: center">变化比对</th>
                   </tr>
                 </thead>
@@ -664,7 +670,7 @@ const bankofsunDiffList = computed<BankofsunDiffItem[]>(() => {
     }
 
     const oldValDisplay = def.formatOld ? def.formatOld(rawOld) : (rawOld || "（空）");
-    const newValDisplay = def.formatNew ? def.formatNew(rawNew) : (rawNew || "（保持为空）");
+    const newValDisplay = def.formatNew ? def.formatNew(rawNew) : (rawNew || "（空）");
 
     return {
       key: def.key,
@@ -1232,11 +1238,21 @@ onMounted(fetchList);
   border-collapse: collapse;
 
   th {
-    background: rgba(74, 138, 54, 0.08);
     font-size: 12px;
     font-weight: 700;
     color: var(--ai-text, #794f27);
     padding: 10px 12px;
+    background: rgba(74, 138, 54, 0.08);
+  }
+
+  .ps-th-old {
+    background: rgba(121, 79, 39, 0.06);
+    border-right: 1px solid rgba(121, 79, 39, 0.12);
+  }
+
+  .ps-th-new {
+    background: rgba(74, 138, 54, 0.12);
+    border-left: 2px solid rgba(74, 138, 54, 0.35);
   }
 
   td {
@@ -1244,28 +1260,54 @@ onMounted(fetchList);
     padding: 8px 12px;
     border-top: 1px solid rgba(121, 79, 39, 0.08);
   }
+
+  .ps-diff-cell-old {
+    background: rgba(121, 79, 39, 0.02);
+    color: rgba(121, 79, 39, 0.7);
+    border-right: 1px solid rgba(121, 79, 39, 0.1);
+  }
+
+  .ps-diff-cell-new {
+    background: rgba(255, 255, 255, 0.7);
+    color: var(--ai-text, #794f27);
+    font-weight: 600;
+    border-left: 2px solid rgba(74, 138, 54, 0.35);
+  }
+}
+
+.ps-th-badge {
+  display: inline-block;
+  padding: 1px 6px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 700;
+  margin-right: 6px;
+}
+
+.ps-th-badge--old {
+  background: rgba(121, 79, 39, 0.15);
+  color: #794f27;
+}
+
+.ps-th-badge--new {
+  background: rgba(43, 122, 11, 0.18);
+  color: #2b7a0b;
 }
 
 .ps-diff-row--changed {
-  background: rgba(230, 140, 30, 0.09) !important;
-
   .ps-diff-cell-new {
-    color: #c0662b;
-    font-weight: 700;
+    background: rgba(230, 140, 30, 0.12) !important;
+    color: #c0662b !important;
+    font-weight: 700 !important;
   }
 }
 
 .ps-diff-row--added {
-  background: rgba(43, 122, 11, 0.08) !important;
-
   .ps-diff-cell-new {
-    color: #2b7a0b;
-    font-weight: 700;
+    background: rgba(43, 122, 11, 0.12) !important;
+    color: #2b7a0b !important;
+    font-weight: 700 !important;
   }
-}
-
-.ps-diff-cell-old {
-  color: rgba(121, 79, 39, 0.65);
 }
 
 .ps-extra-params {
