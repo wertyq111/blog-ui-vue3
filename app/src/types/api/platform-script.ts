@@ -74,6 +74,12 @@ export interface BankofsunMatchedCompanyData {
   buyerCompanyType?: string;
   aveInterAmt?: string | number;
   ECIFCstNo?: string;
+  has_comm2_apply?: boolean;
+  comm2_apply_id?: number;
+  apply_no?: string | null;
+  has_apply_no?: boolean;
+  cust_name?: string | null;
+  guarantee_status?: number;
 }
 
 /** bankofsun 预览/匹配结果 */

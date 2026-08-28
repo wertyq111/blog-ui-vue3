@@ -35,7 +35,7 @@ const PlatformScriptAPI = {
   },
 
   /** 执行推送 / 修改 */
-  run(scriptKey: string, params: { text?: string; login?: string; mobile?: string }) {
+  run(scriptKey: string, params: { text?: string; login?: string; mobile?: string; clear_apply_no?: boolean }) {
     return request<any, PlatformScriptRunItem>({
       url: `${BASE_URL}/run`,
       method: "post",

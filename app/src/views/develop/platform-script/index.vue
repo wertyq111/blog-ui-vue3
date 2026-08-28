@@ -217,6 +217,41 @@
             </span>
           </div>
 
+          <!-- 历史 apply_no 冲突预警与清空控制 -->
+          <div
+            v-if="bankofsunPreviewData.company_data?.has_apply_no"
+            class="ps-applyno-alert"
+          >
+            <div class="ps-applyno-alert__header">
+              <div class="ps-applyno-alert__title">
+                <el-tag type="danger" size="small" effect="dark">
+                  历史单号冲突预警
+                </el-tag>
+                <span class="ps-applyno-alert__heading font-bold">检测到该企业已绑定历史交行申请单号 (apply_no)</span>
+              </div>
+            </div>
+            <div class="ps-applyno-alert__body">
+              <div class="ps-applyno-alert__info-row">
+                <span class="ps-applyno-alert__label">库中绑定单号：</span>
+                <span class="ps-applyno-alert__value cell-mono font-bold">{{ bankofsunPreviewData.company_data.apply_no }}</span>
+                <el-tag v-if="bankofsunPreviewData.company_data.cust_name" size="small" type="info" class="ps-applyno-alert__cust">
+                  客户名: {{ bankofsunPreviewData.company_data.cust_name }}
+                </el-tag>
+              </div>
+              <div class="ps-applyno-alert__desc">
+                若交行本次使用新的申请编号发起联调，金服会因历史单号未清空而判定单号不匹配，直接拒绝担保（返回 guarantee = 'N'，交易额 0）。
+              </div>
+              <div class="ps-applyno-alert__action">
+                <el-checkbox v-model="bankofsunClearApplyNo" class="ps-applyno-checkbox">
+                  <span class="font-bold">流转至阶段三时【清空历史申请编号】（置为 NULL，推荐）</span>
+                </el-checkbox>
+                <div class="ps-applyno-tip">
+                  {{ bankofsunClearApplyNo ? '✓ 达成阶段三时将自动把 apply_no 和 cust_name 置空，允许交行以新单号发起查询并自动绑定' : '✕ 保留原有历史单号，仅允许交行以完全相同的单号重试' }}
+                </div>
+              </div>
+            </div>
+          </div>
+
           <!-- 1. 已建档：对比表格视图 -->
           <template v-if="bankofsunPreviewData.matched && bankofsunPreviewData.company_data">
             <div class="ps-diff-table-wrap">
@@ -240,9 +275,9 @@
                     v-for="diff in bankofsunDiffList"
                     :key="diff.key"
                     :class="[
-                      diff.diffType === 'changed' ? 'ps-diff-row--changed' : '',
-                      diff.diffType === 'added' ? 'ps-diff-row--added' : '',
-                    ]"
+                    diff.diffType === 'changed' ? 'ps-diff-row--changed' : '',
+                    diff.diffType === 'added' ? 'ps-diff-row--added' : '',
+                  ]"
                   >
                     <td class="font-bold">{{ diff.label }}</td>
                     <td class="cell-mono ps-diff-cell-old">
@@ -281,6 +316,18 @@
                 <div class="ps-grid__item">
                   <span class="ps-grid__label">申请授信额度</span>
                   <span class="ps-grid__value cell-mono font-bold">{{ formatBankofsunFieldValue('amount', bankofsunPreviewData.fields.amount) }}</span>
+                </div>
+                <div v-if="bankofsunPreviewData.company_data?.has_apply_no" class="ps-grid__item">
+                  <span class="ps-grid__label">历史交行申请单号 (apply_no)</span>
+                  <span class="ps-grid__value cell-mono font-bold" :class="{ 'ps-text-strikethrough': bankofsunClearApplyNo }">
+                    {{ bankofsunPreviewData.company_data.apply_no }}
+                  </span>
+                </div>
+                <div v-if="bankofsunPreviewData.company_data?.has_apply_no" class="ps-grid__item">
+                  <span class="ps-grid__label">本次执行单号策略</span>
+                  <span class="ps-grid__value font-bold" :class="bankofsunClearApplyNo ? 'ps-text-success' : 'ps-text-warning'">
+                    {{ bankofsunClearApplyNo ? '✓ 执行阶段三时清空（置为 NULL）' : '✕ 保留原历史单号' }}
+                  </span>
                 </div>
                 <div class="ps-grid__item ps-grid__item--ordr">
                   <span class="ps-grid__label">订单号 / 流水号 ordrNo（自增）</span>
@@ -578,6 +625,7 @@ const chemnetQueryResult = ref<ChemnetPreviewResult | null>(null);
 // Bankofsun 企业贷 2.0 表单状态
 const bankofsunText = ref("");
 const bankofsunPreviewData = ref<BankofsunComm2PreviewResult | null>(null);
+const bankofsunClearApplyNo = ref(true);
 
 interface BankofsunDiffItem {
   key: string;
@@ -705,6 +753,7 @@ function handleScriptChange(): void {
   previewData.value = null;
   chemnetQueryResult.value = null;
   bankofsunPreviewData.value = null;
+  bankofsunClearApplyNo.value = true;
   result.value = null;
 }
 
@@ -854,7 +903,11 @@ async function handlePreviewBankofsun(): Promise<void> {
   try {
     const res = await PlatformScriptAPI.preview(scriptKey.value, { text: bankofsunText.value });
     bankofsunPreviewData.value = res;
-    if (res.matched) {
+    // 检测历史申请单号
+    if (res.company_data?.has_apply_no) {
+      bankofsunClearApplyNo.value = true;
+      message.warning(`检测到该企业已绑定历史交行申请单号【${res.company_data.apply_no}】，已为您默认开启清空选项`);
+    } else if (res.matched) {
       message.success(`已检索到平台企业档案 (CID: ${res.company_data?.cid || '-'})`);
     } else {
       message.info("未匹配到企业，执行时将自动创建档案");
@@ -869,6 +922,7 @@ async function handlePreviewBankofsun(): Promise<void> {
 function handleFillSampleBankofsun(): void {
   bankofsunText.value = bankofsunPlaceholder;
   bankofsunPreviewData.value = null;
+  bankofsunClearApplyNo.value = true;
   result.value = null;
   message.success("已填入测试企业数据示例");
 }
@@ -876,6 +930,7 @@ function handleFillSampleBankofsun(): void {
 function handleClearBankofsun(): void {
   bankofsunText.value = "";
   bankofsunPreviewData.value = null;
+  bankofsunClearApplyNo.value = true;
   result.value = null;
 }
 
@@ -883,24 +938,36 @@ function handleConfirmRunBankofsun(): void {
   if (!bankofsunPreviewData.value) return;
   const companyName = bankofsunPreviewData.value.fields.company;
   const ordrNo = bankofsunPreviewData.value.ordr_no;
+  const hasHistoryApplyNo = Boolean(bankofsunPreviewData.value.company_data?.has_apply_no);
+  const clearApplyNo = bankofsunClearApplyNo.value;
+
+  let confirmMsg = `确认对企业【${companyName}】一键执行阶段一至阶段三自动流转吗？（流水号：${ordrNo}）`;
+  if (hasHistoryApplyNo) {
+    const actionDesc = clearApplyNo ? "【清空历史申请单号】（置为 NULL，允许交行新单号接入）" : "【保留历史申请单号】";
+    confirmMsg = `检测到企业【${companyName}】已绑定历史申请单号【${bankofsunPreviewData.value.company_data?.apply_no}】。\n\n本次流转将 ${actionDesc}。\n\n确认继续执行阶段一至阶段三自动流转吗？（流水号：${ordrNo}）`;
+  }
 
   confirm(
-    `确认对企业【${companyName}】一键执行阶段一至阶段三自动流转吗？（流水号：${ordrNo}）`,
+    confirmMsg,
     "确认执行流转",
     {
       confirmButtonText: "确认执行",
       cancelButtonText: "取消",
-      type: "warning",
+      type: hasHistoryApplyNo && !clearApplyNo ? "warning" : "info",
     }
   ).then(
     () => {
       running.value = true;
-      PlatformScriptAPI.run(scriptKey.value, { text: bankofsunText.value })
+      PlatformScriptAPI.run(scriptKey.value, {
+        text: bankofsunText.value,
+        clear_apply_no: clearApplyNo,
+      })
         .then((run) => {
           result.value = run;
           bankofsunPreviewData.value = null;
           if (run.status === "success") {
-            message.success(`企业【${companyName}】授信数据已成功生成并达成阶段三！`);
+            const clearNote = hasHistoryApplyNo && clearApplyNo ? "（已自动清空旧 apply_no）" : "";
+            message.success(`企业【${companyName}】授信数据已成功生成并达成阶段三${clearNote}！`);
           } else {
             message.error(run.error || "执行流转失败");
           }
@@ -1259,6 +1326,94 @@ onMounted(fetchList);
 .ps-match-tip {
   font-size: 12px;
   color: var(--ai-text, #794f27);
+}
+
+.ps-applyno-alert {
+  margin: 10px 0 16px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: rgba(230, 90, 40, 0.08);
+  border: 1.5px solid rgba(230, 90, 40, 0.28);
+}
+
+.ps-applyno-alert__header {
+  margin-bottom: 8px;
+}
+
+.ps-applyno-alert__title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.ps-applyno-alert__heading {
+  font-size: 13px;
+  color: #c0392b;
+}
+
+.ps-applyno-alert__body {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.ps-applyno-alert__info-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+}
+
+.ps-applyno-alert__label {
+  color: rgba(121, 79, 39, 0.75);
+}
+
+.ps-applyno-alert__value {
+  color: #c0392b;
+  font-size: 13px;
+}
+
+.ps-applyno-alert__cust {
+  margin-left: 4px;
+}
+
+.ps-applyno-alert__desc {
+  font-size: 12px;
+  color: rgba(121, 79, 39, 0.7);
+  line-height: 1.45;
+}
+
+.ps-applyno-alert__action {
+  margin-top: 6px;
+  padding-top: 8px;
+  border-top: 1px dashed rgba(230, 90, 40, 0.2);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.ps-applyno-checkbox {
+  font-size: 13px;
+  color: var(--ai-text, #794f27);
+}
+
+.ps-applyno-tip {
+  font-size: 12px;
+  color: #2b7a0b;
+  margin-left: 24px;
+}
+
+.ps-text-strikethrough {
+  text-decoration: line-through;
+  opacity: 0.55;
+}
+
+.ps-text-success {
+  color: #2b7a0b;
+}
+
+.ps-text-warning {
+  color: #c0662b;
 }
 
 .ps-diff-table-wrap {
