@@ -4,6 +4,7 @@ import type {
   PlatformScriptQueryParams,
   PlatformScriptPreview,
   PlatformScriptRunItem,
+  BankofsunProgressResult,
 } from "@/types/api/platform-script";
 
 const BASE_URL = "/platform-script";
@@ -38,6 +39,27 @@ const PlatformScriptAPI = {
   run(scriptKey: string, params: { text?: string; login?: string; mobile?: string; clear_apply_no?: boolean }) {
     return request<any, PlatformScriptRunItem>({
       url: `${BASE_URL}/run`,
+      method: "post",
+      data: { scriptKey, ...params },
+    });
+  },
+
+  /** 查询授信进度（只读，不推送） */
+  progress(scriptKey: string, params: { text: string }) {
+    return request<any, BankofsunProgressResult>({
+      url: `${BASE_URL}/progress`,
+      method: "post",
+      data: { scriptKey, ...params },
+    });
+  },
+
+  /** 推送确认担保 */
+  confirmGuarantee(
+    scriptKey: string,
+    params: { text: string; ordr_no?: string; skip_amount_check?: boolean }
+  ) {
+    return request<any, PlatformScriptRunItem>({
+      url: `${BASE_URL}/confirm-guarantee`,
       method: "post",
       data: { scriptKey, ...params },
     });

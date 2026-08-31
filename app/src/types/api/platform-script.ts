@@ -113,3 +113,55 @@ export interface PlatformScriptRunItem {
   createTime?: string;
 }
 
+/** bankofsun 授信进度快照 */
+export interface BankofsunCreditProgress {
+  cid: number;
+  aid: number;
+  comm2_apply_id: number;
+  company: string;
+  social_credit_code: string;
+  apply_no: string;
+  cust_name: string;
+  effective_date: string;
+  company_type: string;
+  trade_amount: number;
+  /** 0 等待同意 / 1 已同意担保 / 2 担保过期 */
+  guarantee_status: number;
+  /** '' 未回 / '00' 未通过 / '01' 通过 */
+  approved_status: string;
+  /** '' 未回 / '00' 异常 / '01' 正常 */
+  signed_status: string;
+  /** '0' 已同意 / '1' 已拒绝 / '2' 待确认 / '-1' 推送中 */
+  agreed_status: string;
+  credit_line: number;
+  amount: number;
+  amount_enough: boolean;
+  has_sign_result: boolean;
+  contract_no: string;
+  confirm_time: string;
+  can_confirm: boolean;
+  block_reason: string;
+}
+
+/** bankofsun 可绑定的流水号候选 */
+export interface BankofsunOrdrNoCandidate {
+  id: number;
+  ordr_no: string;
+  status: string;
+  action: string;
+  action_label: string;
+  created_at: string;
+}
+
+/** bankofsun 授信进度查询结果 */
+export interface BankofsunProgressResult {
+  script_key: string;
+  social_credit_code: string;
+  matched: boolean;
+  message: string;
+  progress: BankofsunCreditProgress | null;
+  ordr_no_candidates: BankofsunOrdrNoCandidate[];
+  next_ordr_no: string;
+}
+
+
