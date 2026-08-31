@@ -1289,12 +1289,22 @@ function handleConfirmGuaranteeBankofsun(): void {
   );
 }
 
-// 文本框输入变动时清空当前进度快照，防止推送到非面板展示的企业
+// 文本框输入变动时清空当前预览快照与进度快照，防止推送到非面板展示的企业
 watch(bankofsunText, () => {
   if (bankofsunProgressData.value) {
     bankofsunProgressData.value = null;
     bankofsunBindOrdrNo.value = "";
     bankofsunSkipAmountCheck.value = false;
+  }
+  if (bankofsunPreviewData.value) {
+    bankofsunPreviewData.value = null;
+    bankofsunClearApplyNo.value = true;
+  }
+});
+
+watch(inputText, () => {
+  if (previewData.value) {
+    previewData.value = null;
   }
 });
 
