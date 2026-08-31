@@ -193,6 +193,10 @@
             <SystemIco name="search" :size="13" />
             解析与匹配预览
           </Button>
+          <Button type="primary" size="small" :disabled="progressing" @click="handleQueryProgressBankofsun">
+            <SystemIco name="search" :size="13" />
+            查询授信进度
+          </Button>
           <Button type="default" size="small" @click="handleFillSampleBankofsun">填入测试示例</Button>
           <Button type="default" size="small" @click="handleClearBankofsun">清空</Button>
         </div>
@@ -361,6 +365,127 @@
             <Button type="default" size="small" @click="bankofsunPreviewData = null">取消</Button>
           </div>
         </div>
+
+        <!-- 授信进度面板 -->
+        <div v-if="bankofsunProgressData" class="ps-panel ps-panel--progress">
+          <div class="ps-panel__title">
+            <SystemIco name="search" :size="13" />
+            授信进度（交总行企业贷 2.0）
+          </div>
+
+          <div v-if="!bankofsunProgressData.matched" class="ps-progress-empty">
+            {{ bankofsunProgressData.message }}
+          </div>
+
+          <template v-else-if="bankofsunProgressData.progress">
+            <div class="ps-progress-steps">
+              <div
+                v-for="(step, idx) in bankofsunProgressSteps"
+                :key="step.label"
+                class="ps-progress-step"
+                :class="`ps-progress-step--${step.state}`"
+              >
+                <div class="ps-progress-step__dot">{{ idx + 1 }}</div>
+                <div class="ps-progress-step__body">
+                  <div class="ps-progress-step__label">{{ step.label }}</div>
+                  <div class="ps-progress-step__desc">{{ step.desc }}</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="ps-grid">
+              <div class="ps-grid__item">
+                <span class="ps-grid__label">企业名称</span>
+                <span class="ps-grid__value font-bold">{{ bankofsunProgressData.progress.company }}</span>
+              </div>
+              <div class="ps-grid__item">
+                <span class="ps-grid__label">银行申请编号 (apply_no)</span>
+                <span class="ps-grid__value cell-mono">{{ bankofsunProgressData.progress.apply_no || '（未绑定）' }}</span>
+              </div>
+              <div class="ps-grid__item">
+                <span class="ps-grid__label">银行客户名</span>
+                <span class="ps-grid__value">{{ bankofsunProgressData.progress.cust_name || '-' }}</span>
+              </div>
+              <div class="ps-grid__item">
+                <span class="ps-grid__label">担保有效期</span>
+                <span class="ps-grid__value cell-mono">{{ bankofsunProgressData.progress.effective_date }}</span>
+              </div>
+              <div class="ps-grid__item">
+                <span class="ps-grid__label">授信申请额度</span>
+                <span class="ps-grid__value cell-mono font-bold" :class="{ 'ps-text-warning': !bankofsunProgressData.progress.amount_enough }">
+                  {{ bankofsunProgressData.progress.amount }} 元
+                </span>
+              </div>
+              <div class="ps-grid__item">
+                <span class="ps-grid__label">银行授信额度</span>
+                <span class="ps-grid__value cell-mono font-bold">
+                  {{ bankofsunProgressData.progress.credit_line || '（未取到）' }}
+                </span>
+              </div>
+              <div v-if="bankofsunProgressData.progress.contract_no" class="ps-grid__item">
+                <span class="ps-grid__label">担保合同号</span>
+                <span class="ps-grid__value cell-mono">{{ bankofsunProgressData.progress.contract_no }}</span>
+              </div>
+              <div v-if="bankofsunProgressData.progress.confirm_time" class="ps-grid__item">
+                <span class="ps-grid__label">确认担保时间</span>
+                <span class="ps-grid__value cell-mono">{{ bankofsunProgressData.progress.confirm_time }}</span>
+              </div>
+            </div>
+
+            <!-- 额度不足预警与强制开关 -->
+            <div v-if="!bankofsunProgressData.progress.amount_enough" class="ps-applyno-alert">
+              <div class="ps-applyno-alert__header">
+                <div class="ps-applyno-alert__title">
+                  <el-tag type="danger" size="small" effect="dark">额度校验不通过</el-tag>
+                  <span class="ps-applyno-alert__heading font-bold">授信申请额度小于银行授信额度</span>
+                </div>
+              </div>
+              <div class="ps-applyno-alert__body">
+                <div class="ps-applyno-alert__desc">
+                  bankofsun 处理中心在这种情况下会直接拦截、不发报文。强制推送后银行大概率返回拒绝，仅用于联调边界场景。
+                </div>
+                <div class="ps-applyno-alert__action">
+                  <el-checkbox v-model="bankofsunSkipAmountCheck" class="ps-applyno-checkbox">
+                    <span class="font-bold">忽略额度校验强制推送</span>
+                  </el-checkbox>
+                </div>
+              </div>
+            </div>
+
+            <!-- 关联流水号 -->
+            <div class="ps-extra-params">
+              <div class="ps-extra-params__title">本次推送关联流水号：</div>
+              <el-select v-model="bankofsunBindOrdrNo" size="small" style="width: 100%">
+                <el-option
+                  v-for="candidate in bankofsunProgressData.ordr_no_candidates"
+                  :key="candidate.id"
+                  :value="candidate.ordr_no"
+                  :label="`${candidate.ordr_no} · ${candidate.action_label} · ${candidate.created_at}`"
+                />
+                <el-option
+                  :value="bankofsunProgressData.next_ordr_no"
+                  :label="`${bankofsunProgressData.next_ordr_no} · 新开流水号`"
+                />
+              </el-select>
+            </div>
+
+            <div class="ps-panel__footer">
+              <Button
+                type="primary"
+                size="small"
+                :disabled="running || !bankofsunProgressData.progress.can_confirm"
+                @click="handleConfirmGuaranteeBankofsun"
+              >
+                <SystemIco name="save" :size="13" />
+                确认担保推送
+              </Button>
+              <span v-if="!bankofsunProgressData.progress.can_confirm" class="ps-block-reason">
+                {{ bankofsunProgressData.progress.block_reason }}
+              </span>
+              <Button type="default" size="small" @click="bankofsunProgressData = null">收起</Button>
+            </div>
+          </template>
+        </div>
       </template>
 
       <!-- 执行结果 -->
@@ -425,32 +550,82 @@
             </tr>
           </thead>
           <tbody>
-            <tr v-for="row in dataList" :key="row.id">
-              <td class="cell-num">{{ row.id }}</td>
-              <td class="cell-mono">{{ row.ordrNo }}</td>
-              <td>
-                <el-tag size="small" :type="row.scriptKey === 'chemnet-secret-code' ? 'info' : 'primary'">
-                  {{ formatScriptKey(row.scriptKey) }}
-                </el-tag>
-              </td>
-              <td class="cell-mono font-bold">{{ row.applId }}</td>
-              <td>{{ formatRecordDetail(row) }}</td>
-              <td>
-                <el-tag :type="statusMeta(row.status).type" size="small">
-                  {{ statusMeta(row.status).text }}
-                </el-tag>
-              </td>
-              <td class="cell-mono">{{ row.createTime }}</td>
-              <td>
-                <span class="tbl-actions">
-                  <span class="action-link act-edit" @click="handleViewOutput(row)">
-                    <SystemIco name="search" :size="12" />
-                    查看
+            <template v-for="group in groupedDataList" :key="group.ordrNo">
+              <!-- 父行 -->
+              <tr class="ps-group-row" :class="{ 'ps-group-row--expandable': group.rows.length > 1 }">
+                <td class="cell-num">
+                  <span
+                    v-if="group.rows.length > 1"
+                    class="ps-expand-toggle"
+                    @click="toggleOrdrNo(group.ordrNo)"
+                  >
+                    {{ expandedOrdrNos.has(group.ordrNo) ? '▾' : '▸' }}
                   </span>
-                </span>
-              </td>
-            </tr>
-            <tr v-if="!loading && dataList.length === 0" class="empty-row">
+                  <span v-else>{{ group.rows[0].id }}</span>
+                </td>
+                <td class="cell-mono">
+                  {{ group.ordrNo }}
+                  <el-tag v-if="group.rows.length > 1" size="small" type="info" class="ps-group-count">
+                    {{ group.rows.length }} 条
+                  </el-tag>
+                </td>
+                <td>
+                  <el-tag size="small" :type="group.rows[0].scriptKey === 'chemnet-secret-code' ? 'info' : 'primary'">
+                    {{ formatScriptKey(group.rows[0].scriptKey) }}
+                  </el-tag>
+                </td>
+                <td class="cell-mono font-bold">{{ group.rows[0].applId }}</td>
+                <td>
+                  <template v-if="group.rows.length > 1">
+                    最新：{{ formatRecordAction(group.rows[0]) }}
+                  </template>
+                  <template v-else>{{ formatRecordDetail(group.rows[0]) }}</template>
+                </td>
+                <td>
+                  <el-tag :type="statusMeta(group.rows[0].status).type" size="small">
+                    {{ statusMeta(group.rows[0].status).text }}
+                  </el-tag>
+                </td>
+                <td class="cell-mono">{{ group.rows[0].createTime }}</td>
+                <td>
+                  <span class="tbl-actions">
+                    <span class="action-link act-edit" @click="handleViewOutput(group.rows[0])">
+                      <SystemIco name="search" :size="12" />
+                      查看
+                    </span>
+                  </span>
+                </td>
+              </tr>
+
+              <!-- 子行 -->
+              <template v-if="group.rows.length > 1 && expandedOrdrNos.has(group.ordrNo)">
+                <tr v-for="row in group.rows" :key="row.id" class="ps-child-row">
+                  <td class="cell-num">{{ row.id }}</td>
+                  <td></td>
+                  <td>
+                    <el-tag size="small" type="warning">{{ formatRecordAction(row) }}</el-tag>
+                  </td>
+                  <td class="cell-mono">{{ row.applId }}</td>
+                  <td>{{ formatRecordDetail(row) }}</td>
+                  <td>
+                    <el-tag :type="statusMeta(row.status).type" size="small">
+                      {{ statusMeta(row.status).text }}
+                    </el-tag>
+                  </td>
+                  <td class="cell-mono">{{ row.createTime }}</td>
+                  <td>
+                    <span class="tbl-actions">
+                      <span class="action-link act-edit" @click="handleViewOutput(row)">
+                        <SystemIco name="search" :size="12" />
+                        查看
+                      </span>
+                    </span>
+                  </td>
+                </tr>
+              </template>
+            </template>
+
+            <tr v-if="!loading && groupedDataList.length === 0" class="empty-row">
               <td colspan="8">暂无数据</td>
             </tr>
           </tbody>
@@ -481,6 +656,8 @@ import type {
   BankofsunComm2CreditFields,
   BankofsunComm2PreviewResult,
   BankofsunMatchedCompanyData,
+  BankofsunCreditProgress,
+  BankofsunProgressResult,
   ChemnetPreviewResult,
   PlatformScriptFields,
   PlatformScriptQueryParams,
@@ -626,6 +803,54 @@ const chemnetQueryResult = ref<ChemnetPreviewResult | null>(null);
 const bankofsunText = ref("");
 const bankofsunPreviewData = ref<BankofsunComm2PreviewResult | null>(null);
 const bankofsunClearApplyNo = ref(true);
+const bankofsunProgressData = ref<BankofsunProgressResult | null>(null);
+const bankofsunBindOrdrNo = ref<string>("");
+const bankofsunSkipAmountCheck = ref(false);
+const progressing = ref(false);
+
+/** 授信进度时间轴节点 */
+const bankofsunProgressSteps = computed(() => {
+  const p = bankofsunProgressData.value?.progress;
+  if (!p) return [];
+
+  const guaranteeText =
+    p.guarantee_status === 1 ? "已同意担保" : p.guarantee_status === 2 ? "担保过期" : "等待同意";
+  const approvedText =
+    p.approved_status === "01" ? "通过" : p.approved_status === "00" ? "未通过" : "等待银行审核";
+  const signedText =
+    p.signed_status === "01" ? "正常" : p.signed_status === "00" ? "异常" : "等待银行合同签署";
+  const agreedText =
+    p.agreed_status === "0" ? "已确认担保" : p.agreed_status === "1" ? "已拒绝担保" : "待确认";
+
+  return [
+    { label: "平台建档", desc: `企业 CID ${p.cid} / 授信申请 ${p.aid}`, state: "done" },
+    {
+      label: "阶段一至三流转",
+      desc: guaranteeText,
+      state: p.guarantee_status === 1 ? "done" : p.guarantee_status === 2 ? "error" : "wait",
+    },
+    {
+      label: "交行查交易额",
+      desc: p.apply_no ? `已绑定申请编号 ${p.apply_no}` : "交行尚未查询交易额",
+      state: p.apply_no ? "done" : "wait",
+    },
+    {
+      label: "银行审批",
+      desc: approvedText,
+      state: p.approved_status === "01" ? "done" : p.approved_status === "00" ? "error" : "wait",
+    },
+    {
+      label: "合同签署",
+      desc: signedText,
+      state: p.signed_status === "01" ? "done" : p.signed_status === "00" ? "error" : "wait",
+    },
+    {
+      label: "确认担保",
+      desc: p.contract_no ? `${agreedText}，合同号 ${p.contract_no}` : agreedText,
+      state: p.agreed_status === "0" ? "done" : p.agreed_status === "1" ? "error" : "wait",
+    },
+  ];
+});
 
 interface BankofsunDiffItem {
   key: string;
@@ -748,12 +973,55 @@ const queryParams = reactive<PlatformScriptQueryParams>({
 const loading = ref(false);
 const total = ref(0);
 const dataList = ref<PlatformScriptRunItem[]>([]);
+const expandedOrdrNos = ref<Set<string>>(new Set());
+
+/** 按流水号分组后的执行记录 */
+const groupedDataList = computed(() => {
+  const groups: { ordrNo: string; rows: PlatformScriptRunItem[] }[] = [];
+  const indexMap = new Map<string, number>();
+
+  dataList.value.forEach((row) => {
+    const key = row.ordrNo;
+    if (!indexMap.has(key)) {
+      indexMap.set(key, groups.length);
+      groups.push({ ordrNo: key, rows: [] });
+    }
+    groups[indexMap.get(key)!].rows.push(row);
+  });
+
+  return groups;
+});
+
+function toggleOrdrNo(ordrNo: string): void {
+  const next = new Set(expandedOrdrNos.value);
+  if (next.has(ordrNo)) {
+    next.delete(ordrNo);
+  } else {
+    next.add(ordrNo);
+  }
+  expandedOrdrNos.value = next;
+}
+
+/** 从 requestData 解析本条记录的动作标签 */
+function formatRecordAction(row: PlatformScriptRunItem): string {
+  if (row.scriptKey !== "bankofsun-comm2-credit") return "-";
+  try {
+    const action = JSON.parse(row.requestData || "{}").action;
+    if (action === "confirm_guarantee") return "确认担保推送";
+    return "阶段一至三流转";
+  } catch {
+    return "阶段一至三流转";
+  }
+}
 
 function handleScriptChange(): void {
   previewData.value = null;
   chemnetQueryResult.value = null;
   bankofsunPreviewData.value = null;
   bankofsunClearApplyNo.value = true;
+  bankofsunProgressData.value = null;
+  bankofsunBindOrdrNo.value = "";
+  bankofsunSkipAmountCheck.value = false;
   result.value = null;
 }
 
@@ -923,6 +1191,9 @@ function handleFillSampleBankofsun(): void {
   bankofsunText.value = bankofsunPlaceholder;
   bankofsunPreviewData.value = null;
   bankofsunClearApplyNo.value = true;
+  bankofsunProgressData.value = null;
+  bankofsunBindOrdrNo.value = "";
+  bankofsunSkipAmountCheck.value = false;
   result.value = null;
   message.success("已填入测试企业数据示例");
 }
@@ -931,7 +1202,87 @@ function handleClearBankofsun(): void {
   bankofsunText.value = "";
   bankofsunPreviewData.value = null;
   bankofsunClearApplyNo.value = true;
+  bankofsunProgressData.value = null;
+  bankofsunBindOrdrNo.value = "";
+  bankofsunSkipAmountCheck.value = false;
   result.value = null;
+}
+
+async function handleQueryProgressBankofsun(): Promise<void> {
+  if (!bankofsunText.value.trim()) {
+    message.warning("请粘贴企业文本或统一社会信用代码");
+    return;
+  }
+  progressing.value = true;
+  result.value = null;
+  bankofsunPreviewData.value = null;
+  try {
+    const res = await PlatformScriptAPI.progress(scriptKey.value, { text: bankofsunText.value });
+    bankofsunProgressData.value = res;
+    bankofsunBindOrdrNo.value = res.ordr_no_candidates[0]?.ordr_no ?? res.next_ordr_no;
+    bankofsunSkipAmountCheck.value = false;
+
+    if (!res.matched) {
+      message.warning(res.message || "未查询到该企业的授信记录");
+    } else if (res.progress?.can_confirm) {
+      message.success("该笔授信已具备确认担保条件");
+    } else {
+      message.info(res.progress?.block_reason || "该笔授信暂不满足确认担保条件");
+    }
+  } catch {
+    bankofsunProgressData.value = null;
+  } finally {
+    progressing.value = false;
+  }
+}
+
+function handleConfirmGuaranteeBankofsun(): void {
+  const p = bankofsunProgressData.value?.progress;
+  if (!p) return;
+
+  const isNewOrdrNo = bankofsunBindOrdrNo.value === bankofsunProgressData.value?.next_ordr_no;
+  let confirmMsg =
+    `确认对企业【${p.company}】推送「同意担保」吗？\n\n` +
+    `银行申请编号：${p.apply_no}\n` +
+    `关联流水号：${bankofsunBindOrdrNo.value}${isNewOrdrNo ? "（新开）" : "（复用已有流水）"}\n\n` +
+    `该操作会真实向银行测试网关发送 agreeGuarantee 报文。`;
+
+  if (!p.amount_enough && bankofsunSkipAmountCheck.value) {
+    confirmMsg =
+      `⚠️ 你已勾选【忽略额度校验强制推送】。\n\n` +
+      `授信申请额度 ${p.amount} 元 小于 银行授信额度 ${p.credit_line} 元，` +
+      `bankofsun 处理中心在这种情况下会拦截不发报文。强制推送后银行大概率返回拒绝。\n\n` +
+      confirmMsg;
+  }
+
+  confirm(confirmMsg, "确认担保推送", {
+    confirmButtonText: "确认推送",
+    cancelButtonText: "取消",
+    type: !p.amount_enough ? "warning" : "info",
+  }).then(
+    () => {
+      running.value = true;
+      PlatformScriptAPI.confirmGuarantee(scriptKey.value, {
+        text: bankofsunText.value,
+        ordr_no: bankofsunBindOrdrNo.value,
+        skip_amount_check: bankofsunSkipAmountCheck.value,
+      })
+        .then((run) => {
+          result.value = run;
+          if (run.status === "success") {
+            message.success(`企业【${p.company}】确认担保推送成功！`);
+            handleQueryProgressBankofsun();
+          } else {
+            message.error(run.error || "确认担保推送失败");
+          }
+          fetchList();
+        })
+        .finally(() => {
+          running.value = false;
+        });
+    },
+    () => {}
+  );
 }
 
 function handleConfirmRunBankofsun(): void {
@@ -1529,6 +1880,92 @@ onMounted(fetchList);
 .ps-output {
   :deep(textarea) {
     font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+    font-size: 12px;
+  }
+}
+
+.ps-panel--progress {
+  .ps-progress-steps {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-bottom: 14px;
+  }
+
+  .ps-progress-step {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    flex: 1 1 180px;
+    padding: 8px 10px;
+    border-radius: 10px;
+    border: 1px solid var(--el-border-color-lighter);
+
+    &__dot {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      font-size: 12px;
+      color: #fff;
+      background: var(--el-color-info);
+      flex-shrink: 0;
+    }
+
+    &__label {
+      font-weight: 700;
+      font-size: 13px;
+    }
+
+    &__desc {
+      font-size: 12px;
+      color: var(--el-text-color-secondary);
+      word-break: break-all;
+    }
+
+    &--done .ps-progress-step__dot {
+      background: var(--el-color-success);
+    }
+
+    &--error .ps-progress-step__dot {
+      background: var(--el-color-danger);
+    }
+
+    &--wait .ps-progress-step__dot {
+      background: var(--el-color-info);
+    }
+  }
+
+  .ps-progress-empty {
+    padding: 16px;
+    text-align: center;
+    color: var(--el-text-color-secondary);
+  }
+
+  .ps-block-reason {
+    margin-left: 10px;
+    font-size: 12px;
+    color: var(--el-color-danger);
+  }
+}
+
+.ps-expand-toggle {
+  cursor: pointer;
+  user-select: none;
+  font-size: 13px;
+  color: var(--el-color-primary);
+}
+
+.ps-group-count {
+  margin-left: 6px;
+}
+
+.ps-child-row {
+  background: var(--el-fill-color-lighter);
+
+  td {
     font-size: 12px;
   }
 }
