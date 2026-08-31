@@ -645,7 +645,7 @@
 
 <script setup lang="ts">
 import { confirm, message } from "@/utils/feedback";
-import { computed, onMounted, reactive, ref } from "vue";
+import { computed, onMounted, reactive, ref, watch } from "vue";
 import { useClipboard } from "@vueuse/core";
 
 import { Button, Input } from "animal-island-vue";
@@ -1262,8 +1262,12 @@ function handleConfirmGuaranteeBankofsun(): void {
   }).then(
     () => {
       running.value = true;
+      const targetCreditCode =
+        bankofsunProgressData.value?.progress?.social_credit_code ||
+        bankofsunProgressData.value?.social_credit_code ||
+        bankofsunText.value;
       PlatformScriptAPI.confirmGuarantee(scriptKey.value, {
-        text: bankofsunText.value,
+        text: targetCreditCode,
         ordr_no: bankofsunBindOrdrNo.value,
         skip_amount_check: bankofsunSkipAmountCheck.value,
       })
@@ -1284,6 +1288,15 @@ function handleConfirmGuaranteeBankofsun(): void {
     () => {}
   );
 }
+
+// 文本框输入变动时清空当前进度快照，防止推送到非面板展示的企业
+watch(bankofsunText, () => {
+  if (bankofsunProgressData.value) {
+    bankofsunProgressData.value = null;
+    bankofsunBindOrdrNo.value = "";
+    bankofsunSkipAmountCheck.value = false;
+  }
+});
 
 function handleConfirmRunBankofsun(): void {
   if (!bankofsunPreviewData.value) return;
