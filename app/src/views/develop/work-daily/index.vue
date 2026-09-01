@@ -178,7 +178,7 @@ import WorkDailyEdit from "./work-daily-edit.vue";
 import WorkDailyReport from "./work-daily-report.vue";
 import SystemIco from "@/components/AdminPage/SystemIco.vue";
 import AdminAnimalModal from "@/components/AdminPage/AdminAnimalModal.vue";
-import { extractTitle, extractDesc, countWords, getRawText } from "@/utils/work-daily-display";
+import { extractTitle, extractDesc, countWords, getRawText } from "@/utils/workDailyDisplay";
 
 defineOptions({ name: "WorkDaily", inheritAttrs: false });
 
