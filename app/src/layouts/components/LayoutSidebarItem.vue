@@ -263,7 +263,7 @@ function resolvePath(routePath: string) {
 // 父菜单激活状态样式
 .el-sub-menu {
   &.has-active-child > .el-sub-menu__title {
-    color: #4a8a36 !important;
+    color: var(--ai-leaf-d) !important;
     background: rgba(255, 255, 255, 0.58) !important;
     border-radius: 12px;
 
@@ -291,7 +291,7 @@ function resolvePath(routePath: string) {
     margin: 0;
     padding: 0 38px 0 36px !important;
     border-radius: 12px;
-    color: #9f927d !important;
+    color: var(--ai-text-2) !important;
     font-size: 13px;
     font-weight: 700;
     line-height: 38px !important;
@@ -305,17 +305,17 @@ function resolvePath(routePath: string) {
     [class^="i-svg:"] {
       position: absolute;
       left: 14px;
-      color: #c4b89e !important;
+      color: var(--ai-text-3) !important;
     }
 
     &:hover {
-      color: #794f27 !important;
+      color: var(--ai-text) !important;
       background: rgba(255, 255, 255, 0.7) !important;
     }
 
     &.is-active {
-      color: #4a8a36 !important;
-      background: linear-gradient(135deg, #d8ecc6 0%, #c4e3a4 100%) !important;
+      color: var(--ai-leaf-d) !important;
+      background: linear-gradient(135deg, var(--ai-leaf-l) 0%, #c4e3a4 100%) !important;
       box-shadow: inset 0 0 0 1.5px rgba(74, 138, 54, 0.15);
 
       &::before {
@@ -325,7 +325,7 @@ function resolvePath(routePath: string) {
         width: 4px;
         height: 24px;
         content: "";
-        background: #4a8a36;
+        background: var(--ai-leaf-d);
         border-radius: 0 4px 4px 0;
         transform: translateY(-50%);
       }
@@ -339,7 +339,7 @@ function resolvePath(routePath: string) {
 
       .el-icon,
       [class^="i-svg:"] {
-        color: #4a8a36 !important;
+        color: var(--ai-leaf-d) !important;
       }
     }
   }

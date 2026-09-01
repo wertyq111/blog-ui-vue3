@@ -209,7 +209,7 @@ onClickOutside(wrapperRef, (event) => {
   background: #fffdf7;
 }
 .ais--open .ais__trigger {
-  border-color: #19c8b9;
+  border-color: var(--ai-primary);
   background: #fffdf7;
 }
 .ais--disabled .ais__trigger {
@@ -268,7 +268,7 @@ onClickOutside(wrapperRef, (event) => {
 }
 .ais__arrow--open {
   transform: rotate(180deg);
-  color: #19c8b9;
+  color: var(--ai-primary);
 }
 </style>
 
@@ -296,7 +296,7 @@ onClickOutside(wrapperRef, (event) => {
   transition: border-color 0.15s;
 }
 .ais__search-input:focus {
-  border-color: #19c8b9;
+  border-color: var(--ai-primary);
 }
 .ais__search-input::placeholder {
   color: #c4b489;
@@ -348,11 +348,11 @@ onClickOutside(wrapperRef, (event) => {
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 .ais__item:hover {
-  border-color: #19c8b9;
+  border-color: var(--ai-primary);
   transform: translateY(-2px);
 }
 .ais__item.is-active {
-  border-color: #19c8b9;
+  border-color: var(--ai-primary);
   background: #e6f9f6;
 }
 

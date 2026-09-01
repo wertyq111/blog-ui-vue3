@@ -265,8 +265,8 @@ function setHover(day: HeatmapDay, weekIndex: number, dayIndex: number) {
 .wb-heatmap {
   min-height: auto;
   padding: 18px 22px;
-  background: var(--ai-paper, #fdfdf5);
-  border: 2px solid var(--ai-border, #e8e2d6);
+  background: var(--ai-paper, var(--ai-paper));
+  border: 2px solid var(--ai-border, var(--ai-border));
   border-radius: 24px;
   position: relative;
 
@@ -281,12 +281,12 @@ function setHover(day: HeatmapDay, weekIndex: number, dayIndex: number) {
   &__title {
     font-size: 15px;
     font-weight: 800;
-    color: var(--ai-text, #794f27);
+    color: var(--ai-text, var(--ai-text));
   }
 
   &__sub {
     font-size: 12px;
-    color: var(--ai-text-2, #9f927d);
+    color: var(--ai-text-2, var(--ai-text-2));
     margin-top: 3px;
     font-weight: 600;
   }
@@ -303,7 +303,7 @@ function setHover(day: HeatmapDay, weekIndex: number, dayIndex: number) {
   gap: 18px;
   margin-top: 16px;
   padding-top: 16px;
-  border-top: 2px dashed var(--ai-border, #e8e2d6);
+  border-top: 2px dashed var(--ai-border, var(--ai-border));
 }
 
 .hm-foot-item {
@@ -315,7 +315,7 @@ function setHover(day: HeatmapDay, weekIndex: number, dayIndex: number) {
 .hm-foot-label {
   font-size: 11px;
   font-weight: 700;
-  color: var(--ai-text-2, #9f927d);
+  color: var(--ai-text-2, var(--ai-text-2));
 }
 
 .hm-foot-value {
@@ -323,12 +323,12 @@ function setHover(day: HeatmapDay, weekIndex: number, dayIndex: number) {
   font-size: 22px;
   font-weight: 800;
   letter-spacing: -0.02em;
-  color: var(--ai-text, #794f27);
+  color: var(--ai-text, var(--ai-text));
   margin-top: 2px;
 
   span {
     font-size: 11px;
-    color: var(--ai-text-2, #9f927d);
+    color: var(--ai-text-2, var(--ai-text-2));
     margin-left: 4px;
     font-family: inherit;
     font-weight: 700;
@@ -342,7 +342,7 @@ function setHover(day: HeatmapDay, weekIndex: number, dayIndex: number) {
   gap: 4px;
   font-size: 11px;
   font-weight: 700;
-  color: var(--ai-text-2, #9f927d);
+  color: var(--ai-text-2, var(--ai-text-2));
   flex-shrink: 0;
 }
 
@@ -367,7 +367,7 @@ function setHover(day: HeatmapDay, weekIndex: number, dayIndex: number) {
 }
 
 .hm-month {
-  fill: var(--ai-text-2, #9f927d);
+  fill: var(--ai-text-2, var(--ai-text-2));
   font-family: inherit;
   font-size: 10px;
   font-weight: 700;
@@ -383,10 +383,10 @@ function setHover(day: HeatmapDay, weekIndex: number, dayIndex: number) {
   padding: 6px 10px;
   font-size: 11px;
   font-weight: 700;
-  color: var(--ai-paper, #fdfdf5);
+  color: var(--ai-paper, var(--ai-paper));
   white-space: nowrap;
   pointer-events: none;
-  background: var(--ai-text, #794f27);
+  background: var(--ai-text, var(--ai-text));
   border-radius: 8px;
   box-shadow: 0 4px 14px rgba(0, 0, 0, 0.18);
 
@@ -398,13 +398,13 @@ function setHover(day: HeatmapDay, weekIndex: number, dayIndex: number) {
     content: "";
     border: 4px solid transparent;
     border-top: 0;
-    border-bottom-color: var(--ai-text, #794f27);
+    border-bottom-color: var(--ai-text, var(--ai-text));
   }
 
   &--above::before {
     top: auto;
     bottom: -4px;
-    border-top: 4px solid var(--ai-text, #794f27);
+    border-top: 4px solid var(--ai-text, var(--ai-text));
     border-bottom: 0;
   }
 }

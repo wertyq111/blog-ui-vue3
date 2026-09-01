@@ -301,7 +301,7 @@ function onDropRoot(): void {
   cursor: pointer;
   font-size: 13px;
   font-weight: 600;
-  color: var(--ai-text, #794f27);
+  color: var(--ai-text, var(--ai-text));
   border: 1.5px solid transparent;
   transition: background 0.15s;
 
@@ -316,13 +316,13 @@ function onDropRoot(): void {
 
   &.is-drop-inside {
     background: rgba(111, 186, 44, 0.16);
-    border-color: var(--ai-success, #6fba2c);
+    border-color: var(--ai-success, var(--ai-success));
   }
   &.is-drop-before {
-    box-shadow: inset 0 2px 0 0 var(--ai-primary, #19c8b9);
+    box-shadow: inset 0 2px 0 0 var(--ai-primary, var(--ai-primary));
   }
   &.is-drop-after {
-    box-shadow: inset 0 -2px 0 0 var(--ai-primary, #19c8b9);
+    box-shadow: inset 0 -2px 0 0 var(--ai-primary, var(--ai-primary));
   }
 }
 
@@ -331,7 +331,7 @@ function onDropRoot(): void {
   place-items: center;
   width: 16px;
   height: 16px;
-  color: var(--ai-text-3, #c4b89e);
+  color: var(--ai-text-3, var(--ai-text-3));
   transition: transform 0.15s;
 
   &.is-open {
@@ -362,7 +362,7 @@ function onDropRoot(): void {
 .ai-tree__count {
   font-size: 11px;
   font-weight: 700;
-  color: var(--ai-text-2, #9f927d);
+  color: var(--ai-text-2, var(--ai-text-2));
   background: rgba(0, 0, 0, 0.04);
   border-radius: 999px;
   padding: 1px 7px;
@@ -383,14 +383,14 @@ function onDropRoot(): void {
   padding: 10px;
   text-align: center;
   font-size: 12px;
-  color: var(--ai-text-2, #9f927d);
-  border: 2px dashed var(--ai-border, #e8e2d6);
+  color: var(--ai-text-2, var(--ai-text-2));
+  border: 2px dashed var(--ai-border, var(--ai-border));
   border-radius: 12px;
 
   &.is-active {
-    border-color: var(--ai-primary, #19c8b9);
+    border-color: var(--ai-primary, var(--ai-primary));
     background: rgba(25, 200, 185, 0.08);
-    color: var(--ai-primary-active, #11a89b);
+    color: var(--ai-primary-active, var(--ai-primary-active));
   }
 }
 </style>

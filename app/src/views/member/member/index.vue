@@ -388,6 +388,6 @@ onMounted(() => {
   object-fit: cover;
   vertical-align: middle;
   background: #fff;
-  border: 1.5px solid var(--ai-border, #e8e2d6);
+  border: 1.5px solid var(--ai-border, var(--ai-border));
 }
 </style>

@@ -265,11 +265,11 @@ onMounted(async () => {
   width: 24px;
   height: 24px;
   cursor: move;
-  color: var(--ai-text-3, #c4b89e);
+  color: var(--ai-text-3, var(--ai-text-3));
   border-radius: 8px;
 
   &:hover {
-    color: var(--ai-primary, #19c8b9);
+    color: var(--ai-primary, var(--ai-primary));
     background: rgba(25, 200, 185, 0.1);
   }
 }

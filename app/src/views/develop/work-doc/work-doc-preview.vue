@@ -294,7 +294,7 @@ watch(
 .doc-preview-name__text {
   font-size: 22px;
   font-weight: 800;
-  color: var(--ai-text, #794f27);
+  color: var(--ai-text, var(--ai-text));
   line-height: 1.4;
 }
 
@@ -312,13 +312,13 @@ watch(
   padding: 6px 12px;
   border-radius: 99px;
   background: rgba(255, 255, 255, 0.85);
-  border: 1.5px solid var(--ai-border, #e8e2d6);
-  color: var(--ai-text-2, #9f927d);
+  border: 1.5px solid var(--ai-border, var(--ai-border));
+  color: var(--ai-text-2, var(--ai-text-2));
   font-size: 12px;
   font-weight: 600;
 
   .el-icon {
-    color: var(--ai-primary-active, #11a89b);
+    color: var(--ai-primary-active, var(--ai-primary-active));
     font-size: 14px;
   }
 }
@@ -338,7 +338,7 @@ watch(
   align-items: center;
   justify-content: center;
   border-radius: 50%;
-  box-shadow: 0 4px #bdaea0;
+  box-shadow: 0 4px var(--ai-shadow-color);
 
   .el-icon {
     font-size: 16px;
@@ -365,7 +365,7 @@ watch(
 .doc-preview-shell {
   padding: 24px;
   background: linear-gradient(180deg, #fdfdfb 0%, #f7f3df 100%);
-  border: 2px solid var(--ai-border, #e8e2d6);
+  border: 2px solid var(--ai-border, var(--ai-border));
   border-radius: 24px;
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.6);
   width: 100%;
@@ -385,19 +385,19 @@ watch(
   font-weight: 800;
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: var(--ai-primary-active, #11a89b);
+  color: var(--ai-primary-active, var(--ai-primary-active));
 }
 
 .doc-preview-hero__summary {
   margin-top: 8px;
-  color: var(--ai-text, #794f27);
+  color: var(--ai-text, var(--ai-text));
   font-size: 14px;
   font-weight: 600;
 }
 
 .doc-preview-hero__divider {
   margin: 0 10px;
-  color: var(--ai-border, #e8e2d6);
+  color: var(--ai-border, var(--ai-border));
 }
 
 .doc-preview-hero__tags {
@@ -412,8 +412,8 @@ watch(
 }
 
 .doc-preview-body {
-  background: #fdfdf5;
-  border: 2px solid var(--ai-border, #e8e2d6);
+  background: var(--ai-paper);
+  border: 2px solid var(--ai-border, var(--ai-border));
   border-radius: 20px;
   padding: 24px;
   min-height: 350px;
@@ -443,7 +443,7 @@ watch(
 
   .animal-modal__header {
     padding-bottom: 20px;
-    border-bottom: 2px dashed var(--ai-border, #e8e2d6);
+    border-bottom: 2px dashed var(--ai-border, var(--ai-border));
     margin-bottom: 16px;
     flex-shrink: 0;
 
@@ -458,7 +458,7 @@ watch(
     overflow-y: auto !important;
     font-size: 14px !important;
     font-weight: normal !important;
-    color: var(--ai-text, #794f27) !important;
+    color: var(--ai-text, var(--ai-text)) !important;
     padding-bottom: 0 !important;
 
     /* 动森风格浅黄极细滚动条 */

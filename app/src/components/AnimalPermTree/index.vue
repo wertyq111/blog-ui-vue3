@@ -336,7 +336,7 @@ watch(
   font-family:
     Nunito, "Noto Sans SC", "Zen Maru Gothic", -apple-system, "PingFang SC",
     "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
-  color: #794f27;
+  color: var(--ai-text);
 }
 
 .apt__row {
@@ -362,7 +362,7 @@ watch(
   transition: transform 0.2s, color 0.15s, background 0.15s;
 
   &:hover {
-    color: #6fba2c;
+    color: var(--ai-success);
     background: rgba(111, 186, 44, 0.1);
   }
   &--open {
@@ -405,19 +405,19 @@ watch(
   transition: all 0.15s;
 
   &--checked {
-    background: #7cba70;
+    background: var(--ai-leaf);
     border-color: #5a9c4e;
     box-shadow: 0 1px 3px rgba(124, 186, 112, 0.4);
   }
   &--indeterminate {
     background: #fdfbf7;
-    border-color: #7cba70;
+    border-color: var(--ai-leaf);
   }
 }
 .apt__dash {
   width: 9px;
   height: 3px;
-  background: #7cba70;
+  background: var(--ai-leaf);
   border-radius: 2px;
 }
 
@@ -439,7 +439,7 @@ watch(
 .apt__empty {
   padding: 24px;
   font-size: 13px;
-  color: #9f927d;
+  color: var(--ai-text-2);
   text-align: center;
 }
 </style>

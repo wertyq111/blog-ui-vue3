@@ -135,8 +135,8 @@ function fmtNum(n: number): string {
 }
 
 .kpi {
-  background: var(--ai-paper, #fdfdf5);
-  border: 2px solid var(--ai-border, #e8e2d6);
+  background: var(--ai-paper, var(--ai-paper));
+  border: 2px solid var(--ai-border, var(--ai-border));
   border-radius: 22px;
   padding: 14px 16px;
   display: flex;
@@ -148,12 +148,12 @@ function fmtNum(n: number): string {
 
   &:hover {
     transform: translateY(-2px);
-    box-shadow: 0 4px 0 0 var(--ai-shadow-color, #bdaea0);
+    box-shadow: 0 4px 0 0 var(--ai-shadow-color, var(--ai-shadow-color));
   }
 }
 
 .kpi-label {
-  color: var(--ai-text-2, #9f927d);
+  color: var(--ai-text-2, var(--ai-text-2));
   font-size: 11.5px;
   font-weight: 700;
   letter-spacing: 0.5px;
@@ -170,7 +170,7 @@ function fmtNum(n: number): string {
   font-size: 28px;
   font-weight: 800;
   letter-spacing: -0.02em;
-  color: var(--ai-text, #794f27);
+  color: var(--ai-text, var(--ai-text));
   line-height: 1;
 }
 
@@ -181,12 +181,12 @@ function fmtNum(n: number): string {
 .kpi-unit {
   font-size: 12px;
   font-weight: 700;
-  color: var(--ai-text-2, #9f927d);
+  color: var(--ai-text-2, var(--ai-text-2));
   margin-left: 2px;
 }
 
 .kpi-suffix {
-  color: var(--ai-text-3, #c4b89e);
+  color: var(--ai-text-3, var(--ai-text-3));
   margin-left: 2px;
 }
 
@@ -196,13 +196,13 @@ function fmtNum(n: number): string {
   gap: 6px;
   font-size: 11px;
   font-weight: 600;
-  color: var(--ai-text-2, #9f927d);
+  color: var(--ai-text-2, var(--ai-text-2));
   min-height: 16px;
   flex-wrap: wrap;
 }
 
 .kpi-hint {
-  color: var(--ai-text-2, #9f927d);
+  color: var(--ai-text-2, var(--ai-text-2));
 }
 
 .kpi-highlight {
@@ -226,10 +226,10 @@ function fmtNum(n: number): string {
 }
 
 .delta-up {
-  color: var(--ai-primary-active, #11a89b);
+  color: var(--ai-primary-active, var(--ai-primary-active));
 }
 
 .delta-down {
-  color: var(--ai-red, #fc736d);
+  color: var(--ai-red, var(--ai-red));
 }
 </style>

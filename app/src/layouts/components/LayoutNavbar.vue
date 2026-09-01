@@ -97,7 +97,7 @@ function handleRefresh() {
   min-width: 0;
   padding: 12px 22px;
   border: 0;
-  border-bottom: 2px solid #e8e2d6;
+  border-bottom: 2px solid var(--ai-border);
   border-radius: 0;
   // sticky 头部不加 backdrop-filter：正文每次滚动都从它下面经过，合成器每帧重做背景快照
   background: rgba(253, 253, 245, 0.85);
@@ -115,11 +115,11 @@ function handleRefresh() {
   &__mark {
     width: 38px;
     height: 38px;
-    background: linear-gradient(135deg, #19c8b9 0%, #82d5bb 100%);
+    background: linear-gradient(135deg, var(--ai-primary) 0%, #82d5bb 100%);
     border-radius: 50% 45% 50% 48% / 48% 50% 45% 50%;
     display: grid;
     place-items: center;
-    box-shadow: 0 3px 0 0 #11a89b;
+    box-shadow: 0 3px 0 0 var(--ai-primary-active);
     color: #fff;
     position: relative;
     overflow: hidden;
@@ -140,7 +140,7 @@ function handleRefresh() {
   &__name {
     font-size: 16px;
     font-weight: 800;
-    color: #794f27;
+    color: var(--ai-text);
     letter-spacing: 0.5px;
   }
 }
@@ -150,12 +150,12 @@ function handleRefresh() {
   height: 36px;
   border-radius: 50%;
   background: #fff;
-  border: 2px solid #e8e2d6;
+  border: 2px solid var(--ai-border);
   display: grid;
   place-items: center;
   cursor: pointer;
-  color: #794f27;
-  box-shadow: 0 2px 0 0 #bdaea0;
+  color: var(--ai-text);
+  box-shadow: 0 2px 0 0 var(--ai-shadow-color);
   transition:
     transform 0.18s,
     box-shadow 0.18s;
@@ -164,7 +164,7 @@ function handleRefresh() {
 
   &:hover {
     transform: translateY(-2px);
-    box-shadow: 0 4px 0 0 #bdaea0;
+    box-shadow: 0 4px 0 0 var(--ai-shadow-color);
   }
 }
 
@@ -172,13 +172,13 @@ function handleRefresh() {
   background: transparent;
   border: 0;
   box-shadow: none;
-  color: #9f927d;
+  color: var(--ai-text-2);
 
   &:hover {
     background: rgba(0, 0, 0, 0.05);
     transform: none;
     box-shadow: none;
-    color: #794f27;
+    color: var(--ai-text);
   }
 }
 
@@ -207,16 +207,16 @@ function handleRefresh() {
 
 :deep(.el-breadcrumb__inner),
 :deep(.el-breadcrumb__inner a) {
-  color: #9f927d;
+  color: var(--ai-text-2);
   font-size: 13px;
   font-weight: 700 !important;
 }
 
 :deep(.el-breadcrumb__item:last-child .el-breadcrumb__inner) {
-  color: #794f27;
+  color: var(--ai-text);
 }
 
 :deep(.el-breadcrumb__separator) {
-  color: #c4b89e;
+  color: var(--ai-text-3);
 }
 </style>

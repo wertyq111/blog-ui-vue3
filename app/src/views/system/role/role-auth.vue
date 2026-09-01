@@ -186,8 +186,8 @@ watch(
   padding: 4px 12px;
   font-size: 12px;
   font-weight: 800;
-  color: var(--ai-primary-active, #11a89b);
-  background: var(--ai-primary-bg, #dff8f3);
+  color: var(--ai-primary-active, var(--ai-primary-active));
+  background: var(--ai-primary-bg, var(--ai-primary-bg));
   border-radius: 999px;
 }
 
@@ -210,11 +210,11 @@ watch(
   gap: 6px;
   font-size: 13px;
   font-weight: 700;
-  color: var(--ai-text-2, #9f927d);
+  color: var(--ai-text-2, var(--ai-text-2));
   cursor: pointer;
 }
 .perm-help {
-  color: var(--ai-primary, #19c8b9);
+  color: var(--ai-primary, var(--ai-primary));
   cursor: pointer;
 }
 
@@ -223,8 +223,8 @@ watch(
   margin-top: 14px;
   padding: 10px 8px;
   overflow-y: auto;
-  background: #fdfdf5;
-  border: 2px solid var(--ai-border, #e8e2d6);
+  background: var(--ai-paper);
+  border: 2px solid var(--ai-border, var(--ai-border));
   border-radius: 18px;
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.6);
 

@@ -535,7 +535,7 @@ useContextMenuManager();
     url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 40"><circle cx="90" cy="10" r="3" fill="%23d1da49" opacity="0.3"/><circle cx="80" cy="20" r="2" fill="%237cba70" opacity="0.3"/></svg>')
       no-repeat right top,
     rgba(216, 236, 198, 0.6);
-  border: 2px solid #e8e2d6;
+  border: 2px solid var(--ai-border);
   border-radius: 18px;
   box-shadow: 0 3px 0 0 rgba(74, 138, 54, 0.08);
   backdrop-filter: none;
@@ -575,7 +575,7 @@ useContextMenuManager();
     border-radius: 999px;
     font-weight: 700;
     font-size: 13px;
-    color: #794f27;
+    color: var(--ai-text);
     background: transparent;
     border: 0;
     cursor: pointer;
@@ -592,7 +592,7 @@ useContextMenuManager();
     padding: 0 16px;
     border: 0;
     background: transparent;
-    color: #794f27;
+    color: var(--ai-text);
     font-size: 13px;
     font-weight: 700;
     transition: background 0.18s;
@@ -604,8 +604,8 @@ useContextMenuManager();
 
     // Active tab: green leaf gradient + seedling emoji
     &.el-tag--primary {
-      background: linear-gradient(135deg, #d8ecc6 0%, #b4dc9c 100%);
-      color: #4a8a36;
+      background: linear-gradient(135deg, var(--ai-leaf-l) 0%, #b4dc9c 100%);
+      color: var(--ai-leaf-d);
       font-weight: 800;
       box-shadow:
         0 2px 0 0 rgba(74, 138, 54, 0.2),
@@ -619,7 +619,7 @@ useContextMenuManager();
     }
 
     :deep(.el-tag__close) {
-      color: #794f27;
+      color: var(--ai-text);
       opacity: 0.55;
       width: 16px;
       height: 16px;
@@ -627,7 +627,7 @@ useContextMenuManager();
 
       &:hover {
         background-color: rgba(74, 138, 54, 0.15);
-        color: #4a8a36;
+        color: var(--ai-leaf-d);
         opacity: 1;
       }
     }
@@ -704,7 +704,7 @@ useContextMenuManager();
 
     &.is-active .overflow-menu__title {
       font-weight: 800;
-      color: #4a8a36;
+      color: var(--ai-leaf-d);
     }
   }
 
@@ -728,7 +728,7 @@ useContextMenuManager();
     opacity: 0.55;
 
     &:hover {
-      color: #4a8a36;
+      color: var(--ai-leaf-d);
       background-color: rgba(74, 138, 54, 0.15);
       opacity: 1;
     }

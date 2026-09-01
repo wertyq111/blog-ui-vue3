@@ -348,7 +348,7 @@ onMounted(async () => {
   grid-template-columns: 1fr 32px;
   gap: 12px;
   padding: 10px 0;
-  border-top: 2px dashed var(--ai-border, #e8e2d6);
+  border-top: 2px dashed var(--ai-border, var(--ai-border));
   align-items: center;
   cursor: pointer;
 
@@ -358,15 +358,15 @@ onMounted(async () => {
   }
 
   &:hover .log-action {
-    background: var(--ai-primary-bg, #dff8f3);
-    color: var(--ai-primary-active, #11a89b);
+    background: var(--ai-primary-bg, var(--ai-primary-bg));
+    color: var(--ai-primary-active, var(--ai-primary-active));
   }
 }
 
 .log-title {
   font-size: 14px;
   font-weight: 800;
-  color: var(--ai-text, #794f27);
+  color: var(--ai-text, var(--ai-text));
   display: flex;
   align-items: center;
   gap: 8px;
@@ -375,15 +375,15 @@ onMounted(async () => {
 .log-platform {
   font-size: 11px;
   font-weight: 800;
-  color: var(--ai-primary-active, #11a89b);
-  background: var(--ai-primary-bg, #dff8f3);
+  color: var(--ai-primary-active, var(--ai-primary-active));
+  background: var(--ai-primary-bg, var(--ai-primary-bg));
   padding: 2px 8px;
   border-radius: 999px;
 }
 
 .log-desc {
   font-size: 12px;
-  color: var(--ai-text-2, #9f927d);
+  color: var(--ai-text-2, var(--ai-text-2));
   margin-top: 3px;
   font-weight: 500;
   display: -webkit-box;
@@ -403,8 +403,8 @@ onMounted(async () => {
 
 .log-words {
   font-size: 11px;
-  color: var(--ai-primary-active, #11a89b);
-  background: var(--ai-primary-bg, #dff8f3);
+  color: var(--ai-primary-active, var(--ai-primary-active));
+  background: var(--ai-primary-bg, var(--ai-primary-bg));
   padding: 2px 9px;
   border-radius: 999px;
   font-weight: 800;
@@ -412,7 +412,7 @@ onMounted(async () => {
 
 .log-tag {
   font-size: 11px;
-  color: var(--ai-text-2, #9f927d);
+  color: var(--ai-text-2, var(--ai-text-2));
   font-weight: 700;
 }
 
@@ -423,21 +423,21 @@ onMounted(async () => {
   border: 0;
   background: #fff;
   cursor: pointer;
-  color: var(--ai-text, #794f27);
+  color: var(--ai-text, var(--ai-text));
   font-weight: 800;
   display: grid;
   place-items: center;
-  box-shadow: 0 3px 0 0 var(--ai-shadow-color, #bdaea0);
+  box-shadow: 0 3px 0 0 var(--ai-shadow-color, var(--ai-shadow-color));
   transition: background 0.18s, color 0.18s, transform 0.18s, box-shadow 0.18s;
 
   &:hover {
     transform: translateY(-1px);
-    box-shadow: 0 4px 0 0 var(--ai-shadow-color, #bdaea0);
+    box-shadow: 0 4px 0 0 var(--ai-shadow-color, var(--ai-shadow-color));
   }
 
   &:active {
     transform: translateY(2px);
-    box-shadow: 0 1px 0 0 var(--ai-shadow-color, #bdaea0);
+    box-shadow: 0 1px 0 0 var(--ai-shadow-color, var(--ai-shadow-color));
   }
 }
 

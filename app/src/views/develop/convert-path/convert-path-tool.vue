@@ -127,7 +127,7 @@ onMounted(async () => {
   margin-bottom: 8px;
   font-size: 13px;
   font-weight: 700;
-  color: var(--ai-text, #794f27);
+  color: var(--ai-text, var(--ai-text));
 }
 
 .convert-tool__footer {

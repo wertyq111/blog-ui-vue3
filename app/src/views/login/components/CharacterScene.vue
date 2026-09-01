@@ -517,7 +517,7 @@ onBeforeUnmount(() => {
   z-index: 4;
   width: 142px;
   height: 230px;
-  background: radial-gradient(circle at 30% 30%, #ffe48a 0%, #f7cd67 60%, #d5a830 100%);
+  background: radial-gradient(circle at 30% 30%, #ffe48a 0%, var(--ai-warning) 60%, #d5a830 100%);
   border-radius: 80px 80px 24px 24px;
   box-shadow: inset 0 -8px 0 rgba(0, 0, 0, 0.06), 0 6px 0 0 rgba(0, 0, 0, 0.18);
 
