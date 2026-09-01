@@ -154,7 +154,7 @@ import { onMounted, reactive, ref } from "vue";
 import { Button, Input } from "animal-island-vue";
 import MemberLevelAPI from "@/api/member/member-level";
 import type { MemberLevelItem, MemberLevelQueryParams } from "@/types/api";
-import MemberLevelEdit from "./memberlevel-edit.vue";
+import MemberLevelEdit from "./member-level-edit.vue";
 import SystemIco from "@/components/AdminPage/SystemIco.vue";
 import { useTableSelection } from "@/composables/useTableSelection";
 
