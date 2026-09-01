@@ -60,8 +60,8 @@ const PhotoAPI = {
   /** 批量删除相册 */
   batchDelete(ids: number[]) {
     return request({
-      url: `${BASE_URL}/batch-delete`,
-      method: "delete",
+      url: `${BASE_URL}/delete`,
+      method: "post",
       data: { id: ids },
     });
   },
