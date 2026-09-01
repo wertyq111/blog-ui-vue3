@@ -87,7 +87,7 @@ function onInput(e: Event): void {
   background: #fffdf7;
 }
 .ata__inner:focus {
-  border-color: #19c8b9;
+  border-color: var(--ai-primary);
   background: #fffdf7;
   box-shadow: 0 0 0 3px rgba(25, 200, 185, 0.15);
 }
@@ -103,7 +103,7 @@ function onInput(e: Event): void {
   right: 12px;
   bottom: 8px;
   font-size: 12px;
-  color: #c4b89e;
+  color: var(--ai-text-3);
   pointer-events: none;
 }
 </style>

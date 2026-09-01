@@ -281,8 +281,8 @@ onMounted(() => {
   }
 
   :deep(.el-menu-item.is-active) {
-    color: #4a8a36 !important;
-    background: linear-gradient(135deg, #d8ecc6 0%, #c4e3a4 100%) !important;
+    color: var(--ai-leaf-d) !important;
+    background: linear-gradient(135deg, var(--ai-leaf-l) 0%, #c4e3a4 100%) !important;
     box-shadow: inset 0 0 0 1.5px rgba(74, 138, 54, 0.15);
 
     // 左侧绿色高亮条
@@ -293,7 +293,7 @@ onMounted(() => {
       top: 50%;
       width: 4px;
       height: 24px;
-      background: #4a8a36;
+      background: var(--ai-leaf-d);
       border-radius: 0 4px 4px 0;
       transform: translateY(-50%);
     }

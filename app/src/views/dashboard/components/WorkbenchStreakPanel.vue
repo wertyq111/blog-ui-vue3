@@ -78,8 +78,8 @@ const bookCount = computed(() => {
 
   &__card {
     padding: 18px 22px;
-    background: var(--ai-paper, #fdfdf5);
-    border: 2px solid var(--ai-border, #e8e2d6);
+    background: var(--ai-paper, var(--ai-paper));
+    border: 2px solid var(--ai-border, var(--ai-border));
     border-radius: 24px;
     position: relative;
     height: 100%;
@@ -98,7 +98,7 @@ const bookCount = computed(() => {
   font-weight: 800;
   color: #5a3a18;
   letter-spacing: 1px;
-  background: var(--ai-yellow, #f7cd67);
+  background: var(--ai-yellow, var(--ai-warning));
   border: 2px solid #c89a3a;
   border-radius: 6px;
   box-shadow:
@@ -120,13 +120,13 @@ const bookCount = computed(() => {
   font-size: 15px;
   font-weight: 800;
   letter-spacing: -0.01em;
-  color: var(--ai-text, #794f27);
+  color: var(--ai-text, var(--ai-text));
 }
 
 .card-sub {
   font-size: 12px;
   font-weight: 600;
-  color: var(--ai-text-2, #9f927d);
+  color: var(--ai-text-2, var(--ai-text-2));
   margin-top: 3px;
 }
 
@@ -149,7 +149,7 @@ const bookCount = computed(() => {
 .streak-unit {
   font-size: 13px;
   font-weight: 700;
-  color: var(--ai-text-2, #9f927d);
+  color: var(--ai-text-2, var(--ai-text-2));
 }
 
 .streak-warn {
@@ -195,22 +195,22 @@ const bookCount = computed(() => {
 }
 
 .week-dot.lvl-0 { background: #f1f7e6; }
-.week-dot.lvl-1 { background: #d8ecc6; }
+.week-dot.lvl-1 { background: var(--ai-leaf-l); }
 .week-dot.lvl-2 { background: #a5d889; }
-.week-dot.lvl-3 { background: #7cba70; }
-.week-dot.lvl-4 { background: #4a8a36; }
+.week-dot.lvl-3 { background: var(--ai-leaf); }
+.week-dot.lvl-4 { background: var(--ai-leaf-d); }
 
 .week-dot-label {
   font-size: 10px;
   font-weight: 700;
-  color: var(--ai-text-2, #9f927d);
+  color: var(--ai-text-2, var(--ai-text-2));
 }
 
 // Summary
 .streak-summary {
   margin-top: auto;
   padding-top: 14px;
-  border-top: 2px dashed var(--ai-border, #e8e2d6);
+  border-top: 2px dashed var(--ai-border, var(--ai-border));
 }
 
 .summary-line {
@@ -219,10 +219,10 @@ const bookCount = computed(() => {
   gap: 8px;
   font-size: 12px;
   font-weight: 600;
-  color: var(--ai-text, #794f27);
+  color: var(--ai-text, var(--ai-text));
 
   b {
-    color: var(--ai-text, #794f27);
+    color: var(--ai-text, var(--ai-text));
     font-weight: 800;
   }
 }

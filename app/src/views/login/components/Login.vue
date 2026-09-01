@@ -441,13 +441,13 @@ defineExpose({ loginFormData });
   align-items: center;
   justify-content: center;
   background: #fffef6;
-  border: 2.5px dashed #e8e2d6;
+  border: 2.5px dashed var(--ai-border);
   border-radius: 25px;
   box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.02);
   transition: all 0.25s;
 
   &:hover {
-    border-color: #19c8b9;
+    border-color: var(--ai-primary);
   }
 }
 

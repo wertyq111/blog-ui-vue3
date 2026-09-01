@@ -231,7 +231,7 @@ const formComponents = {
   font-size: 12px;
   color: var(--cyber-primary-strong);
   letter-spacing: 3px;
-  box-shadow: 0 3px 0 0 #bdaea0;
+  box-shadow: 0 3px 0 0 var(--ai-shadow-color);
   display: inline-flex;
   align-items: center;
   gap: 8px;
@@ -370,7 +370,7 @@ const formComponents = {
     top: -28px;
     height: 40px;
     background:
-      radial-gradient(40px 28px at 30px 28px, #7cba70 50%, transparent 51%) repeat-x,
+      radial-gradient(40px 28px at 30px 28px, var(--ai-leaf) 50%, transparent 51%) repeat-x,
       radial-gradient(60px 36px at 60px 30px, #6dab66 50%, transparent 51%) repeat-x;
     background-size: 70px 28px, 110px 30px;
     background-position: 0 0, 30px 4px;
@@ -493,7 +493,7 @@ const formComponents = {
   justify-content: center;
   background:
     radial-gradient(800px 500px at 100% 0%, #fff7e0 0%, transparent 50%),
-    linear-gradient(180deg, #fdfdf5 0%, #f4ecd6 100%);
+    linear-gradient(180deg, var(--ai-paper) 0%, #f4ecd6 100%);
 
   &::before {
     content: "";
@@ -518,8 +518,8 @@ const formComponents = {
   z-index: 1;
   width: 440px;
   max-width: calc(100% - 48px);
-  background: #fdfdf5;
-  border: 3px solid #e8e2d6;
+  background: var(--ai-paper);
+  border: 3px solid var(--ai-border);
   border-radius: 40px 50px 36px 44px / 44px 36px 50px 40px;
   padding: 36px 38px 32px;
   box-shadow:
@@ -534,7 +534,7 @@ const formComponents = {
     transform: translateX(-50%) rotate(-2deg);
     width: 120px;
     height: 28px;
-    background: #f7cd67;
+    background: var(--ai-warning);
     border: 2px solid #c89a3a;
     border-radius: 6px;
     box-shadow: 0 3px 0 0 #c89a3a, inset 0 0 0 2px rgba(255, 255, 255, 0.5);

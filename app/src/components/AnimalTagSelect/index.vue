@@ -279,7 +279,7 @@ onClickOutside(wrapperRef, (event) => {
   min-height: 40px;
   padding: 5px 12px;
   background: #fdfbf7;
-  border: 1.5px solid #e8e2d6;
+  border: 1.5px solid var(--ai-border);
   border-radius: 14px;
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.88),
@@ -315,8 +315,8 @@ onClickOutside(wrapperRef, (event) => {
   align-items: center;
   gap: 4px;
   padding: 2px 6px 2px 10px;
-  background: #d8ecc6;
-  color: #4a8a36;
+  background: var(--ai-leaf-l);
+  color: var(--ai-leaf-d);
   border: 1px solid rgba(111, 186, 44, 0.22);
   border-radius: 999px;
   font-size: 12px;
@@ -387,7 +387,7 @@ onClickOutside(wrapperRef, (event) => {
   overflow-x: hidden;
   overflow-y: auto;
   background: #fdfbf7;
-  border: 2px solid #e8e2d6;
+  border: 2px solid var(--ai-border);
   border-radius: 20px;
   box-shadow: 0 4px 16px rgba(121, 79, 39, 0.08);
   box-sizing: border-box;
@@ -404,7 +404,7 @@ onClickOutside(wrapperRef, (event) => {
   margin: 2px 0;
   font-size: 13px;
   font-weight: 700;
-  color: #794f27;
+  color: var(--ai-text);
   white-space: nowrap;
   cursor: pointer;
   border-radius: 999px;
@@ -432,26 +432,26 @@ onClickOutside(wrapperRef, (event) => {
 }
 
 .ats__option--selected {
-  color: #4a8a36;
+  color: var(--ai-leaf-d);
   background: rgba(124, 186, 112, 0.12);
 }
 
 .ats__option--create {
   margin-top: 6px;
-  color: #4a8a36;
+  color: var(--ai-leaf-d);
 }
 
 .ats__check {
   display: flex;
   flex-shrink: 0;
   align-items: center;
-  color: #6fba2c;
+  color: var(--ai-success);
 }
 
 .ats__empty {
   padding: 10px 18px;
   font-size: 13px;
-  color: #9f927d;
+  color: var(--ai-text-2);
   text-align: center;
 }
 

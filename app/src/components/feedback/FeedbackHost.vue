@@ -113,7 +113,7 @@ function iconSvg(type: FeedbackType): string {
   padding: 8px 16px 8px 8px;
   font-size: 14px;
   font-weight: 700;
-  color: #794f27;
+  color: var(--ai-text);
   pointer-events: auto;
   cursor: pointer;
   background: var(--afb-bg);
@@ -155,7 +155,7 @@ function iconSvg(type: FeedbackType): string {
   font-size: 15px;
   font-weight: 700;
   letter-spacing: 0.01em;
-  color: #794f27;
+  color: var(--ai-text);
   overflow-wrap: anywhere;
 }
 .afb__notify-text {
@@ -218,13 +218,13 @@ function iconSvg(type: FeedbackType): string {
   padding: 4px 2px;
   font-size: 14px;
   font-weight: 600;
-  color: #794f27;
+  color: var(--ai-text);
 }
 .afb__message--success,
 .afb__notify--success,
 .afb__confirm--success {
   --afb-bg: #f5fae9;
-  --afb-border: #6fba2c;
+  --afb-border: var(--ai-success);
   --afb-shadow: 0 6px 18px rgba(111, 186, 44, 0.18);
   --afb-icon-bg: #d8efc1;
   --afb-icon-color: #5a9e1e;
@@ -233,10 +233,10 @@ function iconSvg(type: FeedbackType): string {
 .afb__notify--info,
 .afb__confirm--info {
   --afb-bg: #ecf9f6;
-  --afb-border: #19c8b9;
+  --afb-border: var(--ai-primary);
   --afb-shadow: 0 6px 18px rgba(25, 200, 185, 0.18);
   --afb-icon-bg: #c2ece6;
-  --afb-icon-color: #11a89b;
+  --afb-icon-color: var(--ai-primary-active);
 }
 .afb__message--warning,
 .afb__notify--warning,

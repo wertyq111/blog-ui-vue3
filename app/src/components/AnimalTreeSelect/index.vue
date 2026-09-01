@@ -221,7 +221,7 @@ onClickOutside(wrapperRef, (event) => {
   padding: 5px 12px;
   cursor: pointer;
   background: #fdfbf7;
-  border: 1.5px solid #e8e2d6;
+  border: 1.5px solid var(--ai-border);
   border-radius: 14px;
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.88),
@@ -275,7 +275,7 @@ onClickOutside(wrapperRef, (event) => {
   overflow-x: hidden;
   overflow-y: auto;
   background: #fdfbf7;
-  border: 2px solid #e8e2d6;
+  border: 2px solid var(--ai-border);
   border-radius: 20px;
   box-shadow: 0 4px 16px rgba(121, 79, 39, 0.08);
 }
@@ -291,10 +291,10 @@ onClickOutside(wrapperRef, (event) => {
   margin: 2px 0;
   font-size: 13px;
   font-weight: 700;
-  color: #794f27;
+  color: var(--ai-text);
 }
 .ats__option--selected {
-  color: #11a89b;
+  color: var(--ai-primary-active);
 }
 .ats__caret {
   display: inline-flex;
@@ -348,13 +348,13 @@ onClickOutside(wrapperRef, (event) => {
   animation: ats-cursor-in 0.3s ease-out forwards;
 }
 .ats__option--selected .ats__option-label {
-  color: #4a8a36;
+  color: var(--ai-leaf-d);
   background: rgba(124, 186, 112, 0.12);
 }
 .ats__empty {
   padding: 10px 18px;
   font-size: 13px;
-  color: #9f927d;
+  color: var(--ai-text-2);
   text-align: center;
 }
 

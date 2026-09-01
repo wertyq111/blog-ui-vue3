@@ -1470,7 +1470,7 @@ onMounted(fetchList);
 }
 
 .ps-script-card--active {
-  border-color: #4a8a36 !important;
+  border-color: var(--ai-leaf-d) !important;
   background: rgba(74, 138, 54, 0.08) !important;
   box-shadow: 0 4px 14px rgba(74, 138, 54, 0.14);
 
@@ -1535,7 +1535,7 @@ onMounted(fetchList);
 .ps-script-card__name {
   font-size: 13px;
   font-weight: 600;
-  color: var(--ai-text, #794f27);
+  color: var(--ai-text, var(--ai-text));
   line-height: 1.3;
 }
 
@@ -1582,7 +1582,7 @@ onMounted(fetchList);
   margin-bottom: 8px;
   font-size: 13px;
   font-weight: 700;
-  color: var(--ai-text, #794f27);
+  color: var(--ai-text, var(--ai-text));
 }
 
 .ps-panel {
@@ -1605,7 +1605,7 @@ onMounted(fetchList);
   margin-bottom: 12px;
   font-size: 13px;
   font-weight: 700;
-  color: var(--ai-text, #794f27);
+  color: var(--ai-text, var(--ai-text));
 }
 
 .ps-result-ordr {
@@ -1666,7 +1666,7 @@ onMounted(fetchList);
   margin-bottom: 10px;
   font-size: 13px;
   font-weight: 700;
-  color: var(--ai-text, #794f27);
+  color: var(--ai-text, var(--ai-text));
 }
 
 .ps-edit-box__form {
@@ -1699,7 +1699,7 @@ onMounted(fetchList);
 
 .ps-match-tip {
   font-size: 12px;
-  color: var(--ai-text, #794f27);
+  color: var(--ai-text, var(--ai-text));
 }
 
 .ps-applyno-alert {
@@ -1768,7 +1768,7 @@ onMounted(fetchList);
 
 .ps-applyno-checkbox {
   font-size: 13px;
-  color: var(--ai-text, #794f27);
+  color: var(--ai-text, var(--ai-text));
 }
 
 .ps-applyno-tip {
@@ -1805,7 +1805,7 @@ onMounted(fetchList);
   th {
     font-size: 12px;
     font-weight: 700;
-    color: var(--ai-text, #794f27);
+    color: var(--ai-text, var(--ai-text));
     padding: 10px 12px;
     background: rgba(74, 138, 54, 0.08);
   }
@@ -1834,7 +1834,7 @@ onMounted(fetchList);
 
   .ps-diff-cell-new {
     background: rgba(255, 255, 255, 0.7);
-    color: var(--ai-text, #794f27);
+    color: var(--ai-text, var(--ai-text));
     font-weight: 600;
     border-left: 2px solid rgba(74, 138, 54, 0.35);
   }
@@ -1851,7 +1851,7 @@ onMounted(fetchList);
 
 .ps-th-badge--old {
   background: rgba(121, 79, 39, 0.15);
-  color: #794f27;
+  color: var(--ai-text);
 }
 
 .ps-th-badge--new {
@@ -1887,7 +1887,7 @@ onMounted(fetchList);
   margin-bottom: 8px;
   font-size: 12px;
   font-weight: 700;
-  color: var(--ai-text, #794f27);
+  color: var(--ai-text, var(--ai-text));
 }
 
 .ps-error {

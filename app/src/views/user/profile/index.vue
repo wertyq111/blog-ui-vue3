@@ -548,7 +548,7 @@ onMounted(loadProfile);
 <style lang="scss" scoped>
 .profile-page {
   --mint: #20c9b2;
-  --mint-deep: #11a89b;
+  --mint-deep: var(--ai-primary-active);
   --mint-glow: #d6ff72;
   --teal-ink: #17322d;
   --teal-mute: #648079;

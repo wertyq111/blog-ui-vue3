@@ -131,8 +131,8 @@ const chartOptions = computed(() => {
 <style lang="scss" scoped>
 .wb-weekday {
   padding: 18px 22px;
-  background: var(--ai-paper, #fdfdf5);
-  border: 2px solid var(--ai-border, #e8e2d6);
+  background: var(--ai-paper, var(--ai-paper));
+  border: 2px solid var(--ai-border, var(--ai-border));
   border-radius: 24px;
   position: relative;
 
@@ -144,13 +144,13 @@ const chartOptions = computed(() => {
     font-size: 15px;
     font-weight: 800;
     letter-spacing: -0.01em;
-    color: var(--ai-text, #794f27);
+    color: var(--ai-text, var(--ai-text));
   }
 
   &__sub {
     font-size: 12px;
     font-weight: 600;
-    color: var(--ai-text-2, #9f927d);
+    color: var(--ai-text-2, var(--ai-text-2));
     margin-top: 3px;
   }
 }

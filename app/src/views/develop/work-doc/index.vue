@@ -502,7 +502,7 @@ watch(
   flex-shrink: 0;
   padding: 14px;
   border-radius: 20px;
-  border: 2px solid var(--ai-border, #e8e2d6);
+  border: 2px solid var(--ai-border, var(--ai-border));
   background: rgba(255, 255, 255, 0.5);
 }
 
@@ -515,13 +515,13 @@ watch(
 .wd-tree-title {
   font-size: 15px;
   font-weight: 800;
-  color: var(--ai-text, #794f27);
+  color: var(--ai-text, var(--ai-text));
 }
 
 .wd-tree-tips {
   margin: 6px 0 12px;
   font-size: 11px;
-  color: var(--ai-text-2, #9f927d);
+  color: var(--ai-text-2, var(--ai-text-2));
   line-height: 1.5;
 }
 
@@ -534,10 +534,10 @@ watch(
   cursor: pointer;
 
   &.act-edit {
-    color: var(--ai-info, #5b9eee);
+    color: var(--ai-info, var(--ai-info));
   }
   &.act-del {
-    color: var(--ai-red, #fc736d);
+    color: var(--ai-red, var(--ai-red));
   }
   &:hover {
     background: rgba(0, 0, 0, 0.05);
@@ -550,14 +550,14 @@ watch(
   text-align: center;
   font-size: 12px;
   font-weight: 600;
-  color: var(--ai-text-2, #9f927d);
+  color: var(--ai-text-2, var(--ai-text-2));
   border-radius: 10px;
   cursor: pointer;
 
   &:hover,
   &.is-active {
     background: rgba(25, 200, 185, 0.12);
-    color: var(--ai-primary-active, #11a89b);
+    color: var(--ai-primary-active, var(--ai-primary-active));
   }
 }
 

@@ -115,7 +115,7 @@ withDefaults(
 
 .ani-empty__text {
   margin: 0;
-  color: #794f27;
+  color: var(--ai-text);
   font-family:
     "M PLUS Rounded 1c",
     -apple-system,

@@ -77,8 +77,8 @@ function fmtDateY(dateStr: string): string {
 .wb-logs {
   position: relative;
   padding: 24px 22px 18px;
-  background: var(--ai-paper, #fdfdf5);
-  border: 2px solid var(--ai-border, #e8e2d6);
+  background: var(--ai-paper, var(--ai-paper));
+  border: 2px solid var(--ai-border, var(--ai-border));
   border-radius: 24px;
   box-shadow: 0 3px 10px 0 rgba(61, 52, 40, 0.06);
 
@@ -110,26 +110,26 @@ function fmtDateY(dateStr: string): string {
   &__title {
     font-size: 15px;
     font-weight: 800;
-    color: var(--ai-text, #794f27);
+    color: var(--ai-text, var(--ai-text));
   }
 
   &__sub {
     font-size: 12px;
-    color: var(--ai-text-2, #9f927d);
+    color: var(--ai-text-2, var(--ai-text-2));
     margin-top: 3px;
     font-weight: 600;
   }
 
   &__link {
     font-size: 12px;
-    color: var(--ai-primary-active, #11a89b);
+    color: var(--ai-primary-active, var(--ai-primary-active));
     cursor: pointer;
     font-weight: 800;
     white-space: nowrap;
     line-height: 1.6;
 
     &:hover {
-      color: var(--ai-primary, #19c8b9);
+      color: var(--ai-primary, var(--ai-primary));
     }
   }
 
@@ -144,7 +144,7 @@ function fmtDateY(dateStr: string): string {
   grid-template-columns: 64px 1fr 32px;
   gap: 16px;
   padding: 14px 0;
-  border-top: 2px dashed var(--ai-border, #e8e2d6);
+  border-top: 2px dashed var(--ai-border, var(--ai-border));
   align-items: center;
   cursor: pointer;
 
@@ -154,15 +154,15 @@ function fmtDateY(dateStr: string): string {
   }
 
   &:hover .log-action {
-    background: var(--ai-primary-bg, #dff8f3);
-    color: var(--ai-primary-active, #11a89b);
+    background: var(--ai-primary-bg, var(--ai-primary-bg));
+    color: var(--ai-primary-active, var(--ai-primary-active));
   }
 }
 
 .log-date {
   padding: 6px 4px;
-  background: var(--ai-bg-2, #f4ead8);
-  border: 2px solid var(--ai-border, #e8e2d6);
+  background: var(--ai-bg-2, var(--ai-bg-2));
+  border: 2px solid var(--ai-border, var(--ai-border));
   border-radius: 12px;
   text-align: center;
 }
@@ -171,13 +171,13 @@ function fmtDateY(dateStr: string): string {
   font-size: 18px;
   font-weight: 800;
   line-height: 1;
-  color: var(--ai-text, #794f27);
+  color: var(--ai-text, var(--ai-text));
   font-family: "Nunito", "Noto Sans SC", "HarmonyOS Sans SC", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 }
 
 .log-date-y {
   font-size: 10px;
-  color: var(--ai-text-2, #9f927d);
+  color: var(--ai-text-2, var(--ai-text-2));
   margin-top: 4px;
   font-weight: 700;
 }
@@ -185,12 +185,12 @@ function fmtDateY(dateStr: string): string {
 .log-title {
   font-size: 14px;
   font-weight: 800;
-  color: var(--ai-text, #794f27);
+  color: var(--ai-text, var(--ai-text));
 }
 
 .log-desc {
   font-size: 12px;
-  color: var(--ai-text-2, #9f927d);
+  color: var(--ai-text-2, var(--ai-text-2));
   margin-top: 3px;
   font-weight: 500;
   display: -webkit-box;
@@ -210,8 +210,8 @@ function fmtDateY(dateStr: string): string {
 
 .log-words {
   font-size: 11px;
-  color: var(--ai-primary-active, #11a89b);
-  background: var(--ai-primary-bg, #dff8f3);
+  color: var(--ai-primary-active, var(--ai-primary-active));
+  background: var(--ai-primary-bg, var(--ai-primary-bg));
   padding: 2px 9px;
   border-radius: 999px;
   font-weight: 800;
@@ -219,7 +219,7 @@ function fmtDateY(dateStr: string): string {
 
 .log-tag {
   font-size: 11px;
-  color: var(--ai-text-2, #9f927d);
+  color: var(--ai-text-2, var(--ai-text-2));
   font-weight: 700;
 }
 
@@ -230,21 +230,21 @@ function fmtDateY(dateStr: string): string {
   border: 0;
   background: #fff;
   cursor: pointer;
-  color: var(--ai-text, #794f27);
+  color: var(--ai-text, var(--ai-text));
   font-weight: 800;
   display: grid;
   place-items: center;
-  box-shadow: 0 3px 0 0 var(--ai-shadow-color, #bdaea0);
+  box-shadow: 0 3px 0 0 var(--ai-shadow-color, var(--ai-shadow-color));
   transition: background 0.18s, color 0.18s, transform 0.18s, box-shadow 0.18s;
 
   &:hover {
     transform: translateY(-1px);
-    box-shadow: 0 4px 0 0 var(--ai-shadow-color, #bdaea0);
+    box-shadow: 0 4px 0 0 var(--ai-shadow-color, var(--ai-shadow-color));
   }
 
   &:active {
     transform: translateY(2px);
-    box-shadow: 0 1px 0 0 var(--ai-shadow-color, #bdaea0);
+    box-shadow: 0 1px 0 0 var(--ai-shadow-color, var(--ai-shadow-color));
   }
 }
 </style>

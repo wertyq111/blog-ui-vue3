@@ -727,18 +727,18 @@ const modules = [
 .home-page {
   // ── 昼夜 token（昼间值 = 抽取前的字面值，等值重构）────────────
   // 夜间覆盖见 .home-page--night
-  --ai-text: #794f27;          // 正文/标题棕
-  --ai-text-2: #9f927d;        // 次级文字
-  --ai-primary: #19c8b9;       // 主题青
-  --ai-primary-active: #11a89b;
-  --ai-border: #e8e2d6;        // 浅描边
-  --ai-outline: #794f27;       // 拟物粗描边（与 --ai-text 昼间同值、夜间相反）
+  --ai-text: var(--ai-text);          // 正文/标题棕
+  --ai-text-2: var(--ai-text-2);        // 次级文字
+  --ai-primary: var(--ai-primary);       // 主题青
+  --ai-primary-active: var(--ai-primary-active);
+  --ai-border: var(--ai-border);        // 浅描边
+  --ai-outline: var(--ai-text);       // 拟物粗描边（与 --ai-text 昼间同值、夜间相反）
   --ai-btn-face: #fffef6;      // 按钮/卡片面
   --ai-btn-shadow: #d4c9b4;    // 拟物投影
-  --ai-shadow-color: #bdaea0;  // 柔和阴影
+  --ai-shadow-color: var(--ai-shadow-color);  // 柔和阴影
 
   // ── 首页专有槽 ──────────────────────────────────────────
-  --home-hill-back: #6fba2c;      // 后层山丘
+  --home-hill-back: var(--ai-success);      // 后层山丘
   --home-hill-back-op: 0.45;
   --home-hill-front: #8ac68a;     // 前层山丘
   --home-hill-front-op: 0.65;
@@ -846,7 +846,7 @@ const modules = [
     border-color: #2c3859;
 
     p {
-      // 原字面值 #bdaea0 在这里是「柔和正文色」，不是阴影色。
+      // 原字面值 var(--ai-shadow-color) 在这里是「柔和正文色」，不是阴影色。
       // token 化时按昼间语义归给了 --ai-shadow-color，其夜间值 #0b1123
       // 会在 #1c274c 卡片上变成近黑字，故改用语义正确的 --ai-text-2。
       color: var(--ai-text-2);
@@ -1441,7 +1441,7 @@ const modules = [
 
 .btn-ai-primary {
   color: #fff;
-  background: linear-gradient(180deg, #84cf4f 0%, #6fba2c 100%);
+  background: linear-gradient(180deg, #84cf4f 0%, var(--ai-success) 100%);
   border-color: var(--ai-outline);
   box-shadow: 0 5px 0 0 #5a9e1e;
 
@@ -1621,7 +1621,7 @@ const modules = [
     .num {
       font-size: 14px;
       font-weight: 900;
-      color: #fc736d;
+      color: var(--ai-red);
     }
   }
 }
@@ -2059,7 +2059,7 @@ const modules = [
   .label {
     font-size: 9px;
     font-weight: 800;
-    color: #c4b89e;
+    color: var(--ai-text-3);
     letter-spacing: 0.5px;
     margin-bottom: 3px;
   }
@@ -2070,7 +2070,7 @@ const modules = [
     color: var(--ai-text);
 
     &.fruit-color {
-      color: #fc736d; // 特产色
+      color: var(--ai-red); // 特产色
     }
 
     &.comment {
@@ -2090,7 +2090,7 @@ const modules = [
 }
 
 .title-pill {
-  background: #f7cd67;
+  background: var(--ai-warning);
   border: 2px solid var(--ai-outline);
   color: var(--ai-text);
   font-size: 11px;
@@ -2359,7 +2359,7 @@ const modules = [
     font-size: 9px;
     font-weight: 900;
     color: var(--ai-text);
-    background: #f7cd67;
+    background: var(--ai-warning);
     border: 1.5px solid var(--ai-outline);
     border-radius: 4px;
     padding: 1px 4px;

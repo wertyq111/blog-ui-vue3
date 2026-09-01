@@ -76,7 +76,7 @@ const ranges = [
 .cb-label {
   font-size: 12px;
   font-weight: 700;
-  color: var(--ai-text-2, #9f927d);
+  color: var(--ai-text-2, var(--ai-text-2));
   letter-spacing: 1px;
 }
 
@@ -90,14 +90,14 @@ const ranges = [
   gap: 6px;
   font-size: 12px;
   font-weight: 600;
-  color: var(--ai-text-2, #9f927d);
+  color: var(--ai-text-2, var(--ai-text-2));
 }
 
 .seg {
   display: inline-flex;
   padding: 4px;
   background: rgba(255, 255, 255, 0.7);
-  border: 2px solid var(--ai-border, #e8e2d6);
+  border: 2px solid var(--ai-border, var(--ai-border));
   border-radius: 999px;
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.6);
 }
@@ -109,19 +109,19 @@ const ranges = [
   font-size: 12.5px;
   font-weight: 700;
   background: transparent;
-  color: var(--ai-text-2, #9f927d);
+  color: var(--ai-text-2, var(--ai-text-2));
   cursor: pointer;
   transition: all 0.18s;
   font-family: inherit;
 
   &:hover {
-    color: var(--ai-text, #794f27);
+    color: var(--ai-text, var(--ai-text));
   }
 
   &.seg-btn-active {
     background: var(--ai-primary-bg, #e6f9f6);
-    color: var(--ai-primary-active, #11a89b);
-    box-shadow: 0 2px 0 0 var(--ai-shadow-color, #bdaea0);
+    color: var(--ai-primary-active, var(--ai-primary-active));
+    box-shadow: 0 2px 0 0 var(--ai-shadow-color, var(--ai-shadow-color));
   }
 }
 

@@ -48,7 +48,7 @@ withDefaults(
 }
 
 .ai-tag--success {
-  color: var(--ai-success, #6fba2c);
+  color: var(--ai-success, var(--ai-success));
   background: rgba(111, 186, 44, 0.12);
   border-color: rgba(111, 186, 44, 0.4);
 }
@@ -60,15 +60,15 @@ withDefaults(
 }
 
 .ai-tag--danger {
-  color: var(--ai-red, #fc736d);
+  color: var(--ai-red, var(--ai-red));
   background: rgba(252, 115, 109, 0.12);
   border-color: rgba(252, 115, 109, 0.4);
 }
 
 .ai-tag--info,
 .ai-tag--default {
-  color: var(--ai-text-2, #9f927d);
+  color: var(--ai-text-2, var(--ai-text-2));
   background: rgba(0, 0, 0, 0.03);
-  border-color: var(--ai-border, #e8e2d6);
+  border-color: var(--ai-border, var(--ai-border));
 }
 </style>

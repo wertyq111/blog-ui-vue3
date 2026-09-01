@@ -177,7 +177,7 @@ const mm = computed(() => String(now.value.getMinutes()).padStart(2, "0"));
   font-size: 13px;
   font-weight: 900;
   letter-spacing: 2px;
-  color: #6fba2c;
+  color: var(--ai-success);
 }
 
 .wb-time__monthday {

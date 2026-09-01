@@ -941,7 +941,7 @@ onBeforeUnmount(() => {
   align-items: center;
   justify-content: center;
   height: 100%;
-  color: var(--ai-text-2, #9f927d);
+  color: var(--ai-text-2, var(--ai-text-2));
   font-size: 13px;
 }
 
@@ -963,7 +963,7 @@ onBeforeUnmount(() => {
 
 .report-preview__tip {
   font-size: 12px;
-  color: var(--ai-text-2, #9f927d);
+  color: var(--ai-text-2, var(--ai-text-2));
 }
 
 .report-preview__actions {
@@ -975,7 +975,7 @@ onBeforeUnmount(() => {
   margin-bottom: 16px;
   padding: 16px 18px;
   border-radius: 18px;
-  border: 1.5px solid var(--ai-border, #e8e2d6);
+  border: 1.5px solid var(--ai-border, var(--ai-border));
   background:
     radial-gradient(circle at top right, rgba(172, 236, 109, 0.14), transparent 30%),
     rgba(255, 255, 255, 0.6);
@@ -988,13 +988,13 @@ onBeforeUnmount(() => {
 .report-panel__title {
   font-size: 15px;
   font-weight: 800;
-  color: var(--ai-text, #794f27);
+  color: var(--ai-text, var(--ai-text));
 }
 
 .report-panel__desc {
   margin-top: 3px;
   font-size: 12px;
-  color: var(--ai-text-2, #9f927d);
+  color: var(--ai-text-2, var(--ai-text-2));
 }
 
 .report-panel__row {
@@ -1015,7 +1015,7 @@ onBeforeUnmount(() => {
 
 .export-history {
   font-size: 13px;
-  color: var(--ai-text, #794f27);
+  color: var(--ai-text, var(--ai-text));
 }
 
 .export-history__toolbar {
@@ -1028,13 +1028,13 @@ onBeforeUnmount(() => {
 
 .export-history__hint {
   font-size: 12px;
-  color: var(--ai-text-2, #9f927d);
+  color: var(--ai-text-2, var(--ai-text-2));
 }
 
 .export-history__empty {
   padding: 24px;
   text-align: center;
-  color: var(--ai-text-2, #9f927d);
+  color: var(--ai-text-2, var(--ai-text-2));
 }
 
 .export-history__table {
@@ -1045,7 +1045,7 @@ onBeforeUnmount(() => {
   th,
   td {
     padding: 8px 10px;
-    border-bottom: 1px dashed var(--ai-border, #e8e2d6);
+    border-bottom: 1px dashed var(--ai-border, var(--ai-border));
     text-align: left;
     vertical-align: middle;
     white-space: nowrap;
@@ -1053,7 +1053,7 @@ onBeforeUnmount(() => {
 
   th {
     font-weight: 800;
-    color: var(--ai-text-2, #9f927d);
+    color: var(--ai-text-2, var(--ai-text-2));
     background: rgba(255, 252, 239, 0.6);
   }
 
@@ -1070,7 +1070,7 @@ onBeforeUnmount(() => {
   height: 28px;
   border-radius: 50%;
   background: rgba(159, 146, 125, 0.18);
-  color: var(--ai-text-2, #9f927d);
+  color: var(--ai-text-2, var(--ai-text-2));
   cursor: help;
 
   &.is-pending {
@@ -1080,7 +1080,7 @@ onBeforeUnmount(() => {
 
   &.is-running {
     background: rgba(25, 200, 185, 0.18);
-    color: #11a89b;
+    color: var(--ai-primary-active);
 
     svg {
       animation: export-history-spin 0.9s linear infinite;
@@ -1117,7 +1117,7 @@ onBeforeUnmount(() => {
 
 .export-history__pending {
   font-size: 12px;
-  color: var(--ai-text-2, #9f927d);
+  color: var(--ai-text-2, var(--ai-text-2));
 }
 
 .export-history__actions {
@@ -1196,7 +1196,7 @@ onBeforeUnmount(() => {
     border-radius: 18px;
     border: 2px solid var(--ai-border, #d8c9aa);
     background: rgba(255, 252, 239, 0.9);
-    color: var(--ai-text, #794f27);
+    color: var(--ai-text, var(--ai-text));
     font-size: 13px;
     font-weight: 800;
     cursor: pointer;
@@ -1209,13 +1209,13 @@ onBeforeUnmount(() => {
     .el-icon {
       flex: 0 0 auto;
       font-size: 13px;
-      color: var(--ai-text-2, #9f927d);
+      color: var(--ai-text-2, var(--ai-text-2));
       transition: transform 0.18s ease;
     }
 
     &:hover,
     &.is-open {
-      border-color: var(--ai-primary, #19c8b9);
+      border-color: var(--ai-primary, var(--ai-primary));
       background: #fffdf4;
     }
 
@@ -1251,7 +1251,7 @@ onBeforeUnmount(() => {
     top: calc(100% + 8px);
     padding: 6px 0;
     border-radius: 20px;
-    border: 2px solid var(--ai-border, #e8e2d6);
+    border: 2px solid var(--ai-border, var(--ai-border));
     background: #fdfbf7;
     box-shadow: 0 4px 16px rgba(121, 79, 39, 0.08);
   }
@@ -1282,7 +1282,7 @@ onBeforeUnmount(() => {
     border: 0;
     border-radius: 0;
     background: transparent;
-    color: var(--ai-text, #794f27);
+    color: var(--ai-text, var(--ai-text));
     font-size: 13px;
     font-weight: 700;
     text-align: left;
@@ -1299,7 +1299,7 @@ onBeforeUnmount(() => {
       margin-left: auto;
       flex: 0 0 auto;
       font-size: 13px;
-      color: var(--ai-text-2, #9f927d);
+      color: var(--ai-text-2, var(--ai-text-2));
       transition:
         color 0.2s ease,
         transform 0.2s ease;
@@ -1309,11 +1309,11 @@ onBeforeUnmount(() => {
     &:not(.is-selected):hover,
     &:not(.is-selected).is-active {
       background: rgba(25, 200, 185, 0.06);
-      color: #11a89b;
+      color: var(--ai-primary-active);
       padding-left: 36px;
 
       .el-icon {
-        color: #11a89b;
+        color: var(--ai-primary-active);
       }
 
       &::before {
@@ -1338,11 +1338,11 @@ onBeforeUnmount(() => {
     /* 选中态：绿底深绿字，单层高亮，不出现手指 */
     &.is-selected {
       background: rgba(124, 186, 112, 0.1);
-      color: #4a8a36;
+      color: var(--ai-leaf-d);
       font-weight: 800;
 
       .el-icon {
-        color: #4a8a36;
+        color: var(--ai-leaf-d);
       }
     }
   }

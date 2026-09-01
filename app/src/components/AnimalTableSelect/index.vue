@@ -160,25 +160,25 @@ function handleVisibleChange(visible: boolean): void {
   padding: 0 10px;
   border-radius: 8px;
   background-color: rgba(25, 200, 185, 0.04);
-  border: 1.5px solid var(--ai-border, #e8e2d6);
+  border: 1.5px solid var(--ai-border, var(--ai-border));
   cursor: pointer;
   user-select: none;
   font-family: inherit;
   font-size: 12px;
   font-weight: 700;
-  color: var(--ai-text, #794f27);
+  color: var(--ai-text, var(--ai-text));
   box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.02);
   transition: all 0.2s ease;
 
   &.is-active,
   &:hover {
-    border-color: var(--ai-primary, #19c8b9);
+    border-color: var(--ai-primary, var(--ai-primary));
     background-color: rgba(25, 200, 185, 0.08);
     box-shadow: 0 0 0 2px rgba(25, 200, 185, 0.08);
   }
 
   &.is-empty {
-    color: var(--ai-text-3, #c4b89e);
+    color: var(--ai-text-3, var(--ai-text-3));
     background-color: rgba(0, 0, 0, 0.01);
   }
 
@@ -200,18 +200,18 @@ function handleVisibleChange(visible: boolean): void {
   .arrow-icon {
     font-size: 11px;
     margin-left: 6px;
-    color: var(--ai-text-2, #9f927d);
+    color: var(--ai-text-2, var(--ai-text-2));
     transition: transform 0.25s;
   }
 
   .clear-icon {
     font-size: 12px;
     margin-left: 6px;
-    color: var(--ai-text-3, #c4b89e);
+    color: var(--ai-text-3, var(--ai-text-3));
     transition: color 0.2s;
 
     &:hover {
-      color: var(--ai-red, #fc736d);
+      color: var(--ai-red, var(--ai-red));
     }
   }
 }

@@ -288,7 +288,7 @@ watch(
 .platform-editor {
   margin-top: 16px;
   padding: 14px;
-  border: 1.5px solid var(--ai-border, #e8e2d6);
+  border: 1.5px solid var(--ai-border, var(--ai-border));
   border-radius: 16px;
   background: rgba(255, 255, 255, 0.5);
 }
@@ -296,6 +296,6 @@ watch(
 .platform-editor__header {
   margin-bottom: 8px;
   font-weight: 700;
-  color: var(--ai-primary-active, #11a89b);
+  color: var(--ai-primary-active, var(--ai-primary-active));
 }
 </style>

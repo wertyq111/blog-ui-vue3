@@ -156,8 +156,8 @@ const chartOptions = computed(() => ({
 
 <style lang="scss" scoped>
 .card {
-  background: var(--ai-paper, #fdfdf5);
-  border: 2px solid var(--ai-border, #e8e2d6);
+  background: var(--ai-paper, var(--ai-paper));
+  border: 2px solid var(--ai-border, var(--ai-border));
   border-radius: 24px;
   padding: 18px 22px;
   position: relative;
@@ -180,13 +180,13 @@ const chartOptions = computed(() => ({
   font-size: 15px;
   font-weight: 800;
   letter-spacing: -0.01em;
-  color: var(--ai-text, #794f27);
+  color: var(--ai-text, var(--ai-text));
 }
 
 .card-sub {
   font-size: 12px;
   font-weight: 600;
-  color: var(--ai-text-2, #9f927d);
+  color: var(--ai-text-2, var(--ai-text-2));
   margin-top: 3px;
 }
 
@@ -223,20 +223,20 @@ const chartOptions = computed(() => ({
   font-size: 30px;
   font-weight: 800;
   line-height: 1;
-  color: var(--ai-text, #794f27);
+  color: var(--ai-text, var(--ai-text));
   font-family: "Mochiy Pop One", "M PLUS Rounded 1c", Nunito, "Noto Sans SC", sans-serif;
 }
 
 .clock-center-unit {
   font-size: 12px;
-  color: var(--ai-text-2, #9f927d);
+  color: var(--ai-text-2, var(--ai-text-2));
   font-weight: 700;
   font-family: inherit;
 }
 
 .clock-center-sm {
   font-size: 10.5px;
-  color: var(--ai-text-2, #9f927d);
+  color: var(--ai-text-2, var(--ai-text-2));
   font-weight: 700;
 }
 </style>

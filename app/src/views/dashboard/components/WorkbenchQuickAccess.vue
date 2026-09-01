@@ -248,8 +248,8 @@ function shortPath(value: string): string {
   position: relative;
   min-height: 260px;
   padding: 24px 22px 18px;
-  background: var(--ai-paper, #fdfdf5);
-  border: 2px solid var(--ai-border, #e8e2d6);
+  background: var(--ai-paper, var(--ai-paper));
+  border: 2px solid var(--ai-border, var(--ai-border));
   border-radius: 24px;
   box-shadow: 0 3px 10px 0 rgba(61, 52, 40, 0.06);
 }
@@ -263,20 +263,20 @@ function shortPath(value: string): string {
 }
 
 .card-title {
-  color: var(--ai-text, #794f27);
+  color: var(--ai-text, var(--ai-text));
   font-size: 15px;
   font-weight: 800;
 }
 
 .card-sub {
   margin-top: 3px;
-  color: var(--ai-text-2, #9f927d);
+  color: var(--ai-text-2, var(--ai-text-2));
   font-size: 12px;
   font-weight: 600;
 }
 
 .card-link {
-  color: var(--ai-primary-active, #11a89b);
+  color: var(--ai-primary-active, var(--ai-primary-active));
   font-size: 12px;
   font-weight: 800;
   line-height: 1.6;
@@ -285,7 +285,7 @@ function shortPath(value: string): string {
 }
 
 .card-link:hover {
-  color: var(--ai-primary, #19c8b9);
+  color: var(--ai-primary, var(--ai-primary));
 }
 
 .card-tape {
@@ -295,7 +295,7 @@ function shortPath(value: string): string {
   padding: 4px 12px;
   border: 2px solid #c89a3a;
   border-radius: 6px;
-  background: var(--ai-yellow, #f7cd67);
+  background: var(--ai-yellow, var(--ai-warning));
   color: #5a3a18;
   box-shadow:
     0 2px 0 0 #c89a3a,
@@ -308,11 +308,11 @@ function shortPath(value: string): string {
 }
 
 .card-tape-mint {
-  border-color: var(--ai-primary-active, #11a89b);
-  background: var(--ai-primary-bg, #dff8f3);
-  color: var(--ai-primary-active, #11a89b);
+  border-color: var(--ai-primary-active, var(--ai-primary-active));
+  background: var(--ai-primary-bg, var(--ai-primary-bg));
+  color: var(--ai-primary-active, var(--ai-primary-active));
   box-shadow:
-    0 2px 0 0 var(--ai-primary-active, #11a89b),
+    0 2px 0 0 var(--ai-primary-active, var(--ai-primary-active)),
     inset 0 0 0 1px rgba(255, 255, 255, 0.4);
 }
 
@@ -339,7 +339,7 @@ function shortPath(value: string): string {
 .qa-item {
   appearance: none;
   width: 100%;
-  border: 2px solid var(--ai-border, #e8e2d6);
+  border: 2px solid var(--ai-border, var(--ai-border));
   background: var(--ai-card, #f8f1d9);
   cursor: pointer;
   transition:
@@ -361,7 +361,7 @@ function shortPath(value: string): string {
 .qa-platform:hover,
 .qa-item:hover,
 .qa-platform-active {
-  border-color: var(--ai-primary, #19c8b9);
+  border-color: var(--ai-primary, var(--ai-primary));
 }
 
 .qa-platform:hover,
@@ -375,10 +375,10 @@ function shortPath(value: string): string {
   width: 36px;
   height: 36px;
   place-items: center;
-  border: 2px solid var(--ai-border, #e8e2d6);
+  border: 2px solid var(--ai-border, var(--ai-border));
   border-radius: 12px;
   background: #fff;
-  color: var(--ai-text, #794f27);
+  color: var(--ai-text, var(--ai-text));
   font-size: 16px;
   font-weight: 900;
 }
@@ -393,7 +393,7 @@ function shortPath(value: string): string {
 .qa-item-title {
   display: block;
   overflow: hidden;
-  color: var(--ai-text, #794f27);
+  color: var(--ai-text, var(--ai-text));
   font-size: 13px;
   font-weight: 800;
   text-overflow: ellipsis;
@@ -403,7 +403,7 @@ function shortPath(value: string): string {
 .qa-platform-desc {
   display: block;
   overflow: hidden;
-  color: var(--ai-text-2, #9f927d);
+  color: var(--ai-text-2, var(--ai-text-2));
   font-size: 11px;
   font-weight: 600;
   text-overflow: ellipsis;
@@ -414,8 +414,8 @@ function shortPath(value: string): string {
   margin-left: auto;
   padding: 2px 8px;
   border-radius: 999px;
-  background: var(--ai-primary-bg, #dff8f3);
-  color: var(--ai-primary-active, #11a89b);
+  background: var(--ai-primary-bg, var(--ai-primary-bg));
+  color: var(--ai-primary-active, var(--ai-primary-active));
   font-size: 11px;
   font-weight: 800;
   white-space: nowrap;
@@ -442,13 +442,13 @@ function shortPath(value: string): string {
   flex-wrap: wrap;
   gap: 8px;
   margin-top: 2px;
-  color: var(--ai-text-2, #9f927d);
+  color: var(--ai-text-2, var(--ai-text-2));
   font-size: 11px;
   font-weight: 600;
 }
 
 .qa-item-date {
-  color: var(--ai-text-3, #c4b89e);
+  color: var(--ai-text-3, var(--ai-text-3));
   font-size: 10px;
   font-weight: 700;
   white-space: nowrap;
@@ -457,14 +457,14 @@ function shortPath(value: string): string {
 .qa-pill {
   padding: 1px 8px;
   border-radius: 999px;
-  background: var(--ai-bg-2, #f4ead8);
-  color: var(--ai-text-2, #9f927d);
+  background: var(--ai-bg-2, var(--ai-bg-2));
+  color: var(--ai-text-2, var(--ai-text-2));
   font-weight: 700;
 }
 
 .qa-pill-mint {
-  background: var(--ai-primary-bg, #dff8f3);
-  color: var(--ai-primary-active, #11a89b);
+  background: var(--ai-primary-bg, var(--ai-primary-bg));
+  color: var(--ai-primary-active, var(--ai-primary-active));
 }
 
 .qa-pill-yellow {

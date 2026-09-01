@@ -141,8 +141,8 @@ const chartOptions = computed(() => {
 
 <style lang="scss" scoped>
 .card {
-  background: var(--ai-paper, #fdfdf5);
-  border: 2px solid var(--ai-border, #e8e2d6);
+  background: var(--ai-paper, var(--ai-paper));
+  border: 2px solid var(--ai-border, var(--ai-border));
   border-radius: 24px;
   padding: 18px 22px;
   position: relative;
@@ -165,20 +165,20 @@ const chartOptions = computed(() => {
   font-size: 15px;
   font-weight: 800;
   letter-spacing: -0.01em;
-  color: var(--ai-text, #794f27);
+  color: var(--ai-text, var(--ai-text));
 }
 
 .card-sub {
   font-size: 12px;
   font-weight: 600;
-  color: var(--ai-text-2, #9f927d);
+  color: var(--ai-text-2, var(--ai-text-2));
   margin-top: 3px;
 }
 
 .card-meta {
   font-size: 12px;
   font-weight: 600;
-  color: var(--ai-text-2, #9f927d);
+  color: var(--ai-text-2, var(--ai-text-2));
   display: inline-flex;
   align-items: center;
   gap: 6px;
@@ -192,7 +192,7 @@ const chartOptions = computed(() => {
 }
 
 .dot-green {
-  background: var(--ai-primary-active, #11a89b);
+  background: var(--ai-primary-active, var(--ai-primary-active));
 }
 
 .chart-skeleton {

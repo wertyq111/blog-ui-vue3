@@ -298,7 +298,7 @@ watch(
 <style lang="scss" scoped>
 .develop-dialog-card {
   padding: 16px;
-  border: 1.5px solid var(--ai-border, #e8e2d6);
+  border: 1.5px solid var(--ai-border, var(--ai-border));
   border-radius: 18px;
   background:
     radial-gradient(circle at top right, rgba(25, 200, 185, 0.05), transparent 22%),
@@ -312,7 +312,7 @@ watch(
   margin-bottom: 14px;
   font-size: 14px;
   font-weight: 700;
-  color: var(--ai-primary-active, #11a89b);
+  color: var(--ai-primary-active, var(--ai-primary-active));
 }
 
 .develop-dialog-card__body {

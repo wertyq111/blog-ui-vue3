@@ -138,8 +138,8 @@ const previewAttrs = computed<Record<string, any>>(() => ({
 
 <style lang="scss" scoped>
 .animal-md {
-  --md-bk-color: #fdfdf5;
-  border: 2px solid var(--ai-border, #e8e2d6);
+  --md-bk-color: var(--ai-paper);
+  border: 2px solid var(--ai-border, var(--ai-border));
   border-radius: 16px;
   overflow: hidden;
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.6);
@@ -147,14 +147,14 @@ const previewAttrs = computed<Record<string, any>>(() => ({
 
   :deep(.md-editor-toolbar-wrapper) {
     background: rgba(230, 249, 246, 0.5);
-    border-bottom: 1.5px solid var(--ai-border, #e8e2d6);
+    border-bottom: 1.5px solid var(--ai-border, var(--ai-border));
   }
   :deep(.md-editor-toolbar-item:hover) {
     background: rgba(25, 200, 185, 0.14);
-    color: var(--ai-primary, #19c8b9);
+    color: var(--ai-primary, var(--ai-primary));
   }
   :deep(.md-editor-preview) {
-    color: var(--ai-text, #794f27);
+    color: var(--ai-text, var(--ai-text));
   }
   // 全局 reset 的 `ul, li { padding:0; list-style:none }` 会清掉预览区的项目符号/序号，
   // 这里只在 Markdown 预览内把列表标记和缩进补回来，避免 1)/- 等结构在预览里糊成一团。
@@ -170,7 +170,7 @@ const previewAttrs = computed<Record<string, any>>(() => ({
     list-style: inherit;
   }
   :deep(.md-editor-preview a) {
-    color: var(--ai-primary-active, #11a89b);
+    color: var(--ai-primary-active, var(--ai-primary-active));
   }
   // 工作日常类别图标：把内容里的 emoji 升级成的行内 SVG（见 @/utils/workDailyIcons）
   // 用属性选择器兜底，避免 md-editor sanitize 去掉 class 后失效
@@ -187,7 +187,7 @@ const previewAttrs = computed<Record<string, any>>(() => ({
     background: none;
   }
   :deep(blockquote) {
-    border-left-color: var(--ai-primary, #19c8b9);
+    border-left-color: var(--ai-primary, var(--ai-primary));
   }
 }
 

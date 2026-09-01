@@ -93,7 +93,7 @@ function handleVisibleChange(visible: boolean): void {
   height: 28px;
   border-radius: 8px;
   background-color: rgba(25, 200, 185, 0.04);
-  border: 1.5px solid var(--ai-border, #e8e2d6);
+  border: 1.5px solid var(--ai-border, var(--ai-border));
   box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.02);
   transition: all 0.2s ease;
   overflow: hidden;
@@ -101,13 +101,13 @@ function handleVisibleChange(visible: boolean): void {
   &.is-active,
   &:focus-within,
   &:hover {
-    border-color: var(--ai-primary, #19c8b9);
+    border-color: var(--ai-primary, var(--ai-primary));
     background-color: rgba(25, 200, 185, 0.08);
     box-shadow: 0 0 0 2px rgba(25, 200, 185, 0.08);
   }
 
   &.is-empty {
-    color: var(--ai-text-3, #c4b89e);
+    color: var(--ai-text-3, var(--ai-text-3));
     background-color: rgba(0, 0, 0, 0.01);
   }
 
@@ -117,14 +117,14 @@ function handleVisibleChange(visible: boolean): void {
 
     .date-text,
     .calendar-icon {
-      color: var(--ai-red, #fc736d);
+      color: var(--ai-red, var(--ai-red));
       font-weight: 700;
     }
 
     &.is-active,
     &:focus-within,
     &:hover {
-      border-color: var(--ai-red, #fc736d);
+      border-color: var(--ai-red, var(--ai-red));
       background-color: rgba(252, 115, 109, 0.1);
       box-shadow: 0 0 0 2px rgba(252, 115, 109, 0.1);
     }
@@ -144,14 +144,14 @@ function handleVisibleChange(visible: boolean): void {
     width: 13px;
     height: 13px;
     margin-right: 6px;
-    color: var(--ai-text-2, #9f927d);
+    color: var(--ai-text-2, var(--ai-text-2));
   }
 
   .date-text {
     flex: 1;
     font-size: 12px;
     font-weight: 700;
-    color: var(--ai-text, #794f27);
+    color: var(--ai-text, var(--ai-text));
     text-align: left;
     white-space: nowrap;
     overflow: hidden;
