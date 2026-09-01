@@ -44,7 +44,7 @@
 <script setup lang="ts">
 import { computed } from "vue";
 import type { DashboardKpiItem, DashboardRecentLog } from "@/types/api/dashboard-stats";
-import { extractTitle, extractDesc, countWords } from "@/utils/work-daily-display";
+import { extractTitle, extractDesc, countWords } from "@/utils/workDailyDisplay";
 
 const props = defineProps<{
   logs: DashboardRecentLog[];
@@ -70,7 +70,7 @@ function fmtDateY(dateStr: string): string {
   return dateStr.split("-")[0] || "";
 }
 
-// 内容提取工具函数已抽到 @/utils/work-daily-display
+// 内容提取工具函数已抽到 @/utils/workDailyDisplay
 </script>
 
 <style lang="scss" scoped>

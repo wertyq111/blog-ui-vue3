@@ -1,14 +1,14 @@
 <!-- 待办列表 -->
 <template>
   <div class="page-card">
-    <section class="develop-hero">
+    <div class="todo-head">
       <div class="page-head">
         <div class="page-eyebrow">DEVELOP WORKSPACE</div>
         <h1 class="page-title">待办列表</h1>
         <p class="page-desc">统一管理开发任务与待办事项，支持状态跟踪、优先级管理和平台关联。</p>
       </div>
       <!-- 右上角按照精美动森徽章贴纸风格显示的统计项 -->
-      <div class="develop-hero__meta">
+      <div class="todo-head__stats">
         <div class="ac-stat-badge">
           <span class="ac-stat-label">总计</span>
           <span class="ac-stat-value ac-stat-value--total">{{ statistics.total }}</span>
@@ -26,7 +26,7 @@
           <span class="ac-stat-value ac-stat-value--done">{{ statistics.completed }}</span>
         </div>
       </div>
-    </section>
+    </div>
 
     <div class="filter-bar" style="z-index: 10">
       <div class="filter-field">
@@ -715,7 +715,15 @@ onMounted(async () => {
 }
 
 /* 动森贴纸徽章风格统计排版 */
-.develop-hero__meta {
+.todo-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 18px;
+  margin-bottom: 18px;
+}
+
+.todo-head__stats {
   display: flex;
   flex-direction: column;
   gap: 6px;
