@@ -90,7 +90,7 @@ const RoleAPI = {
   /** 批量删除角色 */
   batchDelete(ids: number[]) {
     return request({
-      url: `${ROLE_BASE_URL}/batchDelete`,
+      url: `${ROLE_BASE_URL}/delete`,
       method: "post",
       data: { id: ids },
     });
