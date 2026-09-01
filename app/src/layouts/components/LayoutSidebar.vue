@@ -24,7 +24,7 @@
   </div>
 </template>
 
-<script lang="ts" setup>
+<script setup lang="ts">
 import { useRoute } from "vue-router";
 import path from "path-browserify";
 import type { MenuInstance } from "element-plus";

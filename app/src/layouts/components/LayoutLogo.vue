@@ -11,7 +11,7 @@
   </div>
 </template>
 
-<script lang="ts" setup>
+<script setup lang="ts">
 import { appConfig } from "@/settings";
 import logo from "@/assets/images/logo-leaf.svg";
 
