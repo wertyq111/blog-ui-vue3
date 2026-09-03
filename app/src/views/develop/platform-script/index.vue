@@ -116,7 +116,7 @@
         <div v-if="chemnetQueryResult" class="ps-panel ps-panel--preview">
           <div class="ps-panel__title">
             <SystemIco name="edit" :size="13" />
-            账号查询结果（数据表：hub_chinachemnet.secret_code）
+            账号查询结果（来源：chemnet secret_code 接口）
           </div>
 
           <div v-if="!chemnetQueryResult.found" class="ps-empty-tip">
@@ -134,20 +134,16 @@
                 <span class="ps-grid__value cell-mono ps-highlight-mobile">{{ chemnetQueryResult.record.mobile }}</span>
               </div>
               <div class="ps-grid__item">
-                <span class="ps-grid__label">最新验证码 (code)</span>
-                <span class="ps-grid__value cell-mono">{{ chemnetQueryResult.record.code || '（空）' }}</span>
+                <span class="ps-grid__label">绑定状态 (status)</span>
+                <span class="ps-grid__value cell-mono">{{ chemnetQueryResult.record.status_text }}</span>
               </div>
               <div class="ps-grid__item">
                 <span class="ps-grid__label">记录 ID</span>
                 <span class="ps-grid__value cell-mono">{{ chemnetQueryResult.record.id }}</span>
               </div>
               <div class="ps-grid__item">
-                <span class="ps-grid__label">发送时间 (post_time)</span>
+                <span class="ps-grid__label">最后变更时间 (post_time)</span>
                 <span class="ps-grid__value cell-mono">{{ chemnetQueryResult.record.post_time }}</span>
-              </div>
-              <div class="ps-grid__item">
-                <span class="ps-grid__label">来源 IP (post_ip)</span>
-                <span class="ps-grid__value cell-mono">{{ chemnetQueryResult.record.post_ip || '（无）' }}</span>
               </div>
             </div>
 
@@ -689,7 +685,7 @@ const scriptOptions = [
     title: "ChemNet 验证码手机号修改",
     tag: "ChemNet",
     tagType: "warning" as const,
-    desc: "查询用户注册手机号并修改 hub_chinachemnet.secret_code",
+    desc: "通过 chemnet secret_code 接口查询并修改用户注册手机号",
   },
 ];
 
