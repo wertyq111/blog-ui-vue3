@@ -25,17 +25,15 @@ export interface PlatformScriptPreview {
   fields: PlatformScriptFields;
 }
 
-/** ChemNet 验证码表记录 */
+/** ChemNet 绑定信息记录（secret_code 接口按白名单输出，无 code / num / post_ip） */
 
 export interface ChemnetSecretCodeRecord {
   id: string;
   login: string;
   mobile: string;
-  code: string;
-  num: string;
   status: string;
+  status_text: string;
   post_time: string;
-  post_ip: string;
 }
 
 /** ChemNet 查询/预览结果 */
@@ -44,7 +42,6 @@ export interface ChemnetPreviewResult {
   login: string;
   found: boolean;
   record: ChemnetSecretCodeRecord | null;
-  list: ChemnetSecretCodeRecord[];
   ordr_no: string;
 }
 
