@@ -1,7 +1,22 @@
 <template>
-  <div class="home-page" :class="'home-page--' + currentTimePeriod">
+  <div class="home-page" :class="['home-page--' + currentTimePeriod, { 'home-page--video': videoActive }]">
     <!-- 天空背景容器 -->
     <div class="sky">
+      <!-- 一日推移背景视频：从不 play，只按滚动进度 seek（见 tickVideo） -->
+      <video
+        v-if="showVideo"
+        ref="videoEl"
+        class="sky-video"
+        :class="{ 'sky-video--ready': videoActive }"
+        src="/home/day-cycle.mp4"
+        poster="/home/day-cycle-poster.jpg"
+        muted
+        playsinline
+        preload="auto"
+        @loadeddata="onVideoReady"
+        @error="onVideoFail"
+      ></video>
+
       <!-- 繁星点缀仅在夜间展示 -->
       <div v-if="currentTimePeriod === 'night'" class="starry-night-stars">
         <span class="star star--1">✦</span>
@@ -582,15 +597,38 @@ const brandName = computed(() =>
   isLoggedIn.value ? `${nickname.value}的小岛` : "博客小岛"
 );
 
+/* ---- 一日推移背景视频（滚动擦洗）---- */
+// 视频是一条 19.63s 的连续镜头：清晨 → 正午 → 黄昏 → 星夜。
+// 它从不 play，只在 rAF 里把 currentTime 设成滚动进度对应的时间点。
+const VIDEO_DURATION = 19.63;
+// 各时段在视频时间轴上的上界（秒），由逐帧取样定出
+const PHASE_END = { morning: 4.5, afternoon: 12.6, sunset: 16.4 };
+// 昼夜开关按下后，把擦洗范围钳在对应时段内，滚动仍能在区间里推进
+const PINNED_RANGE = { day: [4.5, 9.0], night: [16.8, 19.5] };
+
+const videoEl = ref<HTMLVideoElement | null>(null);
+const showVideo = ref(false);   // 设备是否够格加载视频
+const videoActive = ref(false); // 视频是否已就绪并接管背景
+const scrollProgress = ref(0);  // 0 ~ 1
+
+const periodFromVideoTime = (t: number) => {
+  if (t < PHASE_END.morning) return "morning";
+  if (t < PHASE_END.afternoon) return "afternoon";
+  if (t < PHASE_END.sunset) return "sunset";
+  return "night";
+};
+
 /* ---- 24小时时段自动演进逻辑 ---- */
 // 时钟推导出的时段（morning / afternoon / sunset / night）
 const autoTimePeriod = ref("afternoon");
 // 昼夜开关的手动覆盖；null = 跟随本机时间。刷新页面即回到跟随。
 const manualDayNight = ref<"day" | "night" | null>(null);
-// 页面实际生效的时段：手动优先，未手动过则跟随时钟
+// 页面实际生效的时段：手动开关 > 视频画面 > 本机时钟。
+// 视频接管时必须由画面反推时段，否则滚到底会出现「夜景背景 + 昼间卡片」。
 const currentTimePeriod = computed(() => {
   if (manualDayNight.value === "day") return "afternoon";
   if (manualDayNight.value === "night") return "night";
+  if (videoActive.value) return periodFromVideoTime(VIDEO_DURATION * scrollProgress.value);
   return autoTimePeriod.value;
 });
 const formattedTime = ref("");
@@ -644,6 +682,63 @@ const dayNightTitle = computed(() => {
 
 const toggleDayNight = () => {
   manualDayNight.value = isNightView.value ? "day" : "night";
+  ensureTicking();
+};
+
+/* ---- 滚动擦洗驱动 ---- */
+let rafId = 0;
+let seekedTime = 0; // 已写进 video 的时间，用来做插值和去重
+
+const targetVideoTime = () => {
+  const p = scrollProgress.value;
+  const pinned = manualDayNight.value ? PINNED_RANGE[manualDayNight.value] : null;
+  if (pinned) return pinned[0] + (pinned[1] - pinned[0]) * p;
+  return VIDEO_DURATION * p;
+};
+
+// 滚动事件里只记目标值，真正写 currentTime 放到 rAF：
+// 滚轮是离散跳变，直接写会让画面一格一格蹦。
+const ensureTicking = () => {
+  if (!rafId) rafId = requestAnimationFrame(tickVideo);
+};
+
+const onScroll = () => {
+  const max = document.documentElement.scrollHeight - window.innerHeight;
+  scrollProgress.value = max > 0 ? Math.min(1, Math.max(0, window.scrollY / max)) : 0;
+  ensureTicking();
+};
+
+// 追到目标就停，不做常驻空转——首页多数时间是静止的，
+// 120fps 空跑一个 rAF 只是白耗电。滚动和昼夜开关会把它重新唤醒。
+const tickVideo = () => {
+  rafId = 0;
+  const v = videoEl.value;
+  if (!v || v.readyState < 2) {
+    ensureTicking();
+    return;
+  }
+  const target = targetVideoTime();
+  seekedTime += (target - seekedTime) * 0.12;
+  const settled = Math.abs(target - seekedTime) < 0.004;
+  if (settled) seekedTime = target;
+  // 上一次 seek 没完成就不要再写：rAF 有 120fps，浏览器完不成那么多次 seek，
+  // 每次写都会打断在途的那次，结果画面反而卡在几秒前。靠 v.seeking 自然限流。
+  const drifted = Math.abs(v.currentTime - seekedTime) > 1 / 30;
+  if (!v.seeking && drifted) v.currentTime = seekedTime;
+  if (!settled || v.seeking || drifted) ensureTicking();
+};
+
+const onVideoReady = () => {
+  videoActive.value = true;
+  onScroll();
+  seekedTime = targetVideoTime();
+  ensureTicking();
+};
+
+// 加载失败就退回既有的 CSS 天空 + 云 + 草坡 + 飘落粒子，不做别的补救
+const onVideoFail = () => {
+  showVideo.value = false;
+  videoActive.value = false;
 };
 
 /* ---- 动态哈希特产水果与胶囊称号生成 ---- */
@@ -692,6 +787,17 @@ onMounted(async () => {
   updateClock();
   clockTimer = setInterval(updateClock, 1000);
 
+  // 窄屏 / 触摸设备 / 降低动态偏好一律不加载视频，省流量也省解码
+  showVideo.value =
+    window.matchMedia("(min-width: 768px)").matches &&
+    window.matchMedia("(hover: hover)").matches &&
+    !window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  if (showVideo.value) {
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", onScroll, { passive: true });
+  }
+
   if (!isLoggedIn.value) return;
   try {
     const data = await DashboardStatsAPI.getStats("overview", "all");
@@ -703,6 +809,10 @@ onMounted(async () => {
 
 onUnmounted(() => {
   if (clockTimer) clearInterval(clockTimer);
+  if (rafId) cancelAnimationFrame(rafId);
+  rafId = 0;
+  window.removeEventListener("scroll", onScroll);
+  window.removeEventListener("resize", onScroll);
 });
 
 const handleModuleClick = (key: string) => {
@@ -782,6 +892,14 @@ const modules = [
   --home-particle-op: 1;          // 飘落 🍃🌸 透明度
   --home-switch-track: #fffef0;   // 昼夜开关轨道
   --home-switch-knob: #ffd85e;    // 昼夜开关拨钮（昼间＝太阳黄）
+  // 背景视频蒙版：视频是 fixed 铺满视口的，下半部的草地细节会压在正文下面，
+  // 不压一层纸色正文就读不清。上淡下浓，天空区尽量保留原画。
+  --home-video-veil: linear-gradient(
+    180deg,
+    rgba(253, 253, 245, 0.12) 0%,
+    rgba(253, 253, 245, 0.38) 45%,
+    rgba(253, 253, 245, 0.52) 100%
+  );
 
   position: relative;
   width: 100%;
@@ -843,6 +961,12 @@ const modules = [
   --home-particle-op: 0.35;
   --home-switch-track: #1c274c;
   --home-switch-knob: #cbd5ff;
+  --home-video-veil: linear-gradient(
+    180deg,
+    rgba(21, 30, 63, 0.18) 0%,
+    rgba(21, 30, 63, 0.46) 45%,
+    rgba(21, 30, 63, 0.6) 100%
+  );
 
   background: linear-gradient(180deg, #151e3f 0%, #213352 60%, #1e2836 100%);
   color: var(--ai-text);
@@ -950,6 +1074,51 @@ const modules = [
   inset: 0;
   z-index: -2;
   transition: all 1.5s ease;
+}
+
+// 一日推移背景视频。DOM 里排在星点/夜景层之前，靠文档顺序压在它们下面。
+.sky-video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 600ms ease;
+}
+
+.sky-video--ready {
+  opacity: 1;
+}
+
+// ::after 不加 position 会当行内内容绘制、排在 absolute 的视频下面，必须显式定位。
+.home-page--video .sky::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: var(--home-video-veil);
+}
+
+// .home-page 是 position:relative / z-index:auto，不产生堆叠上下文，
+// 所以 .sky（z-index:-2）在根堆叠上下文里排在它的背景之前绘制——
+// 页面渐变是不透明的，会把视频整个盖掉。视频接管时必须让出这层背景。
+// 用两个类叠加提高特异性，免得依赖它和 .home-page--night 的源码先后顺序。
+.home-page.home-page--video {
+  background: none;
+}
+
+// 视频接管后，云 / 草坡 / 飘落粒子 / 夜景层这些 CSS 替身全部撤掉——
+// 视频画面里本来就有，叠着会重影。display:none 同时也停掉它们的动画。
+.home-page--video {
+  .cloud,
+  .grass-hills,
+  .falling-particles,
+  .starry-night-stars,
+  .night-scene {
+    display: none;
+  }
 }
 
 // 夜空闪烁的繁星
