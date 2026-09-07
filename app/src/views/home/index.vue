@@ -110,9 +110,9 @@
         aria-label="昼夜切换"
         @click="toggleDayNight"
       >
-        <span class="nav-daynight__face nav-daynight__face--sun">☀️</span>
-        <span class="nav-daynight__face nav-daynight__face--moon">🌙</span>
-        <span class="nav-daynight__knob"></span>
+        <span class="nav-daynight__knob">
+          <span class="nav-daynight__glyph">{{ isNightView ? "🌙" : "☀️" }}</span>
+        </span>
       </button>
 
       <router-link v-if="!isLoggedIn" class="btn-ai btn-ai-sm btn-ai-primary" to="/login">
@@ -890,6 +890,9 @@ const modules = [
   --home-hill-front-op: 0.65;
   --home-cloud-fill: #fff;        // 云朵填充
   --home-particle-op: 1;          // 飘落 🍃🌸 透明度
+  // 浅色 chip（图标底、黄色称号 pill）上的墨。这些底色是硬编码的浅色、
+  // 不随昼夜翻转，所以墨也必须常驻深色，不能跟着 --ai-text 走。
+  --home-chip-ink: #794f27;
   --home-switch-track: #fffef0;   // 昼夜开关轨道
   --home-switch-knob: #ffd85e;    // 昼夜开关拨钮（昼间＝太阳黄）
   // 背景视频蒙版：视频是 fixed 铺满视口的，下半部的草地细节会压在正文下面，
@@ -1007,6 +1010,19 @@ const modules = [
 
   .nav-daynight {
     border-color: #2c3859;
+  }
+
+  // 这两个 chip 的底是硬编码 #ffffff，夜间文字跟着 --ai-text 翻成近白就没了。
+  // 按 .nav-clock 的既有夜间做法改成深色 chip。
+  .nav-link-active {
+    background: #1c274c;
+    border-color: #2c3859;
+    color: #fffdec;
+  }
+
+  .hero-tag {
+    background: #1c274c;
+    color: var(--ai-primary);
   }
 
   .about-card {
@@ -1608,24 +1624,12 @@ const modules = [
   }
 }
 
-.nav-daynight__face {
-  position: absolute;
-  top: 50%;
-  font-size: 13px;
+// 图标放在拨钮里。原先两个 face 贴在轨道左右两端，而拨钮宽 22px、位移 28px，
+// 正好把当前那一侧的图标整个盖住，结果开关只剩一个空壳加白点。
+.nav-daynight__glyph {
+  font-size: 12px;
   line-height: 1;
-  transform: translateY(-50%);
   pointer-events: none;
-  transition: opacity 320ms cubic-bezier(0.23, 1, 0.32, 1);
-}
-
-.nav-daynight__face--sun {
-  left: 6px;
-  opacity: 1;
-}
-
-.nav-daynight__face--moon {
-  right: 6px;
-  opacity: 0.35;
 }
 
 // 拨钮：位移量由 --home-switch-x 统一驱动，hover 缩放才不会把位移覆盖掉
@@ -1639,6 +1643,8 @@ const modules = [
   height: 22px;
   margin-top: -11px;
   border-radius: 50%;
+  display: grid;
+  place-items: center;
   background: var(--home-switch-knob);
   border: 2px solid var(--ai-outline);
   box-shadow: 0 2px 0 0 var(--ai-btn-shadow);
@@ -1646,18 +1652,12 @@ const modules = [
   transition: transform 320ms cubic-bezier(0.23, 1, 0.32, 1), background 320ms ease;
 }
 
-.nav-daynight--on {
-  .nav-daynight__knob {
-    --home-switch-x: 28px;
-  }
-
-  .nav-daynight__face--sun { opacity: 0.35; }
-  .nav-daynight__face--moon { opacity: 1; }
+.nav-daynight--on .nav-daynight__knob {
+  --home-switch-x: 28px;
 }
 
 @media (prefers-reduced-motion: reduce) {
   .nav-daynight,
-  .nav-daynight__face,
   .nav-daynight__knob {
     transition: none;
   }
@@ -1912,7 +1912,7 @@ const modules = [
     .lbl {
       font-size: 8px;
       font-weight: 800;
-      color: var(--ai-shadow-color);
+      color: var(--ai-text-2);
       margin-bottom: 2px;
     }
 
@@ -1950,10 +1950,12 @@ const modules = [
     display: flex;
     flex-direction: column;
 
+    // 化石挂件整块（底色、.num）都是硬编码、不随昼夜翻转，
+    // 标签也必须用常量墨，换成 --ai-text-2 会在白底上掉到 2.07。
     .lbl {
       font-size: 8px;
       font-weight: 800;
-      color: var(--ai-shadow-color);
+      color: var(--home-chip-ink);
     }
 
     .num {
@@ -2034,7 +2036,7 @@ const modules = [
   small { font-size: 11px; font-weight: 800; color: var(--ai-text-2); margin-left: 2px; }
 }
 
-.stat-lbl { font-size: 11px; color: var(--ai-shadow-color); font-weight: 800; margin-top: 5px; }
+.stat-lbl { font-size: 11px; color: var(--ai-text-2); font-weight: 800; margin-top: 5px; }
 
 // ============================================
 // 7. 背包 Slot 物品功能区
@@ -2139,7 +2141,7 @@ const modules = [
   }
 
   .pocket-slot-ico {
-    color: var(--ai-text);
+    color: var(--home-chip-ink);
     display: grid;
     place-items: center;
   }
@@ -2154,7 +2156,7 @@ const modules = [
 
   .pocket-slot-sub {
     font-size: 12px;
-    color: var(--ai-shadow-color);
+    color: var(--ai-text-2);
     font-weight: 800;
     margin-top: 4px;
     z-index: 1;
@@ -2257,7 +2259,7 @@ const modules = [
     span {
       font-size: 10px;
       font-weight: 800;
-      color: var(--ai-shadow-color);
+      color: var(--ai-text-2);
       letter-spacing: 0.5px;
     }
   }
@@ -2321,7 +2323,7 @@ const modules = [
   margin-top: 8px;
   font-size: 9px;
   font-weight: 900;
-  color: var(--ai-shadow-color);
+  color: var(--ai-text-2);
   letter-spacing: 1px;
 }
 
@@ -2390,7 +2392,7 @@ const modules = [
 .title-pill {
   background: var(--ai-warning);
   border: 2px solid var(--ai-outline);
-  color: var(--ai-text);
+  color: var(--home-chip-ink);
   font-size: 11px;
   font-weight: 900;
   padding: 3px 12px;
