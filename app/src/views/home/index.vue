@@ -111,7 +111,31 @@
         @click="toggleDayNight"
       >
         <span class="nav-daynight__knob">
-          <span class="nav-daynight__glyph">{{ isNightView ? "🌙" : "☀️" }}</span>
+          <span class="nav-daynight__glyph">
+            <svg v-if="isNightView" class="glyph-moon" viewBox="0 0 24 24" fill="currentColor">
+              <path
+                class="moon-body"
+                d="M14 3.5C9.86 3.5 6.5 6.86 6.5 11c0 4.14 3.36 7.5 7.5 7.5 1.7 0 3.26-.57 4.53-1.53-3.23-.48-5.71-3.23-5.71-6.62 0-3.39 2.48-6.14 5.71-6.62C17.26 4.07 15.7 3.5 14 3.5z"
+              />
+              <path
+                class="moon-star"
+                d="M19 7c0-.9.7-1.6 1.6-1.6-.9 0-1.6-.7-1.6-1.6 0 .9-.7 1.6-1.6 1.6.9 0 1.6.7 1.6 1.6z"
+              />
+            </svg>
+            <svg v-else class="glyph-sun" viewBox="0 0 24 24" fill="currentColor">
+              <g class="sun-rays">
+                <circle cx="12" cy="2.5" r="1.5" />
+                <circle cx="12" cy="21.5" r="1.5" />
+                <circle cx="2.5" cy="12" r="1.5" />
+                <circle cx="21.5" cy="12" r="1.5" />
+                <circle cx="5.28" cy="5.28" r="1.5" />
+                <circle cx="18.72" cy="18.72" r="1.5" />
+                <circle cx="5.28" cy="18.72" r="1.5" />
+                <circle cx="18.72" cy="5.28" r="1.5" />
+              </g>
+              <circle class="sun-core" cx="12" cy="12" r="5" />
+            </svg>
+          </span>
         </span>
       </button>
 
@@ -962,8 +986,8 @@ const modules = [
   --home-hill-front-op: 1;
   --home-cloud-fill: rgba(200, 210, 240, 0.35);
   --home-particle-op: 0.35;
-  --home-switch-track: #1c274c;
-  --home-switch-knob: #cbd5ff;
+  --home-switch-track: #151e3f;
+  --home-switch-knob: #24355f;
   --home-video-veil: linear-gradient(
     180deg,
     rgba(21, 30, 63, 0.18) 0%,
@@ -1054,6 +1078,16 @@ const modules = [
     background: #1c274c;
     border-color: var(--ai-outline);
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+  }
+
+  .ac-passport__header {
+    background: linear-gradient(180deg, #24355a 0%, #1c274c 100%);
+    border-bottom-color: rgba(255, 255, 255, 0.1);
+
+    .ac-passport__stamp-dodo {
+      border-color: rgba(61, 212, 198, 0.7);
+      color: #3dd4c6;
+    }
   }
 
   .ac-passport__card {
@@ -1627,9 +1661,122 @@ const modules = [
 // 图标放在拨钮里。原先两个 face 贴在轨道左右两端，而拨钮宽 22px、位移 28px，
 // 正好把当前那一侧的图标整个盖住，结果开关只剩一个空壳加白点。
 .nav-daynight__glyph {
-  font-size: 12px;
-  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
   pointer-events: none;
+
+  svg {
+    width: 14px;
+    height: 14px;
+    display: block;
+  }
+
+  // 🌞 动森小太阳与光芒旋转动效
+  .glyph-sun {
+    color: #794f27;
+    animation: sun-pop-in 0.42s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+
+    .sun-rays {
+      transform-origin: 12px 12px;
+      animation: sun-rays-spin 12s linear infinite;
+    }
+
+    .sun-core {
+      transform-origin: 12px 12px;
+      animation: sun-core-breathe 2.5s ease-in-out infinite alternate;
+    }
+  }
+
+  // 🌙 动森小弯月与星星闪烁动效
+  .glyph-moon {
+    color: #ffd85e;
+    filter: drop-shadow(0 0 2px rgba(255, 216, 94, 0.6));
+    animation: moon-pop-in 0.42s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+
+    .moon-body {
+      transform-origin: 12px 12px;
+      animation: moon-cradle 3.2s ease-in-out infinite alternate;
+    }
+
+    .moon-star {
+      transform-origin: 19px 7px;
+      animation: star-twinkle 1.8s ease-in-out infinite alternate;
+    }
+  }
+}
+
+// 悬浮时太阳转速稍加快
+.nav-daynight:hover .sun-rays {
+  animation-duration: 4s;
+}
+
+@keyframes sun-pop-in {
+  0% {
+    opacity: 0;
+    transform: scale(0.2) rotate(-60deg);
+  }
+  70% {
+    transform: scale(1.15) rotate(8deg);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) rotate(0deg);
+  }
+}
+
+@keyframes sun-rays-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes sun-core-breathe {
+  0% {
+    transform: scale(0.94);
+  }
+  100% {
+    transform: scale(1.06);
+  }
+}
+
+@keyframes moon-pop-in {
+  0% {
+    opacity: 0;
+    transform: scale(0.2) rotate(-40deg);
+  }
+  70% {
+    transform: scale(1.15) rotate(6deg);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) rotate(0deg);
+  }
+}
+
+@keyframes moon-cradle {
+  0% {
+    transform: rotate(-4deg);
+  }
+  100% {
+    transform: rotate(6deg);
+  }
+}
+
+@keyframes star-twinkle {
+  0% {
+    opacity: 0.35;
+    transform: scale(0.75);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1.25);
+  }
 }
 
 // 拨钮：位移量由 --home-switch-x 统一驱动，hover 缩放才不会把位移覆盖掉
@@ -1658,8 +1805,15 @@ const modules = [
 
 @media (prefers-reduced-motion: reduce) {
   .nav-daynight,
-  .nav-daynight__knob {
+  .nav-daynight__knob,
+  .glyph-sun,
+  .glyph-moon,
+  .sun-rays,
+  .sun-core,
+  .moon-body,
+  .moon-star {
     transition: none;
+    animation: none;
   }
 }
 
