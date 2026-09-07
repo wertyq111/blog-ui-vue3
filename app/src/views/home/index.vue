@@ -85,6 +85,21 @@
         <span class="clock-text">{{ formattedTime }}</span>
       </div>
 
+      <!-- 昼夜开关：手动覆盖时段，刷新后回到跟随本机时间 -->
+      <button
+        type="button"
+        class="nav-daynight"
+        :class="{ 'nav-daynight--on': isNightView }"
+        :title="dayNightTitle"
+        :aria-pressed="isNightView"
+        aria-label="昼夜切换"
+        @click="toggleDayNight"
+      >
+        <span class="nav-daynight__face nav-daynight__face--sun">☀️</span>
+        <span class="nav-daynight__face nav-daynight__face--moon">🌙</span>
+        <span class="nav-daynight__knob"></span>
+      </button>
+
       <router-link v-if="!isLoggedIn" class="btn-ai btn-ai-sm btn-ai-primary" to="/login">
         <span class="btn-ai-finger"></span>
         <span class="btn-ai-text">办理登岛手续 ✈️</span>
@@ -568,7 +583,16 @@ const brandName = computed(() =>
 );
 
 /* ---- 24小时时段自动演进逻辑 ---- */
-const currentTimePeriod = ref("afternoon"); // morning, afternoon, sunset, night
+// 时钟推导出的时段（morning / afternoon / sunset / night）
+const autoTimePeriod = ref("afternoon");
+// 昼夜开关的手动覆盖；null = 跟随本机时间。刷新页面即回到跟随。
+const manualDayNight = ref<"day" | "night" | null>(null);
+// 页面实际生效的时段：手动优先，未手动过则跟随时钟
+const currentTimePeriod = computed(() => {
+  if (manualDayNight.value === "day") return "afternoon";
+  if (manualDayNight.value === "night") return "night";
+  return autoTimePeriod.value;
+});
 const formattedTime = ref("");
 let clockTimer: any = null;
 
@@ -600,14 +624,26 @@ const updateClock = () => {
 
   const hour = d.getHours();
   if (hour >= 5 && hour < 8) {
-    currentTimePeriod.value = "morning";
+    autoTimePeriod.value = "morning";
   } else if (hour >= 8 && hour < 17) {
-    currentTimePeriod.value = "afternoon";
+    autoTimePeriod.value = "afternoon";
   } else if (hour >= 17 && hour < 19) {
-    currentTimePeriod.value = "sunset";
+    autoTimePeriod.value = "sunset";
   } else {
-    currentTimePeriod.value = "night";
+    autoTimePeriod.value = "night";
   }
+};
+
+/* ---- 昼夜开关 ---- */
+const isNightView = computed(() => currentTimePeriod.value === "night");
+
+const dayNightTitle = computed(() => {
+  const source = manualDayNight.value === null ? "跟随本机时间" : "手动";
+  return `昼夜切换：当前 ${timePeriodName.value}（${source}）`;
+});
+
+const toggleDayNight = () => {
+  manualDayNight.value = isNightView.value ? "day" : "night";
 };
 
 /* ---- 动态哈希特产水果与胶囊称号生成 ---- */
@@ -744,6 +780,8 @@ const modules = [
   --home-hill-front-op: 0.65;
   --home-cloud-fill: #fff;        // 云朵填充
   --home-particle-op: 1;          // 飘落 🍃🌸 透明度
+  --home-switch-track: #fffef0;   // 昼夜开关轨道
+  --home-switch-knob: #ffd85e;    // 昼夜开关拨钮（昼间＝太阳黄）
 
   position: relative;
   width: 100%;
@@ -803,6 +841,8 @@ const modules = [
   --home-hill-front-op: 1;
   --home-cloud-fill: rgba(200, 210, 240, 0.35);
   --home-particle-op: 0.35;
+  --home-switch-track: #1c274c;
+  --home-switch-knob: #cbd5ff;
 
   background: linear-gradient(180deg, #151e3f 0%, #213352 60%, #1e2836 100%);
   color: var(--ai-text);
@@ -839,6 +879,10 @@ const modules = [
     background: #1c274c;
     border-color: #2c3859;
     color: #fffdec;
+  }
+
+  .nav-daynight {
+    border-color: #2c3859;
   }
 
   .about-card {
@@ -1211,6 +1255,9 @@ const modules = [
   height: 240px;
   z-index: -1;
   pointer-events: none;
+  // 两层山丘 width:120% / left:-8%~-10%，右端伸出视口 154px 会撑出横向滚动条；
+  // 视觉上本就该被视口切掉，这里直接裁掉（同 .ac404__sky 的处理）
+  overflow: hidden;
 }
 
 .grass-hill {
@@ -1362,6 +1409,88 @@ const modules = [
 
   .clock-icon {
     font-size: 15px;
+  }
+}
+
+// 昼夜开关（拨杆形态，与时钟挂件同一套描边/圆角/底色）
+.nav-daynight {
+  position: relative;
+  flex-shrink: 0;
+  width: 58px;
+  height: 30px;
+  padding: 0;
+  margin-right: 10px;
+  background: var(--home-switch-track);
+  border: 2px solid var(--ai-border);
+  border-radius: 999px;
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.06);
+  cursor: pointer;
+  transition:
+    background 320ms cubic-bezier(0.23, 1, 0.32, 1),
+    border-color 320ms cubic-bezier(0.23, 1, 0.32, 1);
+
+  &:hover .nav-daynight__knob {
+    transform: translateX(var(--home-switch-x)) scale(1.06);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--ai-primary);
+    outline-offset: 2px;
+  }
+}
+
+.nav-daynight__face {
+  position: absolute;
+  top: 50%;
+  font-size: 13px;
+  line-height: 1;
+  transform: translateY(-50%);
+  pointer-events: none;
+  transition: opacity 320ms cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+.nav-daynight__face--sun {
+  left: 6px;
+  opacity: 1;
+}
+
+.nav-daynight__face--moon {
+  right: 6px;
+  opacity: 0.35;
+}
+
+// 拨钮：位移量由 --home-switch-x 统一驱动，hover 缩放才不会把位移覆盖掉
+.nav-daynight__knob {
+  --home-switch-x: 0px;
+
+  position: absolute;
+  top: 50%;
+  left: 2px;
+  width: 22px;
+  height: 22px;
+  margin-top: -11px;
+  border-radius: 50%;
+  background: var(--home-switch-knob);
+  border: 2px solid var(--ai-outline);
+  box-shadow: 0 2px 0 0 var(--ai-btn-shadow);
+  transform: translateX(var(--home-switch-x));
+  transition: transform 320ms cubic-bezier(0.23, 1, 0.32, 1), background 320ms ease;
+}
+
+.nav-daynight--on {
+  .nav-daynight__knob {
+    --home-switch-x: 28px;
+  }
+
+  .nav-daynight__face--sun { opacity: 0.35; }
+  .nav-daynight__face--moon { opacity: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .nav-daynight,
+  .nav-daynight__face,
+  .nav-daynight__knob {
+    transition: none;
   }
 }
 
