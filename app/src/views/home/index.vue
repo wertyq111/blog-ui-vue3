@@ -73,6 +73,7 @@ import { resolveAvatar } from "@/utils/avatar";
 import { usePublicPageScroll } from "@/composables";
 import { useDayCycle } from "./day-cycle";
 import type { HomeStats } from "./home-stats";
+import type { HomeModule } from "./home-modules";
 import HomeSky from "./components/HomeSky.vue";
 import HomeNav from "./components/HomeNav.vue";
 import HeroIsland from "./components/HeroIsland.vue";
@@ -142,17 +143,9 @@ onMounted(async () => {
   }
 });
 
-const handleModuleClick = (key: string) => {
-  if (!isLoggedIn.value) {
-    router.push("/login");
-    return;
-  }
-  // 点击背包物品进入对应的功能路由
-  if (key === "me" || key === "user") {
-    router.push("/profile");
-  } else {
-    router.push("/dashboard");
-  }
+// 未登录一律去登录；已登录直达入口对应的功能页
+const handleModuleClick = (mod: HomeModule) => {
+  router.push(isLoggedIn.value ? mod.path : "/login");
 };
 
 </script>

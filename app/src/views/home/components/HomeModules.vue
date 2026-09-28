@@ -12,11 +12,11 @@
 
       <div class="modules-pocket">
         <div
-          v-for="mod in list"
+          v-for="mod in homeModules"
           :key="mod.key"
           class="pocket-slot"
           :class="'pocket-slot--' + mod.color"
-          @click="emit('select', mod.key)"
+          @click="emit('select', mod)"
         >
           <!-- 背包格子的圆圈标记角标 -->
           <span class="pocket-slot-tag">{{ mod.tag }}</span>
@@ -47,12 +47,12 @@
 
 <script setup lang="ts">
 import { computed } from "vue";
-import { modules, unauthModules } from "../home-modules";
+import { homeModules, type HomeModule } from "../home-modules";
 
 defineOptions({ name: "HomeModules" });
 
 const props = defineProps<{ loggedIn: boolean }>();
-const emit = defineEmits<{ select: [key: string] }>();
+const emit = defineEmits<{ select: [mod: HomeModule] }>();
 
 const head = computed(() =>
   props.loggedIn
@@ -67,7 +67,6 @@ const head = computed(() =>
         sub: "Nook 移居计划官方倾情推荐，为您全方位展示博客小岛的悠闲生活与核心建设生态。",
       }
 );
-const list = computed(() => (props.loggedIn ? modules : unauthModules));
 </script>
 
 <style scoped lang="scss">
@@ -200,22 +199,8 @@ const list = computed(() => (props.loggedIn ? modules : unauthModules));
 // 对各颜色包格做细腻的拟色适配
 .pocket-slot--pink { .pocket-slot-ico-wrap { background: #ffe6eb; } }
 .pocket-slot--yellow { .pocket-slot-ico-wrap { background: #fff8d6; } }
-.pocket-slot--blue { .pocket-slot-ico-wrap { background: #e8f0ff; } }
 .pocket-slot--teal { .pocket-slot-ico-wrap { background: #e3faf2; } }
 .pocket-slot--orange { .pocket-slot-ico-wrap { background: #ffebd6; } }
-.pocket-slot--purple { .pocket-slot-ico-wrap { background: #f6ebff; } }
-.pocket-slot--green { .pocket-slot-ico-wrap { background: #ebffe6; } }
-.pocket-slot--peach { .pocket-slot-ico-wrap { background: #ffebd6; } }
-.pocket-slot--lime { .pocket-slot-ico-wrap { background: #fdffe6; } }
-.pocket-slot--red { .pocket-slot-ico-wrap { background: #ffe6e6; } }
-.pocket-slot--brown { .pocket-slot-ico-wrap { background: #fdfaf0; } }
-.pocket-slot--mint { .pocket-slot-ico-wrap { background: #e3faf2; } }
-
-@media (max-width: 1200px) {
-  .modules-pocket {
-    grid-template-columns: repeat(3, 1fr);
-  }
-}
 
 @media (max-width: 900px) {
   .modules-pocket {
