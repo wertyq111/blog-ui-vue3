@@ -19,6 +19,8 @@ export interface IslandScene {
   focusZone(key: ZoneKey): void;
   /** 巡游开关 */
   setAutoplay(on: boolean): void;
+  /** 访客正在看说明卡（悬停 / 聚焦）时挂起巡游，离开后按手动操作规则 6 秒再恢复 */
+  holdTour(on: boolean): void;
   /** 停止渲染循环（离开视口 / 标签页隐藏） */
   pause(): void;
   resume(): void;
@@ -109,6 +111,9 @@ export function createIslandScene(
   controls.minPolarAngle = 0.35;
   controls.maxPolarAngle = 1.25;
   controls.update();
+  // OrbitControls 会把画布设成 touch-action: none，手机上手指落在画布上就滚不动页面。
+  // 竖向手势交还浏览器滚动页面，横向拖动仍然转岛，双指捏合仍由 controls 处理。
+  canvas.style.touchAction = "pan-y";
 
   const gradient = createToonGradient();
   const parts = buildIsland(gradient, !options.mobile);
@@ -213,13 +218,17 @@ export function createIslandScene(
     if (now >= dwellUntil) flyTo((stopIndex + 1) % ORDER.length, now);
   };
 
-  // 拖动开始即视为手动操作：中断飞行，6 秒后恢复
+  // 拖动期间一直不恢复巡游；松手（含滚轮缩放、触摸被浏览器接管）后 6 秒无操作再恢复
   const onControlStart = () => {
     flight = null;
-    idleUntil = performance.now() + IDLE_MS;
+    idleUntil = Infinity;
     resumeCurrent = true;
   };
+  const onControlEnd = () => {
+    idleUntil = performance.now() + IDLE_MS;
+  };
   controls.addEventListener("start", onControlStart);
+  controls.addEventListener("end", onControlEnd);
 
   // ---- 拾取：悬停高亮、点击飞过去 ----
   const raycaster = new THREE.Raycaster();
@@ -330,6 +339,9 @@ export function createIslandScene(
     setAutoplay(on) {
       autoplay = on;
     },
+    holdTour(on) {
+      idleUntil = on ? Infinity : performance.now() + IDLE_MS;
+    },
     pause() {
       running = false;
       cancelAnimationFrame(raf);
@@ -344,6 +356,7 @@ export function createIslandScene(
       api.pause();
       ro.disconnect();
       controls.removeEventListener("start", onControlStart);
+      controls.removeEventListener("end", onControlEnd);
       controls.dispose();
       canvas.removeEventListener("pointerdown", onPointerDown);
       canvas.removeEventListener("pointerup", onPointerUp);
@@ -357,7 +370,10 @@ export function createIslandScene(
         if ((o as THREE.InstancedMesh).isInstancedMesh) (o as THREE.InstancedMesh).dispose();
       });
       gradient.dispose();
+      sun.shadow.dispose();
       renderer.dispose();
+      // dispose 不会释放 WebGL 上下文，要等 canvas 被回收；主动释放，避免频繁进出首页触到上下文上限
+      renderer.forceContextLoss();
       canvas.remove();
     },
   };

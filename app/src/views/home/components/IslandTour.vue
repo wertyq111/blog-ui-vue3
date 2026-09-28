@@ -15,7 +15,15 @@
       <div v-if="!ready" class="island-tour__placeholder">小岛正在浮出水面…</div>
 
       <Transition name="island-tour-card">
-        <div v-if="activeZone" :key="activeZone.key" class="island-tour__card">
+        <div
+          v-if="activeZone"
+          :key="activeZone.key"
+          class="island-tour__card"
+          @pointerenter="scene?.holdTour(true)"
+          @pointerleave="scene?.holdTour(false)"
+          @focusin="scene?.holdTour(true)"
+          @focusout="scene?.holdTour(false)"
+        >
           <div class="island-tour__card-name">{{ activeZone.name }}</div>
           <p class="island-tour__card-intro">{{ activeZone.intro }}</p>
           <div class="island-tour__chips">
