@@ -2,7 +2,7 @@
 
 - 日期：2026-09-28
 - 范围：`blog-ui-vue3` 首页（`app/src/views/home/index.vue`）
-- 核心约束：**等值重构**。不改视觉、不改交互、不改 section 顺序，重构前后像素一致
+- 核心约束：**等值重构**。不改视觉、不改交互、不改 section 顺序，重构前后每个元素的计算样式一致
 - 所属系列：首页改造四个子项目中的第一个，顺序为 A 拆分（本文）→ C hero 与模块区改版 → D 3D 小岛导览 → B 全局深色模式
 
 ## 1. 背景
@@ -130,18 +130,19 @@ export function useScrollProgress(target?: Ref<HTMLElement | null>): Ref<number>
 ## 7. 样式迁移规则
 
 1. **token 不动**：`.home-page` / `.home-page--night` 上的 `--ai-*`、`--home-*` 定义，以及时段背景渐变，留在 `index.vue`。
-2. **夜间逐元素规则随元素走**：`.home-page--night .xxx` 在子组件里写成 `:global(.home-page--night) .xxx`。编译后是 `.home-page--night .xxx[data-v-子组件]`，和原来的 `.home-page--night .xxx[data-v-首页]` 特异性相同。
+2. **夜间逐元素规则随元素走**：在子组件的 scoped 样式里直接写 `.home-page--night .xxx`。scoped 只给最后一段选择器加属性，编译后是 `.home-page--night .xxx[data-v-子组件]`，祖先类照常匹配根节点，特异性与原来的 `.home-page--night .xxx[data-v-首页]` 相同。**不要用 `:global(.home-page--night) .xxx`**：Vue 3 会把整个选择器替换成 `:global()` 的内容，结果变成 `.home-page--night`，规则会刷到页面根上。
 3. **视频接管隐藏规则**：`HomeSky` 自己知道 `videoActive`，改用组件内的修饰类控制，不再依赖根节点的 `.home-page--video`。根节点的 `.home-page--video` 仍保留，用于让出根背景（`.home-page.home-page--video { background: none }`）。
 4. **响应式分块按元素拆散**：`.modules-pocket` 进 `HomeModules`，`.hero-stats` 进 `HomeKpiStrip`，`.hero-grid` 进 `_hero.scss`，`.nav` 进 `HomeNav`，`.ac-passport*` 进 `IslandPassport`。
 5. **共用 partial**：`_shared.scss`、`_hero.scss` 由需要的组件各自 `@use`。scoped 编译后每个组件会各有一份，体积增加很小，换来的是每个组件样式自足。
-6. **清理两处**：
+6. **清理**（均为零视觉影响）：
    - 模块格子的已登录、未登录两段模板合成一段 `v-for`，标题组文案按 `loggedIn` 切换。
    - 删除嵌在 `.section-title` 里的 `&--pink { .pocket-slot-ico-wrap {...} }` 一整组（编译为 `.section-title--pink ...`，永远匹配不到）。正确的 `.pocket-slot--*` 规则保留。
+   - 删除夜间块里的 `.about-card`、`.about-list-row span:last-child` 两条规则，以及 `.ac404__sky` 规则：三个类名在首页模板里都不存在（`.ac404__sky` 属于 404 页，scoped 样式在首页永远匹配不到）。
 7. **不做的事**：不改任何色值、尺寸、动画；不做 token 化治理；不动 KPI 请求失败时的静态兜底数字。
 
 ## 8. 风险
 
-- **源码顺序变化**：拆分后各组件样式的注入顺序与原来单文件里的先后顺序不同。两条特异性相同、作用于同一元素的规则，谁在后谁生效，结果可能改变。靠第 9 节的像素比对兜住，发现差异逐条定位修正。
+- **源码顺序变化**：拆分后各组件样式的注入顺序与原来单文件里的先后顺序不同。两条特异性相同、作用于同一元素的规则，谁在后谁生效，结果可能改变。靠第 9 节的指纹比对兜住，发现差异逐条定位修正。
 - **多根组件**：各子组件均为单根。`index.vue` 本身保持单根（路由缓存要求）。
 
 ## 9. 验证
@@ -150,11 +151,19 @@ export function useScrollProgress(target?: Ref<HTMLElement | null>): Ref<number>
 |---|---|
 | 类型与构建 | `pnpm run type-check`、`pnpm run build-only`，与 CI 一致 |
 | 代码风格 | `pnpm eslint <改动文件>` 定向检查，不跑会就地改写全仓库的 `pnpm run lint` |
-| 像素比对 | 同步到远端 8083 后，重构前（`main`）与重构后（分支）各截一组图，逐张比对 |
+| 计算样式指纹比对 | 远端 8083 上，重构前（`main`）与重构后（分支）各采一次，逐元素比对 |
+| 截图 | 重构后各组合截图，供肉眼复核 |
 
-像素比对矩阵：已登录 / 未登录 × 白天 / 星夜（手动开关钉住）× 桌面 1440 宽 / 手机 375 宽，共 8 组，每组截首屏和整页。另加桌面宽度下未钉住时段、滚动到页面中段（视频擦洗到黄昏）的一组。
+**为什么不做像素比对**：内置浏览器的截图只回到对话里、不落文件，无法逐像素相减；飘落粒子、云、萤火虫的动画相位每次不同，像素必然有噪声。计算样式指纹更严格：
 
-比对前注入临时样式暂停所有 CSS 动画与过渡（飘落粒子、云、萤火虫是随机相位，不暂停无法比对），截完移除。已登录态需要你在浏览器里登录，我不代填密码。打开浏览器验证前会先征得你同意。
+- 按文档顺序遍历 `.home-page` 下的元素（跳过 `display: contents` 的包裹层），对每个元素及其 `::before` / `::after` 取 `getComputedStyle` 全部属性做哈希。
+- 采集时注入 `animation: none; transition: none` 排除时间相关的值；动画声明（时长、次数、缓动等）另行采集，动画名去掉 scoped 哈希后缀再比，并逐个核对对应的 `@keyframes` 在页面样式表里真实存在。
+- 元素的直接文本也纳入哈希（时钟文本除外）。
+- 重构前的指纹存进该页面源的 `localStorage`，重构后在页面内直接比对，只返回不一致的元素。
+
+比对矩阵：已登录 / 未登录 × 白天 / 星夜（手动开关钉住）× 桌面 1440 宽 / 手机 375 宽，共 8 组；另加桌面宽度下不钉住时段、滚动到 70% 处（视频擦洗到黄昏）的已登录一组，共 9 组。
+
+已登录态需要你在浏览器里登录，我不代填密码。打开浏览器验证前会先征得你同意。
 
 ## 10. 交付
 
