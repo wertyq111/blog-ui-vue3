@@ -18,29 +18,59 @@
             <svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" class="btn-arrow-ico"><path d="M3 10h14M11 4l6 6-6 6"/></svg>
             <span class="btn-ai-text">进入工作台</span>
           </router-link>
-          <router-link class="btn-ai btn-ai-lg" to="/develop/work-daily">
+          <button type="button" class="btn-ai btn-ai-lg" @click="introVisible = true">
             <span class="btn-ai-finger"></span>
-            <span class="btn-ai-text">✏️ 写今天的日常</span>
-          </router-link>
+            <span class="btn-ai-text">🎬 小岛介绍</span>
+          </button>
         </div>
       </div>
 
       <HeroAvatar :avatar-src="avatarSrc" :nickname="nickname" :stats="stats" />
     </div>
+
+    <AdminAnimalModal
+      v-model:visible="introVisible"
+      title="小岛介绍"
+      width="min(92vw, 1000px)"
+      :show-footer="false"
+    >
+      <video
+        class="intro-video"
+        src="/home/island-intro.mp4"
+        poster="/home/island-intro-poster.jpg"
+        controls
+        autoplay
+        playsinline
+      ></video>
+    </AdminAnimalModal>
   </section>
 </template>
 
 <script setup lang="ts">
 import HeroSign from "./HeroSign.vue";
 import HeroAvatar from "./HeroAvatar.vue";
+import AdminAnimalModal from "@/components/AdminPage/AdminAnimalModal.vue";
 import type { HomeStats } from "../home-stats";
 
 defineOptions({ name: "HeroIsland" });
 
 defineProps<{ avatarSrc: string; nickname: string; stats: HomeStats }>();
+
+const introVisible = ref(false);
 </script>
 
 <style scoped lang="scss">
 @use "../styles/shared";
 @use "../styles/hero";
+
+// 介绍视频为 16:9 横版，宽度受视口高度约束，避免弹窗内容区出现滚动条
+.intro-video {
+  display: block;
+  width: min(100%, calc(52vh * 16 / 9));
+  height: auto;
+  aspect-ratio: 16 / 9;
+  margin: 0 auto;
+  background: #14121a;
+  border-radius: 12px;
+}
 </style>
