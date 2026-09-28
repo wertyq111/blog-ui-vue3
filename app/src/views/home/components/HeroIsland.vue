@@ -25,22 +25,18 @@
         </div>
       </div>
 
-      <HeroAvatar
-        :avatar-src="avatarSrc"
-        :nickname="nickname"
-        :stat-words="statWords"
-        :stat-streak="statStreak"
-      />
+      <HeroAvatar :avatar-src="avatarSrc" :nickname="nickname" :stats="stats" />
     </div>
   </section>
 </template>
 
 <script setup lang="ts">
 import HeroAvatar from "./HeroAvatar.vue";
+import type { HomeStats } from "../home-stats";
 
 defineOptions({ name: "HeroIsland" });
 
-defineProps<{ avatarSrc: string; nickname: string; statWords: string; statStreak: string }>();
+defineProps<{ avatarSrc: string; nickname: string; stats: HomeStats }>();
 </script>
 
 <style scoped lang="scss">

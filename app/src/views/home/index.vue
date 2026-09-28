@@ -20,17 +20,8 @@
     />
 
     <!-- 主视觉 Hero：已登录展示个人小岛概览，未登录展示移居办理柜台 -->
-    <HeroIsland
-      v-if="isLoggedIn"
-      :avatar-src="avatarSrc"
-      :nickname="nickname"
-      :stat-words="statWords"
-      :stat-streak="statStreak"
-    />
+    <HeroIsland v-if="isLoggedIn" :avatar-src="avatarSrc" :nickname="nickname" :stats="stats" />
     <HeroCounter v-else />
-
-    <!-- 岛民广播属性统计面板 (仅在已登录状态展示) -->
-    <HomeKpiStrip v-if="isLoggedIn" :stats="stats" />
 
     <!-- 模块区：已登录展示“玩家背包栏 Grid”，未登录展示“小岛生态推荐手册 Highlights” -->
     <HomeModules :logged-in="isLoggedIn" @select="handleModuleClick" />
@@ -81,11 +72,11 @@ import islanderSvg from "@/assets/home/islander.svg";
 import { resolveAvatar } from "@/utils/avatar";
 import { usePublicPageScroll } from "@/composables";
 import { useDayCycle } from "./day-cycle";
+import type { HomeStats } from "./home-stats";
 import HomeSky from "./components/HomeSky.vue";
 import HomeNav from "./components/HomeNav.vue";
 import HeroIsland from "./components/HeroIsland.vue";
 import HeroCounter from "./components/HeroCounter.vue";
-import HomeKpiStrip from "./components/HomeKpiStrip.vue";
 import HomeModules from "./components/HomeModules.vue";
 import IslandPassport from "./components/IslandPassport.vue";
 import BulletinBoard from "./components/BulletinBoard.vue";
@@ -134,7 +125,7 @@ const statWords = computed(() => metrics.value ? formatWords(metrics.value.total
 const statLogs = computed(() => metrics.value ? String(metrics.value.total_logs.value) : "42");
 const statStreak = computed(() => metrics.value ? String(metrics.value.longest_streak.value) : "7");
 const statPeak = computed(() => metrics.value?.peak_hour?.label || "14点");
-const stats = computed(() => ({
+const stats = computed<HomeStats>(() => ({
   words: statWords.value,
   logs: statLogs.value,
   streak: statStreak.value,
