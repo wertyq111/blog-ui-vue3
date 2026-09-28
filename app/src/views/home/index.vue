@@ -185,6 +185,10 @@ const handleModuleClick = (key: string) => {
   --home-chip-ink: #794f27;
   --home-switch-track: #fffef0;   // 昼夜开关轨道
   --home-switch-knob: #ffd85e;    // 昼夜开关拨钮（昼间＝太阳黄）
+  --home-sign-wood-top: #c8905a; // 木牌上半
+  --home-sign-wood-bottom: #a86f3d; // 木牌下半
+  --home-sign-wood-shadow: #6b4520; // 木牌投影
+  --home-sign-rope: #794f27; // 挂绳
   // 背景视频蒙版：视频是 fixed 铺满视口的，下半部的草地细节会压在正文下面，
   // 不压一层纸色正文就读不清。上淡下浓，天空区尽量保留原画。
   --home-video-veil: linear-gradient(
@@ -242,6 +246,10 @@ const handleModuleClick = (key: string) => {
   --home-particle-op: 0.35;
   --home-switch-track: #151e3f;
   --home-switch-knob: #24355f;
+  --home-sign-wood-top: #6b4a2e;
+  --home-sign-wood-bottom: #54381f;
+  --home-sign-wood-shadow: #2c1c0e;
+  --home-sign-rope: #a98a66; // 夜空里挂绳要比描边亮，否则看不见
   --home-video-veil: linear-gradient(
     180deg,
     rgba(21, 30, 63, 0.18) 0%,

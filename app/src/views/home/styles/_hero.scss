@@ -53,26 +53,6 @@
   box-shadow: 0 0 0 3px rgba(25, 200, 185, 0.25);
 }
 
-.hero-title {
-  font-size: clamp(64px, 10vw, 120px);
-  font-weight: 900;
-  line-height: 0.94;
-  letter-spacing: -0.03em;
-  margin: 20px 0;
-  color: #fffdec;
-  text-shadow:
-    0 2.5px 0 #eed09d,
-    0 5px 0 var(--ai-outline), // 动森深褐黑描边厚度
-    0 7.5px 0 var(--ai-outline),
-    0 12px 24px rgba(90, 58, 24, 0.18);
-}
-
-.hero-title-row {
-  display: flex;
-  align-items: baseline;
-  gap: 14px;
-}
-
 .hero-sub {
   max-width: 500px;
   font-size: 16px;

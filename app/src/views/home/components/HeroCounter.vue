@@ -7,11 +7,7 @@
           <span class="hero-tag-dot"></span>
           NOOK INC. · 移居小岛计划
         </span>
-        <div class="hero-title-row">
-          <h1 class="hero-title">
-            博客<br/>小岛.
-          </h1>
-        </div>
+        <HeroSign />
         <p class="hero-sub">
           想要开启悠闲又充实的开发第二人生吗？<br />
           这里是 <b>Nook Inc. 移居小岛计划柜台</b>，我们将协助你办理博客小岛的定居登记，收集每日灵感，开启趣味生活！
@@ -77,6 +73,7 @@
 </template>
 
 <script setup lang="ts">
+import HeroSign from "./HeroSign.vue";
 import { scrollToSection } from "../scroll-to-section";
 
 defineOptions({ name: "HeroCounter" });

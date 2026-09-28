@@ -7,11 +7,7 @@
           <span class="hero-tag-dot"></span>
           WELCOME · 博客小岛
         </span>
-        <div class="hero-title-row">
-          <h1 class="hero-title">
-            博客<br/>小岛.
-          </h1>
-        </div>
+        <HeroSign />
         <p class="hero-sub">
           记录开发日常、沉淀项目文档、管理平台来源与工具配置。<br />
           这里是 <b>{{ nickname }}</b> 的小岛 —— 收集本周的灵感、整理项目的航向，也保留一些悠闲发呆的余地。
@@ -22,6 +18,10 @@
             <svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" class="btn-arrow-ico"><path d="M3 10h14M11 4l6 6-6 6"/></svg>
             <span class="btn-ai-text">进入工作台</span>
           </router-link>
+          <router-link class="btn-ai btn-ai-lg" to="/develop/work-daily">
+            <span class="btn-ai-finger"></span>
+            <span class="btn-ai-text">✏️ 写今天的日常</span>
+          </router-link>
         </div>
       </div>
 
@@ -31,6 +31,7 @@
 </template>
 
 <script setup lang="ts">
+import HeroSign from "./HeroSign.vue";
 import HeroAvatar from "./HeroAvatar.vue";
 import type { HomeStats } from "../home-stats";
 
