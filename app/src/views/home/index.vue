@@ -160,17 +160,13 @@ const handleModuleClick = (mod: HomeModule) => goTo(mod.path);
 @use "./styles/shared";
 
 .home-page {
-  // ── 昼夜 token（昼间值 = 抽取前的字面值，等值重构）────────────
-  // 夜间覆盖见 .home-page--night
-  --ai-text: var(--ai-text);          // 正文/标题棕
-  --ai-text-2: var(--ai-text-2);        // 次级文字
-  --ai-primary: var(--ai-primary);       // 主题青
-  --ai-primary-active: var(--ai-primary-active);
-  --ai-border: var(--ai-border);        // 浅描边
+  // ── 昼夜 token ────────────
+  // 昼间的 --ai-text / --ai-text-2 / --ai-primary / --ai-primary-active / --ai-border /
+  // --ai-shadow-color 直接继承全局 :root，这里不要写 `--x: var(--x)`：自引用是循环依赖，
+  // 会让变量在 .home-page 内整体失效（见 lessons l74）。夜间覆盖见 .home-page--night
   --ai-outline: var(--ai-text);       // 拟物粗描边（与 --ai-text 昼间同值、夜间相反）
   --ai-btn-face: #fffef6;      // 按钮/卡片面
   --ai-btn-shadow: #d4c9b4;    // 拟物投影
-  --ai-shadow-color: var(--ai-shadow-color);  // 柔和阴影
 
   // ── 首页专有槽 ──────────────────────────────────────────
   --home-hill-back: var(--ai-success);      // 后层山丘
