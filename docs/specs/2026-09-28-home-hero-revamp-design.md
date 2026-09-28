@@ -40,7 +40,7 @@
 - 以绳子顶端为轴摆动：±2.2°，周期 3.6s，`ease-in-out` 无限循环。
 - 进场时 4 个字依次从上方弹入，间隔 80ms，带回弹（`cubic-bezier(.34, 1.56, .64, 1)`，时长 0.7s）；鼠标移到木牌上时重放一次。
 - 木牌内标题字号 `clamp(52px, 7vw, 88px)`（原标题最大 120px，放进木牌后过宽会挤压头像），保留原标题的奶油色字与棕色立体描边阴影。
-- 木牌颜色走首页 token，与现有昼夜 token 同处 `index.vue` 根上：`--home-sign-wood-top`、`--home-sign-wood-bottom`、`--home-sign-wood-shadow`；`.home-page--night` 覆盖为深木色，标题字色不变。
+- 木牌颜色走首页 token，与现有昼夜 token 同处 `index.vue` 根上：`--home-sign-wood-top`、`--home-sign-wood-bottom`、`--home-sign-wood-shadow`、`--home-sign-rope`（挂绳）；`.home-page--night` 覆盖为深木色，挂绳改用比描边更亮的颜色（夜间描边 `#0f1731` 会融进夜空），标题字色不变。
 
 ### 3.2 头像区（已登录，`HeroAvatar`）
 
