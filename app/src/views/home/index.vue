@@ -1,72 +1,7 @@
 <template>
   <div class="home-page" :class="['home-page--' + currentTimePeriod, { 'home-page--video': videoActive }]">
-    <!-- 天空背景容器 -->
-    <div class="sky">
-      <!-- 一日推移背景视频：从不 play，只按滚动进度 seek（见 tickVideo） -->
-      <video
-        v-if="showVideo"
-        ref="videoEl"
-        class="sky-video"
-        :class="{ 'sky-video--ready': videoActive }"
-        src="/home/day-cycle.mp4"
-        poster="/home/day-cycle-poster.jpg"
-        muted
-        playsinline
-        preload="auto"
-        @loadeddata="onVideoReady"
-        @error="onVideoFail"
-      ></video>
-
-      <!-- 繁星点缀仅在夜间展示 -->
-      <div v-if="currentTimePeriod === 'night'" class="starry-night-stars">
-        <span class="star star--1">✦</span>
-        <span class="star star--2">✦</span>
-        <span class="star star--3">✦</span>
-        <span class="star star--4">✦</span>
-        <span class="star star--5">✦</span>
-        <span class="star star--6">✦</span>
-      </div>
-
-      <!-- 夜景层：月亮 + 萤火虫，仅夜间渲染 -->
-      <div v-if="currentTimePeriod === 'night'" class="night-scene">
-        <div class="night-moon">
-          <span class="night-moon__crater night-moon__crater--1"></span>
-          <span class="night-moon__crater night-moon__crater--2"></span>
-          <span class="night-moon__crater night-moon__crater--3"></span>
-        </div>
-        <span class="night-firefly night-firefly--1"></span>
-        <span class="night-firefly night-firefly--2"></span>
-        <span class="night-firefly night-firefly--3"></span>
-        <span class="night-firefly night-firefly--4"></span>
-        <span class="night-shooting-star"></span>
-      </div>
-    </div>
-
-    <!-- 漂浮的白云 -->
-    <svg class="cloud cloud-1" viewBox="0 0 140 70">
-      <ellipse cx="40" cy="45" rx="40" ry="22"/><ellipse cx="80" cy="35" rx="35" ry="22"/><ellipse cx="115" cy="48" rx="22" ry="16"/>
-    </svg>
-    <svg class="cloud cloud-2" viewBox="0 0 100 50">
-      <ellipse cx="30" cy="30" rx="28" ry="16"/><ellipse cx="65" cy="22" rx="24" ry="16"/><ellipse cx="85" cy="34" rx="14" ry="11"/>
-    </svg>
-    <svg class="cloud cloud-3" viewBox="0 0 80 40">
-      <ellipse cx="22" cy="22" rx="22" ry="12"/><ellipse cx="52" cy="18" rx="20" ry="13"/><ellipse cx="70" cy="26" rx="10" ry="8"/>
-    </svg>
-
-    <!-- 飘落的绿叶和樱花装饰 -->
-    <div class="falling-particles">
-      <span class="particle particle--leaf-1">🍃</span>
-      <span class="particle particle--flower-1">🌸</span>
-      <span class="particle particle--leaf-2">🍃</span>
-      <span class="particle particle--flower-2">🌸</span>
-      <span class="particle particle--leaf-3">🍁</span>
-    </div>
-
-    <!-- 3D 拟物立体双层山坡草地装饰 -->
-    <div class="grass-hills">
-      <div class="grass-hill grass-hill--back"></div>
-      <div class="grass-hill grass-hill--front"></div>
-    </div>
+    <!-- 天空层：一日推移视频 + CSS 替身背景 -->
+    <HomeSky v-model:video-active="videoActive" :period="currentTimePeriod" :video-time="targetVideoTime" />
 
     <!-- 导航栏 -->
     <nav class="nav">
@@ -594,7 +529,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref, onMounted, onUnmounted } from "vue";
+import { computed, ref, onMounted } from "vue";
 import { useRouter } from "vue-router";
 import { useUserStore } from "@/store";
 import DashboardStatsAPI from "@/api/develop/dashboard-stats";
@@ -602,6 +537,8 @@ import type { DashboardMetrics } from "@/types/api/dashboard-stats";
 import islanderSvg from "@/assets/home/islander.svg";
 import { resolveAvatar } from "@/utils/avatar";
 import { usePublicPageScroll } from "@/composables";
+import { useDayCycle } from "./day-cycle";
+import HomeSky from "./components/HomeSky.vue";
 
 defineOptions({ name: "HomePage" });
 
@@ -621,149 +558,17 @@ const brandName = computed(() =>
   isLoggedIn.value ? `${nickname.value}的小岛` : "博客小岛"
 );
 
-/* ---- 一日推移背景视频（滚动擦洗）---- */
-// 视频是一条 19.63s 的连续镜头：清晨 → 正午 → 黄昏 → 星夜。
-// 它从不 play，只在 rAF 里把 currentTime 设成滚动进度对应的时间点。
-const VIDEO_DURATION = 19.63;
-// 各时段在视频时间轴上的上界（秒），由逐帧取样定出
-const PHASE_END = { morning: 4.5, afternoon: 12.6, sunset: 16.4 };
-// 昼夜开关按下后，把擦洗范围钳在对应时段内，滚动仍能在区间里推进
-const PINNED_RANGE = { day: [4.5, 9.0], night: [16.8, 19.5] };
-
-const videoEl = ref<HTMLVideoElement | null>(null);
-const showVideo = ref(false);   // 设备是否够格加载视频
-const videoActive = ref(false); // 视频是否已就绪并接管背景
-const scrollProgress = ref(0);  // 0 ~ 1
-
-const periodFromVideoTime = (t: number) => {
-  if (t < PHASE_END.morning) return "morning";
-  if (t < PHASE_END.afternoon) return "afternoon";
-  if (t < PHASE_END.sunset) return "sunset";
-  return "night";
-};
-
-/* ---- 24小时时段自动演进逻辑 ---- */
-// 时钟推导出的时段（morning / afternoon / sunset / night）
-const autoTimePeriod = ref("afternoon");
-// 昼夜开关的手动覆盖；null = 跟随本机时间。刷新页面即回到跟随。
-const manualDayNight = ref<"day" | "night" | null>(null);
-// 页面实际生效的时段：手动开关 > 视频画面 > 本机时钟。
-// 视频接管时必须由画面反推时段，否则滚到底会出现「夜景背景 + 昼间卡片」。
-const currentTimePeriod = computed(() => {
-  if (manualDayNight.value === "day") return "afternoon";
-  if (manualDayNight.value === "night") return "night";
-  if (videoActive.value) return periodFromVideoTime(VIDEO_DURATION * scrollProgress.value);
-  return autoTimePeriod.value;
-});
-const formattedTime = ref("");
-let clockTimer: any = null;
-
-const timePeriodName = computed(() => {
-  const map: Record<string, string> = {
-    morning: "清晨",
-    afternoon: "白天",
-    sunset: "黄昏",
-    night: "星夜",
-  };
-  return map[currentTimePeriod.value] || "白天";
-});
-
-const timePeriodIcon = computed(() => {
-  const map: Record<string, string> = {
-    morning: "🌅",
-    afternoon: "☀️",
-    sunset: "🌇",
-    night: "🌌",
-  };
-  return map[currentTimePeriod.value] || "☀️";
-});
-
-const updateClock = () => {
-  const d = new Date();
-  const hh = String(d.getHours()).padStart(2, "0");
-  const mm = String(d.getMinutes()).padStart(2, "0");
-  formattedTime.value = `${hh}:${mm}`;
-
-  const hour = d.getHours();
-  if (hour >= 5 && hour < 8) {
-    autoTimePeriod.value = "morning";
-  } else if (hour >= 8 && hour < 17) {
-    autoTimePeriod.value = "afternoon";
-  } else if (hour >= 17 && hour < 19) {
-    autoTimePeriod.value = "sunset";
-  } else {
-    autoTimePeriod.value = "night";
-  }
-};
-
-/* ---- 昼夜开关 ---- */
-const isNightView = computed(() => currentTimePeriod.value === "night");
-
-const dayNightTitle = computed(() => {
-  const source = manualDayNight.value === null ? "跟随本机时间" : "手动";
-  return `昼夜切换：当前 ${timePeriodName.value}（${source}）`;
-});
-
-const toggleDayNight = () => {
-  manualDayNight.value = isNightView.value ? "day" : "night";
-  ensureTicking();
-};
-
-/* ---- 滚动擦洗驱动 ---- */
-let rafId = 0;
-let seekedTime = 0; // 已写进 video 的时间，用来做插值和去重
-
-const targetVideoTime = () => {
-  const p = scrollProgress.value;
-  const pinned = manualDayNight.value ? PINNED_RANGE[manualDayNight.value] : null;
-  if (pinned) return pinned[0] + (pinned[1] - pinned[0]) * p;
-  return VIDEO_DURATION * p;
-};
-
-// 滚动事件里只记目标值，真正写 currentTime 放到 rAF：
-// 滚轮是离散跳变，直接写会让画面一格一格蹦。
-const ensureTicking = () => {
-  if (!rafId) rafId = requestAnimationFrame(tickVideo);
-};
-
-const onScroll = () => {
-  const max = document.documentElement.scrollHeight - window.innerHeight;
-  scrollProgress.value = max > 0 ? Math.min(1, Math.max(0, window.scrollY / max)) : 0;
-  ensureTicking();
-};
-
-// 追到目标就停，不做常驻空转——首页多数时间是静止的，
-// 120fps 空跑一个 rAF 只是白耗电。滚动和昼夜开关会把它重新唤醒。
-const tickVideo = () => {
-  rafId = 0;
-  const v = videoEl.value;
-  if (!v || v.readyState < 2) {
-    ensureTicking();
-    return;
-  }
-  const target = targetVideoTime();
-  seekedTime += (target - seekedTime) * 0.12;
-  const settled = Math.abs(target - seekedTime) < 0.004;
-  if (settled) seekedTime = target;
-  // 上一次 seek 没完成就不要再写：rAF 有 120fps，浏览器完不成那么多次 seek，
-  // 每次写都会打断在途的那次，结果画面反而卡在几秒前。靠 v.seeking 自然限流。
-  const drifted = Math.abs(v.currentTime - seekedTime) > 1 / 30;
-  if (!v.seeking && drifted) v.currentTime = seekedTime;
-  if (!settled || v.seeking || drifted) ensureTicking();
-};
-
-const onVideoReady = () => {
-  videoActive.value = true;
-  onScroll();
-  seekedTime = targetVideoTime();
-  ensureTicking();
-};
-
-// 加载失败就退回既有的 CSS 天空 + 云 + 草坡 + 飘落粒子，不做别的补救
-const onVideoFail = () => {
-  showVideo.value = false;
-  videoActive.value = false;
-};
+const {
+  videoActive,
+  currentTimePeriod,
+  timePeriodName,
+  timePeriodIcon,
+  formattedTime,
+  isNightView,
+  dayNightTitle,
+  toggleDayNight,
+  targetVideoTime,
+} = useDayCycle();
 
 /* ---- 动态哈希特产水果与胶囊称号生成 ---- */
 const fruits = ["🍒 樱桃", "🍑 蜜桃", "🍊 橘子", "🍎 苹果", "🍐 梨子", "🥥 椰子"];
@@ -808,20 +613,6 @@ const statStreak = computed(() => metrics.value ? String(metrics.value.longest_s
 const statPeak = computed(() => metrics.value?.peak_hour?.label || "14点");
 
 onMounted(async () => {
-  updateClock();
-  clockTimer = setInterval(updateClock, 1000);
-
-  // 窄屏 / 触摸设备 / 降低动态偏好一律不加载视频，省流量也省解码
-  showVideo.value =
-    window.matchMedia("(min-width: 768px)").matches &&
-    window.matchMedia("(hover: hover)").matches &&
-    !window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-  if (showVideo.value) {
-    onScroll();
-    window.addEventListener("scroll", onScroll, { passive: true });
-    window.addEventListener("resize", onScroll, { passive: true });
-  }
-
   if (!isLoggedIn.value) return;
   try {
     const data = await DashboardStatsAPI.getStats("overview", "all");
@@ -829,14 +620,6 @@ onMounted(async () => {
   } catch {
     // 异常时保持静态兜底以保证 wow 体验
   }
-});
-
-onUnmounted(() => {
-  if (clockTimer) clearInterval(clockTimer);
-  if (rafId) cancelAnimationFrame(rafId);
-  rafId = 0;
-  window.removeEventListener("scroll", onScroll);
-  window.removeEventListener("resize", onScroll);
 });
 
 const handleModuleClick = (key: string) => {
@@ -998,10 +781,6 @@ const modules = [
   background: linear-gradient(180deg, #151e3f 0%, #213352 60%, #1e2836 100%);
   color: var(--ai-text);
 
-  .sky {
-    background: radial-gradient(1000px 500px at 20% 0%, rgba(136, 157, 240, 0.15) 0%, transparent 60%);
-  }
-
   .nav {
     background: rgba(21, 30, 63, 0.85);
     border-bottom-color: #2c3859;
@@ -1118,38 +897,6 @@ const modules = [
   }
 }
 
-// 慢动天空层
-.sky {
-  position: fixed;
-  inset: 0;
-  z-index: -2;
-  transition: all 1.5s ease;
-}
-
-// 一日推移背景视频。DOM 里排在星点/夜景层之前，靠文档顺序压在它们下面。
-.sky-video {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  pointer-events: none;
-  opacity: 0;
-  transition: opacity 600ms ease;
-}
-
-.sky-video--ready {
-  opacity: 1;
-}
-
-// ::after 不加 position 会当行内内容绘制、排在 absolute 的视频下面，必须显式定位。
-.home-page--video .sky::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  background: var(--home-video-veil);
-}
 
 // .home-page 是 position:relative / z-index:auto，不产生堆叠上下文，
 // 所以 .sky（z-index:-2）在根堆叠上下文里排在它的背景之前绘制——
@@ -1157,359 +904,6 @@ const modules = [
 // 用两个类叠加提高特异性，免得依赖它和 .home-page--night 的源码先后顺序。
 .home-page.home-page--video {
   background: none;
-}
-
-// 视频接管后，云 / 草坡 / 飘落粒子 / 夜景层这些 CSS 替身全部撤掉——
-// 视频画面里本来就有，叠着会重影。display:none 同时也停掉它们的动画。
-.home-page--video {
-  .cloud,
-  .grass-hills,
-  .falling-particles,
-  .starry-night-stars,
-  .night-scene {
-    display: none;
-  }
-}
-
-// 夜空闪烁的繁星
-// ============================================
-// 夜景层（月亮 / 萤火虫），仅 currentTimePeriod === "night" 时渲染。
-// 走 v-if 而非 opacity 开关：昼间零 DOM、零动画、零合成层。
-// 缓动取自 Emil Kowalski 的标准曲线，不用内置 ease-out（太弱）。
-// ============================================
-.night-scene {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-}
-
-.night-moon {
-  position: absolute;
-  top: 10%;
-  right: 9%;
-  width: 96px;
-  height: 96px;
-  background: radial-gradient(circle at 34% 32%, #fff8dc 0%, #ffe9a8 52%, #f4d489 100%);
-  border-radius: 50%;
-  box-shadow:
-    0 0 0 12px rgba(255, 233, 168, 0.1),
-    0 0 70px 22px rgba(255, 233, 168, 0.22);
-  animation: night-moonrise 2.4s cubic-bezier(0.23, 1, 0.32, 1) both;
-
-  &__crater {
-    position: absolute;
-    background: rgba(200, 170, 110, 0.32);
-    border-radius: 50%;
-
-    &--1 {
-      top: 26px;
-      left: 22px;
-      width: 16px;
-      height: 16px;
-    }
-
-    &--2 {
-      top: 54px;
-      left: 46px;
-      width: 11px;
-      height: 11px;
-      opacity: 0.85;
-    }
-
-    &--3 {
-      top: 34px;
-      left: 58px;
-      width: 8px;
-      height: 8px;
-      opacity: 0.7;
-    }
-  }
-}
-
-.night-firefly {
-  position: absolute;
-  width: 6px;
-  height: 6px;
-  background: #ffe9a8;
-  border-radius: 50%;
-  box-shadow: 0 0 12px 4px rgba(255, 233, 168, 0.5);
-  animation: night-firefly-drift 10s cubic-bezier(0.77, 0, 0.175, 1) infinite;
-
-  &--1 {
-    bottom: 22%;
-    left: 14%;
-    width: 7px;
-    height: 7px;
-    animation-duration: 9s;
-  }
-
-  &--2 {
-    bottom: 16%;
-    left: 34%;
-    width: 5px;
-    height: 5px;
-    animation-duration: 11s;
-    animation-delay: 1.5s;
-  }
-
-  &--3 {
-    bottom: 28%;
-    left: 58%;
-    animation-duration: 10s;
-    animation-delay: 0.8s;
-  }
-
-  &--4 {
-    bottom: 19%;
-    left: 74%;
-    width: 5px;
-    height: 5px;
-    animation-duration: 12s;
-    animation-delay: 2.2s;
-  }
-}
-
-// 流星：22s 一次，实际掠过只占 0.7s（3.2%），其余时间靠关键帧停在终点透明处充当间隔。
-// 用 linear —— 流星是匀速掠过，且 ease-in 会让它「起步慢」，正好错过用户在看的那一瞬。
-.night-shooting-star {
-  position: absolute;
-  top: 6%;
-  right: 26%;
-  width: 64px;
-  height: 2px;
-  background: linear-gradient(90deg, transparent, #fffdec);
-  border-radius: 2px;
-  opacity: 0;
-  animation: night-shoot 22s linear 4s infinite;
-}
-
-@keyframes night-shoot {
-  0% {
-    opacity: 0;
-    transform: translate(0, 0) rotate(28deg);
-  }
-
-  0.5% {
-    opacity: 1;
-  }
-
-  3.2% {
-    opacity: 0;
-    transform: translate(-360px, 220px) rotate(28deg);
-  }
-
-  100% {
-    opacity: 0;
-    transform: translate(-360px, 220px) rotate(28deg);
-  }
-}
-
-@keyframes night-moonrise {
-  from {
-    opacity: 0;
-    transform: translateY(34px);
-  }
-
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-// 关键帧名与 .night-firefly 类名刻意错开，避免读代码时把两者当成一个东西
-@keyframes night-firefly-drift {
-  0% {
-    opacity: 0.15;
-    transform: translate(0, 0);
-  }
-
-  25% {
-    opacity: 1;
-  }
-
-  50% {
-    opacity: 0.5;
-    transform: translate(60px, -38px);
-  }
-
-  75% {
-    opacity: 1;
-  }
-
-  100% {
-    opacity: 0.15;
-    transform: translate(0, 0);
-  }
-}
-
-// 无障碍：前庭敏感用户去掉位移，保留静态存在感（gentler，不是 zero）
-@media (prefers-reduced-motion: reduce) {
-  .night-moon {
-    transform: none;
-    animation: night-moon-fade 0.2s ease both;
-  }
-
-  .night-firefly {
-    opacity: 0.6;
-    animation: none;
-  }
-
-  // 流星没有「更温和的版本」——静止的白杠是视觉垃圾，直接隐藏才对
-  .night-shooting-star {
-    opacity: 0;
-    animation: none;
-  }
-
-  @keyframes night-moon-fade {
-    from {
-      opacity: 0;
-    }
-
-    to {
-      opacity: 1;
-    }
-  }
-}
-
-.starry-night-stars {
-  position: absolute;
-  inset: 0;
-}
-
-.star {
-  position: absolute;
-  color: #fff;
-  opacity: 0.8;
-  font-size: 14px;
-  animation: ac-star-blink 3s infinite alternate;
-
-  &--1 { top: 12%; left: 15%; animation-duration: 2.2s; }
-  &--2 { top: 8%; left: 45%; animation-duration: 3.5s; animation-delay: 0.5s; }
-  &--3 { top: 18%; right: 18%; animation-duration: 2.8s; animation-delay: 1.2s; }
-  &--4 { top: 32%; left: 30%; animation-duration: 4.1s; }
-  &--5 { top: 25%; right: 40%; animation-duration: 3.1s; animation-delay: 0.8s; }
-  &--6 { top: 40%; right: 12%; animation-duration: 2.5s; }
-}
-
-@keyframes ac-star-blink {
-  0% { opacity: 0.1; transform: scale(0.7) rotate(0deg); }
-  100% { opacity: 0.9; transform: scale(1.1) rotate(15deg); }
-}
-
-// Cloud漂移
-.cloud {
-  position: fixed;
-  z-index: -1;
-  pointer-events: none;
-  opacity: 0.8;
-  filter: drop-shadow(0 4px 0 rgba(0, 0, 0, 0.03));
-  fill: var(--home-cloud-fill);
-}
-
-.cloud-1 { top: 8%; left: 6%; width: 130px; animation: ac-cloud-float 50s linear infinite; }
-.cloud-2 { top: 15%; right: 8%; width: 100px; animation: ac-cloud-float-rev 60s linear infinite; }
-.cloud-3 { top: 30%; left: 12%; width: 85px; animation: ac-cloud-float 55s linear infinite 5s; }
-
-@keyframes ac-cloud-float {
-  0% { transform: translateX(-120px); }
-  100% { transform: translateX(100vw); }
-}
-
-@keyframes ac-cloud-float-rev {
-  0% { transform: translateX(120px); }
-  100% { transform: translateX(-100vw); }
-}
-
-// 天空微动效（云朵漂移 + 水上飞机拉横幅）
-.ac404__sky {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 250px;
-  pointer-events: none;
-  z-index: 1;
-  overflow: hidden; // 阻断横掠小飞机造成宽度扩展溢出
-}
-
-// 飘落花叶粒子层
-.falling-particles {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  pointer-events: none;
-  z-index: 1;
-}
-
-.particle {
-  position: absolute;
-  font-size: 16px;
-  opacity: var(--home-particle-op);
-  animation: ac-particle-fall 14s linear infinite;
-
-  &--leaf-1 { left: 5%; top: -5%; animation-duration: 10s; }
-  &--flower-1 { left: 22%; top: -5%; animation-duration: 13s; animation-delay: 2s; }
-  &--leaf-2 { left: 45%; top: -5%; animation-duration: 11s; animation-delay: 0.5s; }
-  &--flower-2 { left: 70%; top: -5%; animation-duration: 14s; animation-delay: 3s; }
-  &--leaf-3 { left: 88%; top: -5%; animation-duration: 12s; }
-}
-
-@keyframes ac-particle-fall {
-  0% { transform: translateY(0) rotate(0deg) translateX(0); opacity: 0; }
-  10% { opacity: 0.8; }
-  90% { opacity: 0.8; }
-  100% { transform: translateY(110vh) rotate(360deg) translateX(70px); opacity: 0; }
-}
-
-// ============================================
-// 2. 裸眼 3D 立体波浪双层草坡 (Hills Overlay)
-// ============================================
-.grass-hills {
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  height: 240px;
-  z-index: -1;
-  pointer-events: none;
-  // 两层山丘 width:120% / left:-8%~-10%，右端伸出视口 154px 会撑出横向滚动条；
-  // 视觉上本就该被视口切掉，这里直接裁掉（同 .ac404__sky 的处理）
-  overflow: hidden;
-}
-
-.grass-hill {
-  position: absolute;
-  bottom: -40px;
-  width: 120%;
-  height: 200px;
-  border-radius: 50%;
-  
-  &--back {
-    left: -10%;
-    background: var(--home-hill-back);
-    opacity: var(--home-hill-back-op);
-    animation: ac-hill-wave 16s ease-in-out infinite alternate;
-  }
-
-  &--front {
-    left: -8%;
-    background: var(--home-hill-front);
-    opacity: var(--home-hill-front-op);
-    height: 170px;
-    animation: ac-hill-wave-rev 12s ease-in-out infinite alternate;
-  }
-}
-
-@keyframes ac-hill-wave {
-  0% { transform: translate(0, 0) scaleY(1); }
-  100% { transform: translate(-30px, 8px) scaleY(1.05); }
-}
-
-@keyframes ac-hill-wave-rev {
-  0% { transform: translate(0, 0) scaleY(1); }
-  100% { transform: translate(25px, -6px) scaleY(0.96); }
 }
 
 // ============================================
