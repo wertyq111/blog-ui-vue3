@@ -12,3 +12,6 @@ app/coverage/
 .cgcignore
 .codegraph/
 tmp/
+
+# superpowers 工作区（执行账本、效果图）
+.superpowers/
