@@ -19,7 +19,9 @@ defineOptions({ name: "HeroSign" });
 // 木牌由两根绳子挂着，以绳子顶端为轴轻轻摆动
 .hero-sign {
   position: relative;
-  display: inline-block;
+  // 独占一行：inline-block 会和前面的行内标签挤在同一行
+  display: block;
+  width: fit-content;
   margin: 44px 0 20px;
   padding: 16px 30px 12px;
   background: linear-gradient(
