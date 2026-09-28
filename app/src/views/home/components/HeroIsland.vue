@@ -1,0 +1,46 @@
+<!-- 首页已登录 hero -->
+<template>
+  <section id="hero" class="hero">
+    <div class="hero-grid">
+      <div class="hero-text">
+        <span class="hero-tag">
+          <span class="hero-tag-dot"></span>
+          WELCOME · 博客小岛
+        </span>
+        <HeroSign />
+        <p class="hero-sub">
+          记录开发日常、沉淀项目文档、管理平台来源与工具配置。<br />
+          这里是 <b>{{ nickname }}</b> 的小岛 —— 收集本周的灵感、整理项目的航向，也保留一些悠闲发呆的余地。
+        </p>
+        <div class="hero-actions">
+          <router-link class="btn-ai btn-ai-primary btn-ai-lg" to="/dashboard">
+            <span class="btn-ai-finger"></span>
+            <svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" class="btn-arrow-ico"><path d="M3 10h14M11 4l6 6-6 6"/></svg>
+            <span class="btn-ai-text">进入工作台</span>
+          </router-link>
+          <router-link class="btn-ai btn-ai-lg" to="/develop/work-daily">
+            <span class="btn-ai-finger"></span>
+            <span class="btn-ai-text">✏️ 写今天的日常</span>
+          </router-link>
+        </div>
+      </div>
+
+      <HeroAvatar :avatar-src="avatarSrc" :nickname="nickname" :stats="stats" />
+    </div>
+  </section>
+</template>
+
+<script setup lang="ts">
+import HeroSign from "./HeroSign.vue";
+import HeroAvatar from "./HeroAvatar.vue";
+import type { HomeStats } from "../home-stats";
+
+defineOptions({ name: "HeroIsland" });
+
+defineProps<{ avatarSrc: string; nickname: string; stats: HomeStats }>();
+</script>
+
+<style scoped lang="scss">
+@use "../styles/shared";
+@use "../styles/hero";
+</style>

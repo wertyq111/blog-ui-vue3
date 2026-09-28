@@ -1,0 +1,135 @@
+// 首页共用：拟物按钮、section 标题组。需要的组件各自 @use。
+
+.home-page--night .section-title {
+  color: #fffdec !important;
+}
+
+// ============================================
+// 4. 按钮样式 (Buttons with Hand Wiggle hover)
+// ============================================
+.btn-ai {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px 26px;
+  font-family: inherit;
+  font-weight: 900;
+  font-size: 15px;
+  color: var(--ai-text);
+  background: var(--ai-btn-face);
+  border: 2.5px solid var(--ai-outline);
+  border-radius: 50px;
+  cursor: pointer;
+  letter-spacing: 0.05em;
+  line-height: 1;
+  box-shadow: 0 5px 0 0 var(--ai-btn-shadow);
+  transition: all 0.2s cubic-bezier(0.25, 1, 0.5, 1);
+  text-decoration: none;
+  overflow: hidden;
+
+  .btn-ai-finger {
+    position: absolute;
+    left: 14px;
+    width: 20px;
+    height: 20px;
+    background: url('/src/assets/select-cursor.svg') no-repeat center;
+    background-size: contain;
+    opacity: 0;
+    transform: translateX(-10px) rotate(-10deg);
+    transition: all 0.2s cubic-bezier(0.25, 1, 0.5, 1);
+  }
+
+  .btn-ai-text {
+    transition: transform 0.2s cubic-bezier(0.25, 1, 0.5, 1);
+  }
+
+  .btn-arrow-ico {
+    transition: transform 0.2s;
+  }
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 7px 0 0 var(--ai-btn-shadow);
+    border-color: var(--ai-primary);
+    color: var(--ai-primary-active);
+
+    .btn-ai-finger {
+      opacity: 1;
+      transform: translateX(0) rotate(0deg);
+      animation: ac-btn-wiggle 0.5s ease infinite alternate;
+    }
+
+    .btn-ai-text {
+      transform: translateX(12px); // 向右平移避让手指
+    }
+
+    .btn-arrow-ico {
+      transform: translateX(12px); // 图标跟随右移
+    }
+  }
+
+  &:active {
+    transform: translateY(3px);
+    box-shadow: 0 2px 0 0 var(--ai-btn-shadow);
+  }
+}
+
+.btn-ai-primary {
+  color: #fff;
+  background: linear-gradient(180deg, #84cf4f 0%, var(--ai-success) 100%);
+  border-color: var(--ai-outline);
+  box-shadow: 0 5px 0 0 #5a9e1e;
+
+  &:hover {
+    box-shadow: 0 7px 0 0 #5a9e1e;
+    color: #fff;
+    border-color: var(--ai-primary);
+  }
+
+  &:active {
+    box-shadow: 0 2px 0 0 #5a9e1e;
+  }
+}
+
+.btn-ai-lg { padding: 16px 34px; font-size: 17px; }
+.btn-ai-sm { padding: 8px 18px; font-size: 13px; box-shadow: 0 3px 0 0 var(--ai-btn-shadow); }
+
+@keyframes ac-btn-wiggle {
+  0% { transform: scale(1) rotate(-5deg); }
+  100% { transform: scale(1.08) rotate(5deg); }
+}
+
+.section {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 64px 40px 10px;
+  position: relative;
+  z-index: 2;
+}
+
+.section-head {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  margin-bottom: 30px;
+  gap: 20px;
+}
+
+.section-eyebrow {
+  font-size: 12px;
+  letter-spacing: 4px;
+  font-weight: 900;
+  color: var(--ai-primary-active);
+}
+
+.section-title {
+  margin: 6px 0 0;
+  font-size: 34px;
+  font-weight: 900;
+  color: var(--ai-text);
+  letter-spacing: -0.02em;
+}
+
+.section-sub { color: var(--ai-text-2); font-size: 14px; font-weight: 700; max-width: 480px; }
