@@ -1,0 +1,91 @@
+// 已登录 / 未登录两套 hero 共用的布局
+
+.home-page--night .hero-sub {
+  color: #fffdec !important;
+}
+
+.home-page--night .hero-sub b {
+  color: #3dd4c6 !important;
+}
+
+.home-page--night .hero-tag {
+  background: #1c274c;
+  color: var(--ai-primary);
+}
+
+// ============================================
+// 5. 主体视觉 Hero 模块
+// ============================================
+.hero {
+  position: relative;
+  padding: 56px 40px 60px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.hero-grid {
+  display: grid;
+  grid-template-columns: 1.15fr 0.85fr;
+  gap: 50px;
+  align-items: center;
+}
+
+.hero-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 16px;
+  background: #ffffff;
+  border: 2px solid var(--ai-outline);
+  border-radius: 999px;
+  color: var(--ai-primary-active);
+  font-weight: 800;
+  font-size: 12px;
+  letter-spacing: 2.5px;
+  box-shadow: 0 3px 0 0 rgba(121, 79, 39, 0.1);
+}
+
+.hero-tag-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--ai-primary);
+  box-shadow: 0 0 0 3px rgba(25, 200, 185, 0.25);
+}
+
+.hero-title {
+  font-size: clamp(64px, 10vw, 120px);
+  font-weight: 900;
+  line-height: 0.94;
+  letter-spacing: -0.03em;
+  margin: 20px 0;
+  color: #fffdec;
+  text-shadow:
+    0 2.5px 0 #eed09d,
+    0 5px 0 var(--ai-outline), // 动森深褐黑描边厚度
+    0 7.5px 0 var(--ai-outline),
+    0 12px 24px rgba(90, 58, 24, 0.18);
+}
+
+.hero-title-row {
+  display: flex;
+  align-items: baseline;
+  gap: 14px;
+}
+
+.hero-sub {
+  max-width: 500px;
+  font-size: 16px;
+  line-height: 1.8;
+  color: var(--ai-text);
+  font-weight: 700;
+  margin-bottom: 32px;
+
+  b { color: var(--ai-primary-active); font-weight: 800; }
+}
+
+.hero-actions { display: flex; gap: 14px; flex-wrap: wrap; }
+
+@media (max-width: 900px) {
+  .hero-grid { grid-template-columns: 1fr; gap: 40px; }
+}

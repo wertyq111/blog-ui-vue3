@@ -4,85 +4,16 @@
     <HomeSky v-model:video-active="videoActive" :period="currentTimePeriod" :video-time="targetVideoTime" />
 
     <!-- 导航栏 -->
-    <nav class="nav">
-      <div class="brand">
-        <div class="brand-mark">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M3 21c4 0 8-2 11-7 2-3 3-7 3-11-4 0-8 1-11 4-3 3-5 7-5 12 0 1 0 2 2 2z"/>
-          </svg>
-        </div>
-        <span class="brand-text">{{ brandName }}</span>
-      </div>
-      <div class="nav-links">
-        <a class="nav-link nav-link-active" href="javascript:void(0)" @click="scrollToSection('hero')">
-          <span class="nav-link-finger"></span>
-          <span class="nav-link-text">概览</span>
-        </a>
-        <a class="nav-link" href="javascript:void(0)" @click="scrollToSection('modules')">
-          <span class="nav-link-finger"></span>
-          <span class="nav-link-text">模块</span>
-        </a>
-        <a class="nav-link" href="javascript:void(0)" @click="scrollToSection('about')">
-          <span class="nav-link-finger"></span>
-          <span class="nav-link-text">关于</span>
-        </a>
-      </div>
-      <div class="nav-spacer"></div>
-      
-      <!-- 动态本地时钟小挂件 -->
-      <div class="nav-clock" :title="'当前时段: ' + timePeriodName">
-        <span class="clock-icon">{{ timePeriodIcon }}</span>
-        <span class="clock-text">{{ formattedTime }}</span>
-      </div>
-
-      <!-- 昼夜开关：手动覆盖时段，刷新后回到跟随本机时间 -->
-      <button
-        type="button"
-        class="nav-daynight"
-        :class="{ 'nav-daynight--on': isNightView }"
-        :title="dayNightTitle"
-        :aria-pressed="isNightView"
-        aria-label="昼夜切换"
-        @click="toggleDayNight"
-      >
-        <span class="nav-daynight__knob">
-          <span class="nav-daynight__glyph">
-            <svg v-if="isNightView" class="glyph-moon" viewBox="0 0 24 24" fill="currentColor">
-              <path
-                class="moon-body"
-                d="M14 3.5C9.86 3.5 6.5 6.86 6.5 11c0 4.14 3.36 7.5 7.5 7.5 1.7 0 3.26-.57 4.53-1.53-3.23-.48-5.71-3.23-5.71-6.62 0-3.39 2.48-6.14 5.71-6.62C17.26 4.07 15.7 3.5 14 3.5z"
-              />
-              <path
-                class="moon-star"
-                d="M19 7c0-.9.7-1.6 1.6-1.6-.9 0-1.6-.7-1.6-1.6 0 .9-.7 1.6-1.6 1.6.9 0 1.6.7 1.6 1.6z"
-              />
-            </svg>
-            <svg v-else class="glyph-sun" viewBox="0 0 24 24" fill="currentColor">
-              <g class="sun-rays">
-                <circle cx="12" cy="2.5" r="1.5" />
-                <circle cx="12" cy="21.5" r="1.5" />
-                <circle cx="2.5" cy="12" r="1.5" />
-                <circle cx="21.5" cy="12" r="1.5" />
-                <circle cx="5.28" cy="5.28" r="1.5" />
-                <circle cx="18.72" cy="18.72" r="1.5" />
-                <circle cx="5.28" cy="18.72" r="1.5" />
-                <circle cx="18.72" cy="5.28" r="1.5" />
-              </g>
-              <circle class="sun-core" cx="12" cy="12" r="5" />
-            </svg>
-          </span>
-        </span>
-      </button>
-
-      <router-link v-if="!isLoggedIn" class="btn-ai btn-ai-sm btn-ai-primary" to="/login">
-        <span class="btn-ai-finger"></span>
-        <span class="btn-ai-text">办理登岛手续 ✈️</span>
-      </router-link>
-      <router-link v-else class="btn-ai btn-ai-sm btn-ai-primary" to="/dashboard">
-        <span class="btn-ai-finger"></span>
-        <span class="btn-ai-text">进入工作台</span>
-      </router-link>
-    </nav>
+    <HomeNav
+      :brand-name="brandName"
+      :logged-in="isLoggedIn"
+      :period-name="timePeriodName"
+      :period-icon="timePeriodIcon"
+      :clock="formattedTime"
+      :is-night="isNightView"
+      :day-night-title="dayNightTitle"
+      @toggle-day-night="toggleDayNight"
+    />
 
     <!-- 主视觉 Hero (已登录状态下展示个人小岛概览) -->
     <section v-if="isLoggedIn" id="hero" class="hero">
@@ -539,6 +470,8 @@ import { resolveAvatar } from "@/utils/avatar";
 import { usePublicPageScroll } from "@/composables";
 import { useDayCycle } from "./day-cycle";
 import HomeSky from "./components/HomeSky.vue";
+import HomeNav from "./components/HomeNav.vue";
+import { scrollToSection } from "./scroll-to-section";
 
 defineOptions({ name: "HomePage" });
 
@@ -635,24 +568,6 @@ const handleModuleClick = (key: string) => {
   }
 };
 
-const scrollToSection = (id: string) => {
-  const el = document.getElementById(id);
-  if (el) {
-    el.scrollIntoView({ behavior: "smooth", block: "start" });
-    
-    // 更新导航栏上的高亮激活状态
-    const links = document.querySelectorAll(".nav-link");
-    links.forEach(link => link.classList.remove("nav-link-active"));
-    
-    const activeLink = Array.from(links).find(link => 
-      link.querySelector(".nav-link-text")?.textContent === (id === "hero" ? "概览" : id === "modules" ? "模块" : "关于")
-    );
-    if (activeLink) {
-      activeLink.classList.add("nav-link-active");
-    }
-  }
-};
-
 const unauthModules = [
   { key: "daily", color: "pink", tag: "DAILY · 日常", title: "工作日常", sub: "日报 · 周报 · 月报的打理", icon: "M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z" },
   { key: "docs", color: "yellow", tag: "DOCS · 开发", title: "开发文档", sub: "小岛技术结晶与沉淀", icon: "M4 19.5A2.5 2.5 0 016.5 17H20M4 19.5A2.5 2.5 0 016.5 17H20M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z" },
@@ -677,6 +592,9 @@ const modules = [
 </script>
 
 <style lang="scss" scoped>
+@use "./styles/shared";
+@use "./styles/hero";
+
 .home-page {
   // ── 昼夜 token（昼间值 = 抽取前的字面值，等值重构）────────────
   // 夜间覆盖见 .home-page--night
@@ -781,21 +699,6 @@ const modules = [
   background: linear-gradient(180deg, #151e3f 0%, #213352 60%, #1e2836 100%);
   color: var(--ai-text);
 
-  .nav {
-    background: rgba(21, 30, 63, 0.85);
-    border-bottom-color: #2c3859;
-  }
-
-  .brand-text,
-  .hero-sub,
-  .section-title {
-    color: #fffdec !important;
-  }
-
-  .hero-sub b {
-    color: #3dd4c6 !important;
-  }
-
   .stat {
     background: #1c274c;
     border-color: #2c3859;
@@ -803,29 +706,6 @@ const modules = [
 
   .stat-num {
     color: #fffdec;
-  }
-
-  .nav-clock {
-    background: #1c274c;
-    border-color: #2c3859;
-    color: #fffdec;
-  }
-
-  .nav-daynight {
-    border-color: #2c3859;
-  }
-
-  // 这两个 chip 的底是硬编码 #ffffff，夜间文字跟着 --ai-text 翻成近白就没了。
-  // 按 .nav-clock 的既有夜间做法改成深色 chip。
-  .nav-link-active {
-    background: #1c274c;
-    border-color: #2c3859;
-    color: #fffdec;
-  }
-
-  .hero-tag {
-    background: #1c274c;
-    color: var(--ai-primary);
   }
 
   .about-card {
@@ -905,483 +785,6 @@ const modules = [
 .home-page.home-page--video {
   background: none;
 }
-
-// ============================================
-// 3. 顶栏导航 (Navbar)
-// ============================================
-.nav {
-  position: sticky;
-  top: 0;
-  z-index: 10;
-  display: flex;
-  align-items: center;
-  gap: 28px;
-  padding: 16px 40px;
-  background: rgba(253, 253, 245, 0.8);
-  backdrop-filter: blur(16px);
-  border-bottom: 2px solid var(--ai-border);
-  box-shadow: 0 4px 16px rgba(121, 79, 39, 0.04);
-}
-
-.brand {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  font-weight: 900;
-  font-size: 18px;
-  color: var(--ai-text);
-  cursor: pointer;
-}
-
-.brand-mark {
-  width: 38px;
-  height: 38px;
-  background: linear-gradient(135deg, var(--ai-primary) 0%, #82d5bb 100%);
-  border: 2px solid var(--ai-outline);
-  border-radius: 50% 45% 50% 48% / 48% 50% 45% 50%;
-  display: grid;
-  place-items: center;
-  box-shadow: 0 3px 0 0 var(--ai-outline);
-
-  svg { width: 22px; height: 22px; color: #fff; }
-}
-
-.nav-links {
-  display: flex;
-  gap: 8px;
-  margin-left: 28px;
-}
-
-.nav-link {
-  position: relative;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: 8px 20px;
-  border-radius: 999px;
-  font-weight: 800;
-  color: var(--ai-text-2);
-  cursor: pointer;
-  transition: all 0.22s cubic-bezier(0.25, 1, 0.5, 1);
-  text-decoration: none;
-  overflow: hidden;
-
-  // lessons.md 文字避让小手指 hover 交互规范
-  .nav-link-finger {
-    position: absolute;
-    left: 8px;
-    width: 14px;
-    height: 14px;
-    background: url('/src/assets/select-cursor.svg') no-repeat center;
-    background-size: contain;
-    opacity: 0;
-    transform: translateX(-8px);
-    transition: all 0.2s cubic-bezier(0.25, 1, 0.5, 1);
-  }
-
-  .nav-link-text {
-    transition: transform 0.2s cubic-bezier(0.25, 1, 0.5, 1);
-  }
-
-  &:hover {
-    background: #f0e8d8;
-    color: var(--ai-text);
-
-    .nav-link-finger {
-      opacity: 1;
-      transform: translateX(0);
-    }
-
-    .nav-link-text {
-      transform: translateX(8px); // 文字向右偏移避让
-    }
-  }
-}
-
-.nav-link-active {
-  background: #ffffff;
-  color: var(--ai-text);
-  border: 1.5px solid var(--ai-border);
-  box-shadow: 0 3px 6px rgba(61, 52, 40, 0.05);
-}
-
-// 本地时钟挂件
-.nav-clock {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  padding: 6px 14px;
-  background: #fffef0;
-  border: 2px solid var(--ai-border);
-  border-radius: 16px;
-  font-size: 13px;
-  font-weight: 800;
-  color: var(--ai-text);
-  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.02);
-  margin-right: 6px;
-
-  .clock-icon {
-    font-size: 15px;
-  }
-}
-
-// 昼夜开关（拨杆形态，与时钟挂件同一套描边/圆角/底色）
-.nav-daynight {
-  position: relative;
-  flex-shrink: 0;
-  width: 58px;
-  height: 30px;
-  padding: 0;
-  margin-right: 10px;
-  background: var(--home-switch-track);
-  border: 2px solid var(--ai-border);
-  border-radius: 999px;
-  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.06);
-  cursor: pointer;
-  transition:
-    background 320ms cubic-bezier(0.23, 1, 0.32, 1),
-    border-color 320ms cubic-bezier(0.23, 1, 0.32, 1);
-
-  &:hover .nav-daynight__knob {
-    transform: translateX(var(--home-switch-x)) scale(1.06);
-  }
-
-  &:focus-visible {
-    outline: 2px solid var(--ai-primary);
-    outline-offset: 2px;
-  }
-}
-
-// 图标放在拨钮里。原先两个 face 贴在轨道左右两端，而拨钮宽 22px、位移 28px，
-// 正好把当前那一侧的图标整个盖住，结果开关只剩一个空壳加白点。
-.nav-daynight__glyph {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 100%;
-  height: 100%;
-  pointer-events: none;
-
-  svg {
-    width: 14px;
-    height: 14px;
-    display: block;
-  }
-
-  // 🌞 动森小太阳与光芒旋转动效
-  .glyph-sun {
-    color: #794f27;
-    animation: sun-pop-in 0.42s cubic-bezier(0.34, 1.56, 0.64, 1) both;
-
-    .sun-rays {
-      transform-origin: 12px 12px;
-      animation: sun-rays-spin 12s linear infinite;
-    }
-
-    .sun-core {
-      transform-origin: 12px 12px;
-      animation: sun-core-breathe 2.5s ease-in-out infinite alternate;
-    }
-  }
-
-  // 🌙 动森小弯月与星星闪烁动效
-  .glyph-moon {
-    color: #ffd85e;
-    filter: drop-shadow(0 0 2px rgba(255, 216, 94, 0.6));
-    animation: moon-pop-in 0.42s cubic-bezier(0.34, 1.56, 0.64, 1) both;
-
-    .moon-body {
-      transform-origin: 12px 12px;
-      animation: moon-cradle 3.2s ease-in-out infinite alternate;
-    }
-
-    .moon-star {
-      transform-origin: 19px 7px;
-      animation: star-twinkle 1.8s ease-in-out infinite alternate;
-    }
-  }
-}
-
-// 悬浮时太阳转速稍加快
-.nav-daynight:hover .sun-rays {
-  animation-duration: 4s;
-}
-
-@keyframes sun-pop-in {
-  0% {
-    opacity: 0;
-    transform: scale(0.2) rotate(-60deg);
-  }
-  70% {
-    transform: scale(1.15) rotate(8deg);
-  }
-  100% {
-    opacity: 1;
-    transform: scale(1) rotate(0deg);
-  }
-}
-
-@keyframes sun-rays-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-@keyframes sun-core-breathe {
-  0% {
-    transform: scale(0.94);
-  }
-  100% {
-    transform: scale(1.06);
-  }
-}
-
-@keyframes moon-pop-in {
-  0% {
-    opacity: 0;
-    transform: scale(0.2) rotate(-40deg);
-  }
-  70% {
-    transform: scale(1.15) rotate(6deg);
-  }
-  100% {
-    opacity: 1;
-    transform: scale(1) rotate(0deg);
-  }
-}
-
-@keyframes moon-cradle {
-  0% {
-    transform: rotate(-4deg);
-  }
-  100% {
-    transform: rotate(6deg);
-  }
-}
-
-@keyframes star-twinkle {
-  0% {
-    opacity: 0.35;
-    transform: scale(0.75);
-  }
-  100% {
-    opacity: 1;
-    transform: scale(1.25);
-  }
-}
-
-// 拨钮：位移量由 --home-switch-x 统一驱动，hover 缩放才不会把位移覆盖掉
-.nav-daynight__knob {
-  --home-switch-x: 0px;
-
-  position: absolute;
-  top: 50%;
-  left: 2px;
-  width: 22px;
-  height: 22px;
-  margin-top: -11px;
-  border-radius: 50%;
-  display: grid;
-  place-items: center;
-  background: var(--home-switch-knob);
-  border: 2px solid var(--ai-outline);
-  box-shadow: 0 2px 0 0 var(--ai-btn-shadow);
-  transform: translateX(var(--home-switch-x));
-  transition: transform 320ms cubic-bezier(0.23, 1, 0.32, 1), background 320ms ease;
-}
-
-.nav-daynight--on .nav-daynight__knob {
-  --home-switch-x: 28px;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .nav-daynight,
-  .nav-daynight__knob,
-  .glyph-sun,
-  .glyph-moon,
-  .sun-rays,
-  .sun-core,
-  .moon-body,
-  .moon-star {
-    transition: none;
-    animation: none;
-  }
-}
-
-.nav-spacer { flex: 1; }
-
-// ============================================
-// 4. 按钮样式 (Buttons with Hand Wiggle hover)
-// ============================================
-.btn-ai {
-  position: relative;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  padding: 12px 26px;
-  font-family: inherit;
-  font-weight: 900;
-  font-size: 15px;
-  color: var(--ai-text);
-  background: var(--ai-btn-face);
-  border: 2.5px solid var(--ai-outline);
-  border-radius: 50px;
-  cursor: pointer;
-  letter-spacing: 0.05em;
-  line-height: 1;
-  box-shadow: 0 5px 0 0 var(--ai-btn-shadow);
-  transition: all 0.2s cubic-bezier(0.25, 1, 0.5, 1);
-  text-decoration: none;
-  overflow: hidden;
-
-  .btn-ai-finger {
-    position: absolute;
-    left: 14px;
-    width: 20px;
-    height: 20px;
-    background: url('/src/assets/select-cursor.svg') no-repeat center;
-    background-size: contain;
-    opacity: 0;
-    transform: translateX(-10px) rotate(-10deg);
-    transition: all 0.2s cubic-bezier(0.25, 1, 0.5, 1);
-  }
-
-  .btn-ai-text {
-    transition: transform 0.2s cubic-bezier(0.25, 1, 0.5, 1);
-  }
-
-  .btn-arrow-ico {
-    transition: transform 0.2s;
-  }
-
-  &:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 7px 0 0 var(--ai-btn-shadow);
-    border-color: var(--ai-primary);
-    color: var(--ai-primary-active);
-
-    .btn-ai-finger {
-      opacity: 1;
-      transform: translateX(0) rotate(0deg);
-      animation: ac-btn-wiggle 0.5s ease infinite alternate;
-    }
-
-    .btn-ai-text {
-      transform: translateX(12px); // 向右平移避让手指
-    }
-
-    .btn-arrow-ico {
-      transform: translateX(12px); // 图标跟随右移
-    }
-  }
-
-  &:active {
-    transform: translateY(3px);
-    box-shadow: 0 2px 0 0 var(--ai-btn-shadow);
-  }
-}
-
-.btn-ai-primary {
-  color: #fff;
-  background: linear-gradient(180deg, #84cf4f 0%, var(--ai-success) 100%);
-  border-color: var(--ai-outline);
-  box-shadow: 0 5px 0 0 #5a9e1e;
-
-  &:hover {
-    box-shadow: 0 7px 0 0 #5a9e1e;
-    color: #fff;
-    border-color: var(--ai-primary);
-  }
-
-  &:active {
-    box-shadow: 0 2px 0 0 #5a9e1e;
-  }
-}
-
-.btn-ai-lg { padding: 16px 34px; font-size: 17px; }
-.btn-ai-sm { padding: 8px 18px; font-size: 13px; box-shadow: 0 3px 0 0 var(--ai-btn-shadow); }
-
-@keyframes ac-btn-wiggle {
-  0% { transform: scale(1) rotate(-5deg); }
-  100% { transform: scale(1.08) rotate(5deg); }
-}
-
-// ============================================
-// 5. 主体视觉 Hero 模块
-// ============================================
-.hero {
-  position: relative;
-  padding: 56px 40px 60px;
-  max-width: 1200px;
-  margin: 0 auto;
-}
-
-.hero-grid {
-  display: grid;
-  grid-template-columns: 1.15fr 0.85fr;
-  gap: 50px;
-  align-items: center;
-}
-
-.hero-tag {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  padding: 6px 16px;
-  background: #ffffff;
-  border: 2px solid var(--ai-outline);
-  border-radius: 999px;
-  color: var(--ai-primary-active);
-  font-weight: 800;
-  font-size: 12px;
-  letter-spacing: 2.5px;
-  box-shadow: 0 3px 0 0 rgba(121, 79, 39, 0.1);
-}
-
-.hero-tag-dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: var(--ai-primary);
-  box-shadow: 0 0 0 3px rgba(25, 200, 185, 0.25);
-}
-
-.hero-title {
-  font-size: clamp(64px, 10vw, 120px);
-  font-weight: 900;
-  line-height: 0.94;
-  letter-spacing: -0.03em;
-  margin: 20px 0;
-  color: #fffdec;
-  text-shadow:
-    0 2.5px 0 #eed09d,
-    0 5px 0 var(--ai-outline), // 动森深褐黑描边厚度
-    0 7.5px 0 var(--ai-outline),
-    0 12px 24px rgba(90, 58, 24, 0.18);
-}
-
-.hero-title-row {
-  display: flex;
-  align-items: baseline;
-  gap: 14px;
-}
-
-.hero-sub {
-  max-width: 500px;
-  font-size: 16px;
-  line-height: 1.8;
-  color: var(--ai-text);
-  font-weight: 700;
-  margin-bottom: 32px;
-
-  b { color: var(--ai-primary-active); font-weight: 800; }
-}
-
-.hero-actions { display: flex; gap: 14px; flex-wrap: wrap; }
 
 .hero-avatar-wrap {
   position: relative;
@@ -1585,56 +988,6 @@ const modules = [
 }
 
 .stat-lbl { font-size: 11px; color: var(--ai-text-2); font-weight: 800; margin-top: 5px; }
-
-// ============================================
-// 7. 背包 Slot 物品功能区
-// ============================================
-.section {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 64px 40px 10px;
-  position: relative;
-  z-index: 2;
-}
-
-.section-head {
-  display: flex;
-  align-items: flex-end;
-  justify-content: space-between;
-  margin-bottom: 30px;
-  gap: 20px;
-}
-
-.section-eyebrow {
-  font-size: 12px;
-  letter-spacing: 4px;
-  font-weight: 900;
-  color: var(--ai-primary-active);
-}
-
-.section-title {
-  margin: 6px 0 0;
-  font-size: 34px;
-  font-weight: 900;
-  color: var(--ai-text);
-  letter-spacing: -0.02em;
-  
-  // 对各颜色包格做细腻的拟色适配 (使用 & 连字符修正 SCSS 同级类匹配)
-  &--pink { .pocket-slot-ico-wrap { background: #ffe6eb; } }
-  &--yellow { .pocket-slot-ico-wrap { background: #fff8d6; } }
-  &--blue { .pocket-slot-ico-wrap { background: #e8f0ff; } }
-  &--teal { .pocket-slot-ico-wrap { background: #e3faf2; } }
-  &--orange { .pocket-slot-ico-wrap { background: #ffebd6; } }
-  &--purple { .pocket-slot-ico-wrap { background: #f6ebff; } }
-  &--green { .pocket-slot-ico-wrap { background: #ebffe6; } }
-  &--peach { .pocket-slot-ico-wrap { background: #ffebd6; } }
-  &--lime { .pocket-slot-ico-wrap { background: #fdffe6; } }
-  &--red { .pocket-slot-ico-wrap { background: #ffe6e6; } }
-  &--brown { .pocket-slot-ico-wrap { background: #fdfaf0; } }
-  &--mint { .pocket-slot-ico-wrap { background: #e3faf2; } }
-}
-
-.section-sub { color: var(--ai-text-2); font-size: 14px; font-weight: 700; max-width: 480px; }
 
 .modules-pocket {
   display: grid;
@@ -2026,10 +1379,7 @@ const modules = [
 }
 
 @media (max-width: 900px) {
-  .hero-grid { grid-template-columns: 1fr; gap: 40px; }
   .modules-pocket { grid-template-columns: repeat(2, 1fr); }
-  .nav { padding: 12px 20px; gap: 12px; }
-  .nav-links { display: none; }
   
   .ac-passport {
     border-radius: 24px;
