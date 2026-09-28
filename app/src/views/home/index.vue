@@ -23,6 +23,9 @@
     <HeroIsland v-if="isLoggedIn" :avatar-src="avatarSrc" :nickname="nickname" :stats="stats" />
     <HeroCounter v-else />
 
+    <!-- 小岛导览：3D 功能分区巡游 -->
+    <IslandTour :period="currentTimePeriod" @go="goTo" />
+
     <!-- 模块区：已登录展示“玩家背包栏 Grid”，未登录展示“小岛生态推荐手册 Highlights” -->
     <HomeModules :logged-in="isLoggedIn" @select="handleModuleClick" />
 
@@ -78,6 +81,7 @@ import HomeSky from "./components/HomeSky.vue";
 import HomeNav from "./components/HomeNav.vue";
 import HeroIsland from "./components/HeroIsland.vue";
 import HeroCounter from "./components/HeroCounter.vue";
+import IslandTour from "./components/IslandTour.vue";
 import HomeModules from "./components/HomeModules.vue";
 import IslandPassport from "./components/IslandPassport.vue";
 import BulletinBoard from "./components/BulletinBoard.vue";
@@ -143,10 +147,12 @@ onMounted(async () => {
   }
 });
 
-// 未登录一律去登录；已登录直达入口对应的功能页
-const handleModuleClick = (mod: HomeModule) => {
-  router.push(isLoggedIn.value ? mod.path : "/login");
+// 未登录一律去登录；已登录直达目标功能页
+const goTo = (path: string) => {
+  router.push(isLoggedIn.value ? path : "/login");
 };
+
+const handleModuleClick = (mod: HomeModule) => goTo(mod.path);
 
 </script>
 
