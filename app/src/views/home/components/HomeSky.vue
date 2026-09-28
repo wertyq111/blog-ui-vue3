@@ -79,6 +79,18 @@ const videoActive = defineModel<boolean>("videoActive", { required: true });
   display: contents;
 }
 
+.home-page--morning .sky {
+  background: radial-gradient(1000px 500px at 70% 0%, rgba(254, 219, 178, 0.4) 0%, transparent 60%);
+}
+
+.home-page--afternoon .sky {
+  background: radial-gradient(1000px 500px at 80% 0%, rgba(25, 200, 185, 0.08) 0%, transparent 60%);
+}
+
+.home-page--sunset .sky {
+  background: radial-gradient(1100px 600px at 80% 10%, rgba(252, 115, 109, 0.3) 0%, transparent 60%);
+}
+
 .home-page--night .sky {
   background: radial-gradient(1000px 500px at 20% 0%, rgba(136, 157, 240, 0.15) 0%, transparent 60%);
 }
