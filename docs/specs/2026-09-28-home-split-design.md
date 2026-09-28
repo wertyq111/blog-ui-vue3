@@ -70,7 +70,7 @@ export function useScrollProgress(target?: Ref<HTMLElement | null>): Ref<number>
 - 不传 `target`：按文档滚动计算 `scrollY / (scrollHeight - innerHeight)`，钳到 0~1。这是首页现有 `onScroll` 的原样搬迁。
 - 传 `target`：按该元素的 `scrollTop / (scrollHeight - clientHeight)` 计算。后台布局在内部容器里滚动，不走文档滚动，以后接入后台页面时用这个参数。
 - 监听 `scroll` 与 `resize`（`passive`），在 `onMounted` 挂、`onUnmounted` 卸。
-- 与现状的差别：现状只在视频启用时才监听滚动；搬迁后始终监听。视频未启用时时段不读滚动进度，所以没有可见差别，开销只是一次赋值。
+- 与现状的差别：现状只在视频启用时才监听滚动；搬迁后始终监听。视频未启用时时段不读滚动进度，所以没有可见差别；但 `time` 仍会随滚动变化，因此 `ScrubVideoBackground` 的擦洗循环在没有 `<video>` 时必须直接停下，不能逐帧重排（否则窄屏 / 触屏 / 减少动态效果设备上会 rAF 空转）。
 
 ### 4.2 `ScrubVideoBackground`
 
@@ -87,7 +87,7 @@ export function useScrollProgress(target?: Ref<HTMLElement | null>): Ref<number>
 内部行为全部从首页原样搬迁：
 
 - **设备门槛**：`(min-width: 768px)`、`(hover: hover)`、非 `prefers-reduced-motion` 三者同时满足才渲染 `<video>`，否则什么都不渲染，`active` 保持假。
-- **擦洗循环**：`time` 变化时唤醒 rAF；每帧 `seekedTime += (target - seekedTime) * 0.12`，差值小于 0.004 视为到位；`v.seeking` 期间不写 `currentTime`，漂移超过 1/30 秒才写；到位后停止 rAF。
+- **擦洗循环**：`time` 变化时唤醒 rAF；没有 `<video>`（设备不达标或已加载失败）时立即停止；每帧 `seekedTime += (target - seekedTime) * 0.12`，差值小于 0.004 视为到位；`v.seeking` 期间不写 `currentTime`，漂移超过 1/30 秒才写；到位后停止 rAF。
 - **就绪瞬间**：`seekedTime` 直接对齐当前 `time`，不从 0 插值过去。
 - **卸载**：取消 rAF。
 - 样式：`position: absolute; inset: 0; object-fit: cover; pointer-events: none`，就绪前 `opacity: 0`，就绪后 600ms 淡入。定位上下文由使用方的容器提供（首页是 `position: fixed` 的 `.sky`）。

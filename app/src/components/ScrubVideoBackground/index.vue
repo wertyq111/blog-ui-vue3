@@ -43,7 +43,9 @@ const ensureTicking = () => {
 const tick = () => {
   rafId = 0;
   const v = videoEl.value;
-  if (!v || v.readyState < 2) {
+  // 没有 <video>（设备不够格或已加载失败）就停下，不空转；就绪时 onReady 会重新唤醒
+  if (!v) return;
+  if (v.readyState < 2) {
     ensureTicking();
     return;
   }
