@@ -14,6 +14,8 @@ export interface IslandZone {
   path: string;
   /** 地标在岛上的方位角（弧度）；方向向量见 zoneDirection */
   angle: number;
+  /** 镜头对准的高度（按建筑高度取，灯塔要把灯室拍进画面） */
+  focusY: number;
 }
 
 /** 岛屿草地半径 */
@@ -32,6 +34,7 @@ export const zones: IslandZone[] = [
     features: ["工作日常", "工作文档", "待办列表"],
     path: "/develop/work-daily",
     angle: at(0),
+    focusY: 1.3,
   },
   {
     key: "workshop",
@@ -40,6 +43,7 @@ export const zones: IslandZone[] = [
     features: ["路径转换", "模型初始化", "图片处理"],
     path: "/develop/convert-path",
     angle: at(1),
+    focusY: 1.2,
   },
   {
     key: "pomo",
@@ -48,6 +52,7 @@ export const zones: IslandZone[] = [
     features: ["专注番茄"],
     path: "/profile-center/pomo",
     angle: at(2),
+    focusY: 1.1,
   },
   {
     key: "studio",
@@ -56,6 +61,7 @@ export const zones: IslandZone[] = [
     features: ["壁纸管理", "相册管理", "笔记管理"],
     path: "/mini-program/wallpaper",
     angle: at(3),
+    focusY: 1.0,
   },
   {
     key: "tower",
@@ -64,6 +70,7 @@ export const zones: IslandZone[] = [
     features: ["用户管理", "角色管理", "菜单管理", "会员管理"],
     path: "/system/user",
     angle: at(4),
+    focusY: 3,
   },
 ];
 

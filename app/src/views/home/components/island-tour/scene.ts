@@ -53,10 +53,10 @@ function zoneView(key: ZoneKey): View {
   return {
     position: new THREE.Vector3(
       d.x * (ZONE_RING + 7) + side.x * 2.5,
-      4.5,
+      zone.focusY + 3.2,
       d.z * (ZONE_RING + 7) + side.z * 2.5
     ),
-    target: new THREE.Vector3(d.x * ZONE_RING, 1.3, d.z * ZONE_RING),
+    target: new THREE.Vector3(d.x * ZONE_RING, zone.focusY, d.z * ZONE_RING),
   };
 }
 
