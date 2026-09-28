@@ -115,6 +115,8 @@ defineProps<{ stats: { words: string; logs: string; streak: string; peak: string
 .stat-lbl { font-size: 11px; color: var(--ai-text-2); font-weight: 800; margin-top: 5px; }
 
 @media (max-width: 1200px) {
-  .hero-stats { grid-template-columns: repeat(2, 1fr); }
+  .hero-stats {
+    grid-template-columns: repeat(2, 1fr);
+  }
 }
 </style>

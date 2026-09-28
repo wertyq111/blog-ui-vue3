@@ -436,7 +436,12 @@ const emit = defineEmits<{ "toggle-day-night": [] }>();
 .nav-spacer { flex: 1; }
 
 @media (max-width: 900px) {
-  .nav { padding: 12px 20px; gap: 12px; }
-  .nav-links { display: none; }
+  .nav {
+    padding: 12px 20px;
+    gap: 12px;
+  }
+  .nav-links {
+    display: none;
+  }
 }
 </style>

@@ -87,5 +87,8 @@
 .hero-actions { display: flex; gap: 14px; flex-wrap: wrap; }
 
 @media (max-width: 900px) {
-  .hero-grid { grid-template-columns: 1fr; gap: 40px; }
+  .hero-grid {
+    grid-template-columns: 1fr;
+    gap: 40px;
+  }
 }

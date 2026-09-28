@@ -33,61 +33,7 @@
     <HomeKpiStrip v-if="isLoggedIn" :stats="stats" />
 
     <!-- 模块区：已登录展示“玩家背包栏 Grid”，未登录展示“小岛生态推荐手册 Highlights” -->
-    <section id="modules" class="section">
-      <div v-if="isLoggedIn">
-        <div class="section-head">
-          <div>
-            <div class="section-eyebrow">MODULES · 岛屿口袋</div>
-            <h2 class="section-title">我的背包格子 (Pocket Slots)</h2>
-          </div>
-          <p class="section-sub">小岛里的常用入口，化为随身背包里的各种神奇道具，点击即可掏出使用。</p>
-        </div>
-        
-        <div class="modules-pocket">
-          <div v-for="mod in modules" :key="mod.key" class="pocket-slot" :class="'pocket-slot--' + mod.color" @click="handleModuleClick(mod.key)">
-            <!-- 背包格子的圆圈标记角标 -->
-            <span class="pocket-slot-tag">{{ mod.tag }}</span>
-            
-            <div class="pocket-slot-ico-wrap">
-              <div class="pocket-slot-ico">
-                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                  <path :d="mod.icon" />
-                </svg>
-              </div>
-            </div>
-            <div class="pocket-slot-title">{{ mod.title }}</div>
-            <div class="pocket-slot-sub">{{ mod.sub }}</div>
-          </div>
-        </div>
-      </div>
-
-      <div v-else>
-        <div class="section-head">
-          <div>
-            <div class="section-eyebrow">HIGHLIGHTS · 岛屿生态手册</div>
-            <h2 class="section-title">小岛推荐指南 (Getaway Highlights)</h2>
-          </div>
-          <p class="section-sub">Nook 移居计划官方倾情推荐，为您全方位展示博客小岛的悠闲生活与核心建设生态。</p>
-        </div>
-        
-        <div class="modules-pocket">
-          <div v-for="mod in unauthModules" :key="mod.key" class="pocket-slot" :class="'pocket-slot--' + mod.color" @click="handleModuleClick(mod.key)">
-            <!-- 背包格子的圆圈标记角标 -->
-            <span class="pocket-slot-tag">{{ mod.tag }}</span>
-            
-            <div class="pocket-slot-ico-wrap">
-              <div class="pocket-slot-ico">
-                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                  <path :d="mod.icon" />
-                </svg>
-              </div>
-            </div>
-            <div class="pocket-slot-title">{{ mod.title }}</div>
-            <div class="pocket-slot-sub">{{ mod.sub }}</div>
-          </div>
-        </div>
-      </div>
-    </section>
+    <HomeModules :logged-in="isLoggedIn" @select="handleModuleClick" />
 
     <!-- 关于区：已登录展示“动森玩家岛民证 (Island Passport)”，未登录展示“大头针告示板 (Bulletin Board)” -->
     <section id="about" class="section">
@@ -288,6 +234,7 @@ import HomeNav from "./components/HomeNav.vue";
 import HeroIsland from "./components/HeroIsland.vue";
 import HeroCounter from "./components/HeroCounter.vue";
 import HomeKpiStrip from "./components/HomeKpiStrip.vue";
+import HomeModules from "./components/HomeModules.vue";
 
 defineOptions({ name: "HomePage" });
 
@@ -390,27 +337,6 @@ const handleModuleClick = (key: string) => {
   }
 };
 
-const unauthModules = [
-  { key: "daily", color: "pink", tag: "DAILY · 日常", title: "工作日常", sub: "日报 · 周报 · 月报的打理", icon: "M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z" },
-  { key: "docs", color: "yellow", tag: "DOCS · 开发", title: "开发文档", sub: "小岛技术结晶与沉淀", icon: "M4 19.5A2.5 2.5 0 016.5 17H20M4 19.5A2.5 2.5 0 016.5 17H20M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z" },
-  { key: "docker", color: "blue", tag: "TRANSIT · 联运", title: "Dodo 联运", sub: "本地远端服务无缝对接", icon: "M22 12h-4l-3 9L9 3l-3 9H2" },
-  { key: "site", color: "green", tag: "BLUEPRINT · 蓝图", title: "建设蓝图", sub: "站点字典参数系统配置", icon: "M12 20h9M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z" },
-];
-
-const modules = [
-  { key: "daily", color: "pink", tag: "DAILY", title: "工作日常", sub: "日报 · 周报 · 月报", icon: "M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z" },
-  { key: "docs", color: "yellow", tag: "DOCS", title: "开发文档", sub: "项目资料沉淀", icon: "M4 19.5A2.5 2.5 0 016.5 17H20M4 19.5A2.5 2.5 0 016.5 17H20M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z" },
-  { key: "source", color: "blue", tag: "SOURCE", title: "平台来源", sub: "绑定项目上下文", icon: "M6 3h12l4 6-10 13L2 9z" },
-  { key: "route", color: "teal", tag: "ROUTE", title: "路径转换", sub: "网址与服务器地址", icon: "M13 2L3 14h9l-1 8 10-12h-9z" },
-  { key: "init", color: "orange", tag: "INIT", title: "模型初始化", sub: "框架模板配置", icon: "M12 3v18M3 12h18" },
-  { key: "user", color: "purple", tag: "USER", title: "会员管理", sub: "用户资料与头像", icon: "M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2M12 3a4 4 0 100 8 4 4 0 000-8z" },
-  { key: "sys", color: "green", tag: "SYS", title: "系统管理", sub: "菜单 · 角色 · 权限", icon: "M12.22 2h-.44a2 2 0 00-2 2v.18a2 2 0 01-1 1.73l-.43.25a2 2 0 01-2 0l-.15-.08a2 2 0 00-2.73.73l-.22.38a2 2 0 00.73 2.73l.15.1a2 2 0 011 1.72v.51a2 2 0 01-1 1.74l-.15.09a2 2 0 00-.73 2.73l.22.38a2 2 0 002.73.73l.15-.08a2 2 0 012 0l.43.25a2 2 0 011 1.73V20a2 2 0 002 2h.44a2 2 0 002-2v-.18a2 2 0 011-1.73l.43-.25a2 2 0 012 0l.15.08a2 2 0 002.73-.73l.22-.39a2 2 0 00-.73-2.73l-.15-.08a2 2 0 01-1-1.74v-.5a2 2 0 011-1.74l.15-.09a2 2 0 00.73-2.73l-.22-.38a2 2 0 00-2.73-.73l-.15.08a2 2 0 01-2 0l-.43-.25a2 2 0 01-1-1.73V4a2 2 0 00-2-2z" },
-  { key: "site", color: "peach", tag: "SITE", title: "站点配置", sub: "字典 · 参数 · 日志", icon: "M12 20h9M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z" },
-  { key: "api", color: "lime", tag: "API", title: "接口后台", sub: "Laravel API", icon: "M18 20V10M12 20V4M6 20v-6" },
-  { key: "docker", color: "red", tag: "DOCKER", title: "远端验证", sub: "Docker 运行环境", icon: "M22 12h-4l-3 9L9 3l-3 9H2" },
-  { key: "mini", color: "brown", tag: "MINI", title: "小程序内容", sub: "壁纸 · 相册 · 记录", icon: "M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2zM12 17a4 4 0 100-8 4 4 0 000 8z" },
-  { key: "me", color: "mint", tag: "ME", title: "个人中心", sub: "岛主信息与偏好", icon: "M12 12m-10 0a10 10 0 1020 0 10 10 0 10-20 0M8 14s1.5 2 4 2 4-2 4-2M9 9h.01M15 9h.01" },
-];
 </script>
 
 <style lang="scss" scoped>
@@ -536,15 +462,6 @@ const modules = [
     color: #fffdec;
   }
 
-  .pocket-slot {
-    background: rgba(28, 39, 76, 0.85);
-    border-color: #2c3859;
-
-    &:hover {
-      background: #1c274c;
-    }
-  }
-
   .ac-passport {
     background: #1c274c;
     border-color: var(--ai-outline);
@@ -597,135 +514,6 @@ const modules = [
 .home-page.home-page--video {
   background: none;
 }
-
-.modules-pocket {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 20px;
-}
-
-// 动森经典背包格子道具卡片
-.pocket-slot {
-  position: relative;
-  background: var(--ai-btn-face);
-  border: 3px solid var(--ai-outline);
-  border-radius: 28px;
-  padding: 24px 20px;
-  height: 206px;
-  display: flex;
-  flex-direction: column;
-  cursor: pointer;
-  transition: all 0.25s cubic-bezier(0.25, 1, 0.5, 1);
-  overflow: hidden;
-  box-shadow: 0 5px 0 0 var(--ai-btn-shadow);
-  color: var(--ai-text);
-  text-decoration: none;
-
-  // 内阴影和极柔格子平铺底纹
-  &::before {
-    content: "";
-    position: absolute;
-    inset: 0;
-    background-image: repeating-linear-gradient(
-      45deg,
-      rgba(121, 79, 39, 0.01) 0px,
-      rgba(121, 79, 39, 0.01) 4px,
-      transparent 4px,
-      transparent 8px
-    );
-    pointer-events: none;
-    z-index: 0;
-  }
-
-  .pocket-slot-ico-wrap {
-    width: 60px;
-    height: 60px;
-    display: grid;
-    place-items: center;
-    background: var(--ai-border);
-    border: 2px solid var(--ai-outline);
-    border-radius: 18px;
-    margin-bottom: auto;
-    z-index: 1;
-    transition: transform 0.25s cubic-bezier(0.25, 1, 0.5, 1);
-  }
-
-  .pocket-slot-ico {
-    color: var(--home-chip-ink);
-    display: grid;
-    place-items: center;
-  }
-
-  .pocket-slot-title {
-    font-size: 18px;
-    font-weight: 900;
-    margin-top: 14px;
-    letter-spacing: 0.02em;
-    z-index: 1;
-  }
-
-  .pocket-slot-sub {
-    font-size: 12px;
-    color: var(--ai-text-2);
-    font-weight: 800;
-    margin-top: 4px;
-    z-index: 1;
-  }
-
-  // 动森手指光标避让
-  &:hover {
-    transform: translateY(-6px) scale(1.02);
-    box-shadow: 0 10px 0 0 var(--ai-btn-shadow);
-    border-color: var(--ai-primary);
-    color: var(--ai-primary-active);
-
-    .pocket-slot-ico-wrap {
-      transform: scale(1.1) rotate(6deg);
-      background: #e6f9f6;
-      border-color: var(--ai-primary);
-      color: var(--ai-primary-active);
-    }
-
-    .pocket-slot-sub {
-      color: var(--ai-primary);
-    }
-  }
-
-  &:active {
-    transform: translateY(3px) scale(0.98);
-    box-shadow: 0 2px 0 0 var(--ai-btn-shadow);
-  }
-}
-
-// 背包格子标签角标
-.pocket-slot-tag {
-  position: absolute;
-  top: 16px;
-  right: 16px;
-  background: rgba(121, 79, 39, 0.08);
-  border: 1.5px solid var(--ai-outline);
-  color: var(--ai-text);
-  font-size: 10px;
-  font-weight: 900;
-  padding: 2px 8px;
-  border-radius: 999px;
-  letter-spacing: 0.5px;
-  z-index: 1;
-}
-
-// 对各颜色包格做细腻的拟色适配
-.pocket-slot--pink { .pocket-slot-ico-wrap { background: #ffe6eb; } }
-.pocket-slot--yellow { .pocket-slot-ico-wrap { background: #fff8d6; } }
-.pocket-slot--blue { .pocket-slot-ico-wrap { background: #e8f0ff; } }
-.pocket-slot--teal { .pocket-slot-ico-wrap { background: #e3faf2; } }
-.pocket-slot--orange { .pocket-slot-ico-wrap { background: #ffebd6; } }
-.pocket-slot--purple { .pocket-slot-ico-wrap { background: #f6ebff; } }
-.pocket-slot--green { .pocket-slot-ico-wrap { background: #ebffe6; } }
-.pocket-slot--peach { .pocket-slot-ico-wrap { background: #ffebd6; } }
-.pocket-slot--lime { .pocket-slot-ico-wrap { background: #fdffe6; } }
-.pocket-slot--red { .pocket-slot-ico-wrap { background: #ffe6e6; } }
-.pocket-slot--brown { .pocket-slot-ico-wrap { background: #fdfaf0; } }
-.pocket-slot--mint { .pocket-slot-ico-wrap { background: #e3faf2; } }
 
 // ============================================
 // 8. 岛民证 (Passport)
@@ -983,11 +771,9 @@ const modules = [
 // 10. 响应式适配
 // ============================================
 @media (max-width: 1200px) {
-  .modules-pocket { grid-template-columns: repeat(3, 1fr); }
 }
 
 @media (max-width: 900px) {
-  .modules-pocket { grid-template-columns: repeat(2, 1fr); }
   
   .ac-passport {
     border-radius: 24px;
