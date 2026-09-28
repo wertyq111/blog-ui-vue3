@@ -1,7 +1,11 @@
 <template>
   <div class="home-page" :class="['home-page--' + currentTimePeriod, { 'home-page--video': videoActive }]">
     <!-- 天空层：一日推移视频 + CSS 替身背景 -->
-    <HomeSky v-model:video-active="videoActive" :period="currentTimePeriod" :video-time="targetVideoTime" />
+    <HomeSky
+      v-model:video-active="videoActive"
+      :period="currentTimePeriod"
+      :video-time="targetVideoTime"
+    />
 
     <!-- 导航栏 -->
     <HomeNav
@@ -15,208 +19,18 @@
       @toggle-day-night="toggleDayNight"
     />
 
-    <!-- 主视觉 Hero (已登录状态下展示个人小岛概览) -->
-    <section v-if="isLoggedIn" id="hero" class="hero">
-      <div class="hero-grid">
-        <div class="hero-text">
-          <span class="hero-tag">
-            <span class="hero-tag-dot"></span>
-            WELCOME · 博客小岛
-          </span>
-          <div class="hero-title-row">
-            <h1 class="hero-title">
-              博客<br/>小岛.
-            </h1>
-          </div>
-          <p class="hero-sub">
-            记录开发日常、沉淀项目文档、管理平台来源与工具配置。<br />
-            这里是 <b>{{ nickname }}</b> 的小岛 —— 收集本周的灵感、整理项目的航向，也保留一些悠闲发呆的余地。
-          </p>
-          <div class="hero-actions">
-            <router-link class="btn-ai btn-ai-primary btn-ai-lg" to="/dashboard">
-              <span class="btn-ai-finger"></span>
-              <svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" class="btn-arrow-ico"><path d="M3 10h14M11 4l6 6-6 6"/></svg>
-              <span class="btn-ai-text">进入工作台</span>
-            </router-link>
-          </div>
-        </div>
-
-        <!-- 岛主大头贴与挂件装饰 (气球礼包与五角星化石) -->
-        <div class="hero-avatar-wrap">
-          <!-- 动森经典红色漂浮气球礼包 (字数统计) -->
-          <div class="deco-balloon-present">
-            <div class="balloon-svg">
-              <svg viewBox="0 0 60 80" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <!-- 气球主体 -->
-                <path d="M30 10 C12 10, 8 28, 8 40 C8 52, 18 60, 30 60 C42 60, 52 52, 52 40 C52 28, 48 10, 30 10 Z" fill="#fc736d" stroke="#794f27" stroke-width="2.5" />
-                <!-- 气球小嘴 -->
-                <path d="M26 60 L34 60 L30 64 Z" fill="#fc736d" stroke="#794f27" stroke-width="2" />
-                <!-- 悬挂线 -->
-                <line x1="30" y1="64" x2="30" y2="76" stroke="#794f27" stroke-width="1.5" stroke-dasharray="2 2" />
-              </svg>
-            </div>
-            <div class="present-box">
-              <span class="present-box-ribbon"></span>
-              <div class="present-box-content">
-                <span class="lbl">累计字数</span>
-                <span class="num">{{ statWords }}</span>
-              </div>
-            </div>
-          </div>
-
-          <!-- 动森五角星蓝色化石 (连续天数统计) -->
-          <div class="deco-fossil-streak">
-            <div class="fossil-icon">
-              <svg viewBox="0 0 60 60" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <!-- 蓝色化石底盘 -->
-                <circle cx="30" cy="30" r="26" fill="#889df0" stroke="#794f27" stroke-width="3" />
-                <circle cx="30" cy="30" r="21" stroke="#fff" stroke-width="1.5" stroke-dasharray="4 2" opacity="0.6" />
-                <!-- 蜗牛螺旋线 -->
-                <path d="M30 16 C38 16, 44 22, 44 30 C44 38, 38 44, 30 44 C22 44, 18 38, 20 30 C21 24, 26 22, 30 22 C34 22, 36 25, 34 28 C33 29, 31 29, 30 28" stroke="#794f27" stroke-width="3" stroke-linecap="round" fill="none" />
-                <!-- 小五角星 -->
-                <path d="M30 24 L31 27 L34 27 L32 29 L33 32 L30 30 L27 32 L28 29 L26 27 L29 27 Z" fill="#fff" stroke="#794f27" stroke-width="1" />
-              </svg>
-            </div>
-            <div class="fossil-content">
-              <span class="lbl">连续天数</span>
-              <span class="num">{{ statStreak }}<small>天</small></span>
-            </div>
-          </div>
-
-          <!-- 挂角动森树叶装饰 🍃 -->
-          <svg class="deco deco-leaf-1" viewBox="0 0 40 40" fill="#8ac68a">
-            <path d="M5 35c10 0 20-5 28-13 5-5 7-12 7-22-10 0-17 2-22 7-8 8-13 18-13 28z" stroke="#794f27" stroke-width="2.5" stroke-linejoin="round"/>
-            <path d="M5 35c8-8 16-14 26-20" stroke="#794f27" stroke-width="1.5" fill="none"/>
-          </svg>
-          <svg class="deco deco-leaf-2" viewBox="0 0 40 40" fill="#d1da49">
-            <path d="M35 5c0 10-5 20-13 28-5 5-12 7-22 7 0-10 2-17 7-22 8-8 18-13 28-13z" stroke="#794f27" stroke-width="2.5" stroke-linejoin="round"/>
-            <path d="M35 5c-8 8-16 14-26 20" stroke="#794f27" stroke-width="1.5" fill="none"/>
-          </svg>
-
-          <!-- 岛主圆形框头像 -->
-          <div class="hero-avatar">
-            <img :src="avatarSrc" :alt="nickname" />
-          </div>
-          <div class="hero-name">🌿 {{ nickname }} · 岛民岛主</div>
-        </div>
-      </div>
-    </section>
-
-    <!-- 主视觉 Hero (未登录状态下展示前台移居办理柜台) -->
-    <section v-else id="hero" class="hero hero--unauth">
-      <div class="hero-grid">
-        <div class="hero-text">
-          <span class="hero-tag hero-tag--unauth">
-            <span class="hero-tag-dot"></span>
-            NOOK INC. · 移居小岛计划
-          </span>
-          <div class="hero-title-row">
-            <h1 class="hero-title">
-              博客<br/>小岛.
-            </h1>
-          </div>
-          <p class="hero-sub">
-            想要开启悠闲又充实的开发第二人生吗？<br />
-            这里是 <b>Nook Inc. 移居小岛计划柜台</b>，我们将协助你办理博客小岛的定居登记，收集每日灵感，开启趣味生活！
-          </p>
-          <div class="hero-actions">
-            <router-link class="btn-ai btn-ai-primary btn-ai-lg" to="/login">
-              <span class="btn-ai-finger"></span>
-              <svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" class="btn-arrow-ico"><path d="M3 10h14M11 4l6 6-6 6"/></svg>
-              <span class="btn-ai-text">填写移居申请卡 🎫</span>
-            </router-link>
-            <a class="btn-ai btn-ai-lg" href="javascript:void(0)" @click="scrollToSection('modules')">
-              <span class="btn-ai-finger"></span>
-              <span class="btn-ai-text">小岛生态指南 🔍</span>
-            </a>
-          </div>
-        </div>
-
-        <!-- 动森移居柜台前台接待处 (粒狸与豆狸经典对话插图) -->
-        <div class="hero-avatar-wrap hero-avatar-wrap--unauth">
-          <!-- 动森经典特产叶子 🍃 -->
-          <div class="deco-nook-leaf">
-            <svg viewBox="0 0 40 40" fill="#58a032">
-              <path d="M5 35c10 0 20-5 28-13 5-5 7-12 7-22-10 0-17 2-22 7-8 8-13 18-13 28z" stroke="#794f27" stroke-width="2.5" stroke-linejoin="round"/>
-              <path d="M5 35c8-8 16-14 26-20" stroke="#794f27" stroke-width="1.5" fill="none"/>
-            </svg>
-          </div>
-
-          <!-- 木纹柜台 Desk -->
-          <div class="nook-counter">
-            <div class="nook-counter-top"></div>
-            <div class="nook-counter-body">
-              <span class="nook-counter-sign">NOOK INC. 移居小岛前台</span>
-            </div>
-          </div>
-
-          <!-- 漂浮在空中的 Dodo Airlines 机票 🎫 -->
-          <div class="deco-dodo-ticket">
-            <div class="ticket-header">DODO AIRLINES</div>
-            <div class="ticket-body">
-              <span class="ticket-icon">✈️</span>
-              <span class="ticket-text">PASS</span>
-            </div>
-          </div>
-
-          <!-- 粒狸的缝线对话气泡 -->
-          <div class="nook-bubble nook-bubble--timmy">
-            <div class="nook-bubble-name">🌿 粒狸 (Timmy)</div>
-            <div class="nook-bubble-content">
-              “欢迎光临！今天是要办理博客小岛的移居定居登记对吧？”
-            </div>
-          </div>
-
-          <!-- 豆狸的小声复读缝线对话气泡 -->
-          <div class="nook-bubble nook-bubble--tommy">
-            <div class="nook-bubble-name">🌿 豆狸 (Tommy)</div>
-            <div class="nook-bubble-content">
-              “...对吧！”
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
+    <!-- 主视觉 Hero：已登录展示个人小岛概览，未登录展示移居办理柜台 -->
+    <HeroIsland
+      v-if="isLoggedIn"
+      :avatar-src="avatarSrc"
+      :nickname="nickname"
+      :stat-words="statWords"
+      :stat-streak="statStreak"
+    />
+    <HeroCounter v-else />
 
     <!-- 岛民广播属性统计面板 (仅在已登录状态展示) -->
-    <div v-if="isLoggedIn" class="hero-stats">
-      <div class="stat">
-        <div class="stat-ico stat-ico-mint">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19l4-12 3 9 3-6 2 5h4"/></svg>
-        </div>
-        <div>
-          <div class="stat-num">{{ statWords }}<small>字</small></div>
-          <div class="stat-lbl">本年累计文字</div>
-        </div>
-      </div>
-      <div class="stat">
-        <div class="stat-ico stat-ico-yellow">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h14M4 12h14M4 18h10"/></svg>
-        </div>
-        <div>
-          <div class="stat-num">{{ statLogs }}<small>条日志</small></div>
-          <div class="stat-lbl">累计随笔日志</div>
-        </div>
-      </div>
-      <div class="stat">
-        <div class="stat-ico stat-ico-pink">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3c1 3 4 4 4 8a4 4 0 11-8 0c0-2 1-3 2-4 0 2 2 2 2-4z"/></svg>
-        </div>
-        <div>
-          <div class="stat-num">{{ statStreak }}<small>天</small></div>
-          <div class="stat-lbl">最长连续记录</div>
-        </div>
-      </div>
-      <div class="stat">
-        <div class="stat-ico stat-ico-blue">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8"/><path d="M12 8v4l3 2"/></svg>
-        </div>
-        <div>
-          <div class="stat-num">{{ statPeak }}<small>时段</small></div>
-          <div class="stat-lbl">高产量活跃时段</div>
-        </div>
-      </div>
-    </div>
+    <HomeKpiStrip v-if="isLoggedIn" :stats="stats" />
 
     <!-- 模块区：已登录展示“玩家背包栏 Grid”，未登录展示“小岛生态推荐手册 Highlights” -->
     <section id="modules" class="section">
@@ -471,7 +285,9 @@ import { usePublicPageScroll } from "@/composables";
 import { useDayCycle } from "./day-cycle";
 import HomeSky from "./components/HomeSky.vue";
 import HomeNav from "./components/HomeNav.vue";
-import { scrollToSection } from "./scroll-to-section";
+import HeroIsland from "./components/HeroIsland.vue";
+import HeroCounter from "./components/HeroCounter.vue";
+import HomeKpiStrip from "./components/HomeKpiStrip.vue";
 
 defineOptions({ name: "HomePage" });
 
@@ -544,6 +360,12 @@ const statWords = computed(() => metrics.value ? formatWords(metrics.value.total
 const statLogs = computed(() => metrics.value ? String(metrics.value.total_logs.value) : "42");
 const statStreak = computed(() => metrics.value ? String(metrics.value.longest_streak.value) : "7");
 const statPeak = computed(() => metrics.value?.peak_hour?.label || "14点");
+const stats = computed(() => ({
+  words: statWords.value,
+  logs: statLogs.value,
+  streak: statStreak.value,
+  peak: statPeak.value,
+}));
 
 onMounted(async () => {
   if (!isLoggedIn.value) return;
@@ -593,7 +415,6 @@ const modules = [
 
 <style lang="scss" scoped>
 @use "./styles/shared";
-@use "./styles/hero";
 
 .home-page {
   // ── 昼夜 token（昼间值 = 抽取前的字面值，等值重构）────────────
@@ -699,15 +520,6 @@ const modules = [
   background: linear-gradient(180deg, #151e3f 0%, #213352 60%, #1e2836 100%);
   color: var(--ai-text);
 
-  .stat {
-    background: #1c274c;
-    border-color: #2c3859;
-  }
-
-  .stat-num {
-    color: #fffdec;
-  }
-
   .about-card {
     background: #1c274c;
     border-color: #2c3859;
@@ -785,209 +597,6 @@ const modules = [
 .home-page.home-page--video {
   background: none;
 }
-
-.hero-avatar-wrap {
-  position: relative;
-  display: grid;
-  place-items: center;
-}
-
-.hero-avatar {
-  width: min(340px, 75vw);
-  aspect-ratio: 1;
-  border-radius: 50%;
-  background: linear-gradient(180deg, #ffffff 0%, #fff7e0 100%);
-  border: 5px solid var(--ai-outline); // 动森深褐黑相框粗边
-  box-shadow:
-    0 0 0 4px #eef9d6,
-    0 16px 36px rgba(90, 58, 24, 0.14);
-  position: relative;
-  z-index: 2;
-  overflow: hidden;
-  display: grid;
-  place-items: center;
-
-  img { width: 92%; height: 92%; object-fit: cover; border-radius: 50%; }
-}
-
-.hero-name {
-  margin-top: 18px;
-  padding: 6px 24px;
-  background: var(--ai-btn-face);
-  border: 2px.5 solid var(--ai-outline);
-  border-radius: 24px 30px 28px 26px / 26px 24px 30px 28px;
-  font-weight: 900;
-  font-size: 16px;
-  color: var(--ai-text);
-  box-shadow: 0 4px 0 0 var(--ai-btn-shadow);
-}
-
-// 浮动的红色气球礼物
-.deco-balloon-present {
-  position: absolute;
-  top: -30px;
-  left: -80px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  z-index: 3;
-  animation: ac-balloon-bob 4s ease-in-out infinite;
-
-  .balloon-svg {
-    width: 46px;
-    height: 60px;
-    filter: drop-shadow(0 3px 4px rgba(0,0,0,0.06));
-  }
-
-  .present-box {
-    margin-top: -12px;
-    background: var(--ai-btn-face);
-    border: 2px.5 solid var(--ai-outline);
-    border-radius: 12px;
-    padding: 6px 12px;
-    box-shadow: 0 3px 0 0 var(--ai-outline);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    position: relative;
-
-    .present-box-ribbon {
-      position: absolute;
-      top: -3px;
-      width: 14px;
-      height: 14px;
-      background: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 10'><path d='M2 5 C2 2, 5 3, 5 5 C5 3, 8 2, 8 5 Z' fill='%23fc736d' stroke='%23794f27' stroke-width='1.2'/></svg>") no-repeat center;
-      background-size: contain;
-    }
-
-    .lbl {
-      font-size: 8px;
-      font-weight: 800;
-      color: var(--ai-text-2);
-      margin-bottom: 2px;
-    }
-
-    .num {
-      font-size: 14px;
-      font-weight: 900;
-      color: var(--ai-red);
-    }
-  }
-}
-
-// 蓝色五角星化石挂饰
-.deco-fossil-streak {
-  position: absolute;
-  bottom: 20px;
-  right: -70px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  background: #ffffff;
-  border: 2px.5 solid var(--ai-outline);
-  border-radius: 20px 24px 22px 26px / 24px 22px 26px 20px;
-  padding: 6px 16px;
-  box-shadow: 0 4px 0 0 var(--ai-outline);
-  z-index: 3;
-  transform: rotate(6deg);
-  animation: ac-fossil-sway 5s ease-in-out infinite alternate;
-
-  .fossil-icon {
-    width: 32px;
-    height: 32px;
-  }
-
-  .fossil-content {
-    display: flex;
-    flex-direction: column;
-
-    // 化石挂件整块（底色、.num）都是硬编码、不随昼夜翻转，
-    // 标签也必须用常量墨，换成 --ai-text-2 会在白底上掉到 2.07。
-    .lbl {
-      font-size: 8px;
-      font-weight: 800;
-      color: var(--home-chip-ink);
-    }
-
-    .num {
-      font-size: 14px;
-      font-weight: 900;
-      color: #6a86d8;
-    }
-  }
-}
-
-@keyframes ac-balloon-bob {
-  0%, 100% { transform: translateY(0) rotate(-2deg); }
-  50% { transform: translateY(-14px) rotate(2deg); }
-}
-
-@keyframes ac-fossil-sway {
-  0% { transform: rotate(3deg) translateY(0); }
-  100% { transform: rotate(9deg) translateY(-4px); }
-}
-
-.deco { position: absolute; }
-.deco-leaf-1 { top: -14px; right: -14px; width: 52px; transform: rotate(18deg); z-index: 3; }
-.deco-leaf-2 { bottom: -14px; left: -14px; width: 44px; transform: rotate(-18deg); z-index: 3; }
-
-// ============================================
-// 6. 岛民广播属性统计面板
-// ============================================
-.hero-stats {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 16px;
-  margin: 28px auto 0;
-  max-width: 1200px;
-  width: 100%;
-  padding: 0 40px;
-  position: relative;
-  z-index: 2;
-}
-
-.stat {
-  background: var(--ai-btn-face);
-  border: 2.5px solid var(--ai-outline);
-  border-radius: 24px;
-  padding: 16px 22px;
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  box-shadow: 0 4px 0 0 var(--ai-btn-shadow);
-  transition: all 0.2s cubic-bezier(0.25, 1, 0.5, 1);
-
-  &:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 6px 0 0 var(--ai-btn-shadow);
-    border-color: var(--ai-primary);
-  }
-}
-
-.stat-ico {
-  width: 42px;
-  height: 42px;
-  border-radius: 12px;
-  display: grid;
-  place-items: center;
-  flex-shrink: 0;
-}
-
-.stat-ico-mint { background: #e6f9f6; color: var(--ai-primary-active); }
-.stat-ico-yellow { background: #fff2ba; color: #9f7c00; }
-.stat-ico-pink { background: #ffe0e6; color: #c05f76; }
-.stat-ico-blue { background: #dfe9ff; color: #6a86d8; }
-
-.stat-num {
-  font-size: 22px;
-  font-weight: 900;
-  line-height: 1;
-  color: var(--ai-text);
-
-  small { font-size: 11px; font-weight: 800; color: var(--ai-text-2); margin-left: 2px; }
-}
-
-.stat-lbl { font-size: 11px; color: var(--ai-text-2); font-weight: 800; margin-top: 5px; }
 
 .modules-pocket {
   display: grid;
@@ -1375,7 +984,6 @@ const modules = [
 // ============================================
 @media (max-width: 1200px) {
   .modules-pocket { grid-template-columns: repeat(3, 1fr); }
-  .hero-stats { grid-template-columns: repeat(2, 1fr); }
 }
 
 @media (max-width: 900px) {
@@ -1405,265 +1013,6 @@ const modules = [
   .ac-passport__stamp-dodo {
     align-self: flex-end;
   }
-}
-
-// ============================================
-// 11. 未登录动森移居柜台前台视觉 (Unauth Counter)
-// ============================================
-.hero--unauth {
-  padding-bottom: 90px;
-}
-
-.hero-tag--unauth {
-  color: #58a032 !important;
-  border-color: var(--ai-outline) !important;
-}
-
-.hero-avatar-wrap--unauth {
-  height: 380px;
-  width: 100%;
-  position: relative;
-  display: flex;
-  justify-content: center;
-  align-items: flex-end;
-}
-
-// 柜台木质底座
-.nook-counter {
-  width: 280px;
-  height: 120px;
-  position: relative;
-  z-index: 2;
-  margin-bottom: 10px;
-  display: flex;
-  flex-direction: column;
-}
-
-.nook-counter-top {
-  height: 14px;
-  background: #a98056;
-  border: 3.5px solid var(--ai-outline);
-  border-radius: 8px;
-  box-shadow: 0 4px 0 rgba(0, 0, 0, 0.08);
-}
-
-.nook-counter-body {
-  flex: 1;
-  background: #eed09d;
-  border: 3.5px solid var(--ai-outline);
-  border-top: none;
-  border-radius: 0 0 16px 16px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 0 8px 16px rgba(121, 79, 39, 0.08);
-  position: relative;
-
-  &::after {
-    content: "";
-    position: absolute;
-    bottom: 8px;
-    left: 8px;
-    right: 8px;
-    top: 8px;
-    border: 2px dashed rgba(121, 79, 39, 0.15);
-    border-radius: 8px;
-    pointer-events: none;
-  }
-}
-
-.nook-counter-sign {
-  font-size: 13px;
-  font-weight: 900;
-  color: var(--ai-text);
-  background: var(--ai-btn-face);
-  border: 2px solid var(--ai-outline);
-  border-radius: 8px;
-  padding: 4px 10px;
-  box-shadow: 0 2.5px 0 0 var(--ai-outline);
-  letter-spacing: 1px;
-}
-
-// 动森小树叶 Nook 标志
-.deco-nook-leaf {
-  position: absolute;
-  top: 170px;
-  left: 60px;
-  width: 38px;
-  height: 38px;
-  z-index: 1;
-  transform: rotate(-15deg);
-  animation: ac-leaf-sway 4s ease-in-out infinite alternate;
-}
-
-@keyframes ac-leaf-sway {
-  0% { transform: rotate(-20deg) scale(0.95); }
-  100% { transform: rotate(-5deg) scale(1.05); }
-}
-
-// Dodo 机票 🎫
-.deco-dodo-ticket {
-  position: absolute;
-  top: 150px;
-  right: 60px;
-  width: 72px;
-  height: 100px;
-  background: #fffdf0;
-  border: 3px solid var(--ai-outline);
-  border-radius: 12px;
-  z-index: 1;
-  transform: rotate(18deg);
-  box-shadow: 0 6px 12px rgba(121, 79, 39, 0.06);
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-  animation: ac-ticket-bob 5s ease-in-out infinite;
-
-  .ticket-header {
-    background: #6a86d8;
-    color: #fff;
-    font-size: 8px;
-    font-weight: 900;
-    text-align: center;
-    padding: 3px 0;
-    border-bottom: 2.5px solid var(--ai-outline);
-  }
-
-  .ticket-body {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 4px;
-    position: relative;
-
-    &::before, &::after {
-      content: "";
-      position: absolute;
-      top: 50%;
-      width: 8px;
-      height: 8px;
-      background: #eaf6db; // 默认匹配天空时域的混合
-      border: 3px solid var(--ai-outline);
-      border-radius: 50%;
-    }
-    &::before { left: -7px; }
-    &::after { right: -7px; }
-  }
-
-  .ticket-icon { font-size: 18px; }
-  .ticket-text {
-    font-size: 9px;
-    font-weight: 900;
-    color: var(--ai-text);
-    background: var(--ai-warning);
-    border: 1.5px solid var(--ai-outline);
-    border-radius: 4px;
-    padding: 1px 4px;
-  }
-}
-
-@keyframes ac-ticket-bob {
-  0%, 100% { transform: rotate(18deg) translateY(0); }
-  50% { transform: rotate(14deg) translateY(-10px); }
-}
-
-// Timmy & Tommy 对话泡泡
-.nook-bubble {
-  position: absolute;
-  background: #fffdf2;
-  border: 3px solid var(--ai-outline);
-  border-radius: 20px;
-  padding: 12px 16px;
-  box-shadow: 0 8px 0 rgba(121, 79, 39, 0.05), 0 12px 24px rgba(0,0,0,0.03);
-  display: flex;
-  flex-direction: column;
-  z-index: 3;
-  width: 250px;
-
-  &::after {
-    content: "";
-    position: absolute;
-    bottom: -13px;
-    left: 30px;
-    width: 0;
-    height: 0;
-    border-style: solid;
-    border-width: 10px 10px 0 10px;
-    border-color: #fffdf2 transparent transparent transparent;
-  }
-
-  &::before {
-    content: "";
-    position: absolute;
-    bottom: -17px;
-    left: 28px;
-    width: 0;
-    height: 0;
-    border-style: solid;
-    border-width: 12px 12px 0 12px;
-    border-color: var(--ai-outline) transparent transparent transparent;
-    z-index: -1;
-  }
-
-  .nook-bubble-name {
-    font-size: 10px;
-    font-weight: 900;
-    color: var(--ai-primary-active);
-    margin-bottom: 4px;
-    letter-spacing: 0.5px;
-  }
-
-  .nook-bubble-content {
-    font-size: 12px;
-    font-weight: 800;
-    color: var(--ai-text);
-    line-height: 1.5;
-  }
-
-  &--timmy {
-    top: 10px;
-    left: 20px;
-    animation: ac-bubble-float 4.5s ease-in-out infinite alternate;
-  }
-
-  &--tommy {
-    top: 90px;
-    right: 20px;
-    width: 140px;
-    padding: 8px 12px;
-    opacity: 0.85;
-    animation: ac-bubble-float-rev 5s ease-in-out infinite alternate;
-
-    &::after {
-      left: auto;
-      right: 30px;
-    }
-    &::before {
-      left: auto;
-      right: 28px;
-    }
-
-    .nook-bubble-name {
-      color: var(--ai-text-2);
-    }
-
-    .nook-bubble-content {
-      font-size: 11px;
-      font-style: italic;
-    }
-  }
-}
-
-@keyframes ac-bubble-float {
-  0% { transform: translateY(0) scale(1); }
-  100% { transform: translateY(-6px) scale(1.02); }
-}
-
-@keyframes ac-bubble-float-rev {
-  0% { transform: translateY(0) scale(1); }
-  100% { transform: translateY(5px) scale(0.98); }
 }
 
 // ============================================
@@ -1800,9 +1149,6 @@ const modules = [
   }
   .sticky-tech, .sticky-recruit {
     transform: none;
-  }
-  .nook-bubble--tommy {
-    display: none;
   }
 }
 </style>
