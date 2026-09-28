@@ -3,7 +3,7 @@
 - 日期：2026-09-28
 - 范围：`blog-ui-vue3` 首页，新增一个 section
 - 所属系列：首页改造四个子项目中的第三个，顺序为 A 拆分 → C hero 与模块区改版 → D 3D 小岛导览（本文）→ B 全局深色模式
-- 前置依赖：A（`docs/specs/2026-09-28-home-split-design.md`）完成合并。C 会改 hero 与模块区，本 section 接在改版后的 hero 下方，实施前按 C 的最终结构核对插入位置
+- 前置依赖：A（`docs/specs/2026-09-28-home-split-design.md`）、C（`docs/specs/2026-09-28-home-hero-revamp-design.md`）均已合并。C 删除了 KPI 条，本 section 直接接在 hero 之后、`#modules` 之前
 
 ## 1. 目标
 
@@ -32,15 +32,15 @@
 
 5 个地标沿岛边环形排列：
 
-| 分区 | 地标造型 | 说明卡内容 |
-|---|---|---|
-| 办公区 | 两层小楼，门口有邮筒和告示板 | 工作日常、开发文档、待办 |
-| 工坊 | 带烟囱的木屋，屋顶有齿轮在转 | 路径转换、模型初始化、图片处理 |
-| 番茄钟小屋 | 番茄形圆顶小屋 | 番茄钟专注计时 |
-| 照相馆 | 正面是大镜头的方盒子建筑，墙上挂相框 | 小程序的壁纸、相册、笔记 |
-| 塔台 | 灯塔，顶上的灯会转 | 系统管理、会员、站点配置 |
+| 分区 | 地标造型 | 说明卡内容 | 按钮直达 |
+|---|---|---|---|
+| 办公区 | 两层小楼，门口有邮筒和告示板 | 工作日常、工作文档、待办列表 | `/develop/work-daily` |
+| 工坊 | 带烟囱的木屋，屋顶有齿轮在转 | 路径转换、模型初始化、图片处理 | `/develop/convert-path` |
+| 番茄钟小屋 | 番茄形圆顶小屋 | 专注番茄计时 | `/profile-center/pomo` |
+| 照相馆 | 正面是大镜头的方盒子建筑，墙上挂相框 | 小程序的壁纸、相册、笔记 | `/mini-program/wallpaper` |
+| 塔台 | 灯塔，顶上的灯会转 | 用户、角色、菜单管理与会员 | `/system/user` |
 
-C 阶段会删减模块格子里的入口。分区讲的是功能生态，不与格子一一对应，不受删减影响；说明卡里提到的功能以实施时仍存在的页面为准。
+说明卡里的功能名与路径均按后端菜单表核对（2026-09-28 远端只读查询）；原稿塔台的「站点配置」在菜单中不存在，已替换。分区讲功能生态，与模块区的 4 个入口互补，不一一对应。
 
 ### 2.3 材质与配色
 
@@ -79,7 +79,7 @@ C 阶段会删减模块格子里的入口。分区讲的是功能生态，不与
 
 ### 3.4 说明卡按钮
 
-沿用首页 `handleModuleClick` 的逻辑：已登录跳工作台，未登录去登录页。各功能页的真实路径来自后端动态菜单，本次不在场景里硬编码深链接。
+按钮文案「去看看 →」。已登录直达该分区的主页面（2.2 表「按钮直达」列）；未登录一律去 `/login`。与 C 模块区入口同一做法：路径取自后端菜单表后写在分区数据里。
 
 ## 4. 工程结构
 
@@ -98,14 +98,15 @@ views/home/components/
 - 接入首页：
 
 ```vue
-<IslandTour :period="currentTimePeriod" :logged-in="isLoggedIn" @go="handleModuleClick" />
+<IslandTour :period="currentTimePeriod" @go="goTo" />
 ```
 
-  放在 hero 之后、`#modules` 之前，其余 section 顺序不动，顶部导航不加新锚点。
+  `go` 事件携带分区主页面路径；`index.vue` 的 `goTo(path)` 按登录状态决定跳 `path` 还是 `/login`（与 `handleModuleClick` 同一规则）。放在 hero 之后、`#modules` 之前，其余 section 顺序不动，顶部导航不加新锚点。
 
 ## 5. 依赖与加载
 
-- 新增依赖 `three`，开发依赖 `@types/three`。轨道控制器用 `three/examples/jsm/controls/OrbitControls`。
+- 新增依赖 `three@^0.186.1`，开发依赖 `@types/three@^0.186.0`（2026-09-28 npm 最新）。轨道控制器用 `three/addons/controls/OrbitControls.js`。
+- 滚轮缩放只在按住 Ctrl 时生效：`OrbitControls` 的 `enableZoom` 同时管滚轮与双指捏合，不能关。做法是在画布父容器上以**捕获阶段**监听 `wheel`：`ctrlKey` 为假时 `stopPropagation()`（不 `preventDefault`），事件到不了画布上的 `OrbitControls`，页面照常滚动；`ctrlKey` 为真时放行，由 `OrbitControls` 缩放并阻止浏览器缩放。双指捏合不经过 `wheel`，照常由 `OrbitControls` 处理。
 - `IslandTour.vue` 在 `onMounted` 里用 `IntersectionObserver` 监听，section 距视口约一屏时才 `await import("./island-tour/scene")`，three.js 由 Vite 拆为独立 chunk，不进首屏包。
 - 加载完成前画布区域显示同尺寸浅色占位底板，避免页面跳动。
 
