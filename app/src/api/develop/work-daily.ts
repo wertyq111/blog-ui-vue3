@@ -7,6 +7,7 @@ const BASE_URL = "/work-daily";
 export interface WorkDailyReportExport {
   id: number;
   type: "month" | "week" | "year";
+  kind: "work" | "growth";
   periodStart: string;
   periodEnd: string;
   model?: string;
@@ -21,6 +22,7 @@ export interface WorkDailyReportExport {
 export interface WorkDailyReportExportCreateResult {
   blocked: boolean;
   export: WorkDailyReportExport;
+  growthExport: WorkDailyReportExport | null;
 }
 
 export interface WorkDailyReportExportStatusResult {

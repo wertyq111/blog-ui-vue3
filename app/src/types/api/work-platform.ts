@@ -1,5 +1,8 @@
 import type { BaseQueryParams, PageResult } from "./common";
 
+/** 工作平台大类 */
+export type WorkPlatformCategory = "work" | "study" | "personal";
+
 /** 工作平台查询参数 */
 export interface WorkPlatformQueryParams extends BaseQueryParams {
   name?: string;
@@ -10,6 +13,7 @@ export interface WorkPlatformQueryParams extends BaseQueryParams {
 export interface WorkPlatformItem {
   id: number;
   name: string;
+  category: WorkPlatformCategory;
   status: number; // 1/0
   sort: number;
   createUser: number;
@@ -21,6 +25,7 @@ export interface WorkPlatformItem {
 export interface WorkPlatformForm {
   id?: number;
   name: string;
+  category: WorkPlatformCategory;
   status?: number;
   sort?: number;
 }

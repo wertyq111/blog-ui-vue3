@@ -61,6 +61,7 @@
             <tr>
               <th style="width: 56px">排序</th>
               <th>平台名称</th>
+              <th style="width: 100px">大类</th>
               <th style="width: 90px">序号</th>
               <th style="width: 110px">状态</th>
               <th style="width: 170px">创建时间</th>
@@ -83,6 +84,11 @@
                 </span>
               </td>
               <td>{{ row.name }}</td>
+              <td>
+                <AnimalTag :type="workPlatformCategoryTagType(row.category)">
+                  {{ workPlatformCategoryLabel(row.category) }}
+                </AnimalTag>
+              </td>
               <td class="cell-num">{{ row.sort }}</td>
               <td>
                 <Switch
@@ -108,7 +114,7 @@
               </td>
             </tr>
             <tr v-if="!loading && dataList.length === 0" class="empty-row">
-              <td colspan="7">暂无数据</td>
+              <td colspan="8">暂无数据</td>
             </tr>
           </tbody>
         </table>
@@ -133,6 +139,11 @@ import { computed, nextTick, onMounted, reactive, ref } from "vue";
 
 import { Button, Input, Switch } from "animal-island-vue";
 import AnimalSelect from "@/components/AnimalSelect/index.vue";
+import AnimalTag from "@/components/AnimalTag/index.vue";
+import {
+  workPlatformCategoryLabel,
+  workPlatformCategoryTagType,
+} from "@/utils/workPlatformCategory";
 import { useDraggable } from "vue-draggable-plus";
 import WorkPlatformAPI from "@/api/develop/work-platform";
 import type { WorkPlatformItem, WorkPlatformQueryParams } from "@/types/api/work-platform";
@@ -216,7 +227,12 @@ async function handleStatusToggle(row: WorkPlatformItem, val: boolean): Promise<
   const next = val ? 1 : 0;
   statusLoadingId.value = row.id;
   try {
-    await WorkPlatformAPI.update(row.id, { name: row.name, status: next, sort: row.sort });
+    await WorkPlatformAPI.update(row.id, {
+      name: row.name,
+      category: row.category,
+      status: next,
+      sort: row.sort,
+    });
     row.status = next;
     message.success(val ? "已启用" : "已禁用");
   } finally {
