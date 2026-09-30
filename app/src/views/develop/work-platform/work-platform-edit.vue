@@ -12,9 +12,12 @@
       label-width="82px"
       class="develop-dialog-form"
     >
-      <div class="field-desc">维护项目来源平台、启用状态与展示顺序。</div>
+      <div class="field-desc">维护项目来源平台、所属大类、启用状态与展示顺序。</div>
       <el-form-item label="平台名称" prop="name">
         <Input v-model="formData.name" placeholder="请输入平台名称" :maxlength="50" allow-clear />
+      </el-form-item>
+      <el-form-item label="平台大类" prop="category">
+        <AnimalSelect v-model="formData.category" :options="WORK_PLATFORM_CATEGORY_OPTIONS" />
       </el-form-item>
       <el-form-item label="状态" prop="status">
         <Switch v-model="statusOn">
@@ -43,6 +46,8 @@ import { useDebounceFn } from "@vueuse/core";
 import { type FormInstance, type FormRules } from "element-plus";
 import AdminAnimalModal from "@/components/AdminPage/AdminAnimalModal.vue";
 import { Button, Input, Switch } from "animal-island-vue";
+import AnimalSelect from "@/components/AnimalSelect/index.vue";
+import { WORK_PLATFORM_CATEGORY_OPTIONS } from "@/utils/workPlatformCategory";
 import WorkPlatformAPI from "@/api/develop/work-platform";
 import type { WorkPlatformForm, WorkPlatformItem } from "@/types/api/work-platform";
 
@@ -61,6 +66,7 @@ const loading = ref(false);
 
 const initialFormData: WorkPlatformForm = {
   name: "",
+  category: "work",
   status: 1,
   sort: 0,
 };
@@ -99,6 +105,7 @@ async function openDialog(): Promise<void> {
     Object.assign(formData, {
       id: props.data.id,
       name: props.data.name,
+      category: props.data.category,
       status: props.data.status,
       sort: props.data.sort,
     });

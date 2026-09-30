@@ -298,6 +298,7 @@
           <thead>
             <tr>
               <th>创建时间</th>
+              <th>报表</th>
               <th>类型</th>
               <th>区间</th>
               <th>模型</th>
@@ -308,6 +309,7 @@
           <tbody>
             <tr v-for="item in historyItems" :key="item.id">
               <td>{{ formatTimestamp(item.createdAt) }}</td>
+              <td>{{ formatExportKind(item.kind) }}</td>
               <td>{{ formatExportType(item.type) }}</td>
               <td>{{ formatExportPeriod(item) }}</td>
               <td>{{ formatModelLabel(item.model || "") || "-" }}</td>
@@ -435,6 +437,8 @@ const modelMenuOpen = ref(false);
 const activeAgentKey = ref("");
 const modelSelectRef = ref<HTMLElement>();
 const currentExport = ref<WorkDailyReportExport | null>(null);
+// 工作报表生成完后接着轮询的个人成长记录任务
+const pendingGrowthId = ref<number | null>(null);
 let exportPollTimer: number | undefined;
 
 const historyVisible = ref(false);
@@ -537,9 +541,7 @@ function isLocalClaudeModel(model: string): boolean {
 }
 
 const MODEL_LABELS: Record<string, string> = {
-  "local-codex/gpt-5.5": "GPT-5.5",
-  "local-codex/gpt-5.6-sol": "GPT-5.6 Sol",
-  "local-codex/gpt-5.6-terra": "GPT-5.6 Terra",
+  "local-codex/gpt-6-sol": "GPT-6 Sol",
   "local-codex/gpt-6-astra": "GPT-6 Astra",
   "local-agy/gemini-3.1-pro-high": "Gemini 3.1 Pro (High)",
   "local-agy/gemini-3.7-flash-high": "Gemini 3.7 Flash (High)",
@@ -547,6 +549,7 @@ const MODEL_LABELS: Record<string, string> = {
   "local-claude/claude-opus-4-6": "Opus 4.6",
   "local-claude/claude-opus-4-8": "Opus 4.8",
   "local-claude/claude-opus-5": "Opus 5",
+  "local-claude/claude-opus-5-5": "Opus 5.5",
 };
 
 function formatModelLabel(model: string): string {
@@ -636,8 +639,11 @@ async function handleExport(): Promise<void> {
 
     const result = await WorkDailyAPI.createReportExport(payload);
     currentExport.value = result.export;
+    pendingGrowthId.value = result.growthExport?.id ?? null;
     if (result.blocked) {
       message.warning("已有报表正在生成");
+    } else if (result.growthExport) {
+      message.success("导出任务已创建，本期有个人记录，会接着生成个人成长记录");
     } else {
       message.success("导出任务已创建");
     }
@@ -680,6 +686,21 @@ async function pollExport(id: number, autoDownload: boolean): Promise<void> {
     if (!result.export || result.active) return;
 
     stopExportPolling();
+    // 成长记录在工作报表之后生成，完成时只提示，不抢占正在看的工作报表预览
+    if (result.export.kind === "growth") {
+      if (result.export.status === "completed") {
+        message.success("个人成长记录已生成，可在导出列表查看");
+      } else {
+        message.error(result.export.errorMessage || "个人成长记录生成失败");
+      }
+      return;
+    }
+
+    if (pendingGrowthId.value) {
+      const growthId = pendingGrowthId.value;
+      pendingGrowthId.value = null;
+      startExportPolling(growthId, false);
+    }
     if (result.export.status === "completed") {
       if (autoDownload) {
         message.success("生成成功");
@@ -869,6 +890,10 @@ function closePreview(): void {
   previewItem.value = null;
   previewMode.value = "view";
   editContent.value = "";
+}
+
+function formatExportKind(kind: string): string {
+  return ({ work: "工作报表", growth: "成长记录" } as Record<string, string>)[kind] || kind;
 }
 
 function formatExportType(type: string): string {
