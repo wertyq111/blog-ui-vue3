@@ -437,7 +437,7 @@ const modelMenuOpen = ref(false);
 const activeAgentKey = ref("");
 const modelSelectRef = ref<HTMLElement>();
 const currentExport = ref<WorkDailyReportExport | null>(null);
-// 工作报表生成完后接着轮询的个人成长记录任务
+// 与工作报表并行生成的个人成长记录任务，工作报表轮询结束后再轮询它
 const pendingGrowthId = ref<number | null>(null);
 let exportPollTimer: number | undefined;
 
@@ -643,7 +643,7 @@ async function handleExport(): Promise<void> {
     if (result.blocked) {
       message.warning("已有报表正在生成");
     } else if (result.growthExport) {
-      message.success("导出任务已创建，本期有个人记录，会接着生成个人成长记录");
+      message.success("导出任务已创建，本期有个人记录，会同时生成个人成长记录");
     } else {
       message.success("导出任务已创建");
     }
@@ -686,7 +686,7 @@ async function pollExport(id: number, autoDownload: boolean): Promise<void> {
     if (!result.export || result.active) return;
 
     stopExportPolling();
-    // 成长记录在工作报表之后生成，完成时只提示，不抢占正在看的工作报表预览
+    // 成长记录完成时只提示，不抢占正在看的工作报表预览
     if (result.export.kind === "growth") {
       if (result.export.status === "completed") {
         message.success("个人成长记录已生成，可在导出列表查看");
