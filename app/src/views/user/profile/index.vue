@@ -8,53 +8,58 @@
 
     <div class="profile-grid">
       <!-- 左：数字身份档案 -->
-      <section class="profile-hero">
+      <section ref="heroRef" class="profile-hero" :style="{ height: heroHeight }">
         <div class="hero__decor hero__decor--mint"></div>
         <div class="hero__decor hero__decor--lime"></div>
         <div class="hero__orbit hero__orbit--1"></div>
         <div class="hero__orbit hero__orbit--2"></div>
 
-        <div class="eyebrow">
-          <span class="eyebrow__dot"></span>
-          数字身份档案
+        <div class="hero__top">
+          <div class="eyebrow">
+            <span class="eyebrow__dot"></span>
+            数字身份档案
+          </div>
+          <div class="scene-switch" role="group" aria-label="场景切换">
+            <button
+              v-for="opt in sceneOptions"
+              :key="opt.key"
+              type="button"
+              class="scene-switch__btn"
+              :class="{
+                'is-active': sceneMode === opt.key,
+                'is-current': sceneMode === 'auto' && activeScene === opt.key,
+              }"
+              @click="sceneMode = opt.key"
+            >
+              {{ opt.label }}
+            </button>
+          </div>
         </div>
         <div class="hero__head">
           <h2>{{ displayName }}</h2>
           <p>{{ heroSubtitle }}</p>
         </div>
 
-        <div class="stage" :class="{ 'has-video': !videoError }">
+        <div class="stage">
           <span class="stage__corner tl"></span>
           <span class="stage__corner tr"></span>
           <span class="stage__corner bl"></span>
           <span class="stage__corner br"></span>
 
-          <video
-            v-show="!videoError"
-            class="stage__video"
-            :src="personaVideo"
-            autoplay
-            muted
-            loop
-            playsinline
-            preload="auto"
-            @error="handleVideoError"
-          ></video>
-
-          <!-- chibi 占位（视频失败兜底） -->
-          <template v-if="videoError">
-            <div class="stage__floor"></div>
-            <div class="persona">
-              <div class="persona__head"></div>
-              <div class="persona__body">
-                <div class="persona__legs">
-                  <span></span>
-                  <span></span>
-                </div>
-              </div>
-            </div>
-            <span class="stage__caption">// persona offline · fallback view</span>
-          </template>
+          <!-- 首帧图作 poster，视频缺失或加载前显示首帧 -->
+          <Transition name="scene-fade">
+            <video
+              :key="sceneAsset"
+              class="stage__video"
+              :src="`${sceneAsset}.mp4`"
+              :poster="`${sceneAsset}.jpg`"
+              autoplay
+              muted
+              loop
+              playsinline
+              preload="auto"
+            ></video>
+          </Transition>
 
           <div class="hud hud--tl">
             <div class="hud__ico">
@@ -330,7 +335,8 @@
 
 <script setup lang="ts">
 import { message } from "@/utils/feedback";
-import { ref, reactive, computed, onMounted, watch } from "vue";
+import { ref, reactive, computed, onMounted, onActivated, watch } from "vue";
+import { useMediaQuery, useNow, useResizeObserver } from "@vueuse/core";
 import UserAPI from "@/api/system/user";
 import { useUserStore } from "@/store/modules/user";
 import AnimalTextarea from "@/components/AnimalTextarea/index.vue";
@@ -346,7 +352,6 @@ const loading = ref(false);
 const saving = ref(false);
 const active = ref<string>("info");
 const fileInput = ref<HTMLInputElement | null>(null);
-const videoError = ref(false);
 const cropVisible = ref(false);
 const cropFile = ref<File | null>(null);
 const avatarSaving = ref(false);
@@ -406,11 +411,34 @@ const genderModel = computed<string>({
   },
 });
 
-const personaVideo = computed(() => {
-  if (Number(form.gender) === 1) return "/persona/male.mp4";
-  if (Number(form.gender) === 2) return "/persona/female.mp4";
-  return "/persona/private.mp4";
+type SceneKey = "morning" | "day" | "dusk" | "night";
+
+/** 场景及其起始小时；夜晚跨零点，覆盖 20 点到次日 5 点 */
+const SCENES: { key: SceneKey; label: string; from: number }[] = [
+  { key: "morning", label: "清晨", from: 5 },
+  { key: "day", label: "白天", from: 10 },
+  { key: "dusk", label: "黄昏", from: 17 },
+  { key: "night", label: "夜晚", from: 20 },
+];
+const sceneOptions: { key: SceneKey | "auto"; label: string }[] = [
+  { key: "auto", label: "自动" },
+  ...SCENES,
+];
+
+const sceneMode = ref<SceneKey | "auto">("auto");
+const now = useNow({ interval: 60_000 });
+const activeScene = computed<SceneKey>(() => {
+  if (sceneMode.value !== "auto") return sceneMode.value;
+  const hour = now.value.getHours();
+  return SCENES.findLast((scene) => hour >= scene.from)?.key ?? "night";
 });
+
+const personaGender = computed(() => {
+  if (Number(form.gender) === 1) return "male";
+  if (Number(form.gender) === 2) return "female";
+  return "private";
+});
+const sceneAsset = computed(() => `/persona/${personaGender.value}-${activeScene.value}`);
 
 const displayName = computed(() => form.nickname || form.realname || form.email || "数字分身档案");
 const currentAvatar = computed(() => resolveAvatar(form.avatar, form.gender));
@@ -482,9 +510,34 @@ const accountBindings = [
   },
 ];
 
-function handleVideoError() {
-  videoError.value = true;
+/** 左侧卡片底边贴齐可视区，舞台随之填满剩余高度 */
+const HERO_BOTTOM_GAP = 44;
+const HERO_MIN_HEIGHT = 520;
+const heroRef = ref<HTMLElement | null>(null);
+const heroHeight = ref<string>();
+const isStacked = useMediaQuery("(max-width: 992px)");
+
+function fitHero() {
+  const hero = heroRef.value;
+  const scroller = hero?.closest<HTMLElement>(".app-main");
+  // keepAlive 失活时容器高度为 0，不能据此计算
+  if (!hero || !scroller || !scroller.clientHeight || isStacked.value) {
+    heroHeight.value = undefined;
+    return;
+  }
+  // 用 offsetTop 累加而不是 getBoundingClientRect，避免页面切换动画的 transform 干扰
+  let offsetTop = 0;
+  for (let el: HTMLElement | null = hero; el && el !== scroller; ) {
+    offsetTop += el.offsetTop;
+    el = el.offsetParent as HTMLElement | null;
+  }
+  const available = scroller.clientHeight - offsetTop - HERO_BOTTOM_GAP;
+  heroHeight.value = `${Math.max(available, HERO_MIN_HEIGHT)}px`;
 }
+
+useResizeObserver(() => heroRef.value?.closest<HTMLElement>(".app-main"), fitHero);
+watch(isStacked, fitHero);
+onActivated(fitHero);
 
 async function loadProfile() {
   loading.value = true;
@@ -686,6 +739,9 @@ onMounted(loadProfile);
 
 /* ─── LEFT — persona hero ─── */
 .profile-hero {
+  display: flex;
+  flex-direction: column;
+  align-self: start;
   padding: 28px 28px 24px;
   background:
     linear-gradient(180deg, rgba(255, 255, 255, 0.86), rgba(243, 250, 246, 0.94)),
@@ -732,9 +788,58 @@ onMounted(loadProfile);
   transform: translateX(-50%) rotate(-12deg);
 }
 
-.eyebrow {
+.hero__top {
   position: relative;
   z-index: 1;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+.scene-switch {
+  display: inline-flex;
+  gap: 2px;
+  padding: 4px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.72);
+}
+.scene-switch__btn {
+  position: relative;
+  padding: 5px 12px;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--teal-mute);
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  transition:
+    background-color 0.2s ease,
+    color 0.2s ease;
+}
+.scene-switch__btn:hover {
+  color: var(--teal-ink);
+}
+.scene-switch__btn.is-active {
+  background: var(--mint);
+  color: #fff;
+}
+/* 自动模式下标出当前时段对应的场景 */
+.scene-switch__btn.is-current::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: 1px;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: var(--mint);
+  transform: translateX(-50%);
+}
+
+.eyebrow {
   display: inline-flex;
   align-items: center;
   gap: 10px;
@@ -789,9 +894,9 @@ onMounted(loadProfile);
 /* persona stage */
 .stage {
   position: relative;
+  flex: 1;
+  min-height: 0;
   margin-top: 18px;
-  aspect-ratio: 9 / 16;
-  min-height: 560px;
   border-radius: var(--radius-xl);
   overflow: hidden;
   background:
@@ -820,129 +925,19 @@ onMounted(loadProfile);
   object-fit: cover;
   z-index: 3;
 }
-
-/* chibi fallback */
-.stage__floor {
-  position: absolute;
-  left: 50%;
-  bottom: 120px;
-  transform: translateX(-50%);
-  width: 240px;
-  height: 26px;
-  border-radius: 50%;
-  background: radial-gradient(ellipse at center, rgba(23, 50, 45, 0.22), transparent 70%);
-  filter: blur(2px);
+/* 新场景叠在旧场景之上淡入，旧场景保持不透明直到被移除 */
+.scene-fade-enter-active {
+  transition: opacity 0.6s ease;
 }
-.persona {
-  position: absolute;
-  left: 50%;
-  bottom: 124px;
-  transform: translateX(-50%);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  animation: persona-breath 4.2s ease-in-out infinite;
-}
-@keyframes persona-breath {
-  0%,
-  100% {
-    transform: translateX(-50%) translateY(0) scale(1);
-  }
-  50% {
-    transform: translateX(-50%) translateY(-6px) scale(1.012);
-  }
-}
-.persona__head {
-  position: relative;
+.scene-fade-leave-active {
   z-index: 2;
-  width: 130px;
-  height: 140px;
-  margin-bottom: -22px;
-  border-radius: 56% 56% 50% 50% / 60% 60% 44% 44%;
-  background:
-    radial-gradient(circle at 35% 30%, rgba(255, 255, 255, 0.55), transparent 50%),
-    linear-gradient(160deg, #ffd9b8 0%, #ffba7e 100%);
-  box-shadow:
-    inset -8px -10px 18px rgba(186, 116, 60, 0.3),
-    inset 6px 8px 14px rgba(255, 255, 255, 0.5),
-    0 8px 22px rgba(186, 116, 60, 0.18);
+  transition: opacity 0.6s;
 }
-.persona__head::before,
-.persona__head::after {
-  content: "";
-  position: absolute;
-  top: 60px;
-  width: 10px;
-  height: 14px;
-  border-radius: 50%;
-  background: #2b1810;
-  animation: persona-blink 5s ease-in-out infinite;
-}
-.persona__head::before {
-  left: 36px;
-}
-.persona__head::after {
-  right: 36px;
-}
-@keyframes persona-blink {
-  0%,
-  92%,
-  100% {
-    transform: scaleY(1);
-  }
-  94%,
-  98% {
-    transform: scaleY(0.1);
-  }
-}
-.persona__body {
-  position: relative;
-  z-index: 1;
-  width: 170px;
-  height: 160px;
-  border-radius: 50px 50px 18px 18px / 36px 36px 18px 18px;
-  background:
-    radial-gradient(circle at 30% 20%, rgba(255, 255, 255, 0.7), transparent 60%),
-    linear-gradient(170deg, #f0f5ee 0%, #c6d3c2 100%);
-  box-shadow:
-    inset -8px -10px 20px rgba(80, 110, 80, 0.22),
-    inset 6px 8px 14px rgba(255, 255, 255, 0.7),
-    0 12px 28px rgba(40, 80, 60, 0.18);
-}
-.persona__body::after {
-  content: "";
-  position: absolute;
-  left: 50%;
-  top: 26px;
-  transform: translateX(-50%);
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
-  background: linear-gradient(135deg, var(--mint), var(--mint-deep));
-  box-shadow:
-    0 2px 6px rgba(17, 168, 155, 0.4),
-    inset 0 1px 0 rgba(255, 255, 255, 0.4);
-}
-.persona__legs {
-  position: absolute;
-  bottom: -38px;
-  left: 50%;
-  transform: translateX(-50%);
-  display: flex;
-  gap: 14px;
-}
-.persona__legs span {
-  display: block;
-  width: 32px;
-  height: 50px;
-  border-radius: 14px 14px 10px 10px / 10px 10px 8px 8px;
-  background: linear-gradient(180deg, #f4ece1 0%, #ddd0bf 100%);
-  box-shadow:
-    inset -2px -4px 8px rgba(120, 90, 60, 0.25),
-    0 6px 12px rgba(80, 50, 30, 0.15);
+.scene-fade-enter-from {
+  opacity: 0;
 }
 
-/* corners + caption */
+/* corners */
 .stage__corner {
   position: absolute;
   width: 18px;
@@ -978,19 +973,6 @@ onMounted(loadProfile);
   border-top: 0;
   border-bottom-right-radius: 6px;
 }
-.stage__caption {
-  position: absolute;
-  bottom: 96px;
-  left: 50%;
-  transform: translateX(-50%);
-  font-family: "JetBrains Mono", monospace;
-  font-size: 10.5px;
-  color: rgba(23, 50, 45, 0.42);
-  letter-spacing: 0.08em;
-  white-space: nowrap;
-  z-index: 4;
-}
-
 /* HUD floating labels */
 .hud {
   position: absolute;
@@ -1009,23 +991,23 @@ onMounted(loadProfile);
   animation: hud-float 6s ease-in-out infinite;
 }
 .hud--tl {
-  top: 70px;
-  left: 22px;
+  top: 36px;
+  left: 36px;
   animation-delay: -0.6s;
 }
 .hud--tr {
-  top: 130px;
-  right: 22px;
+  top: 96px;
+  right: 36px;
   animation-delay: -2.4s;
 }
 .hud--bl {
-  bottom: 180px;
-  left: 22px;
+  bottom: 148px;
+  left: 36px;
   animation-delay: -1.8s;
 }
 .hud--br {
-  bottom: 120px;
-  right: 22px;
+  bottom: 88px;
+  right: 36px;
   animation-delay: -3.2s;
 }
 @keyframes hud-float {
@@ -1329,7 +1311,8 @@ onMounted(loadProfile);
     grid-template-columns: 1fr;
   }
   .stage {
-    min-height: 440px;
+    flex: none;
+    aspect-ratio: 1 / 1;
   }
 }
 @media (max-width: 768px) {
