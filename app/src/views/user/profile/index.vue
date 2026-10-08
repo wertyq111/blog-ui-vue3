@@ -14,30 +14,15 @@
         <div class="hero__orbit hero__orbit--1"></div>
         <div class="hero__orbit hero__orbit--2"></div>
 
-        <div class="hero__top">
-          <div class="eyebrow">
-            <span class="eyebrow__dot"></span>
-            数字身份档案
-          </div>
-          <div class="scene-switch" role="group" aria-label="场景切换">
-            <button
-              v-for="opt in sceneOptions"
-              :key="opt.key"
-              type="button"
-              class="scene-switch__btn"
-              :class="{
-                'is-active': sceneMode === opt.key,
-                'is-current': sceneMode === 'auto' && activeScene === opt.key,
-              }"
-              @click="sceneMode = opt.key"
-            >
-              {{ opt.label }}
-            </button>
-          </div>
+        <div class="eyebrow">
+          <span class="eyebrow__dot"></span>
+          数字身份档案
         </div>
         <div class="hero__head">
           <h2>{{ displayName }}</h2>
-          <p>{{ heroSubtitle }}</p>
+          <Transition name="copy-fade" mode="out-in">
+            <p :key="activeScene">{{ heroSubtitle }}</p>
+          </Transition>
         </div>
 
         <div class="stage" @pointermove="handleStagePointer" @pointerleave="resetStagePointer">
@@ -50,10 +35,61 @@
           <span class="stage__corner bl"></span>
           <span class="stage__corner br"></span>
 
+          <!-- 场景切换：四个时段沿圆环顺时针排成一天的循环，中间是跟随时间的自动模式 -->
+          <div
+            class="scene-dial"
+            :class="{ 'is-auto': sceneMode === 'auto' }"
+            role="group"
+            aria-label="场景切换"
+          >
+            <span class="scene-dial__track"></span>
+            <span class="scene-dial__orbit" :style="{ transform: `rotate(${dialAngle}deg)` }">
+              <span class="scene-dial__knob"></span>
+            </span>
+            <el-tooltip
+              v-for="scene in SCENES"
+              :key="scene.key"
+              :content="scene.label"
+              :placement="scene.placement"
+              :show-after="200"
+            >
+              <button
+                type="button"
+                class="scene-dial__btn"
+                :class="[
+                  `scene-dial__btn--${scene.key}`,
+                  { 'is-active': activeScene === scene.key },
+                ]"
+                :aria-label="scene.label"
+                :aria-pressed="activeScene === scene.key"
+                @click="sceneMode = scene.key"
+              >
+                <AnimalMenuIcon :name="`scene-${scene.key}`" :size="20" />
+              </button>
+            </el-tooltip>
+            <el-tooltip
+              content="自动 · 跟随当前时间"
+              placement="bottom"
+              :offset="46"
+              :show-after="200"
+            >
+              <button
+                type="button"
+                class="scene-dial__btn scene-dial__btn--auto"
+                :class="{ 'is-active': sceneMode === 'auto' }"
+                aria-label="自动，跟随当前时间"
+                :aria-pressed="sceneMode === 'auto'"
+                @click="sceneMode = 'auto'"
+              >
+                <AnimalMenuIcon name="scene-auto" :size="20" />
+              </button>
+            </el-tooltip>
+          </div>
+
           <div class="stage__scene">
             <div class="stage__frame">
               <!-- 首帧图作 poster，视频缺失或加载前显示首帧 -->
-              <Transition name="scene-fade">
+              <Transition name="scene-wipe">
                 <video
                   :key="sceneAsset"
                   class="stage__video"
@@ -305,6 +341,7 @@ import UserAPI from "@/api/system/user";
 import { useUserStore } from "@/store/modules/user";
 import AnimalTextarea from "@/components/AnimalTextarea/index.vue";
 import AnimalSelect from "@/components/AnimalSelect/index.vue";
+import AnimalMenuIcon from "@/components/AnimalMenuIcon/index.vue";
 import AvatarCropModal from "./AvatarCropModal.vue";
 import { resolveAvatar } from "@/utils/avatar";
 import type { UserProfileForm, UserPasswordForm } from "@/types/api";
@@ -377,17 +414,49 @@ const genderModel = computed<string>({
 
 type SceneKey = "morning" | "day" | "dusk" | "night";
 
-/** 场景及其起始小时；夜晚跨零点，覆盖 20 点到次日 5 点 */
-const SCENES: { key: SceneKey; label: string; from: number }[] = [
-  { key: "morning", label: "清晨", from: 5 },
-  { key: "day", label: "白天", from: 10 },
-  { key: "dusk", label: "黄昏", from: 17 },
-  { key: "night", label: "夜晚", from: 20 },
+/** 场景及其起始小时；夜晚跨零点，覆盖 20 点到次日 5 点。angle 是圆环上的位置，顺时针为一天 */
+const SCENES: {
+  key: SceneKey;
+  label: string;
+  from: number;
+  angle: number;
+  placement: "top" | "right" | "bottom" | "left";
+  copy: string;
+}[] = [
+  {
+    key: "morning",
+    label: "清晨",
+    from: 5,
+    angle: 270,
+    placement: "left",
+    copy: "清晨的栈桥很安静，适合等第一条鱼上钩。",
+  },
+  {
+    key: "day",
+    label: "白天",
+    from: 10,
+    angle: 0,
+    placement: "top",
+    copy: "阳光正好，带上捕虫网去草地转一圈。",
+  },
+  {
+    key: "dusk",
+    label: "黄昏",
+    from: 17,
+    angle: 90,
+    placement: "right",
+    copy: "夕阳落进海里，顺手捡了只海螺。",
+  },
+  {
+    key: "night",
+    label: "夜晚",
+    from: 20,
+    angle: 180,
+    placement: "bottom",
+    copy: "篝火噼啪作响，提着灯数今晚的流星。",
+  },
 ];
-const sceneOptions: { key: SceneKey | "auto"; label: string }[] = [
-  { key: "auto", label: "自动" },
-  ...SCENES,
-];
+const sceneOf = (key: SceneKey) => SCENES.find((scene) => scene.key === key)!;
 
 const sceneMode = ref<SceneKey | "auto">("auto");
 const now = useNow({ interval: 60_000 });
@@ -404,16 +473,16 @@ const personaGender = computed(() => {
 });
 const sceneAsset = computed(() => `/persona/${personaGender.value}-${activeScene.value}`);
 
+/** 圆环上的指示钮角度：累加而不是直接取目标值，保证每次都走最短弧 */
+const dialAngle = ref(sceneOf(activeScene.value).angle);
+watch(activeScene, (scene) => {
+  const delta = ((((sceneOf(scene).angle - dialAngle.value) % 360) + 540) % 360) - 180;
+  dialAngle.value += delta;
+});
+
 const displayName = computed(() => form.nickname || form.realname || form.email || "数字分身档案");
 const currentAvatar = computed(() => resolveAvatar(form.avatar, form.gender));
-const heroSubtitle = computed(() => {
-  const map: Record<number, string> = {
-    1: "男性数字形象在线，轻交互模式已启用。",
-    2: "女性数字形象在线，轻交互模式已启用。",
-    3: "保密模式已启用，当前展示默认数字形象。",
-  };
-  return map[Number(form.gender)] || map[1];
-});
+const heroSubtitle = computed(() => sceneOf(activeScene.value).copy);
 
 const heroMeta = computed(() => [
   {
@@ -800,59 +869,12 @@ onMounted(loadProfile);
   transform: translateX(-50%) rotate(-12deg);
 }
 
-.hero__top {
+.eyebrow {
   position: relative;
   z-index: 1;
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  gap: 10px;
-}
-.scene-switch {
   display: inline-flex;
-  gap: 2px;
-  padding: 4px;
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.72);
-}
-.scene-switch__btn {
-  position: relative;
-  padding: 5px 12px;
-  border: 0;
-  border-radius: 999px;
-  background: transparent;
-  color: var(--teal-mute);
-  font-family: inherit;
-  font-size: 12px;
-  font-weight: 700;
-  cursor: pointer;
-  transition:
-    background-color 0.2s ease,
-    color 0.2s ease;
-}
-.scene-switch__btn:hover {
-  color: var(--teal-ink);
-}
-.scene-switch__btn.is-active {
-  background: var(--mint);
-  color: #fff;
-}
-/* 自动模式下标出当前时段对应的场景 */
-.scene-switch__btn.is-current::after {
-  content: "";
-  position: absolute;
-  left: 50%;
-  bottom: 1px;
-  width: 4px;
-  height: 4px;
-  border-radius: 50%;
-  background: var(--mint);
-  transform: translateX(-50%);
-}
-
-.eyebrow {
-  display: inline-flex;
+  /* 左卡片是纵向 flex，不收住会被拉成整行宽 */
+  align-self: flex-start;
   align-items: center;
   gap: 10px;
   padding: 8px 14px;
@@ -973,6 +995,154 @@ onMounted(loadProfile);
 .scene-fade-enter-from {
   opacity: 0;
 }
+/* 视频换场：新画面从右上角（圆环所在方向）圆形展开 */
+.scene-wipe-enter-active {
+  transition: clip-path 0.7s var(--ease-in-out);
+}
+.scene-wipe-leave-active {
+  transition: opacity 0.7s;
+}
+.scene-wipe-enter-from {
+  clip-path: circle(0% at 100% 0%);
+}
+.scene-wipe-enter-to {
+  clip-path: circle(150% at 100% 0%);
+}
+/* 副标题随场景切换 */
+.copy-fade-enter-active,
+.copy-fade-leave-active {
+  transition:
+    opacity 0.18s ease,
+    transform 0.18s ease;
+}
+.copy-fade-enter-from {
+  opacity: 0;
+  transform: translateY(4px);
+}
+.copy-fade-leave-to {
+  opacity: 0;
+  transform: translateY(-4px);
+}
+
+/* 场景圆环 */
+.scene-dial {
+  position: absolute;
+  top: 34px;
+  right: 34px;
+  z-index: 6;
+  width: 112px;
+  height: 112px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.42);
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  box-shadow:
+    0 10px 24px rgba(23, 50, 45, 0.12),
+    inset 0 1px 0 rgba(255, 255, 255, 0.55);
+  backdrop-filter: blur(14px) saturate(140%);
+}
+/* 虚线轨道穿过四个时段；自动模式下缓慢转动，表示时间在走 */
+.scene-dial__track {
+  position: absolute;
+  inset: 18px;
+  border: 1.5px dashed rgba(255, 255, 255, 0.9);
+  border-radius: 50%;
+  animation: dial-cycle 24s linear infinite;
+  animation-play-state: paused;
+}
+.scene-dial.is-auto .scene-dial__track {
+  animation-play-state: running;
+}
+@keyframes dial-cycle {
+  to {
+    transform: rotate(360deg);
+  }
+}
+.scene-dial__orbit {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  transition: transform 0.6s var(--ease-in-out);
+}
+.scene-dial__knob {
+  position: absolute;
+  top: 3px;
+  left: 50%;
+  width: 30px;
+  height: 30px;
+  margin-left: -15px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow:
+    0 0 0 2px var(--mint),
+    0 4px 10px rgba(23, 50, 45, 0.18);
+}
+.scene-dial__btn {
+  position: absolute;
+  z-index: 1;
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  cursor: pointer;
+  transition:
+    scale 0.16s ease,
+    background-color 0.2s ease;
+}
+.scene-dial__btn:active {
+  scale: 0.94;
+}
+.scene-dial__btn--day {
+  top: 3px;
+  left: 50%;
+  margin-left: -15px;
+}
+.scene-dial__btn--dusk {
+  top: 50%;
+  right: 3px;
+  margin-top: -15px;
+}
+.scene-dial__btn--night {
+  bottom: 3px;
+  left: 50%;
+  margin-left: -15px;
+}
+.scene-dial__btn--morning {
+  top: 50%;
+  left: 3px;
+  margin-top: -15px;
+}
+.scene-dial__btn--auto {
+  top: 50%;
+  left: 50%;
+  width: 34px;
+  height: 34px;
+  margin: -17px 0 0 -17px;
+  background: rgba(255, 255, 255, 0.6);
+  box-shadow: 0 0 0 0 var(--mint);
+  transition:
+    scale 0.16s ease,
+    background-color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+.scene-dial__btn--auto.is-active {
+  background: #fff;
+  box-shadow:
+    0 0 0 2px var(--mint),
+    0 4px 10px rgba(23, 50, 45, 0.18);
+}
+@media (hover: hover) and (pointer: fine) {
+  .scene-dial__btn:hover {
+    scale: 1.1;
+    background: rgba(255, 255, 255, 0.55);
+  }
+  .scene-dial__btn--auto.is-active:hover {
+    background: #fff;
+  }
+}
 
 /* corners */
 .stage__corner {
@@ -1030,14 +1200,15 @@ onMounted(loadProfile);
 .hud--tl {
   top: 8%;
 }
+/* 右上角让给场景圆环 */
 .hud--tr {
-  top: 24%;
+  top: 32%;
 }
 .hud--bl {
   top: 56%;
 }
 .hud--br {
-  top: 72%;
+  top: 74%;
 }
 .hud__card {
   position: relative;
@@ -1473,8 +1644,22 @@ onMounted(loadProfile);
     animation: hud-fade 0.2s ease both;
   }
   .hud__card::after,
-  .hud__sheen::before {
+  .hud__sheen::before,
+  .scene-dial__track {
     animation: none;
+  }
+  .scene-dial__orbit {
+    transition: none;
+  }
+  .scene-wipe-enter-active {
+    transition: opacity 0.2s ease;
+  }
+  .scene-wipe-enter-from {
+    clip-path: none;
+    opacity: 0;
+  }
+  .scene-wipe-enter-to {
+    clip-path: none;
   }
   .dock__chip {
     animation: hud-fade 0.2s ease both;

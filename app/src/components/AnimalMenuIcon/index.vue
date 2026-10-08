@@ -14,6 +14,7 @@
 <script setup lang="ts">
 import { computed } from "vue";
 import { PLATFORM_SCRIPT_GLYPHS } from "@/constants/animal-glyphs/platform-script";
+import { PERSONA_SCENE_GLYPHS } from "@/constants/animal-glyphs/persona-scene";
 
 defineOptions({ name: "AnimalMenuIcon" });
 
@@ -504,6 +505,9 @@ const GLYPH_DATABASE: Record<string, string> = {
 
   // 平台脚本专属动森图标（由 @/constants/animal-glyphs/platform-script 模块化维护）
   ...PLATFORM_SCRIPT_GLYPHS,
+
+  // 个人中心场景切换图标（由 @/constants/animal-glyphs/persona-scene 模块化维护）
+  ...PERSONA_SCENE_GLYPHS,
 };
 
 const glyph = computed<string>(() => GLYPH_DATABASE[props.name] || "");
