@@ -104,53 +104,76 @@
               </Transition>
             </div>
 
-            <!-- 换场景时整层重建，标签重新入场 -->
-            <div :key="sceneAsset" class="hud-layer">
-              <div
-                v-for="(item, i) in heroMeta"
-                :key="item.label"
-                ref="hudRefs"
-                class="hud"
-                :class="`hud--${item.slot}`"
-                :style="{ '--hud-i': i }"
+            <!-- 四个发光点：点击展开对应的能力标签，再点标签碎裂消散 -->
+            <div
+              v-for="(item, i) in heroMeta"
+              :key="item.slot"
+              ref="hudRefs"
+              class="hud"
+              :class="[`hud--${item.slot}`, { 'is-open': openHuds[item.slot] }]"
+              :style="{ '--hud-i': i }"
+            >
+              <el-tooltip
+                :content="item.label"
+                :placement="item.slot.endsWith('l') ? 'right' : 'left'"
+                :show-after="200"
+                :disabled="openHuds[item.slot]"
               >
-                <div class="hud__card">
-                  <span class="hud__sheen"></span>
-                  <div class="hud__ico">
-                    <svg
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      stroke-width="1.9"
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      v-html="item.icon"
-                    ></svg>
-                  </div>
-                  <div class="hud__txt">
-                    <span class="hud__lbl">{{ item.label }}</span>
-                    <span class="hud__val">{{ item.value }}</span>
-                  </div>
+                <button
+                  type="button"
+                  class="hud__dot"
+                  :aria-label="`展开${item.label}`"
+                  :aria-expanded="!!openHuds[item.slot]"
+                  @click="openHuds[item.slot] = true"
+                ></button>
+              </el-tooltip>
+              <div
+                v-if="openHuds[item.slot]"
+                class="hud__card"
+                role="button"
+                tabindex="0"
+                title="点击收起"
+                @click="closeHud(item.slot, i)"
+                @keydown.enter="closeHud(item.slot, i)"
+              >
+                <span class="hud__sheen"></span>
+                <div class="hud__ico">
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.9"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    v-html="item.icon"
+                  ></svg>
+                </div>
+                <div class="hud__txt">
+                  <span class="hud__lbl">{{ item.label }}</span>
+                  <span class="hud__val" :class="{ 'is-empty': !item.value }">
+                    {{ item.value || "未填写" }}
+                  </span>
                 </div>
               </div>
+              <!-- 碎片层：收起时的碎片挂在这里，飘散完自行清理 -->
+              <div class="hud__fx"></div>
             </div>
           </div>
 
-          <div class="dock">
-            <span class="dock__label">SKILLS</span>
-            <span class="dock__divider"></span>
-            <div class="dock__chips">
+          <!-- 技能条：指针移到舞台下方才出现，由拼图块依次拼合 -->
+          <Transition name="dock">
+            <div v-if="dockOpen && skillChips.length" class="dock">
+              <span class="dock__piece dock__piece--label" :style="pieceStyle(0)">SKILLS</span>
               <span
-                v-for="(c, i) in skillChips"
-                :key="c"
-                class="dock__chip"
-                :class="{ 'dock__chip--accent': i === 0 }"
-                :style="{ '--chip-i': i }"
+                v-for="(chip, i) in skillChips"
+                :key="chip"
+                class="dock__piece"
+                :style="pieceStyle(i + 1)"
               >
-                {{ c }}
+                {{ chip }}
               </span>
             </div>
-          </div>
+          </Transition>
         </div>
       </section>
 
@@ -249,6 +272,68 @@
             </form>
           </template>
 
+          <!-- 个人能力：左侧舞台的标签与技能条读取这里 -->
+          <template #ability>
+            <form class="profile-form" @submit.prevent>
+              <div class="field">
+                <label>角色定位</label>
+                <Input
+                  v-model="abilityForm.position"
+                  placeholder="如：资深架构师"
+                  :maxlength="50"
+                  allow-clear
+                />
+              </div>
+              <div class="field">
+                <label>组织信息</label>
+                <Input
+                  v-model="abilityForm.organization"
+                  placeholder="所在公司或团队"
+                  :maxlength="100"
+                  allow-clear
+                />
+              </div>
+              <div class="field">
+                <label>所在地区</label>
+                <Input
+                  v-model="abilityForm.region"
+                  placeholder="如：中国 · 浙江省 · 杭州市"
+                  :maxlength="100"
+                  allow-clear
+                />
+              </div>
+              <div class="field">
+                <label>技术栈</label>
+                <Input
+                  v-model="abilityForm.techStack"
+                  placeholder="如：Laravel · Vue · MySQL"
+                  :maxlength="200"
+                  allow-clear
+                />
+              </div>
+              <div class="field field--span2">
+                <label>技能标签</label>
+                <Input
+                  v-model="skillsText"
+                  placeholder="用逗号或顿号分隔，如：Laravel、Vue 3、MySQL（最多 20 个）"
+                  allow-clear
+                />
+                <span v-if="abilityError" class="field__err">{{ abilityError }}</span>
+                <div v-if="skillChips.length" class="skill-preview">
+                  <AnimalTag v-for="chip in skillChips" :key="chip" type="success">
+                    {{ chip }}
+                  </AnimalTag>
+                </div>
+              </div>
+              <div class="actions">
+                <Button type="primary" :loading="abilitySaving" @click="handleAbilitySubmit">
+                  保存更改
+                </Button>
+                <Button @click="resetAbilityForm">重置</Button>
+              </div>
+            </form>
+          </template>
+
           <!-- 账号绑定 -->
           <template #account>
             <div class="account-list">
@@ -342,9 +427,11 @@ import { useUserStore } from "@/store/modules/user";
 import AnimalTextarea from "@/components/AnimalTextarea/index.vue";
 import AnimalSelect from "@/components/AnimalSelect/index.vue";
 import AnimalMenuIcon from "@/components/AnimalMenuIcon/index.vue";
+import AnimalTag from "@/components/AnimalTag/index.vue";
 import AvatarCropModal from "./AvatarCropModal.vue";
 import { resolveAvatar } from "@/utils/avatar";
-import type { UserProfileForm, UserPasswordForm } from "@/types/api";
+import { disintegrate } from "@/utils/disintegrate";
+import type { UserProfileForm, UserPasswordForm, UserAbilities } from "@/types/api";
 
 defineOptions({ name: "Profile" });
 
@@ -388,6 +475,31 @@ const createDefaultForm = (): ProfileForm => ({
 const form = reactive<ProfileForm>(createDefaultForm());
 let lastLoaded: ProfileForm = createDefaultForm();
 
+const MAX_SKILLS = 20;
+const MAX_SKILL_LENGTH = 30;
+const createAbilityForm = (): Omit<UserAbilities, "skills"> => ({
+  position: "",
+  organization: "",
+  region: "",
+  techStack: "",
+});
+
+const abilityForm = reactive(createAbilityForm());
+/** 技能标签以一段文本编辑，保存和展示时再拆成列表 */
+const skillsText = ref("");
+let lastLoadedAbility = { ...createAbilityForm(), skillsText: "" };
+const abilitySaving = ref(false);
+const abilityError = ref("");
+
+const skillChips = computed(() => [
+  ...new Set(
+    skillsText.value
+      .split(/[,，、\n]+/)
+      .map((skill) => skill.trim())
+      .filter(Boolean)
+  ),
+]);
+
 const errors = reactive<{ realname: string; nickname: string; email: string }>({
   realname: "",
   nickname: "",
@@ -396,6 +508,7 @@ const errors = reactive<{ realname: string; nickname: string; email: string }>({
 
 const tabItems = [
   { key: "info", label: "基本信息" },
+  { key: "ability", label: "个人能力" },
   { key: "account", label: "账号绑定" },
   { key: "password", label: "修改密码" },
 ];
@@ -507,34 +620,50 @@ const heroMeta = computed(() => [
   {
     slot: "tl",
     label: "角色定位",
-    value: "资深架构师",
+    value: abilityForm.position,
     icon: '<circle cx="12" cy="8" r="4" /><path d="M4 21a8 8 0 0 1 16 0" />',
   },
   {
     slot: "tr",
     label: "组织信息",
-    value: "浙江网盛生意宝股份有限公司",
+    value: abilityForm.organization,
     icon: '<path d="M4 21V5l8-2v18M12 9h8v12M4 21h16" />',
   },
   {
     slot: "bl",
     label: "所在地区",
-    value: form.address || "中国 · 浙江省 · 杭州市",
+    value: abilityForm.region,
     icon: '<path d="M12 21s7-7.5 7-13a7 7 0 1 0-14 0c0 5.5 7 13 7 13z" /><circle cx="12" cy="8" r="2.4" />',
   },
   {
     slot: "br",
     label: "技术栈",
-    value: "Laravel · Vue · MySQL · AntDesign",
+    value: abilityForm.techStack,
     icon: '<path d="M2 12l10-5 10 5-10 5z" /><path d="M6 14v4c0 1 3 3 6 3s6-2 6-3v-4" />',
   },
 ]);
 
-/** 标签随指针做视差：各标签位移幅度不同，形成前后层次 */
+/** 已展开的标签；默认全部收起，只显示发光点 */
+const openHuds = reactive<Record<string, boolean>>({});
+/** 发光点与标签随指针做视差：各自位移幅度不同，形成前后层次 */
 const HUD_DEPTH = [16, 24, 20, 28];
 const hudRefs = ref<HTMLElement[]>([]);
 const reducedMotion = usePreferredReducedMotion();
 let pointerFrame = 0;
+
+/** 收起标签：先把它碎成粒子飘散，再移除本体；碎片朝远离视频的一侧飘 */
+function closeHud(slot: string, index: number) {
+  const root = hudRefs.value[index];
+  const card = root?.querySelector<HTMLElement>(".hud__card");
+  const host = root?.querySelector<HTMLElement>(".hud__fx");
+  if (card && host && reducedMotion.value !== "reduce") {
+    disintegrate(card, host, {
+      shardClass: "hud__card--shard",
+      direction: slot.endsWith("l") ? -1 : 1,
+    });
+  }
+  openHuds[slot] = false;
+}
 
 function applyParallax(x: number, y: number) {
   hudRefs.value.forEach((el, i) => {
@@ -542,29 +671,43 @@ function applyParallax(x: number, y: number) {
   });
 }
 
+/** 技能条只在指针靠近舞台底部时出现；进出阈值错开，避免在边界上来回闪 */
+const canHover = useMediaQuery("(hover: hover) and (pointer: fine)");
+const pointerNearBottom = ref(false);
+const dockOpen = computed(() => !canHover.value || pointerNearBottom.value);
+
 function handleStagePointer(event: PointerEvent) {
-  if (event.pointerType !== "mouse" || reducedMotion.value === "reduce") return;
+  if (event.pointerType !== "mouse") return;
   const rect = (event.currentTarget as HTMLElement).getBoundingClientRect();
   const x = (event.clientX - rect.left) / rect.width - 0.5;
   const y = (event.clientY - rect.top) / rect.height - 0.5;
+  if (y > 0.28) pointerNearBottom.value = true;
+  else if (y < 0.18) pointerNearBottom.value = false;
+
+  if (reducedMotion.value === "reduce") return;
   cancelAnimationFrame(pointerFrame);
   pointerFrame = requestAnimationFrame(() => applyParallax(x, y));
 }
 
 function resetStagePointer() {
+  pointerNearBottom.value = false;
   cancelAnimationFrame(pointerFrame);
   applyParallax(0, 0);
 }
 
-const skillChips = [
-  "Digital Persona",
-  "Laravel",
-  "Vue 3",
-  "MySQL",
-  "Element Plus",
-  "AntDesign",
-  "Mint Glow",
-];
+/** 拼图块的散落起点：按序号取伪随机，保证每次出现的轨迹一致 */
+function pieceStyle(index: number) {
+  const noise = (salt: number) => {
+    const value = Math.sin((index + 1) * salt) * 43758.5453;
+    return value - Math.floor(value);
+  };
+  return {
+    "--piece-i": index,
+    "--piece-x": `${Math.round((noise(12.9898) - 0.5) * 140)}px`,
+    "--piece-y": `${-36 - Math.round(noise(78.233) * 56)}px`,
+    "--piece-rot": `${Math.round((noise(37.719) - 0.5) * 80)}deg`,
+  };
+}
 
 const ICON_PHONE =
   '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="7" y="2" width="10" height="20" rx="2.5"/><line x1="11" y1="18" x2="13" y2="18"/></svg>';
@@ -653,9 +796,51 @@ async function loadProfile() {
       avatar: member.avatar || data.avatar || "",
     });
     lastLoaded = { ...form };
+
+    const abilities: Partial<UserAbilities> = member.abilities || {};
+    Object.assign(abilityForm, {
+      position: abilities.position || "",
+      organization: abilities.organization || "",
+      region: abilities.region || "",
+      techStack: abilities.techStack || "",
+    });
+    skillsText.value = (abilities.skills || []).join("、");
+    lastLoadedAbility = { ...abilityForm, skillsText: skillsText.value };
   } finally {
     loading.value = false;
   }
+}
+
+function validateAbility(): boolean {
+  if (skillChips.value.length > MAX_SKILLS) {
+    abilityError.value = `技能标签最多 ${MAX_SKILLS} 个，当前 ${skillChips.value.length} 个`;
+  } else if (skillChips.value.some((skill) => skill.length > MAX_SKILL_LENGTH)) {
+    abilityError.value = `单个技能标签不能超过 ${MAX_SKILL_LENGTH} 个字符`;
+  } else {
+    abilityError.value = "";
+  }
+  return !abilityError.value;
+}
+
+async function handleAbilitySubmit() {
+  if (!validateAbility()) return;
+  abilitySaving.value = true;
+  try {
+    await UserAPI.updateProfile({ abilities: { ...abilityForm, skills: skillChips.value } });
+    message.success("保存成功");
+    lastLoadedAbility = { ...abilityForm, skillsText: skillsText.value };
+  } catch {
+    // 失败提示由请求层统一弹出
+  } finally {
+    abilitySaving.value = false;
+  }
+}
+
+function resetAbilityForm() {
+  const { skillsText: text, ...fields } = lastLoadedAbility;
+  Object.assign(abilityForm, fields);
+  skillsText.value = text;
+  abilityError.value = "";
 }
 
 function validate(): boolean {
@@ -981,20 +1166,16 @@ onMounted(loadProfile);
   flex: 1;
   justify-content: center;
   min-height: 0;
-  padding: 22px 22px 12px;
 }
-/* 竖版视频按可用高度完整显示，宽度由 9:16 推出 */
+/* 竖版视频保持原比例、撑满舞台高度，宽度由 9:16 推出 */
 .stage__frame {
   position: relative;
   height: 100%;
   max-width: 100%;
   aspect-ratio: 9 / 16;
-  border-radius: var(--radius-lg);
   overflow: hidden;
   background: rgba(255, 255, 255, 0.3);
-  box-shadow:
-    0 18px 40px rgba(23, 50, 45, 0.22),
-    0 0 0 1px rgba(255, 255, 255, 0.55);
+  box-shadow: 0 0 44px rgba(23, 50, 45, 0.28);
 }
 .stage__video {
   position: absolute;
@@ -1199,41 +1380,95 @@ onMounted(loadProfile);
   border-top: 0;
   border-bottom-right-radius: 6px;
 }
-/* HUD floating labels */
+/* 能力标签：平时是发光点，点击后从光点处展开成卡片 */
 .hud {
   position: absolute;
   z-index: 5;
+  width: 34px;
+  height: 34px;
   /* 指针视差由脚本直接写 translate，这里只负责缓动 */
   transition: translate 0.5s var(--ease-out);
 }
 .hud--tl,
 .hud--bl {
   left: 18px;
-  --hud-from: -28px;
 }
 .hud--tr,
 .hud--br {
   right: 18px;
-  --hud-from: 28px;
 }
 .hud--tl {
-  top: 8%;
+  top: 10%;
 }
 /* 右上角让给场景圆环 */
 .hud--tr {
   top: 32%;
 }
 .hud--bl {
-  top: 56%;
+  top: 58%;
 }
 .hud--br {
   top: 74%;
 }
+.hud__dot {
+  position: absolute;
+  inset: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  cursor: pointer;
+  transition:
+    opacity 0.2s ease,
+    scale 0.2s ease;
+}
+.hud__dot::before,
+.hud__dot::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 12px;
+  height: 12px;
+  margin: -6px 0 0 -6px;
+  border-radius: 50%;
+}
+.hud__dot::before {
+  background: #fff;
+  box-shadow:
+    0 0 0 3px rgba(255, 255, 255, 0.35),
+    0 0 14px 4px rgba(214, 255, 114, 0.8);
+}
+/* 一圈圈向外扩散的光环 */
+.hud__dot::after {
+  border: 1.5px solid rgba(255, 255, 255, 0.9);
+  animation: hud-ping 2.2s var(--ease-out) calc(var(--hud-i) * 0.45s) infinite;
+}
+@keyframes hud-ping {
+  0% {
+    opacity: 0.9;
+    transform: scale(1);
+  }
+  70%,
+  100% {
+    opacity: 0;
+    transform: scale(2.8);
+  }
+}
+.hud.is-open .hud__dot {
+  opacity: 0;
+  scale: 0.6;
+  pointer-events: none;
+}
 .hud__card {
-  position: relative;
+  position: absolute;
+  /* 卡片图标的中心对准发光点的中心 */
+  top: -8px;
+  z-index: 1;
   display: flex;
   align-items: flex-start;
   gap: 10px;
+  width: max-content;
   padding: 10px 14px 10px 12px;
   border-radius: 14px;
   background: rgba(255, 255, 255, 0.5);
@@ -1242,22 +1477,34 @@ onMounted(loadProfile);
     0 10px 24px rgba(23, 50, 45, 0.1),
     inset 0 1px 0 rgba(255, 255, 255, 0.55);
   backdrop-filter: blur(14px) saturate(140%);
+  cursor: pointer;
   transition:
     scale 0.2s ease,
     box-shadow 0.2s ease;
-  /* 入场结束后由漂浮接管 transform */
+  /* 从光点处圆形展开，展开后轻微漂浮 */
   animation:
-    hud-in 0.52s var(--ease-out) calc(var(--hud-i) * 70ms + 0.12s) both,
-    hud-float 6s ease-in-out calc(var(--hud-i) * 0.9s + 0.7s) infinite;
+    hud-open 0.42s var(--ease-out) both,
+    hud-float 6s ease-in-out 0.5s infinite;
 }
-@keyframes hud-in {
+.hud--tl .hud__card,
+.hud--bl .hud__card {
+  left: -10px;
+  --hud-origin: 27px 25px;
+}
+.hud--tr .hud__card,
+.hud--br .hud__card {
+  right: -10px;
+  flex-direction: row-reverse;
+  padding: 10px 12px 10px 14px;
+  text-align: right;
+  --hud-origin: calc(100% - 27px) 25px;
+}
+@keyframes hud-open {
   from {
-    opacity: 0;
-    transform: translateX(var(--hud-from)) scale(0.95);
+    clip-path: circle(0 at var(--hud-origin));
   }
   to {
-    opacity: 1;
-    transform: none;
+    clip-path: circle(150% at var(--hud-origin));
   }
 }
 @keyframes hud-float {
@@ -1267,56 +1514,6 @@ onMounted(loadProfile);
   }
   50% {
     transform: translateY(-4px);
-  }
-}
-/* 指向人物的引线与呼吸圆点 */
-.hud__card::before,
-.hud__card::after {
-  content: "";
-  position: absolute;
-  top: 50%;
-  pointer-events: none;
-}
-.hud__card::before {
-  width: 18px;
-  height: 1px;
-}
-.hud__card::after {
-  width: 7px;
-  height: 7px;
-  margin-top: -3.5px;
-  border-radius: 50%;
-  background: #fff;
-  box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.28);
-  animation: hud-pin 2.4s ease-in-out calc(var(--hud-i) * 0.4s) infinite;
-}
-.hud--tl .hud__card::before,
-.hud--bl .hud__card::before {
-  left: 100%;
-  background: linear-gradient(90deg, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.35));
-}
-.hud--tl .hud__card::after,
-.hud--bl .hud__card::after {
-  left: calc(100% + 18px);
-}
-.hud--tr .hud__card::before,
-.hud--br .hud__card::before {
-  right: 100%;
-  background: linear-gradient(270deg, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.35));
-}
-.hud--tr .hud__card::after,
-.hud--br .hud__card::after {
-  right: calc(100% + 18px);
-}
-@keyframes hud-pin {
-  0%,
-  100% {
-    opacity: 1;
-    transform: scale(1);
-  }
-  50% {
-    opacity: 0.55;
-    transform: scale(0.7);
   }
 }
 /* 玻璃高光：一道斜向光带间歇扫过 */
@@ -1336,7 +1533,7 @@ onMounted(loadProfile);
   width: 45%;
   background: linear-gradient(100deg, transparent, rgba(255, 255, 255, 0.6), transparent);
   transform: translateX(-120%);
-  animation: hud-sheen 7s var(--ease-in-out) calc(var(--hud-i) * 1.3s + 1.2s) infinite;
+  animation: hud-sheen 7s var(--ease-in-out) 1.2s infinite;
 }
 @keyframes hud-sheen {
   0%,
@@ -1345,17 +1542,6 @@ onMounted(loadProfile);
   }
   100% {
     transform: translateX(340%);
-  }
-}
-@media (hover: hover) and (pointer: fine) {
-  .hud:hover .hud__card {
-    scale: 1.04;
-    box-shadow:
-      0 16px 32px rgba(23, 50, 45, 0.16),
-      inset 0 1px 0 rgba(255, 255, 255, 0.55);
-  }
-  .hud:hover .hud__ico {
-    transform: rotate(-8deg) scale(1.08);
   }
 }
 .hud__ico {
@@ -1369,6 +1555,8 @@ onMounted(loadProfile);
   flex-shrink: 0;
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.6);
   transition: transform 0.2s ease;
+  /* 只做 backwards 填充，结束后把 transform 还给 hover */
+  animation: hud-pop 0.32s var(--ease-out) 0.06s backwards;
 }
 .hud__ico svg {
   width: 16px;
@@ -1384,6 +1572,7 @@ onMounted(loadProfile);
   letter-spacing: 0.14em;
   text-transform: uppercase;
   color: #8aa39c;
+  animation: hud-rise 0.3s var(--ease-out) 0.14s backwards;
 }
 .hud__val {
   display: block;
@@ -1392,79 +1581,148 @@ onMounted(loadProfile);
   font-weight: 700;
   color: var(--teal-ink);
   max-width: 132px;
+  animation: hud-rise 0.3s var(--ease-out) 0.2s backwards;
+}
+.hud__val.is-empty {
+  color: #8aa39c;
+  font-weight: 500;
+}
+@keyframes hud-pop {
+  from {
+    opacity: 0;
+    transform: scale(0.6);
+  }
+}
+@keyframes hud-rise {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+}
+/* 碎片层与碎片：碎片是卡片的克隆，关掉动画和毛玻璃，只留外形和内容 */
+.hud__fx {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+.hud__card--shard {
+  background: rgba(255, 255, 255, 0.82);
+  box-shadow: none;
+  backdrop-filter: none;
+  animation: none;
+}
+.hud__card--shard .hud__sheen {
+  display: none;
+}
+.hud__card--shard .hud__ico,
+.hud__card--shard .hud__lbl,
+.hud__card--shard .hud__val {
+  animation: none;
+}
+@media (hover: hover) and (pointer: fine) {
+  .hud__dot:hover {
+    scale: 1.25;
+  }
+  .hud__card:hover {
+    scale: 1.04;
+    box-shadow:
+      0 16px 32px rgba(23, 50, 45, 0.16),
+      inset 0 1px 0 rgba(255, 255, 255, 0.55);
+  }
+  .hud__card:hover .hud__ico {
+    transform: rotate(-8deg) scale(1.08);
+  }
 }
 
-/* skill dock */
+/* 技能条：一排互相咬合的拼图块，出现时从散落处飞来拼合 */
 .dock {
-  position: relative;
-  z-index: 5;
-  margin: 0 22px 22px;
+  --knob: 6px;
+  position: absolute;
+  right: 22px;
+  bottom: 22px;
+  left: 22px;
+  z-index: 6;
   display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 12px 14px;
-  background: rgba(23, 50, 45, 0.45);
+  flex-wrap: wrap;
+  row-gap: 6px;
+  justify-content: center;
+  /* 左侧多留一个凸点的宽度，抵消拼图块的负边距 */
+  padding: 10px 14px 10px calc(14px + var(--knob) + 1px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
   border-radius: 16px;
-  backdrop-filter: blur(14px) saturate(140%);
+  background: rgba(23, 50, 45, 0.45);
   box-shadow:
     0 12px 26px rgba(23, 50, 45, 0.12),
     inset 0 1px 0 rgba(255, 255, 255, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  overflow: hidden;
+  backdrop-filter: blur(14px) saturate(140%);
 }
-.dock__label {
-  flex-shrink: 0;
-  font-family: "JetBrains Mono", monospace;
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: #d6ff72;
+.dock-enter-active {
+  transition: opacity 0.2s ease;
 }
-.dock__divider {
-  width: 1px;
-  height: 22px;
-  background: rgba(214, 255, 114, 0.18);
-  flex-shrink: 0;
+.dock-leave-active {
+  transition:
+    opacity 0.18s ease,
+    transform 0.18s ease;
 }
-.dock__chips {
-  display: flex;
-  flex-wrap: nowrap;
-  gap: 8px;
-  overflow-x: auto;
-  scrollbar-width: none;
-  flex: 1;
-  min-width: 0;
+.dock-enter-from {
+  opacity: 0;
 }
-.dock__chips::-webkit-scrollbar {
-  display: none;
+.dock-leave-to {
+  opacity: 0;
+  transform: translateY(8px);
 }
-.dock__chip {
-  flex-shrink: 0;
-  padding: 6px 12px;
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.14);
+/* 每块右侧一个圆凸点、左侧一个圆凹口；相邻两块重叠一个凸点的宽度，凸点正好嵌进凹口 */
+.dock__piece {
+  margin-left: calc(-1 * var(--knob) - 1px);
+  padding: 7px calc(11px + var(--knob)) 7px calc(10px + var(--knob));
+  background: rgba(255, 255, 255, 0.14);
   color: #e6f7f0;
   font-size: 11.5px;
   font-weight: 700;
   white-space: nowrap;
-  animation: chip-in 0.4s var(--ease-out) calc(var(--chip-i) * 40ms + 0.3s) both;
+  mask:
+    radial-gradient(circle var(--knob) at 0 50%, #000 calc(100% - 0.5px), transparent),
+    radial-gradient(
+      circle var(--knob) at calc(100% - var(--knob) - 1px) 50%,
+      #000 calc(100% - 0.5px),
+      transparent
+    ),
+    linear-gradient(#000 0 0) left / calc(100% - var(--knob) - 1px) 100% no-repeat;
+  mask-composite: exclude, add;
+  animation: piece-in 0.56s var(--ease-out) calc(var(--piece-i) * 55ms + 0.08s) both;
 }
-@keyframes chip-in {
+.dock__piece:nth-child(odd) {
+  background: rgba(255, 255, 255, 0.24);
+}
+/* 第一块左边没有邻居，不开凹口 */
+.dock__piece.dock__piece--label {
+  mask:
+    radial-gradient(
+      circle var(--knob) at calc(100% - var(--knob) - 1px) 50%,
+      #000 calc(100% - 0.5px),
+      transparent
+    ),
+    linear-gradient(#000 0 0) left / calc(100% - var(--knob) - 1px) 100% no-repeat;
+  mask-composite: add;
+  background: linear-gradient(135deg, rgba(214, 255, 114, 0.95), rgba(196, 240, 136, 0.95));
+  color: #1a3508;
+  font-family: "JetBrains Mono", monospace;
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  line-height: 17px;
+}
+@keyframes piece-in {
   from {
     opacity: 0;
-    transform: translateY(8px);
+    transform: translate(var(--piece-x), var(--piece-y)) rotate(var(--piece-rot)) scale(0.9);
+  }
+  60% {
+    opacity: 1;
   }
   to {
     opacity: 1;
     transform: none;
   }
-}
-.dock__chip--accent {
-  background: linear-gradient(135deg, rgba(214, 255, 114, 0.95), rgba(196, 240, 136, 0.95));
-  color: #1a3508;
-  border-color: transparent;
 }
 
 /* ─── RIGHT — editor panel ─── */
@@ -1604,6 +1862,13 @@ onMounted(loadProfile);
   gap: 12px;
 }
 
+/* 个人能力：技能标签预览 */
+.skill-preview {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
 /* account bindings */
 .account-list {
   display: grid;
@@ -1659,11 +1924,15 @@ onMounted(loadProfile);
   .hud {
     transition: none;
   }
-  .hud__card {
+  .hud__card,
+  .dock__piece {
     animation: hud-fade 0.2s ease both;
   }
-  .hud__card::after,
+  .hud__dot::after,
   .hud__sheen::before,
+  .hud__ico,
+  .hud__lbl,
+  .hud__val,
   .scene-dial__track {
     animation: none;
   }
@@ -1679,9 +1948,6 @@ onMounted(loadProfile);
   }
   .scene-wipe-enter-to {
     clip-path: none;
-  }
-  .dock__chip {
-    animation: hud-fade 0.2s ease both;
   }
 }
 @keyframes hud-fade {
