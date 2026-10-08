@@ -93,7 +93,7 @@
 
           <div class="stage__scene">
             <!-- 与视频等大的定位框：星光按视频尺寸定位，又不会被视频的裁切框裁掉 -->
-            <div class="stage__viewport">
+            <div ref="viewportRef" class="stage__viewport">
               <div class="stage__frame">
                 <!-- 首帧图作 poster，视频缺失或加载前显示首帧 -->
                 <Transition name="scene-wipe">
@@ -111,39 +111,46 @@
                 </Transition>
               </div>
 
-              <!-- 四颗闪烁的星光：点击展开对应的能力标签，再点标签碎裂消散 -->
+              <!-- 四颗星光像卫星一样绕着视频运行：悬停暂停，点击展开对应标签，再点标签碎裂消散 -->
               <div
                 v-for="(item, i) in heroMeta"
                 :key="item.slot"
                 ref="hudRefs"
                 class="hud"
-                :class="[`hud--${item.slot}`, { 'is-open': openHuds[item.slot] }]"
+                :class="{ 'is-open': openHuds[item.slot] }"
                 :style="{ '--hud-i': i }"
+                @pointerenter="satellitePaused[i] = true"
+                @pointerleave="satellitePaused[i] = false"
               >
                 <el-tooltip
                   :content="item.label"
-                  :placement="item.slot.endsWith('l') ? 'left' : 'right'"
+                  placement="top"
                   :show-after="200"
-                  :disabled="openHuds[item.slot]"
+                  :disabled="!!openHuds[item.slot]"
                 >
                   <button
                     type="button"
                     class="hud__star"
                     :aria-label="`展开${item.label}`"
                     :aria-expanded="!!openHuds[item.slot]"
-                    @click="openHuds[item.slot] = true"
+                    @click="openHud(item.slot, i)"
                   >
-                    <svg class="hud__star-main" viewBox="0 0 24 24" aria-hidden="true">
-                      <path :d="STAR_PATH" />
-                    </svg>
-                    <svg class="hud__star-mini" viewBox="0 0 24 24" aria-hidden="true">
-                      <path :d="STAR_PATH" />
-                    </svg>
+                    <!-- 远近缩放写在这一层，不和按钮自身的收起、悬停样式抢属性 -->
+                    <span class="hud__star-body">
+                      <svg class="hud__star-main" viewBox="0 0 24 24" aria-hidden="true">
+                        <path :d="STAR_PATH" />
+                      </svg>
+                      <svg class="hud__star-mini" viewBox="0 0 24 24" aria-hidden="true">
+                        <path :d="STAR_PATH" />
+                      </svg>
+                    </span>
                   </button>
                 </el-tooltip>
                 <div
                   v-if="openHuds[item.slot]"
                   class="hud__card"
+                  :class="`hud__card--${openHuds[item.slot]!.side}`"
+                  :style="hudCardStyle(openHuds[item.slot]!)"
                   role="button"
                   tabindex="0"
                   title="点击收起"
@@ -194,7 +201,7 @@
                 :style="pieceStyle(1)"
                 @click="active = 'ability'"
               >
-                还没有技能标签，去「个人能力」添加
+                还没有技能标签，去「个人档案」添加
               </button>
             </div>
           </Transition>
@@ -296,16 +303,17 @@
             </form>
           </template>
 
-          <!-- 个人能力：左侧舞台的标签与技能条读取这里 -->
+          <!-- 个人档案：左侧舞台的标签与技能条读取这里 -->
           <template #ability>
             <form class="profile-form" @submit.prevent>
               <div class="field">
                 <label>角色定位</label>
-                <Input
+                <AnimalSelect
                   v-model="abilityForm.position"
-                  placeholder="如：资深架构师"
-                  :maxlength="50"
-                  allow-clear
+                  :options="positionOptions"
+                  placeholder="请选择角色定位"
+                  clearable
+                  filterable
                 />
               </div>
               <div class="field">
@@ -319,12 +327,23 @@
               </div>
               <div class="field">
                 <label>所在地区</label>
-                <Input
-                  v-model="abilityForm.region"
-                  placeholder="如：中国 · 浙江省 · 杭州市"
-                  :maxlength="100"
-                  allow-clear
-                />
+                <div class="region-picker">
+                  <AnimalSelect
+                    v-model="regionProvince"
+                    :options="provinceOptions"
+                    placeholder="省份"
+                    clearable
+                    filterable
+                  />
+                  <AnimalSelect
+                    v-model="regionCity"
+                    :options="cityOptions"
+                    :placeholder="cityOptions.length ? '城市' : '无需选择'"
+                    :disabled="!cityOptions.length"
+                    clearable
+                    filterable
+                  />
+                </div>
               </div>
               <div class="field">
                 <label>技术栈</label>
@@ -444,8 +463,15 @@
 
 <script setup lang="ts">
 import { message } from "@/utils/feedback";
-import { ref, reactive, computed, onMounted, onActivated, watch } from "vue";
-import { useMediaQuery, useNow, usePreferredReducedMotion, useResizeObserver } from "@vueuse/core";
+import { ref, reactive, computed, onMounted, onActivated, onDeactivated, watch } from "vue";
+import {
+  useElementSize,
+  useMediaQuery,
+  useNow,
+  usePreferredReducedMotion,
+  useRafFn,
+  useResizeObserver,
+} from "@vueuse/core";
 import UserAPI from "@/api/system/user";
 import { useUserStore } from "@/store/modules/user";
 import AnimalTextarea from "@/components/AnimalTextarea/index.vue";
@@ -453,6 +479,7 @@ import AnimalSelect from "@/components/AnimalSelect/index.vue";
 import AnimalMenuIcon from "@/components/AnimalMenuIcon/index.vue";
 import AnimalTag from "@/components/AnimalTag/index.vue";
 import AvatarCropModal from "./AvatarCropModal.vue";
+import { CHINA_REGIONS } from "@/constants/china-regions";
 import { resolveAvatar } from "@/utils/avatar";
 import { disintegrate } from "@/utils/disintegrate";
 import type { UserProfileForm, UserPasswordForm, UserAbilities } from "@/types/api";
@@ -509,6 +536,57 @@ const createAbilityForm = (): Omit<UserAbilities, "skills"> => ({
 });
 
 const abilityForm = reactive(createAbilityForm());
+
+const positionOptions = [
+  "架构师",
+  "资深架构师",
+  "技术负责人",
+  "全栈工程师",
+  "后端工程师",
+  "前端工程师",
+  "移动端工程师",
+  "测试工程师",
+  "运维工程师",
+  "数据工程师",
+  "算法工程师",
+  "产品经理",
+  "设计师",
+  "项目经理",
+  "学生",
+  "自由职业",
+].map((name) => ({ key: name, label: name }));
+
+/** 所在地区存成「中国 · 省 · 市」一段文本，编辑时拆成省、市两个下拉；海外不带「中国」前缀 */
+const REGION_SEPARATOR = " · ";
+const REGION_OVERSEAS = "海外";
+const provinceOptions = [...CHINA_REGIONS.map((region) => region.name), REGION_OVERSEAS].map(
+  (name) => ({ key: name, label: name })
+);
+const regionParts = computed(() => abilityForm.region.split(REGION_SEPARATOR).filter(Boolean));
+const regionProvince = computed<string>({
+  get: () =>
+    regionParts.value[0] === "中国" ? regionParts.value[1] || "" : regionParts.value[0] || "",
+  set: (province) => {
+    // 换省份后原来的城市不再成立，一并清掉
+    abilityForm.region = formatRegion(province, "");
+  },
+});
+const regionCity = computed<string>({
+  get: () => (regionParts.value[0] === "中国" ? regionParts.value[2] || "" : ""),
+  set: (city) => {
+    abilityForm.region = formatRegion(regionProvince.value, city);
+  },
+});
+const cityOptions = computed(() =>
+  (CHINA_REGIONS.find((region) => region.name === regionProvince.value)?.cities || []).map(
+    (name) => ({ key: name, label: name })
+  )
+);
+
+function formatRegion(province: string, city: string): string {
+  if (!province || province === REGION_OVERSEAS) return province;
+  return ["中国", province, city].filter(Boolean).join(REGION_SEPARATOR);
+}
 /** 技能标签以一段文本编辑，保存和展示时再拆成列表 */
 const skillsText = ref("");
 let lastLoadedAbility = { ...createAbilityForm(), skillsText: "" };
@@ -532,7 +610,7 @@ const errors = reactive<{ realname: string; nickname: string; email: string }>({
 
 const tabItems = [
   { key: "info", label: "基本信息" },
-  { key: "ability", label: "个人能力" },
+  { key: "ability", label: "个人档案" },
   { key: "account", label: "账号绑定" },
   { key: "password", label: "修改密码" },
 ];
@@ -671,26 +749,122 @@ const heroMeta = computed(() => [
 const STAR_PATH =
   "M12 1.5c.7 6.3 4.2 9.8 10.5 10.5-6.3.7-9.8 4.2-10.5 10.5-.7-6.3-4.2-9.8-10.5-10.5 6.3-.7 9.8-4.2 10.5-10.5z";
 
-/** 已展开的标签；默认全部收起，只显示星光 */
-const openHuds = reactive<Record<string, boolean>>({});
+/** 已展开的标签及其展开方向；默认全部收起，只显示星光 */
+interface OpenHud {
+  side: "left" | "right";
+  /** 外侧放不下整张卡片时往里挪的像素 */
+  shift: number;
+}
+const openHuds = reactive<Record<string, OpenHud | undefined>>({});
 /** 星光与标签随指针做视差：各自位移幅度不同，形成前后层次 */
 const HUD_DEPTH = [16, 24, 20, 28];
+const HUD_CARD_WIDTH = 200;
+/** 卡片图标中心到卡片近侧边缘的距离，展开时图标正好落在星光上 */
+const HUD_ICON_OFFSET = 27;
+const HUD_EDGE_GAP = 10;
+/** 星光盒子（.hud）边长的一半 */
+const HUD_STAR_RADIUS = 17;
 const hudRefs = ref<HTMLElement[]>([]);
+const viewportRef = ref<HTMLElement | null>(null);
 const reducedMotion = usePreferredReducedMotion();
 let pointerFrame = 0;
 
-/** 收起标签：先把它碎成粒子飘散，再移除本体；碎片朝远离视频的一侧飘 */
+/**
+ * 四颗星光像卫星一样绕视频运行。
+ * 每条轨道是一个斜放的椭圆，绕到后半圈时从视频背后穿过；
+ * 椭圆的半径、倾角和高度各自按不同周期缓慢摆动，所以轨迹不会重复。
+ */
+const SATELLITES = [
+  { period: 34, direction: 1, phase: 0, height: 0.22, tilt: 0.24 },
+  { period: 41, direction: -1, phase: 1.7, height: 0.42, tilt: -0.2 },
+  { period: 29, direction: 1, phase: 3.3, height: 0.62, tilt: 0.16 },
+  { period: 47, direction: -1, phase: 4.9, height: 0.8, tilt: -0.28 },
+];
+/** 每颗星各走各的时钟，悬停或展开时停表，恢复后从原地接着走 */
+const satelliteClock = SATELLITES.map(() => 0);
+const satellitePaused = SATELLITES.map(() => false);
+const { width: viewportWidth, height: viewportHeight } = useElementSize(viewportRef);
+
+function placeSatellite(index: number, slot: string) {
+  const el = hudRefs.value[index];
+  const width = viewportWidth.value;
+  const height = viewportHeight.value;
+  if (!el || !width || !height) return;
+
+  const satellite = SATELLITES[index];
+  const time = satelliteClock[index];
+  const angle = satellite.phase + satellite.direction * (time / satellite.period) * Math.PI * 2;
+  const radiusX = width / 2 + 34 + 22 * Math.sin(time / (11 + index * 2.3));
+  const radiusY = height * 0.06;
+  const tilt = satellite.tilt + 0.3 * Math.sin(time / (27 + index * 5.1) + index);
+  const centerY = height * (satellite.height + 0.05 * Math.sin(time / (17 + index * 3.7)));
+
+  const alongX = radiusX * Math.cos(angle);
+  const alongY = radiusY * Math.sin(angle);
+  const x = alongX * Math.cos(tilt) - alongY * Math.sin(tilt);
+  const y = centerY + alongX * Math.sin(tilt) + alongY * Math.cos(tilt);
+  // 0 在视频正后方，1 在正前方
+  const nearness = (Math.sin(angle) + 1) / 2;
+
+  el.style.transform = `translate3d(${x.toFixed(1)}px, ${Math.min(Math.max(y, 24), height - 58).toFixed(1)}px, 0)`;
+  // 后半圈压到视频下面，两侧模糊区里仍然看得见
+  el.style.zIndex = nearness >= 0.5 || openHuds[slot] ? "5" : "-1";
+  const body = el.querySelector<HTMLElement>(".hud__star-body");
+  if (body) {
+    body.style.scale = (0.7 + 0.3 * nearness).toFixed(3);
+    body.style.opacity = (0.5 + 0.5 * nearness).toFixed(3);
+  }
+}
+
+const { pause: pauseSatellites, resume: resumeSatellites } = useRafFn(({ delta }) => {
+  // 切回页面时 delta 可能很大，封顶避免星光瞬移
+  const seconds = reducedMotion.value === "reduce" ? 0 : Math.min(delta, 100) / 1000;
+  heroMeta.value.forEach((item, index) => {
+    if (!satellitePaused[index] && !openHuds[item.slot]) satelliteClock[index] += seconds;
+    placeSatellite(index, item.slot);
+  });
+});
+onDeactivated(pauseSatellites);
+onActivated(resumeSatellites);
+
+/** 展开标签：朝远离人物的一侧展开；那一侧放不下就往里挪，免得被舞台边缘裁掉 */
+function openHud(slot: string, index: number) {
+  const el = hudRefs.value[index];
+  const scene = viewportRef.value?.parentElement;
+  if (!el || !scene) return;
+  const sceneRect = scene.getBoundingClientRect();
+  const rect = el.getBoundingClientRect();
+  const center = rect.left + rect.width / 2 - sceneRect.left;
+  const side = center < sceneRect.width / 2 ? "left" : "right";
+  const room =
+    side === "left"
+      ? center + HUD_ICON_OFFSET - HUD_EDGE_GAP
+      : sceneRect.width - HUD_EDGE_GAP - (center - HUD_ICON_OFFSET);
+  openHuds[slot] = { side, shift: Math.max(0, Math.round(HUD_CARD_WIDTH - room)) };
+}
+
+function hudCardStyle(state: OpenHud) {
+  // 卡片近侧边缘要落在星光中心外 HUD_ICON_OFFSET 处，换算成相对星光盒子边缘的偏移
+  const offset = `${HUD_STAR_RADIUS - HUD_ICON_OFFSET - state.shift}px`;
+  const originX = HUD_ICON_OFFSET + state.shift;
+  return state.side === "left"
+    ? { right: offset, "--hud-origin": `calc(100% - ${originX}px) 25px` }
+    : { left: offset, "--hud-origin": `${originX}px 25px` };
+}
+
+/** 收起标签：先把它碎成粒子飘散，再移除本体；碎片朝展开的那一侧飘 */
 function closeHud(slot: string, index: number) {
+  const state = openHuds[slot];
   const root = hudRefs.value[index];
   const card = root?.querySelector<HTMLElement>(".hud__card");
   const host = root?.querySelector<HTMLElement>(".hud__fx");
-  if (card && host && reducedMotion.value !== "reduce") {
+  if (state && card && host && reducedMotion.value !== "reduce") {
     disintegrate(card, host, {
       shardClass: "hud__card--shard",
-      direction: slot.endsWith("l") ? -1 : 1,
+      direction: state.side === "left" ? -1 : 1,
     });
   }
-  openHuds[slot] = false;
+  openHuds[slot] = undefined;
 }
 
 function applyParallax(x: number, y: number) {
@@ -1412,32 +1586,19 @@ onMounted(loadProfile);
   border-top: 0;
   border-bottom-right-radius: 6px;
 }
-/* 能力标签：平时是一颗闪烁的星光，点击后从星光处展开成卡片 */
+/* 档案标签：平时是绕着视频运行的星光，点击后从星光处展开成卡片 */
 .hud {
   position: absolute;
+  /* 以视频顶边中点为原点，轨道位置由脚本写 transform */
+  top: 0;
+  left: 50%;
   z-index: 5;
   width: 34px;
   height: 34px;
+  margin: -17px 0 0 -17px;
   /* 指针视差由脚本直接写 translate，这里只负责缓动 */
   transition: translate 0.5s var(--ease-out);
-}
-/* 星光落在视频两侧边缘以内，贴近人物 */
-.hud--tl {
-  top: 14%;
-  left: 5%;
-}
-.hud--bl {
-  top: 60%;
-  left: 3%;
-}
-/* 右侧两颗避开场景圆环 */
-.hud--tr {
-  top: 40%;
-  right: 4%;
-}
-.hud--br {
-  top: 74%;
-  right: 6%;
+  will-change: transform;
 }
 .hud__star {
   position: absolute;
@@ -1450,6 +1611,10 @@ onMounted(loadProfile);
   transition:
     opacity 0.2s ease,
     scale 0.2s ease;
+}
+.hud__star-body {
+  position: absolute;
+  inset: 0;
 }
 .hud__star svg {
   position: absolute;
@@ -1497,7 +1662,8 @@ onMounted(loadProfile);
   display: flex;
   align-items: flex-start;
   gap: 10px;
-  width: max-content;
+  /* 宽度固定，展开前就能算出往哪边放、要不要往里挪 */
+  width: 200px;
   padding: 10px 14px 10px 12px;
   border-radius: 16px;
   background: linear-gradient(135deg, rgba(255, 255, 255, 0.3), rgba(255, 255, 255, 0.12));
@@ -1517,19 +1683,11 @@ onMounted(loadProfile);
     hud-open 0.42s var(--ease-out) both,
     hud-float 6s ease-in-out 0.5s infinite;
 }
-/* 卡片朝远离人物的一侧展开：左侧的向左长，右侧的向右长 */
-.hud--tl .hud__card,
-.hud--bl .hud__card {
-  right: -10px;
+/* 向左展开的卡片左右镜像：图标靠右、文字右对齐，图标仍然压在星光上 */
+.hud__card--left {
   flex-direction: row-reverse;
   padding: 10px 12px 10px 14px;
   text-align: right;
-  --hud-origin: calc(100% - 27px) 25px;
-}
-.hud--tr .hud__card,
-.hud--br .hud__card {
-  left: -10px;
-  --hud-origin: 27px 25px;
 }
 @keyframes hud-open {
   from {
@@ -1595,6 +1753,8 @@ onMounted(loadProfile);
   height: 16px;
 }
 .hud__txt {
+  flex: 1;
+  min-width: 0;
   line-height: 1.35;
 }
 .hud__lbl {
@@ -1612,7 +1772,6 @@ onMounted(loadProfile);
   font-size: 12.5px;
   font-weight: 700;
   color: var(--teal-ink);
-  max-width: 132px;
   animation: hud-rise 0.3s var(--ease-out) 0.2s backwards;
 }
 .hud__val.is-empty {
@@ -1762,7 +1921,7 @@ onMounted(loadProfile);
   letter-spacing: 0.12em;
   line-height: 17px;
 }
-/* 没有技能时的提示块，点击跳到「个人能力」页签 */
+/* 没有技能时的提示块，点击跳到「个人档案」页签 */
 .dock__piece--empty {
   border: 0;
   font-family: inherit;
@@ -1919,7 +2078,14 @@ onMounted(loadProfile);
   gap: 12px;
 }
 
-/* 个人能力：技能标签预览 */
+/* 个人档案：所在地区的省、市两个下拉并排 */
+.region-picker {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+/* 个人档案：技能标签预览 */
 .skill-preview {
   display: flex;
   flex-wrap: wrap;
