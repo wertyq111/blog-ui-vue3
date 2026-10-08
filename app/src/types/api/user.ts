@@ -115,3 +115,13 @@ export interface UserProfileForm {
   /** 简介 */
   intro?: string;
 }
+
+/** 个人中心修改密码表单 */
+export interface UserPasswordForm {
+  /** 当前密码 */
+  oldPassword: string;
+  /** 新密码 */
+  password: string;
+  /** 确认新密码 */
+  passwordConfirmation: string;
+}

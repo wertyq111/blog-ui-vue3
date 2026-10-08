@@ -257,6 +257,63 @@
               </div>
             </div>
           </template>
+
+          <!-- 修改密码 -->
+          <template #password>
+            <form class="profile-form" @submit.prevent>
+              <div class="field field--span2">
+                <label>
+                  <span class="req">*</span>
+                  当前密码
+                </label>
+                <Input
+                  v-model="passwordForm.oldPassword"
+                  type="password"
+                  placeholder="请输入当前登录密码"
+                  :maxlength="32"
+                />
+                <span v-if="passwordErrors.oldPassword" class="field__err">
+                  {{ passwordErrors.oldPassword }}
+                </span>
+              </div>
+              <div class="field">
+                <label>
+                  <span class="req">*</span>
+                  新密码
+                </label>
+                <Input
+                  v-model="passwordForm.password"
+                  type="password"
+                  placeholder="6-32 位"
+                  :maxlength="32"
+                />
+                <span v-if="passwordErrors.password" class="field__err">
+                  {{ passwordErrors.password }}
+                </span>
+              </div>
+              <div class="field">
+                <label>
+                  <span class="req">*</span>
+                  确认新密码
+                </label>
+                <Input
+                  v-model="passwordForm.passwordConfirmation"
+                  type="password"
+                  placeholder="请再次输入新密码"
+                  :maxlength="32"
+                />
+                <span v-if="passwordErrors.passwordConfirmation" class="field__err">
+                  {{ passwordErrors.passwordConfirmation }}
+                </span>
+              </div>
+              <div class="actions">
+                <Button type="primary" :loading="passwordSaving" @click="handlePasswordSubmit">
+                  修改密码
+                </Button>
+                <Button @click="resetPasswordForm">重置</Button>
+              </div>
+            </form>
+          </template>
         </Tabs>
       </section>
     </div>
@@ -280,7 +337,7 @@ import AnimalTextarea from "@/components/AnimalTextarea/index.vue";
 import AnimalSelect from "@/components/AnimalSelect/index.vue";
 import AvatarCropModal from "./AvatarCropModal.vue";
 import { resolveAvatar } from "@/utils/avatar";
-import type { UserProfileForm } from "@/types/api";
+import type { UserProfileForm, UserPasswordForm } from "@/types/api";
 
 defineOptions({ name: "Profile" });
 
@@ -334,6 +391,7 @@ const errors = reactive<{ realname: string; nickname: string; email: string }>({
 const tabItems = [
   { key: "info", label: "基本信息" },
   { key: "account", label: "账号绑定" },
+  { key: "password", label: "修改密码" },
 ];
 
 const genderOptions = [
@@ -491,6 +549,51 @@ function handleReset() {
   errors.realname = "";
   errors.nickname = "";
   errors.email = "";
+}
+
+const createPasswordForm = (): UserPasswordForm => ({
+  oldPassword: "",
+  password: "",
+  passwordConfirmation: "",
+});
+
+const passwordForm = reactive<UserPasswordForm>(createPasswordForm());
+const passwordErrors = reactive<UserPasswordForm>(createPasswordForm());
+const passwordSaving = ref(false);
+
+function validatePassword(): boolean {
+  passwordErrors.oldPassword = passwordForm.oldPassword ? "" : "请输入当前密码";
+  if (passwordForm.password.length < 6) {
+    passwordErrors.password = "新密码至少 6 位";
+  } else if (passwordForm.password === passwordForm.oldPassword) {
+    passwordErrors.password = "新密码不能与当前密码相同";
+  } else {
+    passwordErrors.password = "";
+  }
+  passwordErrors.passwordConfirmation =
+    passwordForm.passwordConfirmation === passwordForm.password ? "" : "两次输入的新密码不一致";
+  return (
+    !passwordErrors.oldPassword && !passwordErrors.password && !passwordErrors.passwordConfirmation
+  );
+}
+
+async function handlePasswordSubmit() {
+  if (!validatePassword()) return;
+  passwordSaving.value = true;
+  try {
+    await UserAPI.updatePassword({ ...passwordForm });
+    message.success("密码修改成功");
+    resetPasswordForm();
+  } catch (e: any) {
+    message.error(e?.message || "密码修改失败");
+  } finally {
+    passwordSaving.value = false;
+  }
+}
+
+function resetPasswordForm() {
+  Object.assign(passwordForm, createPasswordForm());
+  Object.assign(passwordErrors, createPasswordForm());
 }
 
 function triggerUpload() {
