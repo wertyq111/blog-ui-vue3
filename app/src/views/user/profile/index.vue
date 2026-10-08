@@ -25,7 +25,12 @@
           </Transition>
         </div>
 
-        <div class="stage" @pointermove="handleStagePointer" @pointerleave="resetStagePointer">
+        <div
+          class="stage"
+          :class="`stage--${activeScene}`"
+          @pointermove="handleStagePointer"
+          @pointerleave="resetStagePointer"
+        >
           <!-- 当前场景的模糊铺底，填满竖版视频两侧 -->
           <Transition name="scene-fade">
             <img :key="sceneAsset" class="stage__ambient" :src="`${sceneAsset}.jpg`" alt="" />
@@ -87,82 +92,92 @@
           </div>
 
           <div class="stage__scene">
-            <div class="stage__frame">
-              <!-- 首帧图作 poster，视频缺失或加载前显示首帧 -->
-              <Transition name="scene-wipe">
-                <video
-                  :key="sceneAsset"
-                  class="stage__video"
-                  :src="`${sceneAsset}.mp4`"
-                  :poster="`${sceneAsset}.jpg`"
-                  autoplay
-                  muted
-                  loop
-                  playsinline
-                  preload="auto"
-                ></video>
-              </Transition>
-            </div>
-
-            <!-- 四个发光点：点击展开对应的能力标签，再点标签碎裂消散 -->
-            <div
-              v-for="(item, i) in heroMeta"
-              :key="item.slot"
-              ref="hudRefs"
-              class="hud"
-              :class="[`hud--${item.slot}`, { 'is-open': openHuds[item.slot] }]"
-              :style="{ '--hud-i': i }"
-            >
-              <el-tooltip
-                :content="item.label"
-                :placement="item.slot.endsWith('l') ? 'right' : 'left'"
-                :show-after="200"
-                :disabled="openHuds[item.slot]"
-              >
-                <button
-                  type="button"
-                  class="hud__dot"
-                  :aria-label="`展开${item.label}`"
-                  :aria-expanded="!!openHuds[item.slot]"
-                  @click="openHuds[item.slot] = true"
-                ></button>
-              </el-tooltip>
-              <div
-                v-if="openHuds[item.slot]"
-                class="hud__card"
-                role="button"
-                tabindex="0"
-                title="点击收起"
-                @click="closeHud(item.slot, i)"
-                @keydown.enter="closeHud(item.slot, i)"
-              >
-                <span class="hud__sheen"></span>
-                <div class="hud__ico">
-                  <svg
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    stroke-width="1.9"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    v-html="item.icon"
-                  ></svg>
-                </div>
-                <div class="hud__txt">
-                  <span class="hud__lbl">{{ item.label }}</span>
-                  <span class="hud__val" :class="{ 'is-empty': !item.value }">
-                    {{ item.value || "未填写" }}
-                  </span>
-                </div>
+            <!-- 与视频等大的定位框：星光按视频尺寸定位，又不会被视频的裁切框裁掉 -->
+            <div class="stage__viewport">
+              <div class="stage__frame">
+                <!-- 首帧图作 poster，视频缺失或加载前显示首帧 -->
+                <Transition name="scene-wipe">
+                  <video
+                    :key="sceneAsset"
+                    class="stage__video"
+                    :src="`${sceneAsset}.mp4`"
+                    :poster="`${sceneAsset}.jpg`"
+                    autoplay
+                    muted
+                    loop
+                    playsinline
+                    preload="auto"
+                  ></video>
+                </Transition>
               </div>
-              <!-- 碎片层：收起时的碎片挂在这里，飘散完自行清理 -->
-              <div class="hud__fx"></div>
+
+              <!-- 四颗闪烁的星光：点击展开对应的能力标签，再点标签碎裂消散 -->
+              <div
+                v-for="(item, i) in heroMeta"
+                :key="item.slot"
+                ref="hudRefs"
+                class="hud"
+                :class="[`hud--${item.slot}`, { 'is-open': openHuds[item.slot] }]"
+                :style="{ '--hud-i': i }"
+              >
+                <el-tooltip
+                  :content="item.label"
+                  :placement="item.slot.endsWith('l') ? 'left' : 'right'"
+                  :show-after="200"
+                  :disabled="openHuds[item.slot]"
+                >
+                  <button
+                    type="button"
+                    class="hud__star"
+                    :aria-label="`展开${item.label}`"
+                    :aria-expanded="!!openHuds[item.slot]"
+                    @click="openHuds[item.slot] = true"
+                  >
+                    <svg class="hud__star-main" viewBox="0 0 24 24" aria-hidden="true">
+                      <path :d="STAR_PATH" />
+                    </svg>
+                    <svg class="hud__star-mini" viewBox="0 0 24 24" aria-hidden="true">
+                      <path :d="STAR_PATH" />
+                    </svg>
+                  </button>
+                </el-tooltip>
+                <div
+                  v-if="openHuds[item.slot]"
+                  class="hud__card"
+                  role="button"
+                  tabindex="0"
+                  title="点击收起"
+                  @click="closeHud(item.slot, i)"
+                  @keydown.enter="closeHud(item.slot, i)"
+                >
+                  <span class="hud__sheen"></span>
+                  <div class="hud__ico">
+                    <svg
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="1.9"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      v-html="item.icon"
+                    ></svg>
+                  </div>
+                  <div class="hud__txt">
+                    <span class="hud__lbl">{{ item.label }}</span>
+                    <span class="hud__val" :class="{ 'is-empty': !item.value }">
+                      {{ item.value || "未填写" }}
+                    </span>
+                  </div>
+                </div>
+                <!-- 碎片层：收起时的碎片挂在这里，飘散完自行清理 -->
+                <div class="hud__fx"></div>
+              </div>
             </div>
           </div>
 
           <!-- 技能条：指针移到舞台下方才出现，由拼图块依次拼合 -->
           <Transition name="dock">
-            <div v-if="dockOpen && skillChips.length" class="dock">
+            <div v-if="dockOpen" class="dock">
               <span class="dock__piece dock__piece--label" :style="pieceStyle(0)">SKILLS</span>
               <span
                 v-for="(chip, i) in skillChips"
@@ -172,6 +187,15 @@
               >
                 {{ chip }}
               </span>
+              <button
+                v-if="!skillChips.length"
+                type="button"
+                class="dock__piece dock__piece--empty"
+                :style="pieceStyle(1)"
+                @click="active = 'ability'"
+              >
+                还没有技能标签，去「个人能力」添加
+              </button>
             </div>
           </Transition>
         </div>
@@ -643,9 +667,13 @@ const heroMeta = computed(() => [
   },
 ]);
 
-/** 已展开的标签；默认全部收起，只显示发光点 */
+/** 四角星的轮廓，主星和伴星共用 */
+const STAR_PATH =
+  "M12 1.5c.7 6.3 4.2 9.8 10.5 10.5-6.3.7-9.8 4.2-10.5 10.5-.7-6.3-4.2-9.8-10.5-10.5 6.3-.7 9.8-4.2 10.5-10.5z";
+
+/** 已展开的标签；默认全部收起，只显示星光 */
 const openHuds = reactive<Record<string, boolean>>({});
-/** 发光点与标签随指针做视差：各自位移幅度不同，形成前后层次 */
+/** 星光与标签随指针做视差：各自位移幅度不同，形成前后层次 */
 const HUD_DEPTH = [16, 24, 20, 28];
 const hudRefs = ref<HTMLElement[]>([]);
 const reducedMotion = usePreferredReducedMotion();
@@ -1168,11 +1196,15 @@ onMounted(loadProfile);
   min-height: 0;
 }
 /* 竖版视频保持原比例、撑满舞台高度，宽度由 9:16 推出 */
-.stage__frame {
+.stage__viewport {
   position: relative;
   height: 100%;
   max-width: 100%;
   aspect-ratio: 9 / 16;
+}
+.stage__frame {
+  position: absolute;
+  inset: 0;
   overflow: hidden;
   background: rgba(255, 255, 255, 0.3);
   box-shadow: 0 0 44px rgba(23, 50, 45, 0.28);
@@ -1380,7 +1412,7 @@ onMounted(loadProfile);
   border-top: 0;
   border-bottom-right-radius: 6px;
 }
-/* 能力标签：平时是发光点，点击后从光点处展开成卡片 */
+/* 能力标签：平时是一颗闪烁的星光，点击后从星光处展开成卡片 */
 .hud {
   position: absolute;
   z-index: 5;
@@ -1389,80 +1421,77 @@ onMounted(loadProfile);
   /* 指针视差由脚本直接写 translate，这里只负责缓动 */
   transition: translate 0.5s var(--ease-out);
 }
-.hud--tl,
-.hud--bl {
-  left: 18px;
-}
-.hud--tr,
-.hud--br {
-  right: 18px;
-}
+/* 星光落在视频两侧边缘以内，贴近人物 */
 .hud--tl {
-  top: 10%;
-}
-/* 右上角让给场景圆环 */
-.hud--tr {
-  top: 32%;
+  top: 14%;
+  left: 5%;
 }
 .hud--bl {
-  top: 58%;
+  top: 60%;
+  left: 3%;
+}
+/* 右侧两颗避开场景圆环 */
+.hud--tr {
+  top: 40%;
+  right: 4%;
 }
 .hud--br {
   top: 74%;
+  right: 6%;
 }
-.hud__dot {
+.hud__star {
   position: absolute;
   inset: 0;
   padding: 0;
   border: 0;
-  border-radius: 50%;
   background: transparent;
+  color: #fff;
   cursor: pointer;
   transition:
     opacity 0.2s ease,
     scale 0.2s ease;
 }
-.hud__dot::before,
-.hud__dot::after {
-  content: "";
+.hud__star svg {
   position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 12px;
-  height: 12px;
-  margin: -6px 0 0 -6px;
-  border-radius: 50%;
+  fill: currentColor;
+  filter: drop-shadow(0 0 3px rgba(255, 255, 255, 0.95))
+    drop-shadow(0 0 9px rgba(255, 236, 150, 0.9));
 }
-.hud__dot::before {
-  background: #fff;
-  box-shadow:
-    0 0 0 3px rgba(255, 255, 255, 0.35),
-    0 0 14px 4px rgba(214, 255, 114, 0.8);
+/* 主星和伴星周期不同，闪烁不同步 */
+.hud__star-main {
+  top: 5px;
+  left: 5px;
+  width: 24px;
+  height: 24px;
+  animation: star-twinkle 2.4s ease-in-out calc(var(--hud-i) * 0.5s) infinite;
 }
-/* 一圈圈向外扩散的光环 */
-.hud__dot::after {
-  border: 1.5px solid rgba(255, 255, 255, 0.9);
-  animation: hud-ping 2.2s var(--ease-out) calc(var(--hud-i) * 0.45s) infinite;
+.hud__star-mini {
+  top: 0;
+  right: 0;
+  width: 10px;
+  height: 10px;
+  animation: star-twinkle 1.7s ease-in-out calc(var(--hud-i) * 0.3s + 0.6s) infinite;
 }
-@keyframes hud-ping {
-  0% {
-    opacity: 0.9;
-    transform: scale(1);
-  }
-  70%,
+@keyframes star-twinkle {
+  0%,
   100% {
-    opacity: 0;
-    transform: scale(2.8);
+    opacity: 0.3;
+    transform: scale(0.5) rotate(0deg);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.1) rotate(18deg);
   }
 }
-.hud.is-open .hud__dot {
+.hud.is-open .hud__star {
   opacity: 0;
   scale: 0.6;
   pointer-events: none;
 }
+/* macOS 风格的通透玻璃：底色很淡，靠强模糊加提饱和托住文字，边缘一圈高光 */
 .hud__card {
   position: absolute;
-  /* 卡片图标的中心对准发光点的中心 */
+  /* 卡片图标的中心对准星光的中心 */
   top: -8px;
   z-index: 1;
   display: flex;
@@ -1470,34 +1499,37 @@ onMounted(loadProfile);
   gap: 10px;
   width: max-content;
   padding: 10px 14px 10px 12px;
-  border-radius: 14px;
-  background: rgba(255, 255, 255, 0.5);
-  border: 1px solid rgba(255, 255, 255, 0.6);
+  border-radius: 16px;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.3), rgba(255, 255, 255, 0.12));
+  border: 1px solid rgba(255, 255, 255, 0.5);
   box-shadow:
-    0 10px 24px rgba(23, 50, 45, 0.1),
-    inset 0 1px 0 rgba(255, 255, 255, 0.55);
-  backdrop-filter: blur(14px) saturate(140%);
+    0 14px 34px rgba(15, 35, 30, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.75),
+    inset 0 -1px 0 rgba(255, 255, 255, 0.14),
+    inset 0 0 14px rgba(255, 255, 255, 0.14);
+  backdrop-filter: blur(22px) saturate(190%) brightness(1.1);
   cursor: pointer;
   transition:
     scale 0.2s ease,
     box-shadow 0.2s ease;
-  /* 从光点处圆形展开，展开后轻微漂浮 */
+  /* 从星光处圆形展开，展开后轻微漂浮 */
   animation:
     hud-open 0.42s var(--ease-out) both,
     hud-float 6s ease-in-out 0.5s infinite;
 }
+/* 卡片朝远离人物的一侧展开：左侧的向左长，右侧的向右长 */
 .hud--tl .hud__card,
 .hud--bl .hud__card {
-  left: -10px;
-  --hud-origin: 27px 25px;
-}
-.hud--tr .hud__card,
-.hud--br .hud__card {
   right: -10px;
   flex-direction: row-reverse;
   padding: 10px 12px 10px 14px;
   text-align: right;
   --hud-origin: calc(100% - 27px) 25px;
+}
+.hud--tr .hud__card,
+.hud--br .hud__card {
+  left: -10px;
+  --hud-origin: 27px 25px;
 }
 @keyframes hud-open {
   from {
@@ -1548,12 +1580,12 @@ onMounted(loadProfile);
   width: 30px;
   height: 30px;
   border-radius: 9px;
-  background: linear-gradient(135deg, rgba(32, 201, 178, 0.3), rgba(214, 255, 114, 0.42));
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.55), rgba(255, 255, 255, 0.2));
   display: grid;
   place-items: center;
   color: var(--mint-deep);
   flex-shrink: 0;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.6);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8);
   transition: transform 0.2s ease;
   /* 只做 backwards 填充，结束后把 transform 还给 hover */
   animation: hud-pop 0.32s var(--ease-out) 0.06s backwards;
@@ -1571,7 +1603,7 @@ onMounted(loadProfile);
   font-weight: 700;
   letter-spacing: 0.14em;
   text-transform: uppercase;
-  color: #8aa39c;
+  color: rgba(23, 50, 45, 0.66);
   animation: hud-rise 0.3s var(--ease-out) 0.14s backwards;
 }
 .hud__val {
@@ -1584,8 +1616,24 @@ onMounted(loadProfile);
   animation: hud-rise 0.3s var(--ease-out) 0.2s backwards;
 }
 .hud__val.is-empty {
-  color: #8aa39c;
+  color: rgba(23, 50, 45, 0.6);
   font-weight: 500;
+}
+/* 夜晚场景背景偏暗，换成深色玻璃配浅色字 */
+.stage--night .hud__card {
+  background: linear-gradient(135deg, rgba(60, 80, 110, 0.34), rgba(20, 30, 50, 0.2));
+  border-color: rgba(255, 255, 255, 0.28);
+}
+.stage--night .hud__ico {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.28), rgba(255, 255, 255, 0.1));
+  color: #d6ff72;
+}
+.stage--night .hud__lbl,
+.stage--night .hud__val.is-empty {
+  color: rgba(255, 255, 255, 0.7);
+}
+.stage--night .hud__val {
+  color: #fff;
 }
 @keyframes hud-pop {
   from {
@@ -1606,10 +1654,13 @@ onMounted(loadProfile);
   pointer-events: none;
 }
 .hud__card--shard {
-  background: rgba(255, 255, 255, 0.82);
+  background: rgba(255, 255, 255, 0.6);
   box-shadow: none;
   backdrop-filter: none;
   animation: none;
+}
+.stage--night .hud__card--shard {
+  background: rgba(50, 68, 96, 0.72);
 }
 .hud__card--shard .hud__sheen {
   display: none;
@@ -1620,7 +1671,7 @@ onMounted(loadProfile);
   animation: none;
 }
 @media (hover: hover) and (pointer: fine) {
-  .hud__dot:hover {
+  .hud__star:hover {
     scale: 1.25;
   }
   .hud__card:hover {
@@ -1710,6 +1761,12 @@ onMounted(loadProfile);
   font-size: 10px;
   letter-spacing: 0.12em;
   line-height: 17px;
+}
+/* 没有技能时的提示块，点击跳到「个人能力」页签 */
+.dock__piece--empty {
+  border: 0;
+  font-family: inherit;
+  cursor: pointer;
 }
 @keyframes piece-in {
   from {
@@ -1928,7 +1985,7 @@ onMounted(loadProfile);
   .dock__piece {
     animation: hud-fade 0.2s ease both;
   }
-  .hud__dot::after,
+  .hud__star svg,
   .hud__sheen::before,
   .hud__ico,
   .hud__lbl,
