@@ -8,7 +8,7 @@
 
     <div class="profile-grid">
       <!-- 左：数字身份档案 -->
-      <section class="profile-hero">
+      <section ref="heroRef" class="profile-hero" :style="{ height: heroHeight }">
         <div class="hero__decor hero__decor--mint"></div>
         <div class="hero__decor hero__decor--lime"></div>
         <div class="hero__orbit hero__orbit--1"></div>
@@ -20,132 +20,191 @@
         </div>
         <div class="hero__head">
           <h2>{{ displayName }}</h2>
-          <p>{{ heroSubtitle }}</p>
+          <Transition name="copy-fade" mode="out-in">
+            <p :key="sceneAsset">{{ heroSubtitle }}</p>
+          </Transition>
         </div>
 
-        <div class="stage" :class="{ 'has-video': !videoError }">
+        <div
+          class="stage"
+          :class="`stage--${activeScene}`"
+          @pointermove="handleStagePointer"
+          @pointerleave="resetStagePointer"
+        >
+          <!-- 当前场景的模糊铺底，填满竖版视频两侧 -->
+          <Transition name="scene-fade">
+            <img :key="sceneAsset" class="stage__ambient" :src="`${sceneAsset}.jpg`" alt="" />
+          </Transition>
           <span class="stage__corner tl"></span>
           <span class="stage__corner tr"></span>
           <span class="stage__corner bl"></span>
           <span class="stage__corner br"></span>
 
-          <video
-            v-show="!videoError"
-            class="stage__video"
-            :src="personaVideo"
-            autoplay
-            muted
-            loop
-            playsinline
-            preload="auto"
-            @error="handleVideoError"
-          ></video>
+          <!-- 场景切换：四个时段沿圆环顺时针排成一天的循环，中间是跟随时间的自动模式 -->
+          <div
+            class="scene-dial"
+            :class="{ 'is-auto': sceneMode === 'auto' }"
+            role="group"
+            aria-label="场景切换"
+          >
+            <span class="scene-dial__track"></span>
+            <span class="scene-dial__orbit" :style="{ transform: `rotate(${dialAngle}deg)` }">
+              <span class="scene-dial__knob"></span>
+            </span>
+            <el-tooltip
+              v-for="scene in SCENES"
+              :key="scene.key"
+              :content="scene.label"
+              :placement="scene.placement"
+              :show-after="200"
+            >
+              <button
+                type="button"
+                class="scene-dial__btn"
+                :class="[
+                  `scene-dial__btn--${scene.key}`,
+                  { 'is-active': activeScene === scene.key },
+                ]"
+                :aria-label="scene.label"
+                :aria-pressed="activeScene === scene.key"
+                @click="sceneMode = scene.key"
+              >
+                <AnimalMenuIcon :name="`scene-${scene.key}`" :size="20" />
+              </button>
+            </el-tooltip>
+            <el-tooltip
+              content="自动 · 跟随当前时间"
+              placement="bottom"
+              :offset="46"
+              :show-after="200"
+            >
+              <button
+                type="button"
+                class="scene-dial__btn scene-dial__btn--auto"
+                :class="{ 'is-active': sceneMode === 'auto' }"
+                aria-label="自动，跟随当前时间"
+                :aria-pressed="sceneMode === 'auto'"
+                @click="sceneMode = 'auto'"
+              >
+                <AnimalMenuIcon name="scene-auto" :size="20" />
+              </button>
+            </el-tooltip>
+          </div>
 
-          <!-- chibi 占位（视频失败兜底） -->
-          <template v-if="videoError">
-            <div class="stage__floor"></div>
-            <div class="persona">
-              <div class="persona__head"></div>
-              <div class="persona__body">
-                <div class="persona__legs">
-                  <span></span>
-                  <span></span>
+          <div class="stage__scene">
+            <!-- 与视频等大的定位框：星光按视频尺寸定位，又不会被视频的裁切框裁掉 -->
+            <div ref="viewportRef" class="stage__viewport">
+              <div class="stage__frame">
+                <!-- 首帧图作 poster，视频缺失或加载前显示首帧 -->
+                <Transition name="scene-wipe">
+                  <video
+                    :key="sceneAsset"
+                    class="stage__video"
+                    :src="`${sceneAsset}.mp4`"
+                    :poster="`${sceneAsset}.jpg`"
+                    autoplay
+                    muted
+                    loop
+                    playsinline
+                    preload="auto"
+                  ></video>
+                </Transition>
+              </div>
+
+              <!-- 四颗星光像卫星一样绕着视频运行：悬停暂停，点击展开对应标签，再点标签碎裂消散 -->
+              <div
+                v-for="(item, i) in heroMeta"
+                :key="item.slot"
+                ref="hudRefs"
+                class="hud"
+                :class="{ 'is-open': openHuds[item.slot] }"
+                :style="{ '--hud-i': i }"
+                @pointerenter="satellitePaused[i] = true"
+                @pointerleave="satellitePaused[i] = false"
+              >
+                <el-tooltip
+                  :content="item.label"
+                  placement="top"
+                  :show-after="200"
+                  :disabled="!!openHuds[item.slot]"
+                >
+                  <button
+                    type="button"
+                    class="hud__star"
+                    :aria-label="`展开${item.label}`"
+                    :aria-expanded="!!openHuds[item.slot]"
+                    @click="openHud(item.slot, i)"
+                  >
+                    <!-- 远近缩放写在这一层，不和按钮自身的收起、悬停样式抢属性 -->
+                    <span class="hud__star-body">
+                      <svg class="hud__star-main" viewBox="0 0 24 24" aria-hidden="true">
+                        <path :d="STAR_PATH" />
+                      </svg>
+                      <svg class="hud__star-mini" viewBox="0 0 24 24" aria-hidden="true">
+                        <path :d="STAR_PATH" />
+                      </svg>
+                    </span>
+                  </button>
+                </el-tooltip>
+                <div
+                  v-if="openHuds[item.slot]"
+                  class="hud__card"
+                  :class="`hud__card--${openHuds[item.slot]!.side}`"
+                  :style="hudCardStyle(openHuds[item.slot]!)"
+                  role="button"
+                  tabindex="0"
+                  title="点击收起"
+                  @click="closeHud(item.slot, i)"
+                  @keydown.enter="closeHud(item.slot, i)"
+                >
+                  <span class="hud__sheen"></span>
+                  <div class="hud__ico">
+                    <svg
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="1.9"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      v-html="item.icon"
+                    ></svg>
+                  </div>
+                  <div class="hud__txt">
+                    <span class="hud__lbl">{{ item.label }}</span>
+                    <span class="hud__val" :class="{ 'is-empty': !item.value }">
+                      {{ item.value || "未填写" }}
+                    </span>
+                  </div>
                 </div>
+                <!-- 碎片层：收起时的碎片挂在这里，飘散完自行清理 -->
+                <div class="hud__fx"></div>
               </div>
             </div>
-            <span class="stage__caption">// persona offline · fallback view</span>
-          </template>
-
-          <div class="hud hud--tl">
-            <div class="hud__ico">
-              <svg
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="1.9"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-              >
-                <circle cx="12" cy="8" r="4" />
-                <path d="M4 21a8 8 0 0 1 16 0" />
-              </svg>
-            </div>
-            <div class="hud__txt">
-              <span class="hud__lbl">{{ heroMeta[0].label }}</span>
-              <span class="hud__val">{{ heroMeta[0].value }}</span>
-            </div>
-          </div>
-          <div class="hud hud--tr">
-            <div class="hud__ico">
-              <svg
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="1.9"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-              >
-                <path d="M4 21V5l8-2v18M12 9h8v12M4 21h16" />
-              </svg>
-            </div>
-            <div class="hud__txt">
-              <span class="hud__lbl">{{ heroMeta[1].label }}</span>
-              <span class="hud__val">{{ heroMeta[1].value }}</span>
-            </div>
-          </div>
-          <div class="hud hud--bl">
-            <div class="hud__ico">
-              <svg
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="1.9"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-              >
-                <path d="M12 21s7-7.5 7-13a7 7 0 1 0-14 0c0 5.5 7 13 7 13z" />
-                <circle cx="12" cy="8" r="2.4" />
-              </svg>
-            </div>
-            <div class="hud__txt">
-              <span class="hud__lbl">{{ heroMeta[2].label }}</span>
-              <span class="hud__val">{{ heroMeta[2].value }}</span>
-            </div>
-          </div>
-          <div class="hud hud--br">
-            <div class="hud__ico">
-              <svg
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="1.9"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-              >
-                <path d="M2 12l10-5 10 5-10 5z" />
-                <path d="M6 14v4c0 1 3 3 6 3s6-2 6-3v-4" />
-              </svg>
-            </div>
-            <div class="hud__txt">
-              <span class="hud__lbl">{{ heroMeta[3].label }}</span>
-              <span class="hud__val">{{ heroMeta[3].value }}</span>
-            </div>
           </div>
 
-          <div class="dock">
-            <span class="dock__label">SKILLS</span>
-            <span class="dock__divider"></span>
-            <div class="dock__chips">
+          <!-- 技能条：指针移到舞台下方才出现，由拼图块依次拼合 -->
+          <Transition name="dock">
+            <div v-if="dockOpen" class="dock">
+              <span class="dock__piece dock__piece--label" :style="pieceStyle(0)">SKILLS</span>
               <span
-                v-for="(c, i) in skillChips"
-                :key="c"
-                class="dock__chip"
-                :class="{ 'dock__chip--accent': i === 0 }"
+                v-for="(chip, i) in skillChips"
+                :key="chip"
+                class="dock__piece"
+                :style="pieceStyle(i + 1)"
               >
-                {{ c }}
+                {{ chip }}
               </span>
+              <button
+                v-if="!skillChips.length"
+                type="button"
+                class="dock__piece dock__piece--empty"
+                :style="pieceStyle(1)"
+                @click="active = 'ability'"
+              >
+                还没有技能标签，去「个人档案」添加
+              </button>
             </div>
-          </div>
+          </Transition>
         </div>
       </section>
 
@@ -244,6 +303,80 @@
             </form>
           </template>
 
+          <!-- 个人档案：左侧舞台的标签与技能条读取这里 -->
+          <template #ability>
+            <form class="profile-form" @submit.prevent>
+              <div class="field">
+                <label>角色定位</label>
+                <AnimalSelect
+                  v-model="abilityForm.position"
+                  :options="positionOptions"
+                  placeholder="请选择角色定位"
+                  clearable
+                  filterable
+                />
+              </div>
+              <div class="field">
+                <label>组织信息</label>
+                <Input
+                  v-model="abilityForm.organization"
+                  placeholder="所在公司或团队"
+                  :maxlength="100"
+                  allow-clear
+                />
+              </div>
+              <div class="field">
+                <label>所在地区</label>
+                <div class="region-picker">
+                  <AnimalSelect
+                    v-model="regionProvince"
+                    :options="provinceOptions"
+                    placeholder="省份"
+                    clearable
+                    filterable
+                  />
+                  <AnimalSelect
+                    v-model="regionCity"
+                    :options="cityOptions"
+                    :placeholder="cityOptions.length ? '城市' : '无需选择'"
+                    :disabled="!cityOptions.length"
+                    clearable
+                    filterable
+                  />
+                </div>
+              </div>
+              <div class="field">
+                <label>技术栈</label>
+                <Input
+                  v-model="abilityForm.techStack"
+                  placeholder="如：Laravel · Vue · MySQL"
+                  :maxlength="200"
+                  allow-clear
+                />
+              </div>
+              <div class="field field--span2">
+                <label>技能标签</label>
+                <Input
+                  v-model="skillsText"
+                  placeholder="用逗号或顿号分隔，如：Laravel、Vue 3、MySQL（最多 20 个）"
+                  allow-clear
+                />
+                <span v-if="abilityError" class="field__err">{{ abilityError }}</span>
+                <div v-if="skillChips.length" class="skill-preview">
+                  <AnimalTag v-for="chip in skillChips" :key="chip" type="success">
+                    {{ chip }}
+                  </AnimalTag>
+                </div>
+              </div>
+              <div class="actions">
+                <Button type="primary" :loading="abilitySaving" @click="handleAbilitySubmit">
+                  保存更改
+                </Button>
+                <Button @click="resetAbilityForm">重置</Button>
+              </div>
+            </form>
+          </template>
+
           <!-- 账号绑定 -->
           <template #account>
             <div class="account-list">
@@ -256,6 +389,63 @@
                 <a class="account-item__action">{{ item.action }}</a>
               </div>
             </div>
+          </template>
+
+          <!-- 修改密码 -->
+          <template #password>
+            <form class="profile-form" @submit.prevent>
+              <div class="field field--span2">
+                <label>
+                  <span class="req">*</span>
+                  当前密码
+                </label>
+                <Input
+                  v-model="passwordForm.oldPassword"
+                  type="password"
+                  placeholder="请输入当前登录密码"
+                  :maxlength="32"
+                />
+                <span v-if="passwordErrors.oldPassword" class="field__err">
+                  {{ passwordErrors.oldPassword }}
+                </span>
+              </div>
+              <div class="field">
+                <label>
+                  <span class="req">*</span>
+                  新密码
+                </label>
+                <Input
+                  v-model="passwordForm.password"
+                  type="password"
+                  placeholder="6-32 位"
+                  :maxlength="32"
+                />
+                <span v-if="passwordErrors.password" class="field__err">
+                  {{ passwordErrors.password }}
+                </span>
+              </div>
+              <div class="field">
+                <label>
+                  <span class="req">*</span>
+                  确认新密码
+                </label>
+                <Input
+                  v-model="passwordForm.passwordConfirmation"
+                  type="password"
+                  placeholder="请再次输入新密码"
+                  :maxlength="32"
+                />
+                <span v-if="passwordErrors.passwordConfirmation" class="field__err">
+                  {{ passwordErrors.passwordConfirmation }}
+                </span>
+              </div>
+              <div class="actions">
+                <Button type="primary" :loading="passwordSaving" @click="handlePasswordSubmit">
+                  修改密码
+                </Button>
+                <Button @click="resetPasswordForm">重置</Button>
+              </div>
+            </form>
           </template>
         </Tabs>
       </section>
@@ -273,14 +463,26 @@
 
 <script setup lang="ts">
 import { message } from "@/utils/feedback";
-import { ref, reactive, computed, onMounted, watch } from "vue";
+import { ref, reactive, computed, onMounted, onActivated, onDeactivated, watch } from "vue";
+import {
+  useElementSize,
+  useMediaQuery,
+  useNow,
+  usePreferredReducedMotion,
+  useRafFn,
+  useResizeObserver,
+} from "@vueuse/core";
 import UserAPI from "@/api/system/user";
 import { useUserStore } from "@/store/modules/user";
 import AnimalTextarea from "@/components/AnimalTextarea/index.vue";
 import AnimalSelect from "@/components/AnimalSelect/index.vue";
+import AnimalMenuIcon from "@/components/AnimalMenuIcon/index.vue";
+import AnimalTag from "@/components/AnimalTag/index.vue";
 import AvatarCropModal from "./AvatarCropModal.vue";
+import { CHINA_REGIONS } from "@/constants/china-regions";
 import { resolveAvatar } from "@/utils/avatar";
-import type { UserProfileForm } from "@/types/api";
+import { disintegrate } from "@/utils/disintegrate";
+import type { UserProfileForm, UserPasswordForm, UserAbilities } from "@/types/api";
 
 defineOptions({ name: "Profile" });
 
@@ -289,7 +491,6 @@ const loading = ref(false);
 const saving = ref(false);
 const active = ref<string>("info");
 const fileInput = ref<HTMLInputElement | null>(null);
-const videoError = ref(false);
 const cropVisible = ref(false);
 const cropFile = ref<File | null>(null);
 const avatarSaving = ref(false);
@@ -325,6 +526,82 @@ const createDefaultForm = (): ProfileForm => ({
 const form = reactive<ProfileForm>(createDefaultForm());
 let lastLoaded: ProfileForm = createDefaultForm();
 
+const MAX_SKILLS = 20;
+const MAX_SKILL_LENGTH = 30;
+const createAbilityForm = (): Omit<UserAbilities, "skills"> => ({
+  position: "",
+  organization: "",
+  region: "",
+  techStack: "",
+});
+
+const abilityForm = reactive(createAbilityForm());
+
+const positionOptions = [
+  "架构师",
+  "资深架构师",
+  "技术负责人",
+  "全栈工程师",
+  "后端工程师",
+  "前端工程师",
+  "移动端工程师",
+  "测试工程师",
+  "运维工程师",
+  "数据工程师",
+  "算法工程师",
+  "产品经理",
+  "设计师",
+  "项目经理",
+  "学生",
+  "自由职业",
+].map((name) => ({ key: name, label: name }));
+
+/** 所在地区存成「中国 · 省 · 市」一段文本，编辑时拆成省、市两个下拉；海外不带「中国」前缀 */
+const REGION_SEPARATOR = " · ";
+const REGION_OVERSEAS = "海外";
+const provinceOptions = [...CHINA_REGIONS.map((region) => region.name), REGION_OVERSEAS].map(
+  (name) => ({ key: name, label: name })
+);
+const regionParts = computed(() => abilityForm.region.split(REGION_SEPARATOR).filter(Boolean));
+const regionProvince = computed<string>({
+  get: () =>
+    regionParts.value[0] === "中国" ? regionParts.value[1] || "" : regionParts.value[0] || "",
+  set: (province) => {
+    // 换省份后原来的城市不再成立，一并清掉
+    abilityForm.region = formatRegion(province, "");
+  },
+});
+const regionCity = computed<string>({
+  get: () => (regionParts.value[0] === "中国" ? regionParts.value[2] || "" : ""),
+  set: (city) => {
+    abilityForm.region = formatRegion(regionProvince.value, city);
+  },
+});
+const cityOptions = computed(() =>
+  (CHINA_REGIONS.find((region) => region.name === regionProvince.value)?.cities || []).map(
+    (name) => ({ key: name, label: name })
+  )
+);
+
+function formatRegion(province: string, city: string): string {
+  if (!province || province === REGION_OVERSEAS) return province;
+  return ["中国", province, city].filter(Boolean).join(REGION_SEPARATOR);
+}
+/** 技能标签以一段文本编辑，保存和展示时再拆成列表 */
+const skillsText = ref("");
+let lastLoadedAbility = { ...createAbilityForm(), skillsText: "" };
+const abilitySaving = ref(false);
+const abilityError = ref("");
+
+const skillChips = computed(() => [
+  ...new Set(
+    skillsText.value
+      .split(/[,，、\n]+/)
+      .map((skill) => skill.trim())
+      .filter(Boolean)
+  ),
+]);
+
 const errors = reactive<{ realname: string; nickname: string; email: string }>({
   realname: "",
   nickname: "",
@@ -333,7 +610,9 @@ const errors = reactive<{ realname: string; nickname: string; email: string }>({
 
 const tabItems = [
   { key: "info", label: "基本信息" },
+  { key: "ability", label: "个人档案" },
   { key: "account", label: "账号绑定" },
+  { key: "password", label: "修改密码" },
 ];
 
 const genderOptions = [
@@ -348,39 +627,296 @@ const genderModel = computed<string>({
   },
 });
 
-const personaVideo = computed(() => {
-  if (Number(form.gender) === 1) return "/persona/male.mp4";
-  if (Number(form.gender) === 2) return "/persona/female.mp4";
-  return "/persona/private.mp4";
+type SceneKey = "morning" | "day" | "dusk" | "night";
+
+/** 场景及其起始小时；夜晚跨零点，覆盖 20 点到次日 5 点。angle 是圆环上的位置，顺时针为一天 */
+const SCENES: {
+  key: SceneKey;
+  label: string;
+  from: number;
+  angle: number;
+  placement: "top" | "right" | "bottom" | "left";
+}[] = [
+  {
+    key: "morning",
+    label: "清晨",
+    from: 5,
+    angle: 270,
+    placement: "left",
+  },
+  {
+    key: "day",
+    label: "白天",
+    from: 10,
+    angle: 0,
+    placement: "top",
+  },
+  {
+    key: "dusk",
+    label: "黄昏",
+    from: 17,
+    angle: 90,
+    placement: "right",
+  },
+  {
+    key: "night",
+    label: "夜晚",
+    from: 20,
+    angle: 180,
+    placement: "bottom",
+  },
+];
+const sceneOf = (key: SceneKey) => SCENES.find((scene) => scene.key === key)!;
+
+const sceneMode = ref<SceneKey | "auto">("auto");
+const now = useNow({ interval: 60_000 });
+const activeScene = computed<SceneKey>(() => {
+  if (sceneMode.value !== "auto") return sceneMode.value;
+  const hour = now.value.getHours();
+  return SCENES.findLast((scene) => hour >= scene.from)?.key ?? "night";
+});
+
+type PersonaGender = "male" | "female" | "private";
+
+/** 三个人物各有自己的四个场景，副标题按「人物 × 时段」取 */
+const SCENE_COPY: Record<PersonaGender, Record<SceneKey, string>> = {
+  male: {
+    morning: "清晨的栈桥很安静，适合等第一条鱼上钩。",
+    day: "阳光正好，带上捕虫网去草地转一圈。",
+    dusk: "夕阳落进海里，顺手捡了只海螺。",
+    night: "篝火噼啪作响，提着灯数今晚的流星。",
+  },
+  female: {
+    morning: "花园里的露水还没干，先把花浇一遍。",
+    day: "广场上彩旗飘飘，手里的气球总想飞走。",
+    dusk: "趁灯塔刚亮，把今天的落日拍下来。",
+    night: "山顶的风很轻，望远镜里全是星星。",
+  },
+  private: {
+    morning: "菜园的胡萝卜熟了，先拔一根最大的。",
+    day: "沿着小溪走进森林，篮子里装满了蘑菇。",
+    dusk: "麦田染成金色，手里的风车跟着远处的一起转。",
+    night: "祭典的灯笼都亮了，点一支仙女棒。",
+  },
+};
+
+const personaGender = computed<PersonaGender>(() => {
+  if (Number(form.gender) === 1) return "male";
+  if (Number(form.gender) === 2) return "female";
+  return "private";
+});
+const sceneAsset = computed(() => `/persona/${personaGender.value}-${activeScene.value}`);
+
+/** 圆环上的指示钮角度：累加而不是直接取目标值，保证每次都走最短弧 */
+const dialAngle = ref(sceneOf(activeScene.value).angle);
+watch(activeScene, (scene) => {
+  const delta = ((((sceneOf(scene).angle - dialAngle.value) % 360) + 540) % 360) - 180;
+  dialAngle.value += delta;
 });
 
 const displayName = computed(() => form.nickname || form.realname || form.email || "数字分身档案");
 const currentAvatar = computed(() => resolveAvatar(form.avatar, form.gender));
-const heroSubtitle = computed(() => {
-  const map: Record<number, string> = {
-    1: "男性数字形象在线，轻交互模式已启用。",
-    2: "女性数字形象在线，轻交互模式已启用。",
-    3: "保密模式已启用，当前展示默认数字形象。",
-  };
-  return map[Number(form.gender)] || map[1];
-});
+const heroSubtitle = computed(() => SCENE_COPY[personaGender.value][activeScene.value]);
 
 const heroMeta = computed(() => [
-  { label: "角色定位", value: "资深架构师" },
-  { label: "组织信息", value: "浙江网盛生意宝股份有限公司" },
-  { label: "所在地区", value: form.address || "中国 · 浙江省 · 杭州市" },
-  { label: "技术栈", value: "Laravel · Vue · MySQL · AntDesign" },
+  {
+    slot: "tl",
+    label: "角色定位",
+    value: abilityForm.position,
+    icon: '<circle cx="12" cy="8" r="4" /><path d="M4 21a8 8 0 0 1 16 0" />',
+  },
+  {
+    slot: "tr",
+    label: "组织信息",
+    value: abilityForm.organization,
+    icon: '<path d="M4 21V5l8-2v18M12 9h8v12M4 21h16" />',
+  },
+  {
+    slot: "bl",
+    label: "所在地区",
+    value: abilityForm.region,
+    icon: '<path d="M12 21s7-7.5 7-13a7 7 0 1 0-14 0c0 5.5 7 13 7 13z" /><circle cx="12" cy="8" r="2.4" />',
+  },
+  {
+    slot: "br",
+    label: "技术栈",
+    value: abilityForm.techStack,
+    icon: '<path d="M2 12l10-5 10 5-10 5z" /><path d="M6 14v4c0 1 3 3 6 3s6-2 6-3v-4" />',
+  },
 ]);
 
-const skillChips = [
-  "Digital Persona",
-  "Laravel",
-  "Vue 3",
-  "MySQL",
-  "Element Plus",
-  "AntDesign",
-  "Mint Glow",
+/** 四角星的轮廓，主星和伴星共用 */
+const STAR_PATH =
+  "M12 1.5c.7 6.3 4.2 9.8 10.5 10.5-6.3.7-9.8 4.2-10.5 10.5-.7-6.3-4.2-9.8-10.5-10.5 6.3-.7 9.8-4.2 10.5-10.5z";
+
+/** 已展开的标签及其展开方向；默认全部收起，只显示星光 */
+interface OpenHud {
+  side: "left" | "right";
+  /** 外侧放不下整张卡片时往里挪的像素 */
+  shift: number;
+}
+const openHuds = reactive<Record<string, OpenHud | undefined>>({});
+/** 星光与标签随指针做视差：各自位移幅度不同，形成前后层次 */
+const HUD_DEPTH = [16, 24, 20, 28];
+const HUD_CARD_WIDTH = 200;
+/** 卡片图标中心到卡片近侧边缘的距离，展开时图标正好落在星光上 */
+const HUD_ICON_OFFSET = 27;
+const HUD_EDGE_GAP = 10;
+/** 星光盒子（.hud）边长的一半 */
+const HUD_STAR_RADIUS = 17;
+const hudRefs = ref<HTMLElement[]>([]);
+const viewportRef = ref<HTMLElement | null>(null);
+const reducedMotion = usePreferredReducedMotion();
+let pointerFrame = 0;
+
+/**
+ * 四颗星光像卫星一样绕视频运行。
+ * 每条轨道是一个斜放的椭圆，绕到后半圈时从视频背后穿过；
+ * 椭圆的半径、倾角和高度各自按不同周期缓慢摆动，所以轨迹不会重复。
+ */
+const SATELLITES = [
+  { period: 34, direction: 1, phase: 0, height: 0.21, tilt: 0.08, sway: 0.08 },
+  { period: 41, direction: -1, phase: 1.7, height: 0.32, tilt: -0.2, sway: 0.25 },
+  { period: 29, direction: 1, phase: 3.3, height: 0.46, tilt: 0.16, sway: 0.3 },
+  { period: 47, direction: -1, phase: 4.9, height: 0.55, tilt: -0.1, sway: 0.12 },
 ];
+/** 星光的活动范围：上方留出边距，下方不进入技能条出现的区域（舞台底部约四分之一） */
+const SATELLITE_TOP = 24;
+const SATELLITE_BOTTOM_RATIO = 0.74;
+/** 每颗星各走各的时钟，悬停或展开时停表，恢复后从原地接着走 */
+const satelliteClock = SATELLITES.map(() => 0);
+const satellitePaused = SATELLITES.map(() => false);
+const { width: viewportWidth, height: viewportHeight } = useElementSize(viewportRef);
+
+function placeSatellite(index: number, slot: string) {
+  const el = hudRefs.value[index];
+  const width = viewportWidth.value;
+  const height = viewportHeight.value;
+  if (!el || !width || !height) return;
+
+  const satellite = SATELLITES[index];
+  const time = satelliteClock[index];
+  const angle = satellite.phase + satellite.direction * (time / satellite.period) * Math.PI * 2;
+  const radiusX = width / 2 + 34 + 22 * Math.sin(time / (11 + index * 2.3));
+  const radiusY = height * 0.06;
+  // 最上和最下两条轨道摆幅收小，本身就不会越界；下面的夹取只是兜住极端窗口尺寸
+  const tilt = satellite.tilt + satellite.sway * Math.sin(time / (27 + index * 5.1) + index);
+  const centerY = height * (satellite.height + 0.05 * Math.sin(time / (17 + index * 3.7)));
+
+  const alongX = radiusX * Math.cos(angle);
+  const alongY = radiusY * Math.sin(angle);
+  const x = alongX * Math.cos(tilt) - alongY * Math.sin(tilt);
+  const y = Math.min(
+    Math.max(centerY + alongX * Math.sin(tilt) + alongY * Math.cos(tilt), SATELLITE_TOP),
+    height * SATELLITE_BOTTOM_RATIO
+  );
+  // 0 在视频正后方，1 在正前方
+  const nearness = (Math.sin(angle) + 1) / 2;
+
+  el.style.transform = `translate3d(${x.toFixed(1)}px, ${y.toFixed(1)}px, 0)`;
+  // 后半圈压到视频下面，两侧模糊区里仍然看得见
+  el.style.zIndex = nearness >= 0.5 || openHuds[slot] ? "5" : "-1";
+  const body = el.querySelector<HTMLElement>(".hud__star-body");
+  if (body) {
+    body.style.scale = (0.7 + 0.3 * nearness).toFixed(3);
+    body.style.opacity = (0.5 + 0.5 * nearness).toFixed(3);
+  }
+}
+
+const { pause: pauseSatellites, resume: resumeSatellites } = useRafFn(({ delta }) => {
+  // 切回页面时 delta 可能很大，封顶避免星光瞬移
+  const seconds = reducedMotion.value === "reduce" ? 0 : Math.min(delta, 100) / 1000;
+  heroMeta.value.forEach((item, index) => {
+    if (!satellitePaused[index] && !openHuds[item.slot]) satelliteClock[index] += seconds;
+    placeSatellite(index, item.slot);
+  });
+});
+onDeactivated(pauseSatellites);
+onActivated(resumeSatellites);
+
+/** 展开标签：朝远离人物的一侧展开；那一侧放不下就往里挪，免得被舞台边缘裁掉 */
+function openHud(slot: string, index: number) {
+  const el = hudRefs.value[index];
+  const scene = viewportRef.value?.parentElement;
+  if (!el || !scene) return;
+  const sceneRect = scene.getBoundingClientRect();
+  const rect = el.getBoundingClientRect();
+  const center = rect.left + rect.width / 2 - sceneRect.left;
+  const side = center < sceneRect.width / 2 ? "left" : "right";
+  const room =
+    side === "left"
+      ? center + HUD_ICON_OFFSET - HUD_EDGE_GAP
+      : sceneRect.width - HUD_EDGE_GAP - (center - HUD_ICON_OFFSET);
+  openHuds[slot] = { side, shift: Math.max(0, Math.round(HUD_CARD_WIDTH - room)) };
+}
+
+function hudCardStyle(state: OpenHud) {
+  // 卡片近侧边缘要落在星光中心外 HUD_ICON_OFFSET 处，换算成相对星光盒子边缘的偏移
+  const offset = `${HUD_STAR_RADIUS - HUD_ICON_OFFSET - state.shift}px`;
+  const originX = HUD_ICON_OFFSET + state.shift;
+  return state.side === "left"
+    ? { right: offset, "--hud-origin": `calc(100% - ${originX}px) 25px` }
+    : { left: offset, "--hud-origin": `${originX}px 25px` };
+}
+
+/** 收起标签：先把它碎成粒子飘散，再移除本体；碎片朝展开的那一侧飘 */
+function closeHud(slot: string, index: number) {
+  const state = openHuds[slot];
+  const root = hudRefs.value[index];
+  const card = root?.querySelector<HTMLElement>(".hud__card");
+  const host = root?.querySelector<HTMLElement>(".hud__fx");
+  if (state && card && host && reducedMotion.value !== "reduce") {
+    disintegrate(card, host, {
+      shardClass: "hud__card--shard",
+      direction: state.side === "left" ? -1 : 1,
+    });
+  }
+  openHuds[slot] = undefined;
+}
+
+function applyParallax(x: number, y: number) {
+  hudRefs.value.forEach((el, i) => {
+    el.style.translate = `${(x * HUD_DEPTH[i]).toFixed(1)}px ${(y * HUD_DEPTH[i]).toFixed(1)}px`;
+  });
+}
+
+/** 技能条只在指针靠近舞台底部时出现；进出阈值错开，避免在边界上来回闪 */
+const canHover = useMediaQuery("(hover: hover) and (pointer: fine)");
+const pointerNearBottom = ref(false);
+const dockOpen = computed(() => !canHover.value || pointerNearBottom.value);
+
+function handleStagePointer(event: PointerEvent) {
+  if (event.pointerType !== "mouse") return;
+  const rect = (event.currentTarget as HTMLElement).getBoundingClientRect();
+  const x = (event.clientX - rect.left) / rect.width - 0.5;
+  const y = (event.clientY - rect.top) / rect.height - 0.5;
+  if (y > 0.28) pointerNearBottom.value = true;
+  else if (y < 0.18) pointerNearBottom.value = false;
+
+  if (reducedMotion.value === "reduce") return;
+  cancelAnimationFrame(pointerFrame);
+  pointerFrame = requestAnimationFrame(() => applyParallax(x, y));
+}
+
+function resetStagePointer() {
+  pointerNearBottom.value = false;
+  cancelAnimationFrame(pointerFrame);
+  applyParallax(0, 0);
+}
+
+/** 拼图块的散落起点：按序号取伪随机，保证每次出现的轨迹一致 */
+function pieceStyle(index: number) {
+  const noise = (salt: number) => {
+    const value = Math.sin((index + 1) * salt) * 43758.5453;
+    return value - Math.floor(value);
+  };
+  return {
+    "--piece-i": index,
+    "--piece-x": `${Math.round((noise(12.9898) - 0.5) * 140)}px`,
+    "--piece-y": `${-36 - Math.round(noise(78.233) * 56)}px`,
+    "--piece-rot": `${Math.round((noise(37.719) - 0.5) * 80)}deg`,
+  };
+}
 
 const ICON_PHONE =
   '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="7" y="2" width="10" height="20" rx="2.5"/><line x1="11" y1="18" x2="13" y2="18"/></svg>';
@@ -424,9 +960,34 @@ const accountBindings = [
   },
 ];
 
-function handleVideoError() {
-  videoError.value = true;
+/** 左侧卡片底边贴齐可视区，舞台随之填满剩余高度 */
+const HERO_BOTTOM_GAP = 44;
+const HERO_MIN_HEIGHT = 560;
+const heroRef = ref<HTMLElement | null>(null);
+const heroHeight = ref<string>();
+const isStacked = useMediaQuery("(max-width: 992px)");
+
+function fitHero() {
+  const hero = heroRef.value;
+  const scroller = hero?.closest<HTMLElement>(".app-main");
+  // keepAlive 失活时容器高度为 0，不能据此计算
+  if (!hero || !scroller || !scroller.clientHeight || isStacked.value) {
+    heroHeight.value = undefined;
+    return;
+  }
+  // 用 offsetTop 累加而不是 getBoundingClientRect，避免页面切换动画的 transform 干扰
+  let offsetTop = 0;
+  for (let el: HTMLElement | null = hero; el && el !== scroller; ) {
+    offsetTop += el.offsetTop;
+    el = el.offsetParent as HTMLElement | null;
+  }
+  const available = scroller.clientHeight - offsetTop - HERO_BOTTOM_GAP;
+  heroHeight.value = `${Math.max(available, HERO_MIN_HEIGHT)}px`;
 }
+
+useResizeObserver(() => heroRef.value?.closest<HTMLElement>(".app-main"), fitHero);
+watch(isStacked, fitHero);
+onActivated(fitHero);
 
 async function loadProfile() {
   loading.value = true;
@@ -444,9 +1005,51 @@ async function loadProfile() {
       avatar: member.avatar || data.avatar || "",
     });
     lastLoaded = { ...form };
+
+    const abilities: Partial<UserAbilities> = member.abilities || {};
+    Object.assign(abilityForm, {
+      position: abilities.position || "",
+      organization: abilities.organization || "",
+      region: abilities.region || "",
+      techStack: abilities.techStack || "",
+    });
+    skillsText.value = (abilities.skills || []).join("、");
+    lastLoadedAbility = { ...abilityForm, skillsText: skillsText.value };
   } finally {
     loading.value = false;
   }
+}
+
+function validateAbility(): boolean {
+  if (skillChips.value.length > MAX_SKILLS) {
+    abilityError.value = `技能标签最多 ${MAX_SKILLS} 个，当前 ${skillChips.value.length} 个`;
+  } else if (skillChips.value.some((skill) => skill.length > MAX_SKILL_LENGTH)) {
+    abilityError.value = `单个技能标签不能超过 ${MAX_SKILL_LENGTH} 个字符`;
+  } else {
+    abilityError.value = "";
+  }
+  return !abilityError.value;
+}
+
+async function handleAbilitySubmit() {
+  if (!validateAbility()) return;
+  abilitySaving.value = true;
+  try {
+    await UserAPI.updateProfile({ abilities: { ...abilityForm, skills: skillChips.value } });
+    message.success("保存成功");
+    lastLoadedAbility = { ...abilityForm, skillsText: skillsText.value };
+  } catch {
+    // 失败提示由请求层统一弹出
+  } finally {
+    abilitySaving.value = false;
+  }
+}
+
+function resetAbilityForm() {
+  const { skillsText: text, ...fields } = lastLoadedAbility;
+  Object.assign(abilityForm, fields);
+  skillsText.value = text;
+  abilityError.value = "";
 }
 
 function validate(): boolean {
@@ -491,6 +1094,51 @@ function handleReset() {
   errors.realname = "";
   errors.nickname = "";
   errors.email = "";
+}
+
+const createPasswordForm = (): UserPasswordForm => ({
+  oldPassword: "",
+  password: "",
+  passwordConfirmation: "",
+});
+
+const passwordForm = reactive<UserPasswordForm>(createPasswordForm());
+const passwordErrors = reactive<UserPasswordForm>(createPasswordForm());
+const passwordSaving = ref(false);
+
+function validatePassword(): boolean {
+  passwordErrors.oldPassword = passwordForm.oldPassword ? "" : "请输入当前密码";
+  if (passwordForm.password.length < 6) {
+    passwordErrors.password = "新密码至少 6 位";
+  } else if (passwordForm.password === passwordForm.oldPassword) {
+    passwordErrors.password = "新密码不能与当前密码相同";
+  } else {
+    passwordErrors.password = "";
+  }
+  passwordErrors.passwordConfirmation =
+    passwordForm.passwordConfirmation === passwordForm.password ? "" : "两次输入的新密码不一致";
+  return (
+    !passwordErrors.oldPassword && !passwordErrors.password && !passwordErrors.passwordConfirmation
+  );
+}
+
+async function handlePasswordSubmit() {
+  if (!validatePassword()) return;
+  passwordSaving.value = true;
+  try {
+    await UserAPI.updatePassword({ ...passwordForm });
+    message.success("密码修改成功");
+    resetPasswordForm();
+  } catch (e: any) {
+    message.error(e?.message || "密码修改失败");
+  } finally {
+    passwordSaving.value = false;
+  }
+}
+
+function resetPasswordForm() {
+  Object.assign(passwordForm, createPasswordForm());
+  Object.assign(passwordErrors, createPasswordForm());
 }
 
 function triggerUpload() {
@@ -559,6 +1207,8 @@ onMounted(loadProfile);
   --radius-xl: 28px;
   --radius-lg: 22px;
   --radius-md: 16px;
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
 }
 
 /* two-column grid */
@@ -583,6 +1233,9 @@ onMounted(loadProfile);
 
 /* ─── LEFT — persona hero ─── */
 .profile-hero {
+  display: flex;
+  flex-direction: column;
+  align-self: start;
   padding: 28px 28px 24px;
   background:
     linear-gradient(180deg, rgba(255, 255, 255, 0.86), rgba(243, 250, 246, 0.94)),
@@ -633,6 +1286,8 @@ onMounted(loadProfile);
   position: relative;
   z-index: 1;
   display: inline-flex;
+  /* 左卡片是纵向 flex，不收住会被拉成整行宽 */
+  align-self: flex-start;
   align-items: center;
   gap: 10px;
   padding: 8px 14px;
@@ -665,7 +1320,11 @@ onMounted(loadProfile);
 .hero__head {
   position: relative;
   z-index: 1;
-  margin-top: 20px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 6px 14px;
+  margin-top: 14px;
 }
 .hero__head h2 {
   margin: 0;
@@ -676,8 +1335,7 @@ onMounted(loadProfile);
   letter-spacing: 0.5px;
 }
 .hero__head p {
-  margin: 12px 0 0;
-  max-width: 340px;
+  margin: 0;
   color: var(--teal-mute);
   font-size: 13.5px;
   line-height: 1.7;
@@ -686,9 +1344,11 @@ onMounted(loadProfile);
 /* persona stage */
 .stage {
   position: relative;
-  margin-top: 18px;
-  aspect-ratio: 9 / 16;
-  min-height: 560px;
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-height: 0;
+  margin-top: 14px;
   border-radius: var(--radius-xl);
   overflow: hidden;
   background:
@@ -697,149 +1357,207 @@ onMounted(loadProfile);
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.78);
   isolation: isolate;
 }
-.stage::after {
-  content: "";
+.stage__ambient {
   position: absolute;
-  inset: 14px;
-  border-radius: var(--radius-lg);
-  border: 1px solid rgba(255, 255, 255, 0.55);
+  top: -8%;
+  left: -8%;
+  width: 116%;
+  height: 116%;
+  object-fit: cover;
+  filter: blur(26px) saturate(1.15);
+  opacity: 0.82;
   pointer-events: none;
+}
+.stage__scene {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex: 1;
+  justify-content: center;
+  min-height: 0;
+}
+/* 竖版视频保持原比例、撑满舞台高度，宽度由 9:16 推出 */
+.stage__viewport {
+  position: relative;
+  height: 100%;
+  max-width: 100%;
+  aspect-ratio: 9 / 16;
+}
+.stage__frame {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.3);
+  box-shadow: 0 0 44px rgba(23, 50, 45, 0.28);
 }
 .stage__video {
   position: absolute;
-  left: 14px;
-  right: 14px;
-  top: 14px;
-  bottom: 14px;
-  width: auto;
-  height: auto;
-  border-radius: var(--radius-lg);
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
   object-fit: cover;
-  z-index: 3;
+}
+/* 新场景插在旧场景之后、叠在上面淡入；旧场景保持不透明直到被移除 */
+.scene-fade-enter-active {
+  transition: opacity 0.6s ease;
+}
+.scene-fade-leave-active {
+  transition: opacity 0.6s;
+}
+.scene-fade-enter-from {
+  opacity: 0;
+}
+/* 视频换场：新画面从右上角（圆环所在方向）圆形展开 */
+.scene-wipe-enter-active {
+  transition: clip-path 0.7s var(--ease-in-out);
+}
+.scene-wipe-leave-active {
+  transition: opacity 0.7s;
+}
+.scene-wipe-enter-from {
+  clip-path: circle(0% at 100% 0%);
+}
+.scene-wipe-enter-to {
+  clip-path: circle(150% at 100% 0%);
+}
+/* 副标题随场景切换 */
+.copy-fade-enter-active,
+.copy-fade-leave-active {
+  transition:
+    opacity 0.18s ease,
+    transform 0.18s ease;
+}
+.copy-fade-enter-from {
+  opacity: 0;
+  transform: translateY(4px);
+}
+.copy-fade-leave-to {
+  opacity: 0;
+  transform: translateY(-4px);
 }
 
-/* chibi fallback */
-.stage__floor {
+/* 场景圆环 */
+.scene-dial {
   position: absolute;
-  left: 50%;
-  bottom: 120px;
-  transform: translateX(-50%);
-  width: 240px;
-  height: 26px;
+  top: 34px;
+  right: 34px;
+  z-index: 6;
+  width: 112px;
+  height: 112px;
   border-radius: 50%;
-  background: radial-gradient(ellipse at center, rgba(23, 50, 45, 0.22), transparent 70%);
-  filter: blur(2px);
-}
-.persona {
-  position: absolute;
-  left: 50%;
-  bottom: 124px;
-  transform: translateX(-50%);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  animation: persona-breath 4.2s ease-in-out infinite;
-}
-@keyframes persona-breath {
-  0%,
-  100% {
-    transform: translateX(-50%) translateY(0) scale(1);
-  }
-  50% {
-    transform: translateX(-50%) translateY(-6px) scale(1.012);
-  }
-}
-.persona__head {
-  position: relative;
-  z-index: 2;
-  width: 130px;
-  height: 140px;
-  margin-bottom: -22px;
-  border-radius: 56% 56% 50% 50% / 60% 60% 44% 44%;
-  background:
-    radial-gradient(circle at 35% 30%, rgba(255, 255, 255, 0.55), transparent 50%),
-    linear-gradient(160deg, #ffd9b8 0%, #ffba7e 100%);
+  background: rgba(255, 255, 255, 0.42);
+  border: 1px solid rgba(255, 255, 255, 0.6);
   box-shadow:
-    inset -8px -10px 18px rgba(186, 116, 60, 0.3),
-    inset 6px 8px 14px rgba(255, 255, 255, 0.5),
-    0 8px 22px rgba(186, 116, 60, 0.18);
+    0 10px 24px rgba(23, 50, 45, 0.12),
+    inset 0 1px 0 rgba(255, 255, 255, 0.55);
+  backdrop-filter: blur(14px) saturate(140%);
 }
-.persona__head::before,
-.persona__head::after {
-  content: "";
+/* 虚线轨道穿过四个时段；自动模式下缓慢转动，表示时间在走 */
+.scene-dial__track {
   position: absolute;
-  top: 60px;
-  width: 10px;
-  height: 14px;
+  inset: 18px;
+  border: 1.5px dashed rgba(255, 255, 255, 0.9);
   border-radius: 50%;
-  background: #2b1810;
-  animation: persona-blink 5s ease-in-out infinite;
+  animation: dial-cycle 24s linear infinite;
+  animation-play-state: paused;
 }
-.persona__head::before {
-  left: 36px;
+.scene-dial.is-auto .scene-dial__track {
+  animation-play-state: running;
 }
-.persona__head::after {
-  right: 36px;
-}
-@keyframes persona-blink {
-  0%,
-  92%,
-  100% {
-    transform: scaleY(1);
-  }
-  94%,
-  98% {
-    transform: scaleY(0.1);
+@keyframes dial-cycle {
+  to {
+    transform: rotate(360deg);
   }
 }
-.persona__body {
-  position: relative;
+.scene-dial__orbit {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  transition: transform 0.6s var(--ease-in-out);
+}
+.scene-dial__knob {
+  position: absolute;
+  top: 3px;
+  left: 50%;
+  width: 30px;
+  height: 30px;
+  margin-left: -15px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow:
+    0 0 0 2px var(--mint),
+    0 4px 10px rgba(23, 50, 45, 0.18);
+}
+.scene-dial__btn {
+  position: absolute;
   z-index: 1;
-  width: 170px;
-  height: 160px;
-  border-radius: 50px 50px 18px 18px / 36px 36px 18px 18px;
-  background:
-    radial-gradient(circle at 30% 20%, rgba(255, 255, 255, 0.7), transparent 60%),
-    linear-gradient(170deg, #f0f5ee 0%, #c6d3c2 100%);
-  box-shadow:
-    inset -8px -10px 20px rgba(80, 110, 80, 0.22),
-    inset 6px 8px 14px rgba(255, 255, 255, 0.7),
-    0 12px 28px rgba(40, 80, 60, 0.18);
-}
-.persona__body::after {
-  content: "";
-  position: absolute;
-  left: 50%;
-  top: 26px;
-  transform: translateX(-50%);
-  width: 36px;
-  height: 36px;
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  padding: 0;
+  border: 0;
   border-radius: 50%;
-  background: linear-gradient(135deg, var(--mint), var(--mint-deep));
-  box-shadow:
-    0 2px 6px rgba(17, 168, 155, 0.4),
-    inset 0 1px 0 rgba(255, 255, 255, 0.4);
+  background: transparent;
+  cursor: pointer;
+  transition:
+    scale 0.16s ease,
+    background-color 0.2s ease;
 }
-.persona__legs {
-  position: absolute;
-  bottom: -38px;
+.scene-dial__btn:active {
+  scale: 0.94;
+}
+.scene-dial__btn--day {
+  top: 3px;
   left: 50%;
-  transform: translateX(-50%);
-  display: flex;
-  gap: 14px;
+  margin-left: -15px;
 }
-.persona__legs span {
-  display: block;
-  width: 32px;
-  height: 50px;
-  border-radius: 14px 14px 10px 10px / 10px 10px 8px 8px;
-  background: linear-gradient(180deg, #f4ece1 0%, #ddd0bf 100%);
+.scene-dial__btn--dusk {
+  top: 50%;
+  right: 3px;
+  margin-top: -15px;
+}
+.scene-dial__btn--night {
+  bottom: 3px;
+  left: 50%;
+  margin-left: -15px;
+}
+.scene-dial__btn--morning {
+  top: 50%;
+  left: 3px;
+  margin-top: -15px;
+}
+.scene-dial__btn--auto {
+  top: 50%;
+  left: 50%;
+  width: 34px;
+  height: 34px;
+  margin: -17px 0 0 -17px;
+  background: rgba(255, 255, 255, 0.6);
+  box-shadow: 0 0 0 0 var(--mint);
+  transition:
+    scale 0.16s ease,
+    background-color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+.scene-dial__btn--auto.is-active {
+  background: #fff;
   box-shadow:
-    inset -2px -4px 8px rgba(120, 90, 60, 0.25),
-    0 6px 12px rgba(80, 50, 30, 0.15);
+    0 0 0 2px var(--mint),
+    0 4px 10px rgba(23, 50, 45, 0.18);
+}
+@media (hover: hover) and (pointer: fine) {
+  .scene-dial__btn:hover {
+    scale: 1.1;
+    background: rgba(255, 255, 255, 0.55);
+  }
+  .scene-dial__btn--auto.is-active:hover {
+    background: #fff;
+  }
 }
 
-/* corners + caption */
+/* corners */
 .stage__corner {
   position: absolute;
   width: 18px;
@@ -875,55 +1593,116 @@ onMounted(loadProfile);
   border-top: 0;
   border-bottom-right-radius: 6px;
 }
-.stage__caption {
-  position: absolute;
-  bottom: 96px;
-  left: 50%;
-  transform: translateX(-50%);
-  font-family: "JetBrains Mono", monospace;
-  font-size: 10.5px;
-  color: rgba(23, 50, 45, 0.42);
-  letter-spacing: 0.08em;
-  white-space: nowrap;
-  z-index: 4;
-}
-
-/* HUD floating labels */
+/* 档案标签：平时是绕着视频运行的星光，点击后从星光处展开成卡片 */
 .hud {
   position: absolute;
+  /* 以视频顶边中点为原点，轨道位置由脚本写 transform */
+  top: 0;
+  left: 50%;
   z-index: 5;
+  width: 34px;
+  height: 34px;
+  margin: -17px 0 0 -17px;
+  /* 指针视差由脚本直接写 translate，这里只负责缓动 */
+  transition: translate 0.5s var(--ease-out);
+  will-change: transform;
+}
+.hud__star {
+  position: absolute;
+  inset: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: #fff;
+  cursor: pointer;
+  transition:
+    opacity 0.2s ease,
+    scale 0.2s ease;
+}
+.hud__star-body {
+  position: absolute;
+  inset: 0;
+}
+.hud__star svg {
+  position: absolute;
+  fill: currentColor;
+  filter: drop-shadow(0 0 3px rgba(255, 255, 255, 0.95))
+    drop-shadow(0 0 9px rgba(255, 236, 150, 0.9));
+}
+/* 主星和伴星周期不同，闪烁不同步 */
+.hud__star-main {
+  top: 5px;
+  left: 5px;
+  width: 24px;
+  height: 24px;
+  animation: star-twinkle 2.4s ease-in-out calc(var(--hud-i) * 0.5s) infinite;
+}
+.hud__star-mini {
+  top: 0;
+  right: 0;
+  width: 10px;
+  height: 10px;
+  animation: star-twinkle 1.7s ease-in-out calc(var(--hud-i) * 0.3s + 0.6s) infinite;
+}
+@keyframes star-twinkle {
+  0%,
+  100% {
+    opacity: 0.3;
+    transform: scale(0.5) rotate(0deg);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.1) rotate(18deg);
+  }
+}
+.hud.is-open .hud__star {
+  opacity: 0;
+  scale: 0.6;
+  pointer-events: none;
+}
+/* macOS 风格的通透玻璃：底色很淡，靠强模糊加提饱和托住文字，边缘一圈高光 */
+.hud__card {
+  position: absolute;
+  /* 卡片图标的中心对准星光的中心 */
+  top: -8px;
+  z-index: 1;
   display: flex;
   align-items: flex-start;
   gap: 10px;
+  /* 宽度固定，展开前就能算出往哪边放、要不要往里挪 */
+  width: 200px;
   padding: 10px 14px 10px 12px;
-  border-radius: 14px;
-  background: rgba(255, 255, 255, 0.42);
-  border: 1px solid rgba(255, 255, 255, 0.55);
+  border-radius: 16px;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.3), rgba(255, 255, 255, 0.12));
+  border: 1px solid rgba(255, 255, 255, 0.5);
   box-shadow:
-    0 10px 24px rgba(23, 50, 45, 0.06),
-    inset 0 1px 0 rgba(255, 255, 255, 0.55);
-  backdrop-filter: blur(14px) saturate(140%);
-  animation: hud-float 6s ease-in-out infinite;
+    0 14px 34px rgba(15, 35, 30, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.75),
+    inset 0 -1px 0 rgba(255, 255, 255, 0.14),
+    inset 0 0 14px rgba(255, 255, 255, 0.14);
+  backdrop-filter: blur(22px) saturate(190%) brightness(1.1);
+  cursor: pointer;
+  transition:
+    scale 0.2s ease,
+    box-shadow 0.2s ease;
+  /* 从星光处圆形展开，展开后轻微漂浮 */
+  animation:
+    hud-open 0.42s var(--ease-out) both,
+    hud-float 6s ease-in-out 0.5s infinite;
 }
-.hud--tl {
-  top: 70px;
-  left: 22px;
-  animation-delay: -0.6s;
+/* 向左展开的卡片左右镜像：图标靠右、文字右对齐，图标仍然压在星光上 */
+.hud__card--left {
+  flex-direction: row-reverse;
+  padding: 10px 12px 10px 14px;
+  text-align: right;
 }
-.hud--tr {
-  top: 130px;
-  right: 22px;
-  animation-delay: -2.4s;
-}
-.hud--bl {
-  bottom: 180px;
-  left: 22px;
-  animation-delay: -1.8s;
-}
-.hud--br {
-  bottom: 120px;
-  right: 22px;
-  animation-delay: -3.2s;
+@keyframes hud-open {
+  from {
+    clip-path: circle(0 at var(--hud-origin));
+  }
+  to {
+    clip-path: circle(150% at var(--hud-origin));
+  }
 }
 @keyframes hud-float {
   0%,
@@ -934,22 +1713,55 @@ onMounted(loadProfile);
     transform: translateY(-4px);
   }
 }
+/* 玻璃高光：一道斜向光带间歇扫过 */
+.hud__sheen {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  overflow: hidden;
+  pointer-events: none;
+}
+.hud__sheen::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: 45%;
+  background: linear-gradient(100deg, transparent, rgba(255, 255, 255, 0.6), transparent);
+  transform: translateX(-120%);
+  animation: hud-sheen 7s var(--ease-in-out) 1.2s infinite;
+}
+@keyframes hud-sheen {
+  0%,
+  72% {
+    transform: translateX(-120%);
+  }
+  100% {
+    transform: translateX(340%);
+  }
+}
 .hud__ico {
   width: 30px;
   height: 30px;
   border-radius: 9px;
-  background: linear-gradient(135deg, rgba(32, 201, 178, 0.3), rgba(214, 255, 114, 0.42));
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.55), rgba(255, 255, 255, 0.2));
   display: grid;
   place-items: center;
   color: var(--mint-deep);
   flex-shrink: 0;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.6);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8);
+  transition: transform 0.2s ease;
+  /* 只做 backwards 填充，结束后把 transform 还给 hover */
+  animation: hud-pop 0.32s var(--ease-out) 0.06s backwards;
 }
 .hud__ico svg {
   width: 16px;
   height: 16px;
 }
 .hud__txt {
+  flex: 1;
+  min-width: 0;
   line-height: 1.35;
 }
 .hud__lbl {
@@ -958,7 +1770,8 @@ onMounted(loadProfile);
   font-weight: 700;
   letter-spacing: 0.14em;
   text-transform: uppercase;
-  color: #8aa39c;
+  color: rgba(23, 50, 45, 0.66);
+  animation: hud-rise 0.3s var(--ease-out) 0.14s backwards;
 }
 .hud__val {
   display: block;
@@ -966,71 +1779,173 @@ onMounted(loadProfile);
   font-size: 12.5px;
   font-weight: 700;
   color: var(--teal-ink);
-  max-width: 150px;
+  animation: hud-rise 0.3s var(--ease-out) 0.2s backwards;
+}
+.hud__val.is-empty {
+  color: rgba(23, 50, 45, 0.6);
+  font-weight: 500;
+}
+/* 夜晚场景背景偏暗，换成深色玻璃配浅色字 */
+.stage--night .hud__card {
+  background: linear-gradient(135deg, rgba(60, 80, 110, 0.34), rgba(20, 30, 50, 0.2));
+  border-color: rgba(255, 255, 255, 0.28);
+}
+.stage--night .hud__ico {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.28), rgba(255, 255, 255, 0.1));
+  color: #d6ff72;
+}
+.stage--night .hud__lbl,
+.stage--night .hud__val.is-empty {
+  color: rgba(255, 255, 255, 0.7);
+}
+.stage--night .hud__val {
+  color: #fff;
+}
+@keyframes hud-pop {
+  from {
+    opacity: 0;
+    transform: scale(0.6);
+  }
+}
+@keyframes hud-rise {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+}
+/* 碎片层与碎片：碎片是卡片的克隆，关掉动画和毛玻璃，只留外形和内容 */
+.hud__fx {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+.hud__card--shard {
+  background: rgba(255, 255, 255, 0.6);
+  box-shadow: none;
+  backdrop-filter: none;
+  animation: none;
+}
+.stage--night .hud__card--shard {
+  background: rgba(50, 68, 96, 0.72);
+}
+.hud__card--shard .hud__sheen {
+  display: none;
+}
+.hud__card--shard .hud__ico,
+.hud__card--shard .hud__lbl,
+.hud__card--shard .hud__val {
+  animation: none;
+}
+@media (hover: hover) and (pointer: fine) {
+  .hud__star:hover {
+    scale: 1.25;
+  }
+  .hud__card:hover {
+    scale: 1.04;
+    box-shadow:
+      0 16px 32px rgba(23, 50, 45, 0.16),
+      inset 0 1px 0 rgba(255, 255, 255, 0.55);
+  }
+  .hud__card:hover .hud__ico {
+    transform: rotate(-8deg) scale(1.08);
+  }
 }
 
-/* skill dock */
+/* 技能条：一排互相咬合的拼图块，出现时从散落处飞来拼合 */
 .dock {
+  --knob: 6px;
   position: absolute;
-  left: 22px;
   right: 22px;
   bottom: 22px;
-  z-index: 5;
+  left: 22px;
+  z-index: 6;
   display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 12px 14px;
-  background: rgba(23, 50, 45, 0.45);
+  flex-wrap: wrap;
+  row-gap: 6px;
+  justify-content: center;
+  /* 左侧多留一个凸点的宽度，抵消拼图块的负边距 */
+  padding: 10px 14px 10px calc(14px + var(--knob) + 1px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
   border-radius: 16px;
-  backdrop-filter: blur(14px) saturate(140%);
+  background: rgba(23, 50, 45, 0.45);
   box-shadow:
     0 12px 26px rgba(23, 50, 45, 0.12),
     inset 0 1px 0 rgba(255, 255, 255, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  overflow: hidden;
+  backdrop-filter: blur(14px) saturate(140%);
 }
-.dock__label {
-  flex-shrink: 0;
-  font-family: "JetBrains Mono", monospace;
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: #d6ff72;
+.dock-enter-active {
+  transition: opacity 0.2s ease;
 }
-.dock__divider {
-  width: 1px;
-  height: 22px;
-  background: rgba(214, 255, 114, 0.18);
-  flex-shrink: 0;
+.dock-leave-active {
+  transition:
+    opacity 0.18s ease,
+    transform 0.18s ease;
 }
-.dock__chips {
-  display: flex;
-  flex-wrap: nowrap;
-  gap: 8px;
-  overflow-x: auto;
-  scrollbar-width: none;
-  flex: 1;
-  min-width: 0;
+.dock-enter-from {
+  opacity: 0;
 }
-.dock__chips::-webkit-scrollbar {
-  display: none;
+.dock-leave-to {
+  opacity: 0;
+  transform: translateY(8px);
 }
-.dock__chip {
-  flex-shrink: 0;
-  padding: 6px 12px;
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.14);
+/* 每块右侧一个圆凸点、左侧一个圆凹口；相邻两块重叠一个凸点的宽度，凸点正好嵌进凹口 */
+.dock__piece {
+  margin-left: calc(-1 * var(--knob) - 1px);
+  padding: 7px calc(11px + var(--knob)) 7px calc(10px + var(--knob));
+  background: rgba(255, 255, 255, 0.14);
   color: #e6f7f0;
   font-size: 11.5px;
   font-weight: 700;
   white-space: nowrap;
+  mask:
+    radial-gradient(circle var(--knob) at 0 50%, #000 calc(100% - 0.5px), transparent),
+    radial-gradient(
+      circle var(--knob) at calc(100% - var(--knob) - 1px) 50%,
+      #000 calc(100% - 0.5px),
+      transparent
+    ),
+    linear-gradient(#000 0 0) left / calc(100% - var(--knob) - 1px) 100% no-repeat;
+  mask-composite: exclude, add;
+  animation: piece-in 0.56s var(--ease-out) calc(var(--piece-i) * 55ms + 0.08s) both;
 }
-.dock__chip--accent {
+.dock__piece:nth-child(odd) {
+  background: rgba(255, 255, 255, 0.24);
+}
+/* 第一块左边没有邻居，不开凹口 */
+.dock__piece.dock__piece--label {
+  mask:
+    radial-gradient(
+      circle var(--knob) at calc(100% - var(--knob) - 1px) 50%,
+      #000 calc(100% - 0.5px),
+      transparent
+    ),
+    linear-gradient(#000 0 0) left / calc(100% - var(--knob) - 1px) 100% no-repeat;
+  mask-composite: add;
   background: linear-gradient(135deg, rgba(214, 255, 114, 0.95), rgba(196, 240, 136, 0.95));
   color: #1a3508;
-  border-color: transparent;
+  font-family: "JetBrains Mono", monospace;
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  line-height: 17px;
+}
+/* 没有技能时的提示块，点击跳到「个人档案」页签 */
+.dock__piece--empty {
+  border: 0;
+  font-family: inherit;
+  cursor: pointer;
+}
+@keyframes piece-in {
+  from {
+    opacity: 0;
+    transform: translate(var(--piece-x), var(--piece-y)) rotate(var(--piece-rot)) scale(0.9);
+  }
+  60% {
+    opacity: 1;
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
 }
 
 /* ─── RIGHT — editor panel ─── */
@@ -1170,6 +2085,20 @@ onMounted(loadProfile);
   gap: 12px;
 }
 
+/* 个人档案：所在地区的省、市两个下拉并排 */
+.region-picker {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+/* 个人档案：技能标签预览 */
+.skill-preview {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
 /* account bindings */
 .account-list {
   display: grid;
@@ -1220,13 +2149,54 @@ onMounted(loadProfile);
   white-space: nowrap;
 }
 
+/* 减少动态效果：保留淡入，去掉位移与循环动画 */
+@media (prefers-reduced-motion: reduce) {
+  .hud {
+    transition: none;
+  }
+  .hud__card,
+  .dock__piece {
+    animation: hud-fade 0.2s ease both;
+  }
+  .hud__star svg,
+  .hud__sheen::before,
+  .hud__ico,
+  .hud__lbl,
+  .hud__val,
+  .scene-dial__track {
+    animation: none;
+  }
+  .scene-dial__orbit {
+    transition: none;
+  }
+  .scene-wipe-enter-active {
+    transition: opacity 0.2s ease;
+  }
+  .scene-wipe-enter-from {
+    clip-path: none;
+    opacity: 0;
+  }
+  .scene-wipe-enter-to {
+    clip-path: none;
+  }
+}
+@keyframes hud-fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
 /* responsive */
 @media (max-width: 992px) {
   .profile-grid {
     grid-template-columns: 1fr;
   }
   .stage {
-    min-height: 440px;
+    flex: none;
+    height: min(72vh, 640px);
   }
 }
 @media (max-width: 768px) {

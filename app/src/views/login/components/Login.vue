@@ -149,7 +149,7 @@ const isCapsLock = ref(false);
 const captchaBase64 = ref();
 const rememberMe = AuthStorage.getRememberMe();
 const loginFormData = reactive<LoginRequest>({
-  username: "zxf",
+  username: "admin",
   password: "123456",
   captcha_key: "",
   captcha: "",

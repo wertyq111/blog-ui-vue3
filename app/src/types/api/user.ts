@@ -114,4 +114,30 @@ export interface UserProfileForm {
   address?: string;
   /** 简介 */
   intro?: string;
+  /** 个人能力 */
+  abilities?: UserAbilities;
+}
+
+/** 个人中心个人能力（左侧形象舞台的标签与技能条读取这里） */
+export interface UserAbilities {
+  /** 角色定位 */
+  position: string;
+  /** 组织信息 */
+  organization: string;
+  /** 所在地区 */
+  region: string;
+  /** 技术栈 */
+  techStack: string;
+  /** 技能标签 */
+  skills: string[];
+}
+
+/** 个人中心修改密码表单 */
+export interface UserPasswordForm {
+  /** 当前密码 */
+  oldPassword: string;
+  /** 新密码 */
+  password: string;
+  /** 确认新密码 */
+  passwordConfirmation: string;
 }

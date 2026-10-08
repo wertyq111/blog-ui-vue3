@@ -6,6 +6,7 @@ import type {
   UserQueryParams,
   UserItem,
   UserProfileForm,
+  UserPasswordForm,
   OptionItem,
   UnboundUser,
 } from "@/types/api";
@@ -158,6 +159,16 @@ const UserAPI = {
       method: "post",
       data,
     });
+  },
+
+  /** 修改当前用户密码 */
+  updatePassword(data: UserPasswordForm) {
+    return request({
+      url: "/user/password",
+      method: "post",
+      data,
+      __silent: true,
+    } as any);
   },
 
   /** 上传并裁剪当前用户头像 */
