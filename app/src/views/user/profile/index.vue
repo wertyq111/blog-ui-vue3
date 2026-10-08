@@ -21,7 +21,7 @@
         <div class="hero__head">
           <h2>{{ displayName }}</h2>
           <Transition name="copy-fade" mode="out-in">
-            <p :key="activeScene">{{ heroSubtitle }}</p>
+            <p :key="sceneAsset">{{ heroSubtitle }}</p>
           </Transition>
         </div>
 
@@ -421,7 +421,6 @@ const SCENES: {
   from: number;
   angle: number;
   placement: "top" | "right" | "bottom" | "left";
-  copy: string;
 }[] = [
   {
     key: "morning",
@@ -429,7 +428,6 @@ const SCENES: {
     from: 5,
     angle: 270,
     placement: "left",
-    copy: "清晨的栈桥很安静，适合等第一条鱼上钩。",
   },
   {
     key: "day",
@@ -437,7 +435,6 @@ const SCENES: {
     from: 10,
     angle: 0,
     placement: "top",
-    copy: "阳光正好，带上捕虫网去草地转一圈。",
   },
   {
     key: "dusk",
@@ -445,7 +442,6 @@ const SCENES: {
     from: 17,
     angle: 90,
     placement: "right",
-    copy: "夕阳落进海里，顺手捡了只海螺。",
   },
   {
     key: "night",
@@ -453,7 +449,6 @@ const SCENES: {
     from: 20,
     angle: 180,
     placement: "bottom",
-    copy: "篝火噼啪作响，提着灯数今晚的流星。",
   },
 ];
 const sceneOf = (key: SceneKey) => SCENES.find((scene) => scene.key === key)!;
@@ -466,7 +461,31 @@ const activeScene = computed<SceneKey>(() => {
   return SCENES.findLast((scene) => hour >= scene.from)?.key ?? "night";
 });
 
-const personaGender = computed(() => {
+type PersonaGender = "male" | "female" | "private";
+
+/** 三个人物各有自己的四个场景，副标题按「人物 × 时段」取 */
+const SCENE_COPY: Record<PersonaGender, Record<SceneKey, string>> = {
+  male: {
+    morning: "清晨的栈桥很安静，适合等第一条鱼上钩。",
+    day: "阳光正好，带上捕虫网去草地转一圈。",
+    dusk: "夕阳落进海里，顺手捡了只海螺。",
+    night: "篝火噼啪作响，提着灯数今晚的流星。",
+  },
+  female: {
+    morning: "花园里的露水还没干，先把花浇一遍。",
+    day: "广场上彩旗飘飘，手里的气球总想飞走。",
+    dusk: "趁灯塔刚亮，把今天的落日拍下来。",
+    night: "山顶的风很轻，望远镜里全是星星。",
+  },
+  private: {
+    morning: "菜园的胡萝卜熟了，先拔一根最大的。",
+    day: "沿着小溪走进森林，篮子里装满了蘑菇。",
+    dusk: "麦田染成金色，手里的风车跟着远处的一起转。",
+    night: "祭典的灯笼都亮了，点一支仙女棒。",
+  },
+};
+
+const personaGender = computed<PersonaGender>(() => {
   if (Number(form.gender) === 1) return "male";
   if (Number(form.gender) === 2) return "female";
   return "private";
@@ -482,7 +501,7 @@ watch(activeScene, (scene) => {
 
 const displayName = computed(() => form.nickname || form.realname || form.email || "数字分身档案");
 const currentAvatar = computed(() => resolveAvatar(form.avatar, form.gender));
-const heroSubtitle = computed(() => sceneOf(activeScene.value).copy);
+const heroSubtitle = computed(() => SCENE_COPY[personaGender.value][activeScene.value]);
 
 const heroMeta = computed(() => [
   {
