@@ -775,11 +775,14 @@ let pointerFrame = 0;
  * 椭圆的半径、倾角和高度各自按不同周期缓慢摆动，所以轨迹不会重复。
  */
 const SATELLITES = [
-  { period: 34, direction: 1, phase: 0, height: 0.22, tilt: 0.24 },
-  { period: 41, direction: -1, phase: 1.7, height: 0.42, tilt: -0.2 },
-  { period: 29, direction: 1, phase: 3.3, height: 0.62, tilt: 0.16 },
-  { period: 47, direction: -1, phase: 4.9, height: 0.8, tilt: -0.28 },
+  { period: 34, direction: 1, phase: 0, height: 0.21, tilt: 0.08, sway: 0.08 },
+  { period: 41, direction: -1, phase: 1.7, height: 0.32, tilt: -0.2, sway: 0.25 },
+  { period: 29, direction: 1, phase: 3.3, height: 0.46, tilt: 0.16, sway: 0.3 },
+  { period: 47, direction: -1, phase: 4.9, height: 0.55, tilt: -0.1, sway: 0.12 },
 ];
+/** 星光的活动范围：上方留出边距，下方不进入技能条出现的区域（舞台底部约四分之一） */
+const SATELLITE_TOP = 24;
+const SATELLITE_BOTTOM_RATIO = 0.74;
 /** 每颗星各走各的时钟，悬停或展开时停表，恢复后从原地接着走 */
 const satelliteClock = SATELLITES.map(() => 0);
 const satellitePaused = SATELLITES.map(() => false);
@@ -796,17 +799,21 @@ function placeSatellite(index: number, slot: string) {
   const angle = satellite.phase + satellite.direction * (time / satellite.period) * Math.PI * 2;
   const radiusX = width / 2 + 34 + 22 * Math.sin(time / (11 + index * 2.3));
   const radiusY = height * 0.06;
-  const tilt = satellite.tilt + 0.3 * Math.sin(time / (27 + index * 5.1) + index);
+  // 最上和最下两条轨道摆幅收小，本身就不会越界；下面的夹取只是兜住极端窗口尺寸
+  const tilt = satellite.tilt + satellite.sway * Math.sin(time / (27 + index * 5.1) + index);
   const centerY = height * (satellite.height + 0.05 * Math.sin(time / (17 + index * 3.7)));
 
   const alongX = radiusX * Math.cos(angle);
   const alongY = radiusY * Math.sin(angle);
   const x = alongX * Math.cos(tilt) - alongY * Math.sin(tilt);
-  const y = centerY + alongX * Math.sin(tilt) + alongY * Math.cos(tilt);
+  const y = Math.min(
+    Math.max(centerY + alongX * Math.sin(tilt) + alongY * Math.cos(tilt), SATELLITE_TOP),
+    height * SATELLITE_BOTTOM_RATIO
+  );
   // 0 在视频正后方，1 在正前方
   const nearness = (Math.sin(angle) + 1) / 2;
 
-  el.style.transform = `translate3d(${x.toFixed(1)}px, ${Math.min(Math.max(y, 24), height - 58).toFixed(1)}px, 0)`;
+  el.style.transform = `translate3d(${x.toFixed(1)}px, ${y.toFixed(1)}px, 0)`;
   // 后半圈压到视频下面，两侧模糊区里仍然看得见
   el.style.zIndex = nearness >= 0.5 || openHuds[slot] ? "5" : "-1";
   const body = el.querySelector<HTMLElement>(".hud__star-body");
