@@ -40,100 +40,63 @@
           <p>{{ heroSubtitle }}</p>
         </div>
 
-        <div class="stage">
+        <div class="stage" @pointermove="handleStagePointer" @pointerleave="resetStagePointer">
+          <!-- 当前场景的模糊铺底，填满竖版视频两侧 -->
+          <Transition name="scene-fade">
+            <img :key="sceneAsset" class="stage__ambient" :src="`${sceneAsset}.jpg`" alt="" />
+          </Transition>
           <span class="stage__corner tl"></span>
           <span class="stage__corner tr"></span>
           <span class="stage__corner bl"></span>
           <span class="stage__corner br"></span>
 
-          <!-- 首帧图作 poster，视频缺失或加载前显示首帧 -->
-          <Transition name="scene-fade">
-            <video
-              :key="sceneAsset"
-              class="stage__video"
-              :src="`${sceneAsset}.mp4`"
-              :poster="`${sceneAsset}.jpg`"
-              autoplay
-              muted
-              loop
-              playsinline
-              preload="auto"
-            ></video>
-          </Transition>
+          <div class="stage__scene">
+            <div class="stage__frame">
+              <!-- 首帧图作 poster，视频缺失或加载前显示首帧 -->
+              <Transition name="scene-fade">
+                <video
+                  :key="sceneAsset"
+                  class="stage__video"
+                  :src="`${sceneAsset}.mp4`"
+                  :poster="`${sceneAsset}.jpg`"
+                  autoplay
+                  muted
+                  loop
+                  playsinline
+                  preload="auto"
+                ></video>
+              </Transition>
+            </div>
 
-          <div class="hud hud--tl">
-            <div class="hud__ico">
-              <svg
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="1.9"
-                stroke-linecap="round"
-                stroke-linejoin="round"
+            <!-- 换场景时整层重建，标签重新入场 -->
+            <div :key="sceneAsset" class="hud-layer">
+              <div
+                v-for="(item, i) in heroMeta"
+                :key="item.label"
+                ref="hudRefs"
+                class="hud"
+                :class="`hud--${item.slot}`"
+                :style="{ '--hud-i': i }"
               >
-                <circle cx="12" cy="8" r="4" />
-                <path d="M4 21a8 8 0 0 1 16 0" />
-              </svg>
-            </div>
-            <div class="hud__txt">
-              <span class="hud__lbl">{{ heroMeta[0].label }}</span>
-              <span class="hud__val">{{ heroMeta[0].value }}</span>
-            </div>
-          </div>
-          <div class="hud hud--tr">
-            <div class="hud__ico">
-              <svg
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="1.9"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-              >
-                <path d="M4 21V5l8-2v18M12 9h8v12M4 21h16" />
-              </svg>
-            </div>
-            <div class="hud__txt">
-              <span class="hud__lbl">{{ heroMeta[1].label }}</span>
-              <span class="hud__val">{{ heroMeta[1].value }}</span>
-            </div>
-          </div>
-          <div class="hud hud--bl">
-            <div class="hud__ico">
-              <svg
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="1.9"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-              >
-                <path d="M12 21s7-7.5 7-13a7 7 0 1 0-14 0c0 5.5 7 13 7 13z" />
-                <circle cx="12" cy="8" r="2.4" />
-              </svg>
-            </div>
-            <div class="hud__txt">
-              <span class="hud__lbl">{{ heroMeta[2].label }}</span>
-              <span class="hud__val">{{ heroMeta[2].value }}</span>
-            </div>
-          </div>
-          <div class="hud hud--br">
-            <div class="hud__ico">
-              <svg
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="1.9"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-              >
-                <path d="M2 12l10-5 10 5-10 5z" />
-                <path d="M6 14v4c0 1 3 3 6 3s6-2 6-3v-4" />
-              </svg>
-            </div>
-            <div class="hud__txt">
-              <span class="hud__lbl">{{ heroMeta[3].label }}</span>
-              <span class="hud__val">{{ heroMeta[3].value }}</span>
+                <div class="hud__card">
+                  <span class="hud__sheen"></span>
+                  <div class="hud__ico">
+                    <svg
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="1.9"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      v-html="item.icon"
+                    ></svg>
+                  </div>
+                  <div class="hud__txt">
+                    <span class="hud__lbl">{{ item.label }}</span>
+                    <span class="hud__val">{{ item.value }}</span>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
 
@@ -146,6 +109,7 @@
                 :key="c"
                 class="dock__chip"
                 :class="{ 'dock__chip--accent': i === 0 }"
+                :style="{ '--chip-i': i }"
               >
                 {{ c }}
               </span>
@@ -336,7 +300,7 @@
 <script setup lang="ts">
 import { message } from "@/utils/feedback";
 import { ref, reactive, computed, onMounted, onActivated, watch } from "vue";
-import { useMediaQuery, useNow, useResizeObserver } from "@vueuse/core";
+import { useMediaQuery, useNow, usePreferredReducedMotion, useResizeObserver } from "@vueuse/core";
 import UserAPI from "@/api/system/user";
 import { useUserStore } from "@/store/modules/user";
 import AnimalTextarea from "@/components/AnimalTextarea/index.vue";
@@ -452,11 +416,57 @@ const heroSubtitle = computed(() => {
 });
 
 const heroMeta = computed(() => [
-  { label: "角色定位", value: "资深架构师" },
-  { label: "组织信息", value: "浙江网盛生意宝股份有限公司" },
-  { label: "所在地区", value: form.address || "中国 · 浙江省 · 杭州市" },
-  { label: "技术栈", value: "Laravel · Vue · MySQL · AntDesign" },
+  {
+    slot: "tl",
+    label: "角色定位",
+    value: "资深架构师",
+    icon: '<circle cx="12" cy="8" r="4" /><path d="M4 21a8 8 0 0 1 16 0" />',
+  },
+  {
+    slot: "tr",
+    label: "组织信息",
+    value: "浙江网盛生意宝股份有限公司",
+    icon: '<path d="M4 21V5l8-2v18M12 9h8v12M4 21h16" />',
+  },
+  {
+    slot: "bl",
+    label: "所在地区",
+    value: form.address || "中国 · 浙江省 · 杭州市",
+    icon: '<path d="M12 21s7-7.5 7-13a7 7 0 1 0-14 0c0 5.5 7 13 7 13z" /><circle cx="12" cy="8" r="2.4" />',
+  },
+  {
+    slot: "br",
+    label: "技术栈",
+    value: "Laravel · Vue · MySQL · AntDesign",
+    icon: '<path d="M2 12l10-5 10 5-10 5z" /><path d="M6 14v4c0 1 3 3 6 3s6-2 6-3v-4" />',
+  },
 ]);
+
+/** 标签随指针做视差：各标签位移幅度不同，形成前后层次 */
+const HUD_DEPTH = [16, 24, 20, 28];
+const hudRefs = ref<HTMLElement[]>([]);
+const reducedMotion = usePreferredReducedMotion();
+let pointerFrame = 0;
+
+function applyParallax(x: number, y: number) {
+  hudRefs.value.forEach((el, i) => {
+    el.style.translate = `${(x * HUD_DEPTH[i]).toFixed(1)}px ${(y * HUD_DEPTH[i]).toFixed(1)}px`;
+  });
+}
+
+function handleStagePointer(event: PointerEvent) {
+  if (event.pointerType !== "mouse" || reducedMotion.value === "reduce") return;
+  const rect = (event.currentTarget as HTMLElement).getBoundingClientRect();
+  const x = (event.clientX - rect.left) / rect.width - 0.5;
+  const y = (event.clientY - rect.top) / rect.height - 0.5;
+  cancelAnimationFrame(pointerFrame);
+  pointerFrame = requestAnimationFrame(() => applyParallax(x, y));
+}
+
+function resetStagePointer() {
+  cancelAnimationFrame(pointerFrame);
+  applyParallax(0, 0);
+}
 
 const skillChips = [
   "Digital Persona",
@@ -512,7 +522,7 @@ const accountBindings = [
 
 /** 左侧卡片底边贴齐可视区，舞台随之填满剩余高度 */
 const HERO_BOTTOM_GAP = 44;
-const HERO_MIN_HEIGHT = 520;
+const HERO_MIN_HEIGHT = 560;
 const heroRef = ref<HTMLElement | null>(null);
 const heroHeight = ref<string>();
 const isStacked = useMediaQuery("(max-width: 992px)");
@@ -715,6 +725,8 @@ onMounted(loadProfile);
   --radius-xl: 28px;
   --radius-lg: 22px;
   --radius-md: 16px;
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
 }
 
 /* two-column grid */
@@ -873,7 +885,11 @@ onMounted(loadProfile);
 .hero__head {
   position: relative;
   z-index: 1;
-  margin-top: 20px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 6px 14px;
+  margin-top: 14px;
 }
 .hero__head h2 {
   margin: 0;
@@ -884,8 +900,7 @@ onMounted(loadProfile);
   letter-spacing: 0.5px;
 }
 .hero__head p {
-  margin: 12px 0 0;
-  max-width: 340px;
+  margin: 0;
   color: var(--teal-mute);
   font-size: 13.5px;
   line-height: 1.7;
@@ -894,9 +909,11 @@ onMounted(loadProfile);
 /* persona stage */
 .stage {
   position: relative;
+  display: flex;
   flex: 1;
+  flex-direction: column;
   min-height: 0;
-  margin-top: 18px;
+  margin-top: 14px;
   border-radius: var(--radius-xl);
   overflow: hidden;
   background:
@@ -905,32 +922,52 @@ onMounted(loadProfile);
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.78);
   isolation: isolate;
 }
-.stage::after {
-  content: "";
+.stage__ambient {
   position: absolute;
-  inset: 14px;
-  border-radius: var(--radius-lg);
-  border: 1px solid rgba(255, 255, 255, 0.55);
+  top: -8%;
+  left: -8%;
+  width: 116%;
+  height: 116%;
+  object-fit: cover;
+  filter: blur(26px) saturate(1.15);
+  opacity: 0.82;
   pointer-events: none;
+}
+.stage__scene {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex: 1;
+  justify-content: center;
+  min-height: 0;
+  padding: 22px 22px 12px;
+}
+/* 竖版视频按可用高度完整显示，宽度由 9:16 推出 */
+.stage__frame {
+  position: relative;
+  height: 100%;
+  max-width: 100%;
+  aspect-ratio: 9 / 16;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.3);
+  box-shadow:
+    0 18px 40px rgba(23, 50, 45, 0.22),
+    0 0 0 1px rgba(255, 255, 255, 0.55);
 }
 .stage__video {
   position: absolute;
-  left: 14px;
-  right: 14px;
-  top: 14px;
-  bottom: 14px;
-  width: auto;
-  height: auto;
-  border-radius: var(--radius-lg);
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
   object-fit: cover;
-  z-index: 3;
 }
-/* 新场景叠在旧场景之上淡入，旧场景保持不透明直到被移除 */
+/* 新场景插在旧场景之后、叠在上面淡入；旧场景保持不透明直到被移除 */
 .scene-fade-enter-active {
   transition: opacity 0.6s ease;
 }
 .scene-fade-leave-active {
-  z-index: 2;
   transition: opacity 0.6s;
 }
 .scene-fade-enter-from {
@@ -977,38 +1014,61 @@ onMounted(loadProfile);
 .hud {
   position: absolute;
   z-index: 5;
+  /* 指针视差由脚本直接写 translate，这里只负责缓动 */
+  transition: translate 0.5s var(--ease-out);
+}
+.hud--tl,
+.hud--bl {
+  left: 18px;
+  --hud-from: -28px;
+}
+.hud--tr,
+.hud--br {
+  right: 18px;
+  --hud-from: 28px;
+}
+.hud--tl {
+  top: 8%;
+}
+.hud--tr {
+  top: 24%;
+}
+.hud--bl {
+  top: 56%;
+}
+.hud--br {
+  top: 72%;
+}
+.hud__card {
+  position: relative;
   display: flex;
   align-items: flex-start;
   gap: 10px;
   padding: 10px 14px 10px 12px;
   border-radius: 14px;
-  background: rgba(255, 255, 255, 0.42);
-  border: 1px solid rgba(255, 255, 255, 0.55);
+  background: rgba(255, 255, 255, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.6);
   box-shadow:
-    0 10px 24px rgba(23, 50, 45, 0.06),
+    0 10px 24px rgba(23, 50, 45, 0.1),
     inset 0 1px 0 rgba(255, 255, 255, 0.55);
   backdrop-filter: blur(14px) saturate(140%);
-  animation: hud-float 6s ease-in-out infinite;
+  transition:
+    scale 0.2s ease,
+    box-shadow 0.2s ease;
+  /* 入场结束后由漂浮接管 transform */
+  animation:
+    hud-in 0.52s var(--ease-out) calc(var(--hud-i) * 70ms + 0.12s) both,
+    hud-float 6s ease-in-out calc(var(--hud-i) * 0.9s + 0.7s) infinite;
 }
-.hud--tl {
-  top: 36px;
-  left: 36px;
-  animation-delay: -0.6s;
-}
-.hud--tr {
-  top: 96px;
-  right: 36px;
-  animation-delay: -2.4s;
-}
-.hud--bl {
-  bottom: 148px;
-  left: 36px;
-  animation-delay: -1.8s;
-}
-.hud--br {
-  bottom: 88px;
-  right: 36px;
-  animation-delay: -3.2s;
+@keyframes hud-in {
+  from {
+    opacity: 0;
+    transform: translateX(var(--hud-from)) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
 }
 @keyframes hud-float {
   0%,
@@ -1017,6 +1077,95 @@ onMounted(loadProfile);
   }
   50% {
     transform: translateY(-4px);
+  }
+}
+/* 指向人物的引线与呼吸圆点 */
+.hud__card::before,
+.hud__card::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  pointer-events: none;
+}
+.hud__card::before {
+  width: 18px;
+  height: 1px;
+}
+.hud__card::after {
+  width: 7px;
+  height: 7px;
+  margin-top: -3.5px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.28);
+  animation: hud-pin 2.4s ease-in-out calc(var(--hud-i) * 0.4s) infinite;
+}
+.hud--tl .hud__card::before,
+.hud--bl .hud__card::before {
+  left: 100%;
+  background: linear-gradient(90deg, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.35));
+}
+.hud--tl .hud__card::after,
+.hud--bl .hud__card::after {
+  left: calc(100% + 18px);
+}
+.hud--tr .hud__card::before,
+.hud--br .hud__card::before {
+  right: 100%;
+  background: linear-gradient(270deg, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.35));
+}
+.hud--tr .hud__card::after,
+.hud--br .hud__card::after {
+  right: calc(100% + 18px);
+}
+@keyframes hud-pin {
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.55;
+    transform: scale(0.7);
+  }
+}
+/* 玻璃高光：一道斜向光带间歇扫过 */
+.hud__sheen {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  overflow: hidden;
+  pointer-events: none;
+}
+.hud__sheen::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: 45%;
+  background: linear-gradient(100deg, transparent, rgba(255, 255, 255, 0.6), transparent);
+  transform: translateX(-120%);
+  animation: hud-sheen 7s var(--ease-in-out) calc(var(--hud-i) * 1.3s + 1.2s) infinite;
+}
+@keyframes hud-sheen {
+  0%,
+  72% {
+    transform: translateX(-120%);
+  }
+  100% {
+    transform: translateX(340%);
+  }
+}
+@media (hover: hover) and (pointer: fine) {
+  .hud:hover .hud__card {
+    scale: 1.04;
+    box-shadow:
+      0 16px 32px rgba(23, 50, 45, 0.16),
+      inset 0 1px 0 rgba(255, 255, 255, 0.55);
+  }
+  .hud:hover .hud__ico {
+    transform: rotate(-8deg) scale(1.08);
   }
 }
 .hud__ico {
@@ -1029,6 +1178,7 @@ onMounted(loadProfile);
   color: var(--mint-deep);
   flex-shrink: 0;
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.6);
+  transition: transform 0.2s ease;
 }
 .hud__ico svg {
   width: 16px;
@@ -1051,16 +1201,14 @@ onMounted(loadProfile);
   font-size: 12.5px;
   font-weight: 700;
   color: var(--teal-ink);
-  max-width: 150px;
+  max-width: 132px;
 }
 
 /* skill dock */
 .dock {
-  position: absolute;
-  left: 22px;
-  right: 22px;
-  bottom: 22px;
+  position: relative;
   z-index: 5;
+  margin: 0 22px 22px;
   display: flex;
   align-items: center;
   gap: 10px;
@@ -1111,6 +1259,17 @@ onMounted(loadProfile);
   font-size: 11.5px;
   font-weight: 700;
   white-space: nowrap;
+  animation: chip-in 0.4s var(--ease-out) calc(var(--chip-i) * 40ms + 0.3s) both;
+}
+@keyframes chip-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
 }
 .dock__chip--accent {
   background: linear-gradient(135deg, rgba(214, 255, 114, 0.95), rgba(196, 240, 136, 0.95));
@@ -1305,6 +1464,31 @@ onMounted(loadProfile);
   white-space: nowrap;
 }
 
+/* 减少动态效果：保留淡入，去掉位移与循环动画 */
+@media (prefers-reduced-motion: reduce) {
+  .hud {
+    transition: none;
+  }
+  .hud__card {
+    animation: hud-fade 0.2s ease both;
+  }
+  .hud__card::after,
+  .hud__sheen::before {
+    animation: none;
+  }
+  .dock__chip {
+    animation: hud-fade 0.2s ease both;
+  }
+}
+@keyframes hud-fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
 /* responsive */
 @media (max-width: 992px) {
   .profile-grid {
@@ -1312,7 +1496,7 @@ onMounted(loadProfile);
   }
   .stage {
     flex: none;
-    aspect-ratio: 1 / 1;
+    height: min(72vh, 640px);
   }
 }
 @media (max-width: 768px) {
