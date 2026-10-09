@@ -223,13 +223,13 @@
             </div>
             <div class="avatar-upload__meta">
               <strong>头像素材</strong>
-              <span>支持 JPG、PNG、GIF、WebP，最大 5MB</span>
+              <span>图片 JPG、PNG、WebP 最大 5MB；动图 GIF、MP4 最大 20MB，取前 10 秒</span>
               <Button size="small" type="primary" @click="triggerUpload">更换头像</Button>
             </div>
             <input
               ref="fileInput"
               type="file"
-              accept="image/jpeg,image/png,image/gif,image/webp"
+              accept="image/jpeg,image/png,image/gif,image/webp,video/mp4"
               style="display: none"
               @change="handleAvatarChange"
             />
@@ -1150,14 +1150,18 @@ function handleAvatarChange(event: Event) {
   const file = target.files?.[0];
   if (!file) return;
 
-  const allowedTypes = ["image/jpeg", "image/png", "image/gif", "image/webp"];
-  if (!allowedTypes.includes(file.type)) {
-    message.error("请选择 JPG、PNG、GIF 或 WebP 图片");
+  const staticTypes = ["image/jpeg", "image/png", "image/webp"];
+  // GIF / MP4 会在后端转成 WebP 动图，素材本身允许更大
+  const animatedTypes = ["image/gif", "video/mp4"];
+  if (![...staticTypes, ...animatedTypes].includes(file.type)) {
+    message.error("请选择 JPG、PNG、WebP 图片，或 GIF、MP4 动图");
     target.value = "";
     return;
   }
-  if (file.size > 5 * 1024 * 1024) {
-    message.error("头像文件不能超过 5MB");
+  const animated = animatedTypes.includes(file.type);
+  const maxMb = animated ? 20 : 5;
+  if (file.size > maxMb * 1024 * 1024) {
+    message.error(`${animated ? "动图素材" : "头像图片"}不能超过 ${maxMb}MB`);
     target.value = "";
     return;
   }
