@@ -184,6 +184,8 @@ const UserAPI = {
       method: "post",
       data: formData,
       headers: { "Content-Type": "multipart/form-data" },
+      // GIF / MP4 要在后端转成 WebP 动图，10 秒素材约 17 秒，全局 50 秒超时不够稳
+      timeout: 120000,
       __silent: true,
     } as any);
   },

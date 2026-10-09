@@ -22,8 +22,19 @@
           @pointerup="handlePointerUp"
           @pointercancel="handlePointerUp"
         >
+          <video
+            v-if="objectUrl && isVideo"
+            class="avatar-crop-stage__image"
+            :src="objectUrl"
+            autoplay
+            loop
+            muted
+            playsinline
+            :style="imageStyle"
+            @loadedmetadata="handleVideoLoad"
+          />
           <img
-            v-if="objectUrl"
+            v-else-if="objectUrl"
             class="avatar-crop-stage__image"
             :src="objectUrl"
             alt="待裁剪头像"
@@ -55,8 +66,17 @@
         <span class="avatar-crop-preview__eyebrow">LIVE PREVIEW</span>
         <h4>圆形预览</h4>
         <div class="avatar-crop-preview__circle">
+          <video
+            v-if="objectUrl && isVideo"
+            :src="objectUrl"
+            autoplay
+            loop
+            muted
+            playsinline
+            :style="previewStyle"
+          />
           <img
-            v-if="objectUrl"
+            v-else-if="objectUrl"
             :src="objectUrl"
             alt="头像裁剪预览"
             draggable="false"
@@ -105,6 +125,7 @@ const dragging = ref(false);
 const pointerId = ref<number | null>(null);
 const pointerStart = ref({ x: 0, y: 0, offsetX: 0, offsetY: 0 });
 
+const isVideo = computed(() => props.file?.type === "video/mp4");
 const ready = computed(() => Boolean(props.file && naturalWidth.value && naturalHeight.value));
 const minimumScale = computed(() => {
   if (!naturalWidth.value || !naturalHeight.value) return 1;
@@ -158,6 +179,13 @@ function handleImageLoad(event: Event): void {
   const image = event.target as HTMLImageElement;
   naturalWidth.value = image.naturalWidth;
   naturalHeight.value = image.naturalHeight;
+  clampOffset();
+}
+
+function handleVideoLoad(event: Event): void {
+  const video = event.target as HTMLVideoElement;
+  naturalWidth.value = video.videoWidth;
+  naturalHeight.value = video.videoHeight;
   clampOffset();
 }
 
@@ -254,7 +282,8 @@ onBeforeUnmount(revokeObjectUrl);
 }
 
 .avatar-crop-stage__image,
-.avatar-crop-preview__circle img {
+.avatar-crop-preview__circle img,
+.avatar-crop-preview__circle video {
   position: absolute;
   top: 50%;
   left: 50%;
