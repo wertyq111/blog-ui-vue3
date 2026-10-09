@@ -71,3 +71,21 @@ export function downloadFile(response: any, customFileName?: string): void {
     throw error;
   }
 }
+
+/**
+ * 把前端生成的 Blob 保存为文件
+ * @param blob 文件内容
+ * @param fileName 保存的文件名
+ */
+export function downloadBlob(blob: Blob, fileName: string): void {
+  const downloadUrl = window.URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = downloadUrl;
+  link.download = fileName;
+
+  document.body.appendChild(link);
+  link.click();
+
+  document.body.removeChild(link);
+  window.URL.revokeObjectURL(downloadUrl);
+}

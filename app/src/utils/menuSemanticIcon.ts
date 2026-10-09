@@ -37,6 +37,7 @@ const PATH_MAP: Record<string, string> = {
   "/develop/platform-script": "script-corporate-credit",
   // 设计管理
   "/design/image-process": "menu-image-process",
+  "/design/pdf-image-extractor": "menu-pdf-image",
   // 个人中心
   "/user/profile": "menu-profile",
   // 用户详情
@@ -85,7 +86,7 @@ export const MENU_ICON_NAMES: string[] = [
   "menu-work-daily", "menu-work-doc", "menu-todo",
   "script-corporate-credit", "script-loan-disburse", "script-phone-code",
   // 设计管理
-  "menu-image-process",
+  "menu-image-process", "menu-pdf-image",
   // 个人中心
   "menu-profile",
   // 小程序管理

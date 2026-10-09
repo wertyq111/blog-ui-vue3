@@ -320,6 +320,22 @@ const GLYPH_DATABASE: Record<string, string> = {
     '<path class="am-spark" d="M21 6.5 l.4 1.1 1.1.4-1.1.4-.4 1.1-.4-1.1-1.1-.4 1.1-.4z" fill="var(--am-yellow)"/>' +
     "</g>",
 
+  // PDF 图片提取 /design/pdf-image-extractor：折角文档 + 抽出来的图片
+  "menu-pdf-image":
+    '<g class="am-bob">' +
+    '<path class="sf" d="M5 3.5 H12.5 L17 8 V19 C17 19.8 16.3 20.5 15.5 20.5 H5 C4.2 20.5 3.5 19.8 3.5 19 V5 C3.5 4.2 4.2 3.5 5 3.5 Z" fill="#fffaf0"/>' +
+    '<path class="sf" d="M12.5 3.5 V8 H17 Z" fill="var(--am-grey)"/>' +
+    '<rect x="5.5" y="5.8" width="5" height="2.4" rx=".8" fill="var(--am-red)"/>' +
+    '<line class="am-lite1 s" x1="5.8" y1="11" x2="9.6" y2="11"/>' +
+    '<line class="am-lite2 s" x1="5.8" y1="13.8" x2="8" y2="13.8"/>' +
+    "</g>" +
+    '<g class="am-swing">' +
+    '<rect class="sf" x="10.4" y="12" width="9.6" height="8" rx="1.6" fill="var(--am-blue)"/>' +
+    '<circle cx="13.2" cy="14.6" r="1.1" fill="var(--am-yellow)"/>' +
+    '<path class="sf" d="M11 19.5 L14 16.4 L15.9 18.3 L17.5 16.8 L19.4 19.5 Z" fill="var(--am-leaf)"/>' +
+    "</g>" +
+    '<path class="am-spark" d="M20 7.5 l.4 1.1 1.1.4-1.1.4-.4 1.1-.4-1.1-1.1-.4 1.1-.4z" fill="var(--am-yellow)"/>',
+
   // 个人资料 /user/profile：头像 + 资料行
   "menu-profile":
     '<g class="am-bob">' +
