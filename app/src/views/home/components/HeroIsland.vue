@@ -20,7 +20,7 @@
           </router-link>
           <button type="button" class="btn-ai btn-ai-lg" @click="introVisible = true">
             <span class="btn-ai-finger"></span>
-            <span class="btn-ai-text">🎬 小岛介绍</span>
+            <span class="btn-ai-text">🎬 《Check It Off!》</span>
           </button>
         </div>
       </div>
@@ -30,7 +30,7 @@
 
     <AdminAnimalModal
       v-model:visible="introVisible"
-      title="小岛介绍"
+      title="《Check It Off!》"
       width="min(92vw, 1000px)"
       :show-footer="false"
     >
@@ -70,7 +70,7 @@ const introVisible = ref(false);
   height: auto;
   aspect-ratio: 16 / 9;
   margin: 0 auto;
-  background: #14121a;
+  background: #fef8e6;
   border-radius: 12px;
 }
 </style>
