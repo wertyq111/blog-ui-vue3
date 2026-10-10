@@ -63,7 +63,7 @@
         <div class="ac-passport__row">
           <div class="ac-passport__item">
             <span class="label">ISLAND COMMENT / 岛民寄语</span>
-            <span class="value comment">“ 不催稿、不焦虑。写点东西、做点项目，让小岛今天比昨天再绿一点。 🌱 ”</span>
+            <span class="value comment">“ 不催稿、不焦虑。写点东西、做点项目，让小岛今天比昨天再欢乐一点。 🎉 ”</span>
           </div>
         </div>
       </div>
