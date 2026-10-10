@@ -26,8 +26,8 @@
           <span v-else>小岛的生活，从一张机票开始 ✈️</span>
         </h3>
         <p class="island-sub">
-          <span v-if="loggedIn">在这里不焦虑。每天收集一些灵感，搭建好玩的功能。今天的小岛有没有比昨天更绿一点点呢？</span>
-          <span v-else>这里是没有焦虑和催促的像素绿洲。每天整理你的随笔，沉淀开发心得。今天的小岛有没有比昨天更绿一点点呢？</span>
+          <span v-if="loggedIn">在这里不焦虑。每天收集一些灵感，搭建好玩的功能。今天的小岛有没有比昨天更欢乐一点点呢？</span>
+          <span v-else>这里是没有焦虑和催促的像素绿洲。每天整理你的随笔，沉淀开发心得。今天的小岛有没有比昨天更欢乐一点点呢？</span>
         </p>
         <div class="island-actions">
           <router-link v-if="loggedIn" class="btn-ai btn-ai-primary" to="/dashboard">
