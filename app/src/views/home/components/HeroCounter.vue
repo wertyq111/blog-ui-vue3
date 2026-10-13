@@ -18,10 +18,10 @@
             <svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" class="btn-arrow-ico"><path d="M3 10h14M11 4l6 6-6 6"/></svg>
             <span class="btn-ai-text">填写移居申请卡 🎫</span>
           </router-link>
-          <a class="btn-ai btn-ai-lg" href="javascript:void(0)" @click="scrollToSection('modules')">
+          <button type="button" class="btn-ai btn-ai-lg" @click="introVisible = true">
             <span class="btn-ai-finger"></span>
-            <span class="btn-ai-text">小岛生态指南 🔍</span>
-          </a>
+            <span class="btn-ai-text">🎬 《Check It Off!》</span>
+          </button>
         </div>
       </div>
 
@@ -69,19 +69,49 @@
         </div>
       </div>
     </div>
+
+    <AdminAnimalModal
+      v-model:visible="introVisible"
+      title="《Check It Off!》"
+      width="min(92vw, 1000px)"
+      :show-footer="false"
+    >
+      <video
+        v-if="introVisible"
+        class="intro-video"
+        src="/home/island-intro.mp4"
+        poster="/home/island-intro-poster.jpg"
+        controls
+        autoplay
+        playsinline
+      ></video>
+    </AdminAnimalModal>
   </section>
 </template>
 
 <script setup lang="ts">
+import { ref } from "vue";
 import HeroSign from "./HeroSign.vue";
-import { scrollToSection } from "../scroll-to-section";
+import AdminAnimalModal from "@/components/AdminPage/AdminAnimalModal.vue";
 
 defineOptions({ name: "HeroCounter" });
+
+const introVisible = ref(false);
 </script>
 
 <style scoped lang="scss">
 @use "../styles/shared";
 @use "../styles/hero";
+
+.intro-video {
+  display: block;
+  width: min(100%, calc(52vh * 16 / 9));
+  height: auto;
+  aspect-ratio: 16 / 9;
+  margin: 0 auto;
+  background: var(--ai-bg-card);
+  border-radius: 12px;
+}
 
 .hero-avatar-wrap {
   position: relative;
