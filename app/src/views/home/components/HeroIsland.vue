@@ -36,7 +36,7 @@
     >
       <video
         class="intro-video"
-        src="/home/island-intro.mp4"
+        :src="introVideoSrc"
         poster="/home/island-intro-poster.jpg"
         controls
         autoplay
@@ -57,6 +57,10 @@ defineOptions({ name: "HeroIsland" });
 defineProps<{ avatarSrc: string; nickname: string; stats: HomeStats }>();
 
 const introVisible = ref(false);
+
+// 这个视频不进仓库（见 .gitignore），所以用运行时地址绑定：写成静态 src 会被 Vite 当成模块解析，
+// 文件不在时（CI、全新克隆）构建直接失败。
+const introVideoSrc = "/home/island-intro.mp4";
 </script>
 
 <style scoped lang="scss">
