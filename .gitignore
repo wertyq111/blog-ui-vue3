@@ -15,3 +15,7 @@ tmp/
 
 # superpowers 工作区（执行账本、效果图）
 .superpowers/
+
+# 首页《Check It Off!》MV（约 22MB）不进仓库，本地和远端各放一份；
+# 成片来自 lyric-mv 项目的 generated_mv/check-it-off/out/full_30fps_small.mp4
+app/public/home/island-intro.mp4

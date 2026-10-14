@@ -81,7 +81,7 @@ defineOptions({ name: "BulletinBoard" });
   .board-title {
     font-size: 18px;
     font-weight: 900;
-    color: var(--ai-text);
+    color: var(--home-chip-ink);
     letter-spacing: 1px;
   }
 }
@@ -128,7 +128,7 @@ defineOptions({ name: "BulletinBoard" });
   .sticky-head {
     font-size: 13px;
     font-weight: 900;
-    color: var(--ai-text);
+    color: var(--home-chip-ink);
     border-bottom: 1.5px dashed rgba(121, 79, 39, 0.15);
     padding-bottom: 6px;
   }
@@ -136,12 +136,12 @@ defineOptions({ name: "BulletinBoard" });
   .sticky-content {
     font-size: 12px;
     font-weight: 800;
-    color: var(--ai-text);
+    color: var(--home-chip-ink);
     line-height: 1.6;
     flex: 1;
 
     strong {
-      color: var(--ai-primary-active);
+      color: inherit;
       font-weight: 900;
     }
   }
@@ -149,7 +149,7 @@ defineOptions({ name: "BulletinBoard" });
   .sticky-foot {
     font-size: 10px;
     font-weight: 800;
-    color: var(--ai-shadow-color);
+    color: var(--home-chip-ink);
     text-align: right;
   }
 }
