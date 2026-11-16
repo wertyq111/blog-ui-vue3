@@ -4,7 +4,7 @@
     <div class="page-head">
       <div class="page-eyebrow">DEVELOP WORKSPACE</div>
       <h1 class="page-title">工作日常</h1>
-      <p class="page-desc">按日期记录各平台工作内容，支持报表导出与 Markdown 导入。</p>
+      <p class="page-desc">按日期记录各平台工作内容。</p>
     </div>
 
     <div class="filter-bar">
@@ -42,8 +42,6 @@
       </Button>
       <Button type="default" size="small" @click="handleResetQuery">重置</Button>
     </div>
-
-    <WorkDailyReport @imported="handleQuery" />
 
     <div class="list-card">
       <div class="list-head">
@@ -175,7 +173,6 @@ import WorkPlatformAPI from "@/api/develop/work-platform";
 import type { WorkDailyItem, WorkDailyQueryParams } from "@/types/api/work-daily";
 import type { WorkPlatformItem } from "@/types/api/work-platform";
 import WorkDailyEdit from "./work-daily-edit.vue";
-import WorkDailyReport from "./work-daily-report.vue";
 import SystemIco from "@/components/AdminPage/SystemIco.vue";
 import AdminAnimalModal from "@/components/AdminPage/AdminAnimalModal.vue";
 import { extractTitle, extractDesc, countWords, getRawText } from "@/utils/workDailyDisplay";
