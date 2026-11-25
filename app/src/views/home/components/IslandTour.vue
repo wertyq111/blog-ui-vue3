@@ -1,19 +1,105 @@
-<!-- 首页 3D 小岛导览 -->
+<!-- 首页 3D 小岛导览：琉璃海立体切片箱庭 -->
 <template>
   <section v-if="!failed" class="section island-tour">
     <div class="section-head">
       <div>
-        <div class="section-eyebrow">TOUR · 小岛导览</div>
-        <h2 class="section-title">小岛导览 (Island Tour)</h2>
+        <div class="section-eyebrow">TOUR · 立体切片箱庭</div>
+        <h2 class="section-title">小岛导览 · 琉璃海箱庭</h2>
       </div>
-      <p class="section-sub">拖动小岛四处看看，点一下建筑走近它；按住 Ctrl 再滚动滚轮可以缩放。</p>
+      <p class="section-sub">
+        拖动把玩四层共生箱庭，点建筑或标签拉近并触发机关，轻点琉璃海面激起涟漪喂小鱼；按住 Ctrl +
+        滚轮缩放。
+      </p>
     </div>
 
     <!-- 未按 Ctrl 的滚轮在捕获阶段拦下，不让它到达画布，页面照常滚动 -->
     <div ref="stageEl" class="island-tour__stage" @wheel.capture.passive="onWheel">
       <div ref="canvasHost" class="island-tour__canvas"></div>
-      <div v-if="!ready" class="island-tour__placeholder">小岛正在浮出水面…</div>
+      <div v-if="!ready" class="island-tour__placeholder">正在雕琢四层切片箱庭与琉璃海…</div>
 
+      <!-- 左上角紧凑 24h 时光拨盘 -->
+      <div
+        v-if="ready"
+        class="island-tour__clock-pill"
+        title="拖动查看一日 24 小时日光轨迹与海底珊瑚夜光"
+      >
+        <span class="island-tour__clock-time">{{ formattedHour }}</span>
+        <input
+          v-model.number="sliderHour"
+          type="range"
+          min="0"
+          max="24"
+          step="0.1"
+          class="island-tour__clock-slider"
+          aria-label="调节箱庭时间"
+          @input="onSliderInput"
+        />
+        <button
+          v-if="manualHour !== null"
+          type="button"
+          class="island-tour__clock-reset"
+          title="恢复跟随首页时段"
+          aria-label="恢复跟随首页时段"
+          @click="resetManualHour"
+        >
+          ↻
+        </button>
+      </div>
+
+      <!-- 右上角把玩工具条 -->
+      <div v-if="ready" class="island-tour__toolbar">
+        <button
+          type="button"
+          class="island-tour__pill-btn"
+          :class="{ 'island-tour__pill-btn--on': activeKey === null }"
+          @click="scene?.focusOverview()"
+        >
+          🧭 全景
+        </button>
+        <button
+          type="button"
+          class="island-tour__pill-btn"
+          :class="{ 'island-tour__pill-btn--on': isoMode }"
+          @click="toggleIso"
+        >
+          {{ isoMode ? "📐 手办等轴" : "🎥 透视" }}
+        </button>
+        <button
+          v-if="!reducedMotion"
+          type="button"
+          class="island-tour__pill-btn"
+          :class="{ 'island-tour__pill-btn--on': playing }"
+          @click="togglePlay"
+        >
+          {{ playing ? "⏸ 暂停" : "✈️ 巡航" }}
+        </button>
+        <button
+          type="button"
+          class="island-tour__pill-btn"
+          :class="{ 'island-tour__pill-btn--on': showPins }"
+          @click="showPins = !showPins"
+        >
+          🏷️ 标签
+        </button>
+      </div>
+
+      <!-- 3D 空间锚点悬浮胶囊层 -->
+      <div v-show="ready && showPins" class="island-tour__pins">
+        <button
+          v-for="z in zones"
+          :key="z.key"
+          :ref="(el) => setPinRef(z.key, el)"
+          type="button"
+          class="island-tour__pin"
+          :class="{ 'island-tour__pin--on': z.key === activeKey }"
+          @click="selectZoneAndToy(z.key)"
+        >
+          <span class="island-tour__pin-ico">{{ z.icon }}</span>
+          <span>{{ z.name }}</span>
+        </button>
+      </div>
+
+      <!-- 右侧滑入分区检视卡 -->
       <Transition name="island-tour-card">
         <div
           v-if="activeZone"
@@ -24,43 +110,48 @@
           @focusin="scene?.holdTour(true)"
           @focusout="scene?.holdTour(false)"
         >
-          <div class="island-tour__card-name">{{ activeZone.name }}</div>
+          <div class="island-tour__card-head">
+            <span class="island-tour__card-badge">
+              {{ activeZone.badge }} · {{ activeZone.elevationLabel }}
+            </span>
+            <button
+              type="button"
+              class="island-tour__card-close"
+              aria-label="回到全岛俯视"
+              @click="scene?.focusOverview()"
+            >
+              ✕
+            </button>
+          </div>
+          <div class="island-tour__card-name">{{ activeZone.icon }} {{ activeZone.name }}</div>
           <p class="island-tour__card-intro">{{ activeZone.intro }}</p>
           <div class="island-tour__chips">
             <span v-for="f in activeZone.features" :key="f" class="island-tour__chip">{{ f }}</span>
           </div>
-          <button
-            type="button"
-            class="btn-ai btn-ai-primary btn-ai-sm"
-            @click="emit('go', activeZone.path)"
-          >
-            <span class="btn-ai-finger"></span>
-            <span class="btn-ai-text">去看看 →</span>
-          </button>
+          <div class="island-tour__card-actions">
+            <button
+              type="button"
+              class="btn-ai btn-ai-sm"
+              @click="scene?.triggerToy(activeZone.key)"
+            >
+              <span class="btn-ai-text">{{ activeZone.toyLabel }}</span>
+            </button>
+            <button
+              type="button"
+              class="btn-ai btn-ai-primary btn-ai-sm"
+              @click="emit('go', activeZone.path)"
+            >
+              <span class="btn-ai-finger"></span>
+              <span class="btn-ai-text">去看看 →</span>
+            </button>
+          </div>
         </div>
       </Transition>
 
-      <div class="island-tour__dots">
-        <button
-          v-for="z in zones"
-          :key="z.key"
-          type="button"
-          class="island-tour__dot"
-          :class="{ 'island-tour__dot--on': z.key === activeKey }"
-          :title="z.name"
-          :aria-label="'查看' + z.name"
-          @click="scene?.focusZone(z.key)"
-        ></button>
-        <button
-          v-if="!reducedMotion"
-          type="button"
-          class="island-tour__play"
-          :aria-label="playing ? '暂停巡游' : '继续巡游'"
-          @click="togglePlay"
-        >
-          {{ playing ? "❚❚" : "▶" }}
-        </button>
-      </div>
+      <!-- 舞台底部轻提示 -->
+      <Transition name="island-tour-toast">
+        <div v-if="toastText" class="island-tour__toast">{{ toastText }}</div>
+      </Transition>
     </div>
   </section>
 </template>
@@ -75,10 +166,11 @@ import {
   ref,
   shallowRef,
   watch,
+  type ComponentPublicInstance,
 } from "vue";
 import type { TimePeriod } from "../day-cycle";
-import { zones, type ZoneKey } from "./island-tour/zones";
-import type { IslandScene } from "./island-tour/scene";
+import { PERIOD_TO_HOUR } from "./island-tour/palette";
+import { zones, type IslandScene, type PinScreenPos, type ZoneKey } from "./island-tour/zones";
 
 defineOptions({ name: "IslandTour" });
 
@@ -93,11 +185,48 @@ const scene = shallowRef<IslandScene | null>(null);
 const failed = ref(false);
 const ready = ref(false);
 const activeKey = ref<ZoneKey | null>(null);
-const playing = ref(!reducedMotion);
+const playing = ref(false);
+const isoMode = ref(false);
+const showPins = ref(true);
+const manualHour = ref<number | null>(null);
+const sliderHour = ref<number>(PERIOD_TO_HOUR[props.period]);
+const toastText = ref("");
+
 const activeZone = computed(() => zones.find((z) => z.key === activeKey.value) ?? null);
 
+const formattedHour = computed(() => {
+  const h = sliderHour.value;
+  const hh = Math.floor(((h % 24) + 24) % 24);
+  const mm = Math.round((h - Math.floor(h)) * 60) % 60;
+  return `${String(hh).padStart(2, "0")}:${String(mm).padStart(2, "0")}`;
+});
+
+const pinRefs = new Map<ZoneKey, HTMLButtonElement>();
+const setPinRef = (key: ZoneKey, el: Element | ComponentPublicInstance | null) => {
+  if (el instanceof HTMLButtonElement) pinRefs.set(key, el);
+  else pinRefs.delete(key);
+};
+
+let toastTimer: number | null = null;
+const showToast = (msg: string) => {
+  toastText.value = msg;
+  if (toastTimer !== null) window.clearTimeout(toastTimer);
+  toastTimer = window.setTimeout(() => {
+    toastText.value = "";
+  }, 2400);
+};
+
+const updatePins = (pins: PinScreenPos[]) => {
+  for (const p of pins) {
+    const el = pinRefs.get(p.key);
+    if (!el) continue;
+    el.style.transform = `translate3d(${p.x.toFixed(1)}px, ${p.y.toFixed(1)}px, 0) translate(-50%, -100%)`;
+    el.style.opacity = p.visible ? "1" : "0";
+    el.style.pointerEvents = p.visible ? "auto" : "none";
+  }
+};
+
 let inView = false;
-let tourStarted = false;
 let loading = false;
 let unmounted = false;
 let preloadObserver: IntersectionObserver | null = null;
@@ -117,14 +246,18 @@ async function load() {
     if (unmounted || !canvasHost.value) return;
     scene.value = createIslandScene(canvasHost.value, {
       period: props.period,
+      hour: manualHour.value ?? PERIOD_TO_HOUR[props.period],
       reducedMotion,
       mobile: window.matchMedia("(max-width: 767px)").matches,
       onZoneChange: (key) => {
         activeKey.value = key;
       },
+      onProjectPins: updatePins,
+      onToyTriggered: showToast,
     });
     ready.value = true;
-    if (tourStarted) scene.value.setAutoplay(playing.value);
+    scene.value.setIsoMode(isoMode.value);
+    scene.value.setAutoplay(playing.value);
     syncRunning();
   } catch {
     // WebGL 不可用或场景模块加载失败：整个 section 不渲染
@@ -138,18 +271,42 @@ const onWheel = (e: WheelEvent) => {
 
 const togglePlay = () => {
   playing.value = !playing.value;
-  if (tourStarted) scene.value?.setAutoplay(playing.value);
+  scene.value?.setAutoplay(playing.value);
+};
+
+const toggleIso = () => {
+  isoMode.value = !isoMode.value;
+  scene.value?.setIsoMode(isoMode.value);
+};
+
+const selectZoneAndToy = (key: ZoneKey) => {
+  scene.value?.focusZone(key);
+  scene.value?.triggerToy(key);
+};
+
+const onSliderInput = () => {
+  manualHour.value = sliderHour.value;
+  scene.value?.setHour(sliderHour.value);
+};
+
+const resetManualHour = () => {
+  manualHour.value = null;
+  sliderHour.value = PERIOD_TO_HOUR[props.period];
+  scene.value?.setPeriod(props.period);
 };
 
 watch(
   () => props.period,
-  (p) => scene.value?.setPeriod(p)
+  (p) => {
+    manualHour.value = null;
+    sliderHour.value = PERIOD_TO_HOUR[p];
+    scene.value?.setPeriod(p);
+  }
 );
 
 onMounted(() => {
   const el = stageEl.value;
   if (!el) return;
-  // 距视口约一屏时才加载 three
   preloadObserver = new IntersectionObserver(
     (entries) => {
       if (loading || !entries.some((e) => e.isIntersecting)) return;
@@ -158,18 +315,13 @@ onMounted(() => {
     },
     { rootMargin: "100% 0px" }
   );
-  // 进入视口一半以上才开始巡游；离开视口停止渲染
   viewObserver = new IntersectionObserver(
     (entries) => {
       const e = entries[entries.length - 1];
       inView = e.isIntersecting;
-      if (e.intersectionRatio >= 0.5 && !tourStarted) {
-        tourStarted = true;
-        scene.value?.setAutoplay(playing.value);
-      }
       syncRunning();
     },
-    { threshold: [0, 0.5] }
+    { threshold: [0, 0.25] }
   );
   preloadObserver.observe(el);
   viewObserver.observe(el);
@@ -181,6 +333,7 @@ onDeactivated(() => scene.value?.pause());
 
 onBeforeUnmount(() => {
   unmounted = true;
+  if (toastTimer !== null) window.clearTimeout(toastTimer);
   preloadObserver?.disconnect();
   viewObserver?.disconnect();
   document.removeEventListener("visibilitychange", syncRunning);
@@ -194,7 +347,7 @@ onBeforeUnmount(() => {
 
 .island-tour__stage {
   position: relative;
-  height: 560px;
+  height: 580px;
   border-radius: 28px;
   overflow: hidden;
 }
@@ -214,11 +367,142 @@ onBeforeUnmount(() => {
   font-weight: 800;
 }
 
+.island-tour__clock-pill {
+  position: absolute;
+  top: 16px;
+  left: 16px;
+  z-index: 5;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px;
+  background: rgba(255, 254, 246, 0.9);
+  border: 2px solid var(--ai-outline);
+  border-radius: 999px;
+  box-shadow: 0 3px 0 0 var(--ai-btn-shadow);
+  color: var(--ai-text);
+}
+
+.island-tour__clock-time {
+  min-width: 40px;
+  font-size: 12px;
+  font-weight: 900;
+  font-variant-numeric: tabular-nums;
+}
+
+.island-tour__clock-slider {
+  width: 96px;
+  accent-color: var(--ai-primary);
+  cursor: pointer;
+}
+
+.island-tour__clock-reset {
+  width: 20px;
+  height: 20px;
+  padding: 0;
+  border: 1.5px solid var(--ai-outline);
+  border-radius: 50%;
+  background: var(--ai-btn-face);
+  color: var(--ai-text);
+  font-size: 11px;
+  font-weight: 900;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.island-tour__toolbar {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  z-index: 5;
+  display: inline-flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 6px;
+}
+
+.island-tour__pill-btn {
+  padding: 6px 12px;
+  border: 2px solid var(--ai-outline);
+  border-radius: 999px;
+  background: rgba(255, 254, 246, 0.9);
+  box-shadow: 0 3px 0 0 var(--ai-btn-shadow);
+  color: var(--ai-text);
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 800;
+  line-height: 1.1;
+  cursor: pointer;
+  transition:
+    transform 0.15s ease,
+    border-color 0.15s ease,
+    background 0.15s ease;
+
+  &:hover {
+    transform: translateY(-1px);
+    border-color: var(--ai-primary);
+  }
+}
+
+.island-tour__pill-btn--on {
+  background: #e6f9f6;
+  border-color: var(--ai-primary);
+  color: var(--ai-primary-active);
+}
+
+.island-tour__pins {
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+  pointer-events: none;
+}
+
+.island-tour__pin {
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 10px;
+  border: 2px solid var(--ai-outline);
+  border-radius: 999px;
+  background: rgba(255, 254, 246, 0.92);
+  box-shadow: 0 3px 0 0 var(--ai-btn-shadow);
+  color: var(--ai-text);
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 900;
+  white-space: nowrap;
+  cursor: pointer;
+  transition:
+    opacity 0.2s ease,
+    border-color 0.2s ease,
+    background 0.2s ease;
+
+  &:hover {
+    border-color: var(--ai-primary);
+    background: #e9fbf8;
+  }
+}
+
+.island-tour__pin--on {
+  border-color: var(--ai-primary);
+  background: #e6f9f6;
+  color: var(--ai-primary-active);
+}
+
+.island-tour__pin-ico {
+  font-size: 13px;
+  line-height: 1;
+}
+
 .island-tour__card {
   position: absolute;
-  left: 24px;
-  bottom: 64px;
-  width: min(320px, calc(100% - 48px));
+  right: 20px;
+  bottom: 20px;
+  z-index: 6;
+  width: min(334px, calc(100% - 40px));
   padding: 16px 18px;
   background: var(--ai-btn-face);
   border: 3px solid var(--ai-outline);
@@ -227,8 +511,36 @@ onBeforeUnmount(() => {
   color: var(--ai-text);
 }
 
+.island-tour__card-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+
+.island-tour__card-badge {
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: 0.8px;
+  color: var(--ai-primary-active);
+}
+
+.island-tour__card-close {
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  border: 1.5px solid var(--ai-outline);
+  border-radius: 50%;
+  background: transparent;
+  color: var(--ai-text-2);
+  font-size: 11px;
+  font-weight: 900;
+  cursor: pointer;
+}
+
 .island-tour__card-name {
-  font-size: 20px;
+  font-size: 19px;
   font-weight: 900;
 }
 
@@ -256,70 +568,104 @@ onBeforeUnmount(() => {
   font-weight: 800;
 }
 
-.island-tour__dots {
-  position: absolute;
-  left: 50%;
-  bottom: 18px;
+.island-tour__card-actions {
   display: flex;
-  align-items: center;
-  gap: 10px;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.island-tour__toast {
+  position: absolute;
+  bottom: 18px;
+  left: 50%;
+  z-index: 7;
+  padding: 8px 16px;
+  border: 2px solid var(--ai-outline);
+  border-radius: 999px;
+  background: var(--ai-btn-face);
+  box-shadow: 0 4px 0 0 var(--ai-btn-shadow);
+  color: var(--ai-text);
+  font-size: 12px;
+  font-weight: 900;
+  white-space: nowrap;
   transform: translateX(-50%);
 }
 
-.island-tour__dot {
-  width: 12px;
-  height: 12px;
-  padding: 0;
-  border: 2px solid var(--ai-outline);
-  border-radius: 50%;
-  background: var(--ai-btn-face);
-  cursor: pointer;
-  transition:
-    transform 0.2s ease,
-    background 0.2s ease;
-}
-
-.island-tour__dot--on {
-  background: var(--ai-primary);
-  transform: scale(1.25);
-}
-
-.island-tour__play {
-  width: 28px;
-  height: 28px;
-  padding: 0;
-  border: 2px solid var(--ai-outline);
-  border-radius: 50%;
-  background: var(--ai-btn-face);
+// 夜间模式适配：直接命中父级状态类（见 lessons l72）
+.home-page--night .island-tour__clock-pill,
+.home-page--night .island-tour__pill-btn,
+.home-page--night .island-tour__pin {
+  background: rgba(24, 35, 70, 0.9);
   color: var(--ai-text);
-  font-size: 11px;
-  font-weight: 900;
-  cursor: pointer;
 }
 
-// 卡片进出：位移按卡片尺寸（约 320px）取 16px，参见 lessons l08
+.home-page--night .island-tour__pill-btn--on,
+.home-page--night .island-tour__pin--on {
+  background: rgba(44, 64, 118, 0.95);
+  color: var(--ai-primary);
+}
+
+.home-page--night .island-tour__placeholder {
+  background: rgba(21, 30, 63, 0.55);
+}
+
 .island-tour-card-enter-active,
 .island-tour-card-leave-active {
   transition:
-    opacity 260ms ease,
-    transform 260ms ease;
+    opacity 240ms ease,
+    transform 240ms ease;
 }
 
 .island-tour-card-enter-from,
 .island-tour-card-leave-to {
   opacity: 0;
-  transform: translateY(16px) scale(0.96);
+  transform: translateX(20px) scale(0.96);
+}
+
+.island-tour-toast-enter-active,
+.island-tour-toast-leave-active {
+  transition:
+    opacity 200ms ease,
+    transform 200ms ease;
+}
+
+.island-tour-toast-enter-from,
+.island-tour-toast-leave-to {
+  opacity: 0;
+  transform: translate(-50%, 10px);
 }
 
 @media (max-width: 767px) {
   .island-tour__stage {
-    height: 420px;
+    height: 440px;
+  }
+
+  .island-tour__clock-pill {
+    top: 10px;
+    left: 10px;
+    padding: 5px 10px;
+  }
+
+  .island-tour__clock-slider {
+    width: 68px;
+  }
+
+  .island-tour__toolbar {
+    top: 48px;
+    right: 10px;
+    left: 10px;
+    justify-content: flex-start;
+  }
+
+  .island-tour__pill-btn {
+    padding: 5px 9px;
+    font-size: 11px;
   }
 
   .island-tour__card {
-    left: 12px;
     right: 12px;
-    bottom: 56px;
+    bottom: 12px;
+    left: 12px;
     width: auto;
   }
 }
@@ -327,7 +673,10 @@ onBeforeUnmount(() => {
 @media (prefers-reduced-motion: reduce) {
   .island-tour-card-enter-active,
   .island-tour-card-leave-active,
-  .island-tour__dot {
+  .island-tour-toast-enter-active,
+  .island-tour-toast-leave-active,
+  .island-tour__pin,
+  .island-tour__pill-btn {
     transition: none;
   }
 }
