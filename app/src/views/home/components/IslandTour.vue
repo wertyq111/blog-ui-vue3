@@ -1,13 +1,13 @@
-<!-- 首页 3D 小岛导览：琉璃海立体切片箱庭 -->
+<!-- 首页 3D 小岛导览原型：工作岛风格立体纸艺书 -->
 <template>
   <section v-if="!failed" class="section island-tour">
     <div class="section-head">
       <div>
-        <div class="section-eyebrow">TOUR · 立体切片箱庭</div>
-        <h2 class="section-title">小岛导览 · 琉璃海箱庭</h2>
+        <div class="section-eyebrow">TOUR · 立体纸艺书</div>
+        <h2 class="section-title">小岛导览 · 立体纸艺工作岛</h2>
       </div>
       <p class="section-sub">
-        拖动把玩四层共生箱庭，点建筑或标签拉近并触发机关，轻点琉璃海面激起涟漪喂小鱼；按住 Ctrl +
+        左右把玩立体纸艺全景，点地标或标签拉近触发机关，轻点剪纸海浪跃出小纸鱼；按住 Ctrl +
         滚轮缩放。
       </p>
     </div>
@@ -15,34 +15,19 @@
     <!-- 未按 Ctrl 的滚轮在捕获阶段拦下，不让它到达画布，页面照常滚动 -->
     <div ref="stageEl" class="island-tour__stage" @wheel.capture.passive="onWheel">
       <div ref="canvasHost" class="island-tour__canvas"></div>
-      <div v-if="!ready" class="island-tour__placeholder">正在雕琢四层切片箱庭与琉璃海…</div>
+      <div v-if="!ready" class="island-tour__placeholder">正在裁切折纸岛屿与水彩纸海…</div>
 
-      <!-- 左上角紧凑 24h 时光拨盘 -->
-      <div
-        v-if="ready"
-        class="island-tour__clock-pill"
-        title="拖动查看一日 24 小时日光轨迹与海底珊瑚夜光"
-      >
-        <span class="island-tour__clock-time">{{ formattedHour }}</span>
-        <input
-          v-model.number="sliderHour"
-          type="range"
-          min="0"
-          max="24"
-          step="0.1"
-          class="island-tour__clock-slider"
-          aria-label="调节箱庭时间"
-          @input="onSliderInput"
-        />
+      <!-- 左上角四档绘本光影情绪切换 -->
+      <div v-if="ready" class="island-tour__mood-bar" role="group" aria-label="光影时段切换">
         <button
-          v-if="manualHour !== null"
+          v-for="m in MOOD_OPTIONS"
+          :key="m.key"
           type="button"
-          class="island-tour__clock-reset"
-          title="恢复跟随首页时段"
-          aria-label="恢复跟随首页时段"
-          @click="resetManualHour"
+          class="island-tour__pill-btn"
+          :class="{ 'island-tour__pill-btn--on': currentMood === m.key }"
+          @click="selectMood(m.key)"
         >
-          ↻
+          {{ m.icon }} {{ m.label }}
         </button>
       </div>
 
@@ -57,14 +42,6 @@
           🧭 全景
         </button>
         <button
-          type="button"
-          class="island-tour__pill-btn"
-          :class="{ 'island-tour__pill-btn--on': isoMode }"
-          @click="toggleIso"
-        >
-          {{ isoMode ? "📐 手办等轴" : "🎥 透视" }}
-        </button>
-        <button
           v-if="!reducedMotion"
           type="button"
           class="island-tour__pill-btn"
@@ -72,6 +49,14 @@
           @click="togglePlay"
         >
           {{ playing ? "⏸ 暂停" : "✈️ 巡航" }}
+        </button>
+        <button
+          v-if="!reducedMotion"
+          type="button"
+          class="island-tour__pill-btn"
+          @click="scene?.replayUnfold()"
+        >
+          📖 重播展开
         </button>
         <button
           type="button"
@@ -86,7 +71,7 @@
       <!-- 3D 空间锚点悬浮胶囊层 -->
       <div v-show="ready && showPins" class="island-tour__pins">
         <button
-          v-for="z in zones"
+          v-for="z in PAPERCRAFT_ZONES"
           :key="z.key"
           :ref="(el) => setPinRef(z.key, el)"
           type="button"
@@ -169,37 +154,35 @@ import {
   type ComponentPublicInstance,
 } from "vue";
 import type { TimePeriod } from "../day-cycle";
-import { PERIOD_TO_HOUR } from "./island-tour/palette";
-import { zones, type IslandScene, type PinScreenPos, type ZoneKey } from "./island-tour/zones";
+import { MOOD_OPTIONS } from "./island-tour/moods";
+import {
+  PAPERCRAFT_ZONES,
+  type PapercraftScene,
+  type PinScreenPos,
+  type ZoneKey,
+} from "./island-tour/zones";
 
 defineOptions({ name: "IslandTour" });
 
 const props = defineProps<{ period: TimePeriod }>();
-const emit = defineEmits<{ go: [path: string] }>();
+const emit = defineEmits<{
+  go: [path: string];
+}>();
 
 const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
 const stageEl = ref<HTMLElement | null>(null);
 const canvasHost = ref<HTMLElement | null>(null);
-const scene = shallowRef<IslandScene | null>(null);
+const scene = shallowRef<PapercraftScene | null>(null);
 const failed = ref(false);
 const ready = ref(false);
 const activeKey = ref<ZoneKey | null>(null);
 const playing = ref(false);
-const isoMode = ref(false);
 const showPins = ref(true);
-const manualHour = ref<number | null>(null);
-const sliderHour = ref<number>(PERIOD_TO_HOUR[props.period]);
+const currentMood = ref<TimePeriod>(props.period);
 const toastText = ref("");
 
-const activeZone = computed(() => zones.find((z) => z.key === activeKey.value) ?? null);
-
-const formattedHour = computed(() => {
-  const h = sliderHour.value;
-  const hh = Math.floor(((h % 24) + 24) % 24);
-  const mm = Math.round((h - Math.floor(h)) * 60) % 60;
-  return `${String(hh).padStart(2, "0")}:${String(mm).padStart(2, "0")}`;
-});
+const activeZone = computed(() => PAPERCRAFT_ZONES.find((z) => z.key === activeKey.value) ?? null);
 
 const pinRefs = new Map<ZoneKey, HTMLButtonElement>();
 const setPinRef = (key: ZoneKey, el: Element | ComponentPublicInstance | null) => {
@@ -232,7 +215,6 @@ let unmounted = false;
 let preloadObserver: IntersectionObserver | null = null;
 let viewObserver: IntersectionObserver | null = null;
 
-// 只有在视口内且标签页可见时才跑渲染循环
 const syncRunning = () => {
   if (!scene.value) return;
   if (inView && document.visibilityState === "visible") scene.value.resume();
@@ -242,11 +224,10 @@ const syncRunning = () => {
 async function load() {
   loading = true;
   try {
-    const { createIslandScene } = await import("./island-tour/scene");
+    const { createPapercraftScene } = await import("./island-tour/scene");
     if (unmounted || !canvasHost.value) return;
-    scene.value = createIslandScene(canvasHost.value, {
-      period: props.period,
-      hour: manualHour.value ?? PERIOD_TO_HOUR[props.period],
+    scene.value = createPapercraftScene(canvasHost.value, {
+      period: currentMood.value,
       reducedMotion,
       mobile: window.matchMedia("(max-width: 767px)").matches,
       onZoneChange: (key) => {
@@ -256,11 +237,10 @@ async function load() {
       onToyTriggered: showToast,
     });
     ready.value = true;
-    scene.value.setIsoMode(isoMode.value);
     scene.value.setAutoplay(playing.value);
     syncRunning();
-  } catch {
-    // WebGL 不可用或场景模块加载失败：整个 section 不渲染
+  } catch (err) {
+    console.error("Failed to initialize papercraft scene:", err);
     failed.value = true;
   }
 }
@@ -274,32 +254,20 @@ const togglePlay = () => {
   scene.value?.setAutoplay(playing.value);
 };
 
-const toggleIso = () => {
-  isoMode.value = !isoMode.value;
-  scene.value?.setIsoMode(isoMode.value);
-};
-
 const selectZoneAndToy = (key: ZoneKey) => {
   scene.value?.focusZone(key);
   scene.value?.triggerToy(key);
 };
 
-const onSliderInput = () => {
-  manualHour.value = sliderHour.value;
-  scene.value?.setHour(sliderHour.value);
-};
-
-const resetManualHour = () => {
-  manualHour.value = null;
-  sliderHour.value = PERIOD_TO_HOUR[props.period];
-  scene.value?.setPeriod(props.period);
+const selectMood = (period: TimePeriod) => {
+  currentMood.value = period;
+  scene.value?.setPeriod(period);
 };
 
 watch(
   () => props.period,
   (p) => {
-    manualHour.value = null;
-    sliderHour.value = PERIOD_TO_HOUR[p];
+    currentMood.value = p;
     scene.value?.setPeriod(p);
   }
 );
@@ -348,8 +316,11 @@ onBeforeUnmount(() => {
 .island-tour__stage {
   position: relative;
   height: 580px;
+  border: 3px solid var(--ai-outline);
   border-radius: 28px;
+  box-shadow: 0 8px 0 0 var(--ai-btn-shadow);
   overflow: hidden;
+  background: #d8f2f7;
 }
 
 .island-tour__canvas {
@@ -362,52 +333,19 @@ onBeforeUnmount(() => {
   inset: 0;
   display: grid;
   place-items: center;
-  background: rgba(255, 254, 246, 0.55);
+  background: rgba(255, 254, 246, 0.72);
   color: var(--ai-text);
   font-weight: 800;
 }
 
-.island-tour__clock-pill {
+.island-tour__mood-bar {
   position: absolute;
   top: 16px;
   left: 16px;
   z-index: 5;
   display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  padding: 6px 12px;
-  background: rgba(255, 254, 246, 0.9);
-  border: 2px solid var(--ai-outline);
-  border-radius: 999px;
-  box-shadow: 0 3px 0 0 var(--ai-btn-shadow);
-  color: var(--ai-text);
-}
-
-.island-tour__clock-time {
-  min-width: 40px;
-  font-size: 12px;
-  font-weight: 900;
-  font-variant-numeric: tabular-nums;
-}
-
-.island-tour__clock-slider {
-  width: 96px;
-  accent-color: var(--ai-primary);
-  cursor: pointer;
-}
-
-.island-tour__clock-reset {
-  width: 20px;
-  height: 20px;
-  padding: 0;
-  border: 1.5px solid var(--ai-outline);
-  border-radius: 50%;
-  background: var(--ai-btn-face);
-  color: var(--ai-text);
-  font-size: 11px;
-  font-weight: 900;
-  line-height: 1;
-  cursor: pointer;
+  flex-wrap: wrap;
+  gap: 6px;
 }
 
 .island-tour__toolbar {
@@ -425,7 +363,7 @@ onBeforeUnmount(() => {
   padding: 6px 12px;
   border: 2px solid var(--ai-outline);
   border-radius: 999px;
-  background: rgba(255, 254, 246, 0.9);
+  background: rgba(255, 254, 246, 0.92);
   box-shadow: 0 3px 0 0 var(--ai-btn-shadow);
   color: var(--ai-text);
   font-family: inherit;
@@ -467,7 +405,7 @@ onBeforeUnmount(() => {
   padding: 4px 10px;
   border: 2px solid var(--ai-outline);
   border-radius: 999px;
-  background: rgba(255, 254, 246, 0.92);
+  background: rgba(255, 254, 246, 0.94);
   box-shadow: 0 3px 0 0 var(--ai-btn-shadow);
   color: var(--ai-text);
   font-family: inherit;
@@ -592,21 +530,24 @@ onBeforeUnmount(() => {
 }
 
 // 夜间模式适配：直接命中父级状态类（见 lessons l72）
-.home-page--night .island-tour__clock-pill,
+.home-page--night .island-tour__stage {
+  background: #172554;
+}
+
 .home-page--night .island-tour__pill-btn,
 .home-page--night .island-tour__pin {
-  background: rgba(24, 35, 70, 0.9);
+  background: rgba(24, 35, 70, 0.92);
   color: var(--ai-text);
 }
 
 .home-page--night .island-tour__pill-btn--on,
 .home-page--night .island-tour__pin--on {
-  background: rgba(44, 64, 118, 0.95);
+  background: rgba(44, 64, 118, 0.96);
   color: var(--ai-primary);
 }
 
 .home-page--night .island-tour__placeholder {
-  background: rgba(21, 30, 63, 0.55);
+  background: rgba(21, 30, 63, 0.72);
 }
 
 .island-tour-card-enter-active,
@@ -640,21 +581,18 @@ onBeforeUnmount(() => {
     height: 440px;
   }
 
-  .island-tour__clock-pill {
+  .island-tour__mood-bar {
     top: 10px;
     left: 10px;
-    padding: 5px 10px;
-  }
-
-  .island-tour__clock-slider {
-    width: 68px;
+    gap: 4px;
   }
 
   .island-tour__toolbar {
-    top: 48px;
+    top: 46px;
     right: 10px;
     left: 10px;
     justify-content: flex-start;
+    gap: 4px;
   }
 
   .island-tour__pill-btn {

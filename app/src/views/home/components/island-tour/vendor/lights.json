@@ -1,0 +1,73 @@
+{
+  "_about": "Light presets by light condition: key (sun / moon colour), fill (frontal fill colour), leak (the colour shadows let through), haze (far distance colour). The four template sets (day, golden-hour, dusk, night) are measured, with intensities and grades in references/look.md section 8; the rest are starting values. No subject colours here on purpose: derive the palette from the brief and its references (references/palettes.md section 3, references/gallery.md).",
+  "day": {
+    "use": "a clear day: mild warm key, warm frontal fill (the 3D template's day set)",
+    "key": "#ffdcb2",
+    "fill": "#f2dcc2",
+    "leak": "#a0602c",
+    "haze": "#d8bf8e"
+  },
+  "golden-hour": {
+    "use": "low warm key against a COOL fill, long shadows (the template's golden set)",
+    "key": "#ffc890",
+    "fill": "#b9bcd8",
+    "leak": "#8f5034",
+    "haze": "#e6c08a"
+  },
+  "dusk": {
+    "use": "low warm key, violet fill, lit windows (the template's dusk set)",
+    "key": "#ffb38a",
+    "fill": "#6f63a8",
+    "leak": "#6a4a8a",
+    "haze": "#c98fa0"
+  },
+  "night": {
+    "use": "pale-blue moon, warm lamp pools (the template's night set)",
+    "key": "#c8d6ff",
+    "fill": "#7890d0",
+    "leak": "#26368a",
+    "haze": "#0e1a44"
+  },
+  "hard-noon": {
+    "use": "white-hot high sun, dusty rose-violet fill (salt flats, white stone, beaches; warm sand keeps warm umber shadows)",
+    "key": "#fff0d2",
+    "fill": "#d8b0b4",
+    "leak": "#8c6470",
+    "haze": "#c0905c"
+  },
+  "snow-bright": {
+    "use": "warm-white key, cold blue fill and shadows (snow, ice, high mountains)",
+    "key": "#fbf0e0",
+    "fill": "#a4bbe0",
+    "leak": "#6c84b0",
+    "haze": "#aab4c8"
+  },
+  "soft-spring": {
+    "use": "peach key, lilac fill (pastel mornings)",
+    "key": "#ffe6cc",
+    "fill": "#c9b9da",
+    "leak": "#8c6c88",
+    "haze": "#bc9ea4"
+  },
+  "mist": {
+    "use": "soft key, teal fill, a far haze (misty forests, marsh, rain)",
+    "key": "#f8e2b6",
+    "fill": "#62857f",
+    "leak": "#44685c",
+    "haze": "#788e84"
+  },
+  "aquatic": {
+    "use": "cool clear light, teal fill and shadows (coasts, shallow seas, under water near the top)",
+    "key": "#f6f0dc",
+    "fill": "#7fb3c2",
+    "leak": "#3d6a78",
+    "haze": "#6fa3a6"
+  },
+  "overcast": {
+    "use": "neutral key, cool grey-blue fill (cities, machines, cloudy days)",
+    "key": "#f3e6cf",
+    "fill": "#9fb3c4",
+    "leak": "#a0602c",
+    "haze": "#9aa3a8"
+  }
+}
